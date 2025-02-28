@@ -5,11 +5,11 @@
 
 <head>
     <base href="" />
-    <title>TORKATA Umrah & Travel</title>
+    <title>Rumah Jurnal</title>
     <meta charset="utf-8" />
     <meta name="description"
         content="
-            TORKATA Umrah & Travel - Aplikasi Pemesanan Paket Umrah dan Travel Terbaik di Indonesia.
+            Rumah Jurnal UIN Sjech M.Djamil Djambek Bukittinggi
         " />
     <meta name="keywords"
         content="

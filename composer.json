@@ -9,6 +9,7 @@
         "php": "^8.2",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.31",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1",
         "realrashid/sweet-alert": "^7.2",

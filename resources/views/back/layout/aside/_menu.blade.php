@@ -78,65 +78,34 @@
                 </div>
             </div>
         </div>
-        <div data-kt-menu-trigger="click" class="menu-item menu-accordion">
-            <span class="menu-link">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-address-book fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                        <span class="path3"></span>
-                    </i>
-                </span>
-                <span class="menu-title">User Profile</span>
-                <span class="menu-arrow"></span>
-            </span>
-            <div class="menu-sub menu-sub-accordion">
-                <div class="menu-item">
-                    <a class="menu-link" href="?page=pages/user-profile/overview">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Overview</span>
-                    </a>
-                </div>
 
-                <div class="menu-item">
-                    <a class="menu-link" href="?page=pages/user-profile/projects">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Projects</span>
-                    </a>
-                </div>
-            </div>
-        </div>
 
         <div class="menu-item pt-5">
-            <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Help</span></div>
+            <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Jurnal</span>
+            </div>
+        </div>
+        @php
+            $journal_all = App\Models\Journal::all();
+        @endphp
 
-        </div>
-        <div class="menu-item">
-            <a class="menu-link" href="https://preview.keenthemes.com/html/metronic/docs/base/utilities"
-                target="_blank">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-rocket fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
-                </span>
-                <span class="menu-title">Components</span>
-            </a>
-        </div>
+        @foreach ($journal_all as $journal)
+            @can($journal->url_path)
+                <div class="menu-item">
+                    <a class="menu-link" href="{{ route('back.message.index') }}">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-sms fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">{{ $journal->title }}</span>
+                    </a>
+                </div>
+            @endcan
+        @endforeach
 
-        <div class="menu-item">
-            <a class="menu-link" href="?page=layout-builder">
-                <span class="menu-icon"><i class="ki-duotone ki-abstract-13 fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span></i>
-                </span>
-                <span class="menu-title">Layout Builder</span>
-            </a>
-        </div>
+
+
 
         <div class="menu-item pt-5">
             <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Administrator</span>
@@ -154,6 +123,40 @@
                 </span>
                 <span class="menu-title">Inbox</span>
             </a>
+        </div>
+
+        <div data-kt-menu-trigger="click"
+            class="menu-item menu-accordion @if (request()->routeIs('back.master.*')) here show @endif">
+            <span class="menu-link">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-setting-2 fs-2">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                </span>
+                <span class="menu-title">Master Data</span>
+                <span class="menu-arrow"></span>
+            </span>
+            <div class="menu-sub menu-sub-accordion">
+                <div class="menu-item">
+                    <a class="menu-link @if (request()->routeIs('back.master.journal.*')) active @endif"
+                        href="{{ route('back.master.journal.index') }}">
+                        <span class="menu-bullet">
+                            <span class="bullet bullet-dot"></span>
+                        </span>
+                        <span class="menu-title">Journal</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a class="menu-link @if (request()->routeIs('back.master.user.*')) active @endif"
+                        href="{{ route('back.master.user.index') }}">
+                        <span class="menu-bullet">
+                            <span class="bullet bullet-dot"></span>
+                        </span>
+                        <span class="menu-title">Pengguna</span>
+                    </a>
+                </div>
+            </div>
         </div>
 
         <div data-kt-menu-trigger="click"

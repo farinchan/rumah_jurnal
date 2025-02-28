@@ -1,0 +1,296 @@
+@charset "UTF-8";
+@font-face {
+  font-family: "flaticon";
+  src: url("./flaticon.ttf?b66957d660bcc55c5e858f139c964a40") format("truetype"), url("./flaticon.woff?b66957d660bcc55c5e858f139c964a40") format("woff"), url("./flaticon.woff2?b66957d660bcc55c5e858f139c964a40") format("woff2"), url("./flaticon.eot?b66957d660bcc55c5e858f139c964a40#iefix") format("embedded-opentype"), url("./flaticon.svg?b66957d660bcc55c5e858f139c964a40#flaticon") format("svg"); }
+
+i[class^="flaticon-"]:before, i[class*=" flaticon-"]:before {
+  font-family: flaticon !important;
+  font-style: normal;
+  font-weight: normal !important;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; }
+
+.flaticon-add-to-cart:before {
+  content: ""; }
+
+.flaticon-add-user-1:before {
+  content: ""; }
+
+.flaticon-add-user:before {
+  content: ""; }
+
+.flaticon-add:before {
+  content: ""; }
+
+.flaticon-airplane:before {
+  content: ""; }
+
+.flaticon-apartment-1:before {
+  content: ""; }
+
+.flaticon-apartment:before {
+  content: ""; }
+
+.flaticon-armchair:before {
+  content: ""; }
+
+.flaticon-bathtub:before {
+  content: ""; }
+
+.flaticon-bed-1:before {
+  content: ""; }
+
+.flaticon-bed:before {
+  content: ""; }
+
+.flaticon-beds:before {
+  content: ""; }
+
+.flaticon-book:before {
+  content: ""; }
+
+.flaticon-branch:before {
+  content: ""; }
+
+.flaticon-building:before {
+  content: ""; }
+
+.flaticon-buy-home:before {
+  content: ""; }
+
+.flaticon-buy-online:before {
+  content: ""; }
+
+.flaticon-call-center-agent:before {
+  content: ""; }
+
+.flaticon-car:before {
+  content: ""; }
+
+.flaticon-chat:before {
+  content: ""; }
+
+.flaticon-clean:before {
+  content: ""; }
+
+.flaticon-deal-1:before {
+  content: ""; }
+
+.flaticon-deal:before {
+  content: ""; }
+
+.flaticon-dining-table-with-chairs:before {
+  content: ""; }
+
+.flaticon-double-bed:before {
+  content: ""; }
+
+.flaticon-dryer:before {
+  content: ""; }
+
+.flaticon-dumbbell:before {
+  content: ""; }
+
+.flaticon-dumbell:before {
+  content: ""; }
+
+.flaticon-excavator:before {
+  content: ""; }
+
+.flaticon-expand:before {
+  content: ""; }
+
+.flaticon-fast-forward-double-right-arrows-symbol:before {
+  content: ""; }
+
+.flaticon-financial:before {
+  content: ""; }
+
+.flaticon-garage-1:before {
+  content: ""; }
+
+.flaticon-garage:before {
+  content: ""; }
+
+.flaticon-google-docs:before {
+  content: ""; }
+
+.flaticon-heart-1:before {
+  content: ""; }
+
+.flaticon-heart:before {
+  content: ""; }
+
+.flaticon-home-1:before {
+  content: ""; }
+
+.flaticon-home-2:before {
+  content: ""; }
+
+.flaticon-home-3:before {
+  content: ""; }
+
+.flaticon-home:before {
+  content: ""; }
+
+.flaticon-hospital:before {
+  content: ""; }
+
+.flaticon-house-1:before {
+  content: ""; }
+
+.flaticon-house-2:before {
+  content: ""; }
+
+.flaticon-house-3:before {
+  content: ""; }
+
+.flaticon-house-4:before {
+  content: ""; }
+
+.flaticon-house-key:before {
+  content: ""; }
+
+.flaticon-house:before {
+  content: ""; }
+
+.flaticon-key-1:before {
+  content: ""; }
+
+.flaticon-key:before {
+  content: ""; }
+
+.flaticon-left-quote-1:before {
+  content: ""; }
+
+.flaticon-left-quote:before {
+  content: ""; }
+
+.flaticon-left-quotes-sign:before {
+  content: ""; }
+
+.flaticon-location:before {
+  content: ""; }
+
+.flaticon-loupe:before {
+  content: ""; }
+
+.flaticon-mall:before {
+  content: ""; }
+
+.flaticon-maps-and-location:before {
+  content: ""; }
+
+.flaticon-measure:before {
+  content: ""; }
+
+.flaticon-metro:before {
+  content: ""; }
+
+.flaticon-mortarboard:before {
+  content: ""; }
+
+.flaticon-mortgage:before {
+  content: ""; }
+
+.flaticon-mountain:before {
+  content: ""; }
+
+.flaticon-office:before {
+  content: ""; }
+
+.flaticon-official-documents:before {
+  content: ""; }
+
+.flaticon-online-shop:before {
+  content: ""; }
+
+.flaticon-operator:before {
+  content: ""; }
+
+.flaticon-package:before {
+  content: ""; }
+
+.flaticon-park:before {
+  content: ""; }
+
+.flaticon-parking:before {
+  content: ""; }
+
+.flaticon-pencil:before {
+  content: ""; }
+
+.flaticon-phone-call:before {
+  content: ""; }
+
+.flaticon-pin:before {
+  content: ""; }
+
+.flaticon-plane:before {
+  content: ""; }
+
+.flaticon-plus:before {
+  content: ""; }
+
+.flaticon-quotation:before {
+  content: ""; }
+
+.flaticon-right-arrow:before {
+  content: ""; }
+
+.flaticon-right-quote:before {
+  content: ""; }
+
+.flaticon-salad:before {
+  content: ""; }
+
+.flaticon-secure-shield:before {
+  content: ""; }
+
+.flaticon-secure:before {
+  content: ""; }
+
+.flaticon-select:before {
+  content: ""; }
+
+.flaticon-sewing:before {
+  content: ""; }
+
+.flaticon-slider:before {
+  content: ""; }
+
+.flaticon-slumber:before {
+  content: ""; }
+
+.flaticon-square-shape-design-interface-tool-symbol:before {
+  content: ""; }
+
+.flaticon-stethoscope:before {
+  content: ""; }
+
+.flaticon-support:before {
+  content: ""; }
+
+.flaticon-swimming:before {
+  content: ""; }
+
+.flaticon-toilet:before {
+  content: ""; }
+
+.flaticon-train:before {
+  content: ""; }
+
+.flaticon-user-1:before {
+  content: ""; }
+
+.flaticon-user:before {
+  content: ""; }
+
+.flaticon-vegetable:before {
+  content: ""; }
+
+.flaticon-washer:before {
+  content: ""; }

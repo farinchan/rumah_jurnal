@@ -18,8 +18,12 @@ class NewsController extends Controller
     {
         $data = [
             'title' => 'Kategori Berita',
-            'menu' => 'Berita',
-            'sub_menu' => 'Kategori',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Kategori Berita',
+                    'link' => route('back.news.category')
+                ]
+            ],
             'categories' => NewsCategory::all()
         ];
 
@@ -91,8 +95,12 @@ class NewsController extends Controller
     {
         $data = [
             'title' => 'Berita',
-            'menu' => 'Berita',
-            'sub_menu' => 'Berita',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Berita',
+                    'link' => route('back.news.index')
+                ]
+            ],
             'list_news' => News::all()
         ];
 
@@ -103,8 +111,16 @@ class NewsController extends Controller
     {
         $data = [
             'title' => 'Tambah Berita',
-            'menu' => 'Berita',
-            'sub_menu' => 'Berita',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Berita',
+                    'link' => route('back.news.index')
+                ],
+                [
+                    'name' => 'Tambah Berita',
+                    'link' => route('back.news.create')
+                ]
+            ],
             'categories' => NewsCategory::all(),
             'news' => News::all()
         ];
@@ -114,20 +130,23 @@ class NewsController extends Controller
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'title' => 'required',
-            'content' => 'required',
-            'category_id' => 'required',
-            'status' => 'required',
-            'meta_keywords' => 'nullable',
-        ],[
-            'image' => 'File harus berupa gambar',
-            'mimes' => 'Format file harus :values',
-            'max' => 'Ukuran file maksimal :max KB',
-            'required' => 'Kolom :attribute harus diisi'
-        ]
-    );
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'title' => 'required',
+                'content' => 'required',
+                'category_id' => 'required',
+                'status' => 'required',
+                'meta_keywords' => 'nullable',
+            ],
+            [
+                'image' => 'File harus berupa gambar',
+                'mimes' => 'Format file harus :values',
+                'max' => 'Ukuran file maksimal :max KB',
+                'required' => 'Kolom :attribute harus diisi'
+            ]
+        );
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput()->with('error', $validator->errors()->all());
@@ -165,8 +184,16 @@ class NewsController extends Controller
     {
         $data = [
             'title' => 'Edit Berita',
-            'menu' => 'Berita',
-            'sub_menu' => 'Berita',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Berita',
+                    'link' => route('back.news.index')
+                ],
+                [
+                    'name' => 'Edit Berita',
+                    'link' => route('back.news.edit', $id)
+                ]
+            ],
             'categories' => NewsCategory::all(),
             'news' => News::find($id)
         ];
@@ -176,20 +203,23 @@ class NewsController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'title' => 'required',
-            'content' => 'required',
-            'category_id' => 'required',
-            'status' => 'required',
-            'meta_keywords' => 'nullable',
-        ],[
-            'image' => 'File harus berupa gambar',
-            'mimes' => 'Format file harus :values',
-            'max' => 'Ukuran file maksimal :max KB',
-            'required' => 'Kolom :attribute harus diisi'
-        ]
-    );
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'title' => 'required',
+                'content' => 'required',
+                'category_id' => 'required',
+                'status' => 'required',
+                'meta_keywords' => 'nullable',
+            ],
+            [
+                'image' => 'File harus berupa gambar',
+                'mimes' => 'Format file harus :values',
+                'max' => 'Ukuran file maksimal :max KB',
+                'required' => 'Kolom :attribute harus diisi'
+            ]
+        );
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput()->with('error', $validator->errors()->all());
@@ -235,8 +265,12 @@ class NewsController extends Controller
     {
         $data = [
             'title' => 'Komentar Berita',
-            'menu' => 'Berita',
-            'sub_menu' => 'Komentar',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Komentar Berita',
+                    'link' => route('back.news.comment')
+                ]
+            ],
             'comments' => NewsComment::with('news')->get()
         ];
 

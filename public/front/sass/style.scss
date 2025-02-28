@@ -1,0 +1,27 @@
+/*
+    Template Name: Spero
+    Description: Construction HTML Template
+    Version: 1.0.0
+*/
+
+//== Global Design
+@import "global/_mixins";
+@import "global/_variables";
+@import "global/_global";
+@import "global/_gutenberg";
+
+//== Sections
+@import "sections/_animation";
+@import "sections/_breadcrumb";
+@import "sections/_widgets";
+@import "sections/_header";
+@import "sections/_slider";
+@import "sections/_product";
+@import "sections/_portfolio";
+@import "sections/_main";
+@import "sections/_footer";
+
+//== Elements
+@import "elements/_preloader";
+@import "elements/_search_popup";
+@import "elements/_button";

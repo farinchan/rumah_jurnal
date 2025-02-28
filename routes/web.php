@@ -2,16 +2,23 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\HomeController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
+use App\Http\Controllers\Back\JournalController as BackJournalController;
+use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
+use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::get('/login', [LoginController::class, 'index'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
-Route::prefix('back')->name('back.')->group(function () {
+
+Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [BackDashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('news')->name('news.')->group(function () {
@@ -30,6 +37,26 @@ Route::prefix('back')->name('back.')->group(function () {
         Route::get('/comment', [BackNewsController::class, 'comment'])->name('comment');
         Route::post('/comment/spam/{id}', [BackNewsController::class, 'commentSpam'])->name('comment.spam');
     });
+
+
+    Route::prefix('master')->name('master.')->group(function () {
+
+        Route::prefix('journal')->name('journal.')->group(function () {
+            Route::get('/', [BackMasterDataController::class, 'journalIndex'])->name('index');
+            Route::put('/edit/{id}', [BackMasterDataController::class, 'journalUpdate'])->name('update');
+            Route::delete('/delete/{id}', [BackMasterDataController::class, 'journalDestroy'])->name('destroy');
+        });
+
+        Route::prefix('user')->name('user.')->group(function () {
+            Route::get('/', [BackMasterDataController::class, 'UserIndex'])->name('index');
+            Route::post('/create', [BackMasterDataController::class, 'userStore'])->name('store');
+            Route::put('/edit/{id}', [BackMasterDataController::class, 'userUpdate'])->name('update');
+            Route::delete('/delete/{id}', [BackMasterDataController::class, 'userDestroy'])->name('destroy');
+        });
+    });
+
+
+
 
     Route::prefix('message')->name('message.')->group(function () {
         Route::get('/', [BackMessageController::class, 'index'])->name('index');

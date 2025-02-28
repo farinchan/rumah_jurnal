@@ -1,0 +1,215 @@
+/* ---------------------------------------
+    ## Button
+--------------------------------------- */
+.btn-wrapper  {
+    display: block;
+    margin-top: 30px;
+}
+.btn {
+    border-radius: 0;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 400;
+    font-family: var(--ltn__body-font);
+    padding: 17px 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease 0s;
+    position: relative;
+    z-index: 1;
+    margin-right: 15px;
+    &:last-child {
+        margin-right: 0;
+    }
+}
+.theme-btn-1 {
+    background-color: var(--ltn__secondary-color);
+    color: var(--white);
+    &:hover{
+        background-color:  var(--ltn__primary-color);
+        color: var(--white);
+    }
+}
+.theme-btn-2 {
+    background-color:  var(--ltn__primary-color);
+    color: var(--white);
+    &:hover{
+        background-color: var(--ltn__secondary-color);
+        color: var(--white);
+    }
+}
+.theme-btn-3 {
+    background-color:  transparent;
+    border: 2px solid var(--border-color-9);
+    &:hover{
+        background-color: var(--ltn__secondary-color);
+        border-color: var(--ltn__secondary-color);
+        color: var(--white);
+    }
+}
+.reverse-color{
+    background-color: var(--ltn__secondary-color);
+    &:hover{
+        background-color:  var(--ltn__primary-color);
+    }
+}
+.btn-white {
+    background-color: var(--white);
+    color: var(--ltn__primary-color);
+    box-shadow: var(--ltn__box-shadow-3);
+    &:hover{
+        background-color: var(--ltn__secondary-color);
+        color: var(--white);
+    }
+}
+.btn-black {
+    background-color: var(--black);
+    color: var(--white);
+    &:hover{
+        background-color: var(--ltn__secondary-color);
+        color: var(--white);
+    }
+}
+.btn-transparent {
+    background-color: transparent;
+    box-shadow: var(--ltn__box-shadow-3);
+    border-color: #ddd;
+    &:hover{
+        background-color: var(--ltn__secondary-color);
+        color: var(--white);
+    }
+}
+.btn-round {
+    border-radius: 50px;
+}
+.btn-opacity-6 {
+    opacity: 0.6;
+    &:hover {
+        opacity: 1;
+    }
+}
+.btn-opacity-7 {
+    opacity: 0.7;
+    &:hover {
+        opacity: 1;
+    }
+}
+.btn-opacity-8 {
+    opacity: 0.8;
+    &:hover {
+        opacity: 1;
+    }
+}
+.btn-opacity-9 {
+    opacity: 0.9;
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.btn:after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+.btn-effect-1 {
+    &:after {
+        width: 0%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: var(--white);
+    }
+    &:hover{
+        color: var(--ltn__heading-color);
+        &::after {
+            width: 100%;
+        }
+    }
+}
+.btn-effect-2 {
+    &:after {
+        width: 0%;
+        height: 100%;
+        top: 0;
+        right: 0;
+        background: var(--white);
+    }
+    &:hover{
+        color: var(--ltn__heading-color);
+        &::after {
+            width: 100%;
+        }
+    }
+}
+.btn-effect-3 {
+    &:after {
+        width: 0%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: var(--ltn__primary-color);
+    }
+    &:hover{
+        color: var(--white);
+        &::after {
+            width: 100%;
+        }
+    }
+}
+.btn-effect-4 {
+    &:after {
+        width: 0%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: var(--ltn__secondary-color);
+    }
+    &:hover{
+        color: var(--white);
+        &::after {
+            width: 100%;
+        }
+    }
+}
+.btn-full-width {
+    display: block;
+}
+.btn-full-width-2 {
+    display: block;
+    width: 100%;
+}
+
+
+.btn-border {
+    border: 2px solid var(--border-color-10);
+    box-shadow: none;
+}
+
+
+
+@media (min-width: 768px) and (max-width: 991px){
+    .btn {
+        padding: 12px 25px;
+    }
+    [type="submit"].btn {
+        padding: 15px 30px;
+    }
+}
+
+@media only screen and (max-width:767px){
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    [type="submit"].btn {
+        padding: 12px 30px;
+    }
+}
+
+/* ----------------------------------------------------
+    END
+---------------------------------------------------- */

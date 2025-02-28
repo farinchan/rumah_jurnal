@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Journal extends Model
+{
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $casts = [
+        'indexing' => 'array'
+    ];
+
+    public function getContextUrl(){
+        return $this->url . '/api/v1/contexts/' . $this->context_id;
+    }
+
+    public function getJournalThumbnail(){
+        $base_url = parse_url($this->url, PHP_URL_SCHEME) . '://' . parse_url($this->url, PHP_URL_HOST);
+        return $this->thumbnail ? $base_url . '/public/journals/' . $this->context_id . '/' . $this->thumbnail : 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg';
+    }
+}

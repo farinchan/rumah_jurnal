@@ -9,6 +9,9 @@ class HomeController extends Controller
 {
     public function index()
     {
-        return view('welcome');
+        $data = [
+
+        ];
+        return view('front.pages.home.index', $data);
     }
 }
