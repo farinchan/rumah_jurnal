@@ -11,12 +11,19 @@ class Journal extends Model
         'indexing' => 'array'
     ];
 
-    public function getContextUrl(){
+    public function getContextUrl()
+    {
         return $this->url . '/api/v1/contexts/' . $this->context_id;
     }
 
-    public function getJournalThumbnail(){
+    public function getJournalThumbnail()
+    {
         $base_url = parse_url($this->url, PHP_URL_SCHEME) . '://' . parse_url($this->url, PHP_URL_HOST);
         return $this->thumbnail ? $base_url . '/public/journals/' . $this->context_id . '/' . $this->thumbnail : 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg';
+    }
+
+    public function issues()
+    {
+        return $this->hasMany(Issue::class, 'journal_id');
     }
 }

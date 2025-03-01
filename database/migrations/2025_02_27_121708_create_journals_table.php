@@ -24,6 +24,7 @@ return new class extends Migration
             $table->integer('author_fee')->nullable();
             $table->json('indexing')->nullable();
             $table->string('api_key');
+            $table->enum('ojs_version', ['3.3', '3.4']);
             $table->dateTime('last_sync');
             $table->timestamps();
         });

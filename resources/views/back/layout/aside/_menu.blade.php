@@ -38,11 +38,9 @@
             class="menu-item menu-accordion @if (request()->routeIs('back.news.*')) here show @endif">
             <span class="menu-link">
                 <span class="menu-icon">
-                    <i class="ki-duotone ki-book fs-2">
+                    <i class="ki-duotone ki-document fs-2">
                         <span class="path1"></span>
                         <span class="path2"></span>
-                        <span class="path3"></span>
-                        <span class="path4"></span>
                     </i>
                 </span>
                 <span class="menu-title">Berita</span>
@@ -91,11 +89,14 @@
         @foreach ($journal_all as $journal)
             @can($journal->url_path)
                 <div class="menu-item">
-                    <a class="menu-link" href="{{ route('back.message.index') }}">
+                    <a class="menu-link @if (request()->routeIs('back.journal.index', $journal->url_path)) active @endif"
+                        href="{{ route('back.journal.index', $journal->url_path) }}">
                         <span class="menu-icon">
-                            <i class="ki-duotone ki-sms fs-2">
+                            <i class="ki-duotone ki-book fs-2">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
+                                <span class="path3"></span>
+                                <span class="path4"></span>
                             </i>
                         </span>
                         <span class="menu-title">{{ $journal->title }}</span>

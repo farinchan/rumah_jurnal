@@ -38,6 +38,16 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::post('/comment/spam/{id}', [BackNewsController::class, 'commentSpam'])->name('comment.spam');
     });
 
+    Route::prefix('journal')->name('journal.')->group(function () {
+        Route::get('/{journal_path}', [BackJournalController::class, 'index'])->name('index');
+
+        Route::post('/{journal_path}/issue/store', [BackJournalController::class, 'issueStore'])->name('issue.store');
+        Route::put('/{journal_path}/issue/{id}/update', [BackJournalController::class, 'issueUpdate'])->name('issue.update');
+        Route::delete('/{journal_path}/issue/{id}/delete', [BackJournalController::class, 'issueDestroy'])->name('issue.destroy');
+
+        Route::get('/{journal_path}/issue/{issue_id}/article', [BackJournalController::class, 'articleIndex'])->name('article.index');
+    });
+
 
     Route::prefix('master')->name('master.')->group(function () {
 

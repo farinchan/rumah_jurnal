@@ -101,13 +101,24 @@
                                 <input type="url" name="url" class="form-control"
                                     placeholder="https://your-journal.org/journal-path" />
                                 <span class="form-text text-muted">Masukkan URL jurnal yang ingin diimport pastikan SSL
-                                    (<code>https</code>) sudah aftif</span>
+                                    (<code>https</code>) sudah aktif</span>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Path Jurnal</label>
                                 <input type="text" name="url_path" class="form-control"
                                     placeholder="your-journal-path" />
                             </div>
+
+                            <div class="col-md-12 mt-10">
+                                <label class="form-label">Versi OJS</label>
+                                <select name="ojs_version" class="form-select">
+                                    <option value="3.3">OJS 3.3</option>
+                                    <option value="3.2">OJS 3.2</option>
+                                </select>
+                                <span class="form-text text-muted">Pilih versi OJS yang digunakan, Pastikan versi OJS yang dipilih sesuai dengan versi OJS jurnal yang ingin diimport
+                                </span>
+                            </div>
+
                             <div class="col-md-12 mt-10">
                                 <label class="form-label">API KEY</label>
                                 <textarea name="api_key" class="form-control" rows="3" placeholder="Deskripsi jurnal"></textarea>

@@ -110,6 +110,7 @@
     <script src="{{ asset("back/js/custom/widgets.js")}}"></script>
     {{-- <script src="{{ asset("back/js/custom/apps/chat/chat.js")}}"></script>
     <script src="{{ asset("back/js/custom/utilities/modals/users-search.js")}}"></script> --}}
+    @include('sweetalert::alert')
 
     @yield('scripts')
     <!--end::Custom Javascript-->
