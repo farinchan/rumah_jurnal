@@ -34,6 +34,19 @@
                 <span class="menu-heading fw-bold text-uppercase fs-7">Post</span>
             </div>
         </div>
+
+        <div class= "menu-item">
+            <a class="menu-link @if (request()->routeIs('back.event.*')) active @endif"
+                href=" {{ route('back.event.index') }} ">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-pin fs-2">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                </span>
+                <span class="menu-title">Agenda</span>
+            </a>
+        </div>
         <div data-kt-menu-trigger="click"
             class="menu-item menu-accordion @if (request()->routeIs('back.news.*')) here show @endif">
             <span class="menu-link">

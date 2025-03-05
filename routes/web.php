@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
+use App\Http\Controllers\Back\EventController as BackEventController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
 use App\Http\Controllers\Back\JournalController as BackJournalController;
 use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
@@ -20,6 +21,15 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
 Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [BackDashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('event')->name('event.')->group(function () {
+        Route::get('/', [BackEventController::class, 'index'])->name('index');
+        Route::get('/create', [BackEventController::class, 'create'])->name('create');
+        Route::post('/create', [BackEventController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [BackEventController::class, 'edit'])->name('edit');
+        Route::put('/edit/{id}', [BackEventController::class, 'update'])->name('update');
+        Route::delete('/delete/{id}', [BackEventController::class, 'destroy'])->name('destroy');
+    });
 
     Route::prefix('news')->name('news.')->group(function () {
         Route::get('/category', [BackNewsController::class, 'category'])->name('category');
