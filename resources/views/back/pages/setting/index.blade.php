@@ -212,6 +212,18 @@
                                 </div>
                             </div>
 
+                            {{-- facebook --}}
+                            <div class="row fv-row mb-7">
+                                <div class="col-md-3 text-md-end">
+                                    <label class="fs-6 fw-semibold form-label mt-3">
+                                        <span>Facebook</span>
+                                    </label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="url" class="form-control form-control-solid" name="facebook"
+                                        value="{{ $setting->facebook ?? '' }}" />
+                                </div>
+                            </div>
 
                             {{-- instagram --}}
                             <div class="row fv-row mb-7">
@@ -223,19 +235,6 @@
                                 <div class="col-md-9">
                                     <input type="url" class="form-control form-control-solid" name="instagram"
                                         value="{{ $setting->instagram ?? '' }}" />
-                                </div>
-                            </div>
-
-                            {{-- twitter --}}
-                            <div class="row fv-row mb-7">
-                                <div class="col-md-3 text-md-end">
-                                    <label class="fs-6 fw-semibold form-label mt-3">
-                                        <span>Twitter</span>
-                                    </label>
-                                </div>
-                                <div class="col-md-9">
-                                    <input type="url" class="form-control form-control-solid" name="twitter"
-                                        value="{{ $setting->twitter ?? '' }}" />
                                 </div>
                             </div>
 
@@ -251,8 +250,6 @@
                                         value="{{ $setting->tiktok ?? '' }}" />
                                 </div>
                             </div>
-
-
 
                             {{-- linkedin --}}
                             <div class="row fv-row mb-7">

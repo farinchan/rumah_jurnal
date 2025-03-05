@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
+use App\Models\SettingBanner;
 use App\Models\SettingWebsite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,8 +16,16 @@ class SettingController extends Controller
     {
         $data = [
             'title' => 'Setting Website',
-            'menu' => 'Setting',
-            'sub_menu' => 'Website',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Setting',
+                    'link' => route('back.setting.website')
+                ]
+            ],
             'setting' => SettingWebsite::first(),
         ];
         return view('back.pages.setting.index', $data);
@@ -35,10 +44,7 @@ class SettingController extends Controller
             'longitude' => 'nullable',
             'facebook' => 'nullable',
             'instagram' => 'nullable',
-            'twitter' => 'nullable',
-            'youtube' => 'nullable',
-            'whatsapp' => 'nullable',
-            'telegram' => 'nullable',
+            'tiktok' => 'nullable',
             'linkedin' => 'nullable',
             'about' => 'nullable',
         ]);
@@ -48,7 +54,7 @@ class SettingController extends Controller
             return redirect()->back()->withErrors($validator)->withInput()->with('error', $validator->errors()->all());
         }
 
-        $setting = SettingWebsite::first();
+        $setting = SettingWebsite::firstOrNew([]);
         $setting->name = $request->name;
         $setting->email = $request->email;
         $setting->phone = $request->phone;
@@ -57,10 +63,7 @@ class SettingController extends Controller
         $setting->longitude = $request->longitude;
         $setting->facebook = $request->facebook;
         $setting->instagram = $request->instagram;
-        $setting->twitter = $request->twitter;
-        $setting->youtube = $request->youtube;
-        $setting->whatsapp = $request->whatsapp;
-        $setting->telegram = $request->telegram;
+        $setting->tiktok = $request->tiktok;
         $setting->linkedin = $request->linkedin;
         $setting->about = $request->about;
 
@@ -98,5 +101,64 @@ class SettingController extends Controller
         $setting->save();
 
         return redirect()->back()->with('success', 'Informasi berhasil diperbarui');
+    }
+
+    public function banner()
+    {
+        $data = [
+            'title' => 'Pengaturan Banner',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Setting',
+                    'link' => route('back.setting.website')
+                ],
+                [
+                    'name' => 'Banner',
+                    'link' => route('back.setting.banner')
+                ]
+            ],
+            'banner1' => SettingBanner::find(1) ?? null,
+            'banner2' => SettingBanner::find(2) ?? null,
+            'banner3' => SettingBanner::find(3) ?? null,
+
+        ];
+        // dd($data);
+        return view('back.pages.setting.banner', $data);
+    }
+
+    public function bannerUpdate(Request $request, $id)
+    {
+        // dd($request->all());
+        $request->validate([
+            'image' => 'nullable|image|mimes:jpg,jpeg,png',
+            'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'url' => 'required|string',
+            'status' => 'required|in:1,0',
+        ]);
+
+        $banner = SettingBanner::find($id) ?? new SettingBanner();
+        $banner->id = $id;
+        $banner->title = $request->title;
+        $banner->subtitle = $request->subtitle;
+        $banner->url = $request->url;
+        $banner->status = $request->status?? false;
+
+        if ($request->hasFile('image')) {
+            if ($banner->image) {
+                Storage::delete('public/' . $banner->image);
+            }
+            $image = $request->file('image');
+            $fileName = time() . '_' . $image->getClientOriginalName();
+            $filePath = $image->storeAs('setting/banner/', $fileName, 'public');
+            $banner->image = $filePath;
+        }
+
+        $banner->save();
+        return redirect()->route('back.setting.banner')->with('success', 'Pengaturan Banner berhasil diubah');
     }
 }

@@ -196,7 +196,8 @@
                     </a>
                 </div>
                 <div class="menu-item">
-                    <a class="menu-link">
+                    <a class="menu-link @if (request()->routeIs('back.setting.banner')) active @endif"
+                        href="{{ route('back.setting.banner') }}">
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
