@@ -20,7 +20,7 @@
                             <li><a href="mailto:{{ $setting_web->email }}"><i class="icon-mail"></i>
                                     {{ $setting_web->email }}</a>
                             </li>
-                            <li><a href="locations.html"><i class="icon-placeholder"></i> UIN Sjech M.Djamil Djambek
+                            <li><a href="#"><i class="icon-placeholder"></i> UIN Sjech M.Djamil Djambek
                                     Bukittinggi</a>
                                 </a></li>
                         </ul>
@@ -68,7 +68,7 @@
                 <div class="col">
                     <div class="site-logo-wrap">
                         <div class="site-logo">
-                            <a href="index.html"><img src="{{ $setting_web?->getLogo() ?? '' }}" alt="Logo"
+                            <a href="{{ route("home") }}"><img src="{{ $setting_web?->getLogo() ?? '' }}" alt="Logo"
                                     style="height: 80px;"></a>
                             </a>
                         </div>
@@ -111,7 +111,7 @@
                                                     @endforeach
                                                 </ul>
                                             </li>
-                                            <li><a href="shop.html"><img
+                                            <li><a href="#"><img
                                                         src="{{ asset('front/img/banner/menu-banner-1.jpg') }}"
                                                         alt="#"></a>
                                             </li>
@@ -190,7 +190,7 @@
     <div class="ltn__utilize-menu-inner ltn__scrollbar">
         <div class="ltn__utilize-menu-head">
             <div class="site-logo">
-                <a href="index.html"><img src="{{ $setting_web?->getLogo() ?? '' }}" alt="Logo" style="height: 80px;"></a>
+                <a href="{{ route("home") }}"><img src="{{ $setting_web?->getLogo() ?? '' }}" alt="Logo" style="height: 80px;"></a>
             </div>
             <button class="ltn__utilize-close">×</button>
         </div>
