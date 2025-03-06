@@ -45,12 +45,14 @@ class DatabaseSeeder extends Seeder
             'title' => 'Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi',
             'subtitle' => 'Portal Publikasi Ilmiah Resmi Universitas Islam Negeri Sjech M. Djamil Djambek Bukittinggi',
             'image' => 'setting/banner/vC5qyP6SqARhMTDtFaUm.png',
+            'url' => 'https://uinbukittinggi.ac.id',
         ]);
 
         SettingBanner::create([
             'title' => 'Pusat Riset dan Publikasi Ilmiah UIN Sjech M. Djamil Djambek Bukittinggi',
             'subtitle' => 'Mendorong Pengembangan dan Penyebaran Penelitian Ilmiah yang Berkualitas di Indonesia',
             'image' => 'setting/banner/qJplFaRe6aIcaEwwiyPO.png',
+            'url' => 'https://uinbukittinggi.ac.id',
         ]);
 
         NewsCategory::create([
