@@ -17,6 +17,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 Route::prefix('back')->name('back.')->middleware('auth')->group(function () {

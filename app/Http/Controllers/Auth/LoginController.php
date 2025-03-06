@@ -41,4 +41,10 @@ class LoginController extends Controller
         Alert::error('Error', 'Email atau username dan password salah');
         return redirect()->back()->withInput();
     }
+
+    public function logout()
+    {
+        Auth::logout();
+        return redirect()->route('login');
+    }
 }
