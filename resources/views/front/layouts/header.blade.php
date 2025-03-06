@@ -1,5 +1,11 @@
 @php
     $category_news = \App\Models\NewsCategory::all();
+    $journals = \App\Models\Journal::all();
+
+    $journal_chunks = $journals->split(3);
+    $part1 = $journal_chunks->get(0) ?? collect();
+    $part2 = $journal_chunks->get(1) ?? collect();
+    $part3 = $journal_chunks->get(2) ?? collect();
 @endphp
 
 <!-- HEADER AREA START (header-5) -->
@@ -73,7 +79,7 @@
                         <nav>
                             <div class="ltn__main-menu">
                                 <ul>
-                                    <li><a href="#">Home</a></li>
+                                    <li><a href="{{ route("home") }}">Home</a></li>
                                     <li class="menu-icon"><a href="{{ route('news.index') }}">News</a>
                                         <ul>
                                             @foreach ($category_news as $category)
@@ -82,21 +88,27 @@
 
                                         </ul>
                                     </li>
-                                    <li class="menu-icon"><a href="#">Journal</a>
+                                    <li class="menu-icon"><a href="{{ route("journal.index") }}">Journal</a>
                                         <ul class="mega-menu">
                                             <li>
                                                 <ul>
-                                                    <li><a href="portfolio.html">Portfolio</a></li>
+                                                    @foreach ($part1 as $journal)
+                                                        <li><a href="{{ route('journal.detail', $journal->url_path) }}">{{ $journal->title }}</a></li>
+                                                    @endforeach
                                                 </ul>
                                             </li>
                                             <li>
                                                 <ul>
-                                                    <li><a href="history.html">History</a></li>
+                                                    @foreach ($part2 as $journal)
+                                                        <li><a href="{{ route('journal.detail', $journal->url_path) }}">{{ $journal->title }}</a></li>
+                                                    @endforeach
                                                 </ul>
                                             </li>
                                             <li>
                                                 <ul>
-                                                    <li><a href="shop.html">Shop</a></li>
+                                                    @foreach ($part3 as $journal)
+                                                        <li><a href="{{ route('journal.detail', $journal->url_path) }}">{{ $journal->title }}</a></li>
+                                                    @endforeach
                                                 </ul>
                                             </li>
                                             <li><a href="shop.html"><img
@@ -105,7 +117,7 @@
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><a href="#">Pembayaran</a></li>
+                                    <li><a href="#">Payments</a></li>
                                     <li><a href="contact.html">Contact</a></li>
                                 </ul>
                             </div>
@@ -203,7 +215,9 @@
                 </li>
                 <li><a href="#">Journal</a>
                     <ul class="sub-menu">
-                        <li><a href="shop.html">Shop</a></li>
+                        @foreach ($journals as $journal)
+                            <li><a href="{{ route('journal.detail', $journal->url_path) }}">{{ $journal->title }}</a></li>
+                        @endforeach
                     </ul>
                 </li>
 

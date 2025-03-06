@@ -1,3 +1,10 @@
+@php
+    $journals = \App\Models\Journal::all();
+
+    $journal_chunks = $journals->split(2);
+    $part1 = $journal_chunks->get(0) ?? collect();
+    $part2 = $journal_chunks->get(1) ?? collect();
+@endphp
 <!-- BRAND LOGO AREA START -->
 {{-- <div class="ltn__brand-logo-area ltn__brand-logo-1 before-bg-bottom">
         <div class="container">
@@ -116,8 +123,8 @@
                         <div class="footer-menu">
                             <ul>
                                 <li><a href="{{ route("home") }}">Home</a></li>
-                                <li><a href="#">News</a></li>
-                                <li><a href="#">Journal</a></li>
+                                <li><a href="{{route("news.index")}}">News</a></li>
+                                <li><a href="{{ route("journal.index") }}">Journal</a></li>
                                 <li><a href="#">Payments</a></li>
                                 <li><a href="#">Contact</a></li>
                             </ul>
@@ -129,12 +136,11 @@
                         <h4 class="footer-title">Journal</h4>
                         <div class="footer-menu">
                             <ul>
-                                <li><a href="order-tracking.html">Order tracking</a></li>
-                                <li><a href="wishlist.html">Wish List</a></li>
-                                <li><a href="login.html">Login</a></li>
-                                <li><a href="account.html">My account</a></li>
-                                <li><a href="about.html">Terms & Conditions</a></li>
-                                <li><a href="about.html">Promotional Offers</a></li>
+                                @foreach ($part1 as $journal)
+                                    <li><a href="{{ route('journal.detail', $journal->url_path) }}">
+                                            {{ $journal->title }}
+                                        </a></li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -143,12 +149,11 @@
                     <div class="footer-widget footer-menu-widget clearfix">
                         <div class="footer-menu">
                             <ul>
-                                <li><a href="login.html">Login</a></li>
-                                <li><a href="account.html">My account</a></li>
-                                <li><a href="wishlist.html">Wish List</a></li>
-                                <li><a href="order-tracking.html">Order tracking</a></li>
-                                <li><a href="faq.html">FAQ</a></li>
-                                <li><a href="contact.html">Contact us</a></li>
+                                @foreach ($part2 as $journal)
+                                    <li><a href="{{ route('journal.detail', $journal->url_path) }}">
+                                            {{ $journal->title }}
+                                        </a></li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -176,14 +181,14 @@
             <div class="row">
                 <div class="col-md-6 col-12">
                     <div class="ltn__copyright-design clearfix">
-                        <p>All Rights Reserved @ Company <span class="current-year"></span></p>
+                        <p>All Rights Reserved @ {{ $setting_web?->name ?? '' }} <span class="current-year"></span></p>
                     </div>
                 </div>
                 <div class="col-md-6 col-12 align-self-center">
                     <div class="ltn__copyright-menu text-right">
                         <ul>
+                            <li><a href="#">Support</a></li>
                             <li><a href="#">Terms & Conditions</a></li>
-                            <li><a href="#">Claim</a></li>
                             <li><a href="#">Privacy & Policy</a></li>
                         </ul>
                     </div>

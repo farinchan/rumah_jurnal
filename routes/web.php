@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Front\NewsController;
+use App\Http\Controllers\Front\JournalController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\EventController as BackEventController;
@@ -28,6 +29,10 @@ Route::prefix('news')->name('news.')->group(function () {
     Route::post('/comment', [NewsController::class, 'comment'])->name('comment');
 });
 
+Route::prefix('journal')->name('journal.')->group(function () {
+    Route::get('/', [JournalController::class, 'index'])->name('index');
+    Route::get('/{journal_path}', [JournalController::class, 'detail'])->name('detail');
+});
 
 Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [BackDashboardController::class, 'index'])->name('dashboard');
