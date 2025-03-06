@@ -29,4 +29,8 @@ class SettingWebsite extends Model
     public function getFavicon(){
         return Storage::url($this->favicon);
     }
+
+    public function getAboutRaw(){
+        return strip_tags($this->about);
+    }
 }

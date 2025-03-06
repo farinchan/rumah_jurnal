@@ -75,9 +75,6 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         });
     });
 
-
-
-
     Route::prefix('message')->name('message.')->group(function () {
         Route::get('/', [BackMessageController::class, 'index'])->name('index');
         Route::delete('/{id}', [BackMessageController::class, 'destroy'])->name('destroy');

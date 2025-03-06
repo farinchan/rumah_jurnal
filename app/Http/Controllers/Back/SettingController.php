@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Str;
 
 class SettingController extends Controller
 {
@@ -83,6 +84,7 @@ class SettingController extends Controller
 
         $setting->save();
 
+        Alert::success('Berhasil', 'Setting website berhasil diperbarui');
         return redirect()->back()->with('success', 'Setting website berhasil diperbarui');
     }
 
@@ -153,12 +155,13 @@ class SettingController extends Controller
                 Storage::delete('public/' . $banner->image);
             }
             $image = $request->file('image');
-            $fileName = time() . '_' . $image->getClientOriginalName();
-            $filePath = $image->storeAs('setting/banner/', $fileName, 'public');
+            $fileName = Str::random(20) . '.' . $image->getClientOriginalExtension();
+            $filePath = $image->storeAs('setting/banner', $fileName, 'public');
             $banner->image = $filePath;
         }
 
         $banner->save();
+        Alert::success('Berhasil', 'Pengaturan Banner berhasil diubah');
         return redirect()->route('back.setting.banner')->with('success', 'Pengaturan Banner berhasil diubah');
     }
 }

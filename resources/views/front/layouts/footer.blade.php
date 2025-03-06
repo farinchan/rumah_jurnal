@@ -1,6 +1,5 @@
-
-    <!-- BRAND LOGO AREA START -->
-    <div class="ltn__brand-logo-area ltn__brand-logo-1 before-bg-bottom">
+<!-- BRAND LOGO AREA START -->
+{{-- <div class="ltn__brand-logo-area ltn__brand-logo-1 before-bg-bottom">
         <div class="container">
             <div class="row ltn__brand-logo-active ltn__secondary-bg ltn__border-radius pt-30 pb-20">
                 <div class="col-lg-12">
@@ -35,11 +34,11 @@
                 </div>
             </div>
         </div>
-    </div>
-    <!-- BRAND LOGO AREA END -->
+    </div> --}}
+<!-- BRAND LOGO AREA END -->
 
-  <!-- FOOTER AREA START -->
-   <footer class="ltn__footer-area  ">
+<!-- FOOTER AREA START -->
+<footer class="ltn__footer-area  ">
     <div class="footer-top-area  section-bg-2 plr--5">
         <div class="container-fluid">
             <div class="row">
@@ -47,11 +46,12 @@
                     <div class="footer-widget footer-about-widget">
                         <div class="footer-logo">
                             <div class="site-logo">
-                                <img src="{{ asset("front/img/logo-2.png")}}" alt="Logo">
+                                <img src="{{ $setting_web?->getLogo() ?? '' }}" alt="Logo">
                             </div>
                         </div>
-                        <p>Lorem Ipsum is simply dummy text of the and typesetting industry. Lorem Ipsum is
-                            dummy text of the printing.</p>
+                        <p>
+                            {{ Str::limit($setting_web?->getAboutRaw() ?? '', 100, '...') }}
+                        </p>
                         <div class="footer-address">
                             <ul>
                                 <li>
@@ -59,7 +59,9 @@
                                         <i class="icon-placeholder"></i>
                                     </div>
                                     <div class="footer-address-info">
-                                        <p>Brooklyn, New York, United States</p>
+                                        <p>
+                                            {{ $setting_web?->address ?? '' }}
+                                        </p>
                                     </div>
                                 </li>
                                 <li>
@@ -67,7 +69,9 @@
                                         <i class="icon-call"></i>
                                     </div>
                                     <div class="footer-address-info">
-                                        <p><a href="tel:+0123-456789">+0123-456789</a></p>
+                                        <p><a href="tel:{{ $setting_web?->phone ?? '' }}">
+                                                {{ $setting_web?->phone ?? '' }}
+                                            </a></p>
                                     </div>
                                 </li>
                                 <li>
@@ -75,41 +79,54 @@
                                         <i class="icon-mail"></i>
                                     </div>
                                     <div class="footer-address-info">
-                                        <p><a href="mailto:example@example.com">example@example.com</a></p>
+                                        <p><a href="mailto:{{ $setting_web?->email ?? '' }}">
+                                                {{ $setting_web?->email ?? '' }}
+                                            </a></p>
                                     </div>
                                 </li>
                             </ul>
                         </div>
                         <div class="ltn__social-media mt-20">
                             <ul>
-                                <li><a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                                </li>
-                                <li><a href="#" title="Twitter"><i class="fab fa-twitter"></i></a></li>
-                                <li><a href="#" title="Linkedin"><i class="fab fa-linkedin"></i></a>
-                                </li>
-                                <li><a href="#" title="Youtube"><i class="fab fa-youtube"></i></a></li>
+                                @if ($setting_web?->facebook)
+                                    <li><a href="{{ $setting_web?->facebook }}" title="Facebook"><i
+                                                class="fab fa-facebook-f"></i></a>
+                                    </li>
+                                @endif
+                                @if ($setting_web?->twitter)
+                                    <li><a href="{{ $setting_web?->twitter }}" title="Twitter"><i
+                                                class="fab fa-twitter"></i></a></li>
+                                @endif
+                                @if ($setting_web?->linkedin)
+                                    <li><a href="{{ $setting_web?->linkedin }}" title="Linkedin"><i
+                                                class="fab fa-linkedin"></i></a>
+                                    </li>
+                                @endif
+                                @if ($setting_web?->youtube)
+                                    <li><a href="{{ $setting_web?->youtube }}" title="Youtube"><i
+                                                class="fab fa-youtube"></i></a></li>
+                                @endif
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-2 col-md-6 col-sm-6 col-12">
                     <div class="footer-widget footer-menu-widget clearfix">
-                        <h4 class="footer-title">Company</h4>
+                        <h4 class="footer-title">Web</h4>
                         <div class="footer-menu">
                             <ul>
-                                <li><a href="about.html">About</a></li>
-                                <li><a href="blog.html">Blog</a></li>
-                                <li><a href="shop.html">All Products</a></li>
-                                <li><a href="locations.html">Locations Map</a></li>
-                                <li><a href="faq.html">FAQ</a></li>
-                                <li><a href="contact.html">Contact us</a></li>
+                                <li><a href="{{ route("home") }}">Home</a></li>
+                                <li><a href="#">News</a></li>
+                                <li><a href="#">Journal</a></li>
+                                <li><a href="#">Payments</a></li>
+                                <li><a href="#">Contact</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-2 col-md-6 col-sm-6 col-12">
                     <div class="footer-widget footer-menu-widget clearfix">
-                        <h4 class="footer-title">Services</h4>
+                        <h4 class="footer-title">Journal</h4>
                         <div class="footer-menu">
                             <ul>
                                 <li><a href="order-tracking.html">Order tracking</a></li>
@@ -124,7 +141,6 @@
                 </div>
                 <div class="col-xl-2 col-md-6 col-sm-6 col-12">
                     <div class="footer-widget footer-menu-widget clearfix">
-                        <h4 class="footer-title">Customer Care</h4>
                         <div class="footer-menu">
                             <ul>
                                 <li><a href="login.html">Login</a></li>
@@ -150,8 +166,6 @@
                                 </div>
                             </form>
                         </div>
-                        <h5 class="mt-30">We Accept</h5>
-                        <img src="{{ asset("front/img/icons/payment-4.png")}}" alt="Payment Image">
                     </div>
                 </div>
             </div>
