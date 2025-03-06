@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\HomeController;
+use App\Http\Controllers\Front\NewsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\EventController as BackEventController;
@@ -18,6 +19,14 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::prefix('news')->name('news.')->group(function () {
+    Route::get('/', [NewsController::class, 'index'])->name('index');
+    Route::get('/{slug}', [NewsController::class, 'detail'])->name('detail');
+
+    Route::get('/category/{slug}', [NewsController::class, 'category'])->name('category');
+    Route::post('/comment', [NewsController::class, 'comment'])->name('comment');
+});
 
 
 Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
@@ -82,11 +91,11 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
     });
 
     Route::prefix('setting')->name('setting.')->group(function () {
-        Route::get('/website', [App\Http\Controllers\back\SettingController::class, 'website'])->name('website');
-        Route::put('/website', [App\Http\Controllers\back\SettingController::class, 'websiteUpdate'])->name('website.update');
-        Route::put('/website/info', [App\Http\Controllers\back\SettingController::class, 'informationUpdate'])->name('website.info');
+        Route::get('/website', [BackSettingController::class, 'website'])->name('website');
+        Route::put('/website', [BackSettingController::class, 'websiteUpdate'])->name('website.update');
+        Route::put('/website/info', [BackSettingController::class, 'informationUpdate'])->name('website.info');
 
-        Route::get('/banner', [App\Http\Controllers\back\SettingController::class, 'banner'])->name('banner');
-        Route::put('/banner/{id}/update', [App\Http\Controllers\back\SettingController::class, 'bannerUpdate'])->name('banner-update');
+        Route::get('/banner', [BackSettingController::class, 'banner'])->name('banner');
+        Route::put('/banner/{id}/update', [BackSettingController::class, 'bannerUpdate'])->name('banner-update');
     });
 });
