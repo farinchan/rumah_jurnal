@@ -72,7 +72,7 @@ class DatabaseSeeder extends Seeder
         News::create([
             'title' => 'Perkuat Reputasi Akademik, Dua Jurnal UIN Bukittinggi Raih Akreditasi SINTA 2',
             'slug' => 'perkuat-reputasi-akademik-dua-jurnal-uin-bukittinggi-raih-akreditasi-sinta-2',
-            'category_id' => 1,
+            'news_category_id' => 1,
             'image' => 'news/20250306064812_perkuat-reputasi-akademik-dua-jurnal-uin-bukittinggi-raih-akreditasi-sinta-2.jpeg',
             'content' => '<p class="ql-align-justify">Bukittinggi (Humas) – Dua jurnal ilmiah dari Universitas Islam Negeri (UIN) Sjech M. Djamil Djambek Bukittinggi, yakni Jurnal Islam Realitas dan Jurnal Humanisma, resmi terakreditasi SINTA 2 Dikti. Pencapaian ini didasarkan pada Surat Keputusan Direktur Jenderal Pendidikan Tinggi, Riset dan Teknologi Nomor 117/E/KPT/2024.</p><p class="ql-align-justify">Akreditasi SINTA Dikti merupakan salah satu indikator kualitas publikasi ilmiah di Indonesia yang dikeluarkan oleh Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi. Akreditasi ini menjadi tolak ukur dan pengakuan terhadap kualitas jurnal. Akreditasi tersebut juga menjadi parameter untuk mendorong penelitian dan pengembangan ilmu pengetahuan yang lebih terarah di tingkat nasional.</p><p class="ql-align-justify">Rektor UIN Bukittinggi, Prof. Silfia Hanani, mengaku bangga atas pencapaian ini. “Akreditasi ini membuktikan komitmen kampus dalam meningkatkan kualitas riset dan publikasi ilmiah di UIN Bukittinggi,” pungkasnya.</p><p class="ql-align-justify">Dikatakannya, penghargaan akreditasi ini tidak hanya sekedar symbol pengakuan, tapi juga tantangan untuk terus berinovasi dan meningkatkan mutu. “Kami berharap pencapaian ini akan semakin memperkuat kontribusi UIN Bukittinggi dalam dunia akademik nasional dan internasional,” ujarnya.</p><p><br></p>',
             'user_id' => 1,
@@ -85,7 +85,7 @@ class DatabaseSeeder extends Seeder
         News::create([
             'title' => 'Panggilan Artikel Ilmiah untuk Edisi Terbaru Jurnal Ilmiah',
             'slug' => 'panggilan-artikel-ilmiah-untuk-edisi-terbaru-jurnal-ilmiah',
-            'category_id' => 2,
+            'news_category_id' => 2,
             'image' => 'news/20250306064812_perkuat-reputasi-akademik-dua-jurnal-uin-bukittinggi-raih-akreditasi-sinta-2.jpeg',
             'content' => '<p>Sehubungan dengan akan diterbitkannya edisi terbaru Jurnal Ilmiah, kami mengundang para peneliti, akademisi, dan praktisi untuk mengirimkan artikel ilmiah yang berkualitas dan orisinil. Artikel yang dikirimkan akan melalui proses peer-review
             yang ketat dan transparan untuk memastikan kualitas dan keaslian artikel. Jurnal Ilmiah merupakan jurnal akademik yang terindeks dan terakreditasi sehingga artikel yang diterbitkan akan memiliki nilai yang tinggi dalam dunia ilmiah.</p>',
