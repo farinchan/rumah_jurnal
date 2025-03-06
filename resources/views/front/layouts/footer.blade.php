@@ -122,11 +122,11 @@
                         <h4 class="footer-title">Web</h4>
                         <div class="footer-menu">
                             <ul>
-                                <li><a href="{{ route("home") }}">Home</a></li>
-                                <li><a href="{{route("news.index")}}">News</a></li>
-                                <li><a href="{{ route("journal.index") }}">Journal</a></li>
-                                <li><a href="#">Payments</a></li>
-                                <li><a href="{{ route("contact.index") }}">Contact</a></li>
+                                <li><a href="{{ route("home") }}">{{ __('layout.home') }}</a></li>
+                                <li><a href="{{route("news.index")}}">{{ __('layout.news') }}</a></li>
+                                <li><a href="{{ route("journal.index") }}">{{ __('layout.journal') }}</a></li>
+                                <li><a href="#">{{ __('layout.payment') }}</a></li>
+                                <li><a href="{{ route("contact.index") }}">{{ __('layout.contact') }}</a></li>
                             </ul>
                         </div>
                     </div>
@@ -161,7 +161,9 @@
                 <div class="col-xl-3 col-md-6 col-sm-12 col-12">
                     <div class="footer-widget footer-newsletter-widget">
                         <h4 class="footer-title">Newsletter</h4>
-                        <p>Subscribe to our weekly Newsletter and receive updates via email.</p>
+                        <p>
+                            {{ __('layout.newsletter') }}
+                        </p>
                         <div class="footer-newsletter">
                             <form action="#">
                                 <input type="email" name="email" placeholder="Email*">

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Front\NewsController;
 use App\Http\Controllers\Front\JournalController;
@@ -14,6 +15,8 @@ use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
+
+Route::get('/locale/{locale}', LocaleController::class)->name('locale.change');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 

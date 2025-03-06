@@ -20,8 +20,8 @@
                             <li><a href="mailto:{{ $setting_web->email }}"><i class="icon-mail"></i>
                                     {{ $setting_web->email }}</a>
                             </li>
-                            <li><a href="#"><i class="icon-placeholder"></i> UIN Sjech M.Djamil Djambek
-                                    Bukittinggi</a>
+                            <li><a href="#"><i class="icon-placeholder"></i>
+                                UIN Sjech M.Djamil Djambek Bukittinggi</a>
                                 </a></li>
                         </ul>
                     </div>
@@ -79,8 +79,8 @@
                         <nav>
                             <div class="ltn__main-menu">
                                 <ul>
-                                    <li><a href="{{ route("home") }}">Home</a></li>
-                                    <li class="menu-icon"><a href="{{ route('news.index') }}">News</a>
+                                    <li><a href="{{ route("home") }}">{{ __("layout.home") }}</a></li>
+                                    <li class="menu-icon"><a href="{{ route('news.index') }}">{{ __("layout.news") }}</a>
                                         <ul>
                                             @foreach ($category_news as $category)
                                                 <li><a href="{{ route('news.category', $category->slug) }}">{{ $category->name }}</a></li>
@@ -88,7 +88,7 @@
 
                                         </ul>
                                     </li>
-                                    <li class="menu-icon"><a href="{{ route("journal.index") }}">Journal</a>
+                                    <li class="menu-icon"><a href="{{ route("journal.index") }}">{{ __("layout.journal") }}</a>
                                         <ul class="mega-menu">
                                             <li>
                                                 <ul>
@@ -117,8 +117,8 @@
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><a href="#">Payments</a></li>
-                                    <li><a href="{{ route("contact.index") }}">Contact</a></li>
+                                    <li><a href="#">{{ __("layout.payment") }}</a></li>
+                                    <li><a href="{{ route("contact.index") }}">{{ __("layout.contact") }}</a></li>
                                 </ul>
                             </div>
                         </nav>
@@ -126,7 +126,7 @@
                 </div>
                 <div class="ltn__header-options ltn__header-options-2 mb-sm-20">
                     <!-- header-search-1 -->
-                    <div class="header-search-wrap">
+                    {{-- <div class="header-search-wrap">
                         <div class="header-search-1">
                             <div class="search-icon">
                                 <i class="icon-search for-search-show"></i>
@@ -141,6 +141,25 @@
                                 </button>
                             </form>
                         </div>
+                    </div> --}}
+
+                    <div class="ltn__drop-menu user-menu" style="margin-right: 0px;">
+                        <ul>
+                            <li>
+                                <a href="#">
+                                    <img src="
+                                    @if (app()->getLocale() == 'en')
+                                        {{ asset('back/media/flags/united-kingdom.svg') }}
+                                    @else
+                                        {{ asset('back/media/flags/indonesia.svg') }}
+                                    @endif" alt="Image" style="width: 30px;">
+                                </a>
+                                <ul>
+                                        <li><a href="{{ route("locale.change", 'en') }}">English</a></li>
+                                        <li><a href="{{ route("locale.change", 'id') }}">Indonesia</a></li>
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
                     <!-- user-menu -->
                     <div class="ltn__drop-menu user-menu">
@@ -149,11 +168,11 @@
                                 <a href="#"><i class="icon-user"></i></a>
                                 <ul>
                                     @auth
-                                        <li><a href="{{ route('back.dashboard') }}">Dashboard</a></li>
-                                        <li><a href="{{ route('logout') }}">Logout</a></li>
+                                        <li><a href="{{ route('back.dashboard') }}">{{ __("layout.dashboard") }}</a></li>
+                                        <li><a href="{{ route('logout') }}">{{ __("layout.logout") }}</a></li>
                                     @endauth
                                     @guest
-                                        <li><a href="{{ route('login') }}">Login</a></li>
+                                        <li><a href="{{ route('login') }}">{{ __("layout.login") }}</a></li>
                                     @endguest
                                 </ul>
                             </li>
@@ -202,18 +221,18 @@
         </div>
         <div class="ltn__utilize-menu">
             <ul>
-                <li><a href="{{ route("home") }}">Home</a>
+                <li><a href="{{ route("home") }}">{{ __("layout.home") }}</a>
 
                 </li>
-                <li><a href="#">News</a>
+                <li><a href="#">{{ __("layout.news") }}</a>
                     <ul class="sub-menu">
-                        <li><a href="{{ route("news.index") }}">All News</a></li>
+                        <li><a href="{{ route("news.index") }}">{{ __("layout.news_all") }}</a></li>
                         @foreach ($category_news as $category)
                             <li><a href="{{ route('news.category', $category->slug) }}">{{ $category->name }}</a></li>
                         @endforeach
                     </ul>
                 </li>
-                <li><a href="#">Journal</a>
+                <li><a href="#">{{ __("layout.journal") }}</a>
                     <ul class="sub-menu">
                         @foreach ($journals as $journal)
                             <li><a href="{{ route('journal.detail', $journal->url_path) }}">{{ $journal->title }}</a></li>
@@ -221,8 +240,8 @@
                     </ul>
                 </li>
 
-                <li><a href="#">Pembayaran</a></li>
-                <li><a href="{{ route("contact.index") }}">Contact</a></li>
+                <li><a href="#">{{ __("layout.payment") }}</a></li>
+                <li><a href="{{ route("contact.index") }}">{{ __("layout.contact") }}</a></li>
             </ul>
         </div>
         <div class="ltn__utilize-buttons ltn__utilize-buttons-2">
@@ -233,7 +252,7 @@
                             <span class="utilize-btn-icon">
                                 <i class="far fa-user"></i>
                             </span>
-                            Dashboard
+                            {{ __("layout.dashboard") }}
                         </a>
                     @endauth
                     @guest
@@ -241,7 +260,7 @@
                             <span class="utilize-btn-icon">
                                 <i class="far fa-user"></i>
                             </span>
-                            Login
+                            {{ __("layout.login") }}
                         </a>
                     @endguest
                 </li>
