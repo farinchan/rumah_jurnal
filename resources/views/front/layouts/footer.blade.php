@@ -126,7 +126,7 @@
                                 <li><a href="{{route("news.index")}}">News</a></li>
                                 <li><a href="{{ route("journal.index") }}">Journal</a></li>
                                 <li><a href="#">Payments</a></li>
-                                <li><a href="#">Contact</a></li>
+                                <li><a href="{{ route("contact.index") }}">Contact</a></li>
                             </ul>
                         </div>
                     </div>

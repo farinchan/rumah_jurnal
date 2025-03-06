@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Front\NewsController;
 use App\Http\Controllers\Front\JournalController;
+use App\Http\Controllers\Front\ContactController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\EventController as BackEventController;
@@ -13,7 +14,6 @@ use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
-
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -32,6 +32,11 @@ Route::prefix('news')->name('news.')->group(function () {
 Route::prefix('journal')->name('journal.')->group(function () {
     Route::get('/', [JournalController::class, 'index'])->name('index');
     Route::get('/{journal_path}', [JournalController::class, 'detail'])->name('detail');
+});
+
+Route::prefix('contact')->name('contact.')->group(function () {
+    Route::get('/', [ContactController::class, 'index'])->name('index');
+    Route::post('/', [ContactController::class, 'send'])->name('send');
 });
 
 Route::prefix('back')->name('back.')->middleware('auth')->group(function () {

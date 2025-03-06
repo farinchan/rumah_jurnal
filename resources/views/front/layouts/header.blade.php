@@ -118,7 +118,7 @@
                                         </ul>
                                     </li>
                                     <li><a href="#">Payments</a></li>
-                                    <li><a href="contact.html">Contact</a></li>
+                                    <li><a href="{{ route("contact.index") }}">Contact</a></li>
                                 </ul>
                             </div>
                         </nav>
@@ -202,7 +202,7 @@
         </div>
         <div class="ltn__utilize-menu">
             <ul>
-                <li><a href="#">Home</a>
+                <li><a href="{{ route("home") }}">Home</a>
 
                 </li>
                 <li><a href="#">News</a>
@@ -222,7 +222,7 @@
                 </li>
 
                 <li><a href="#">Pembayaran</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="{{ route("contact.index") }}">Contact</a></li>
             </ul>
         </div>
         <div class="ltn__utilize-buttons ltn__utilize-buttons-2">
