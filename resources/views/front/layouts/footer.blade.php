@@ -183,7 +183,8 @@
             <div class="row">
                 <div class="col-md-6 col-12">
                     <div class="ltn__copyright-design clearfix">
-                        <p>All Rights Reserved @ {{ $setting_web?->name ?? '' }} <span class="current-year"></span></p>
+                        <p> &copy; {{ date('Y') }} All Rights Reserved. {{ $setting_web?->name ?? '' }}
+                           </p>
                     </div>
                 </div>
                 <div class="col-md-6 col-12 align-self-center">

@@ -34,15 +34,22 @@
                                     <!-- ltn__social-media -->
                                     <div class="ltn__social-media">
                                         <ul>
-                                            <li><a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                                            </li>
-                                            <li><a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-                                            </li>
-
-                                            <li><a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-                                            </li>
-                                            <li><a href="#" title="Dribbble"><i class="fab fa-dribbble"></i></a>
-                                            </li>
+                                            @if ($setting_web->facebook)
+                                                <li><a href="{{ $setting_web->facebook }}" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                                </li>
+                                            @endif
+                                            @if ($setting_web->twitter)
+                                                <li><a href="{{ $setting_web->twitter }}" title="Twitter"><i class="fab fa-twitter"></i></a>
+                                                </li>
+                                            @endif
+                                            @if ($setting_web->linkedin)
+                                                <li><a href="{{ $setting_web->linkedin }}" title="Linkedin"><i class="fab fa-linkedin"></i></a>
+                                                </li>
+                                            @endif
+                                            @if ($setting_web->instagram)
+                                                <li><a href="{{ $setting_web->instagram }}" title="Instagram"><i class="fab fa-instagram"></i></a>
+                                                </li>
+                                            @endif
                                         </ul>
                                     </div>
                                 </li>
