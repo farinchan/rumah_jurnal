@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('photo')->nullable();
             $table->string('name');
+            $table->enum('gender', ['laki-laki', 'perempuan'])->nullable();
             $table->string('sinta_id')->nullable();
             $table->string('scopus_id')->nullable();
             $table->string('google_scholar')->nullable();

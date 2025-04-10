@@ -27,26 +27,26 @@
                 @foreach ($journals as $journal)
                     <!-- gallery-item -->
                     <div class="ltn__gallery-item
-                    @if (in_array('Scopus Q1', $journal->indexing) || in_array('Scopus Q2', $journal->indexing) || in_array('Scopus Q3', $journal->indexing) || in_array('Scopus Q4', $journal->indexing) || in_array('Scopus', $journal->indexing))
+                    @if (in_array('Scopus Q1', $journal->indexing??[]) || in_array('Scopus Q2', $journal->indexing??[]) || in_array('Scopus Q3', $journal->indexing??[]) || in_array('Scopus Q4', $journal->indexing??[]) || in_array('Scopus', $journal->indexing??[]))
                         filter_category_1
                     @endif
-                    @if (in_array('Sinta 1', $journal->indexing) || in_array('Sinta 2', $journal->indexing))
+                    @if (in_array('Sinta 1', $journal->indexing??[]) || in_array('Sinta 2', $journal->indexing??[]))
                         filter_category_2
                     @endif
-                    @if (in_array('Sinta 3', $journal->indexing) || in_array('Sinta 4', $journal->indexing))
+                    @if (in_array('Sinta 3', $journal->indexing??[]) || in_array('Sinta 4', $journal->indexing??[]))
                         filter_category_3
                     @endif
-                    @if (in_array('Sinta 5', $journal->indexing) || in_array('Sinta 6', $journal->indexing))
+                    @if (in_array('Sinta 5', $journal->indexing??[]) || in_array('Sinta 6', $journal->indexing??[]))
                         filter_category_4
                     @endif
-                    @if (!in_array('Sinta 1', $journal->indexing) && !in_array('Sinta 2', $journal->indexing) && !in_array('Sinta 3', $journal->indexing) && !in_array('Sinta 4', $journal->indexing) && !in_array('Sinta 5', $journal->indexing) && !in_array('Sinta 6', $journal->indexing) && !in_array('Scopus Q1', $journal->indexing) && !in_array('Scopus Q2', $journal->indexing) && !in_array('Scopus Q3', $journal->indexing) && !in_array('Scopus Q4', $journal->indexing) && !in_array('Scopus', $journal->indexing))
+                    @if (!in_array('Sinta 1', $journal->indexing??[]) && !in_array('Sinta 2', $journal->indexing??[]) && !in_array('Sinta 3', $journal->indexing??[]) && !in_array('Sinta 4', $journal->indexing??[]) && !in_array('Sinta 5', $journal->indexing??[]) && !in_array('Sinta 6', $journal->indexing??[]) && !in_array('Scopus Q1', $journal->indexing??[]) && !in_array('Scopus Q2', $journal->indexing??[]) && !in_array('Scopus Q3', $journal->indexing??[]) && !in_array('Scopus Q4', $journal->indexing??[]) && !in_array('Scopus', $journal->indexing??[]))
                         filter_category_5
                     @endif
                     col-md-4 col-sm-6 col-12">
                         <div class="ltn__gallery-item-inner">
                             <div class="ltn__gallery-item-img">
                                 <a href="{{ route('journal.detail', $journal->url_path) }}">
-                                    <img src="{{ $journal->getJournalThumbnail() }}" alt="Image">
+                                    <img src="{{ $journal->getJournalThumbnail() }}" alt="Image" style="height: 500px; width: 500px;">
                                     <span class="ltn__gallery-action-icon">
                                         <i class="fas fa-search"></i>
                                     </span>
@@ -57,7 +57,7 @@
                                         {{ $journal->title }}
                                     </a></h4>
                                 <p>Acredited:
-                                    @foreach ($journal->indexing ?? [] as $akreditasi_item)
+                                    @foreach ($journal->indexing??[] ?? [] as $akreditasi_item)
                                         <strong>{{ $akreditasi_item }},</strong>
                                     @endforeach
                                 </p>

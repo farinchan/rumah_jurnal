@@ -91,10 +91,12 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         });
 
         Route::prefix('user')->name('user.')->group(function () {
-            Route::get('/', [BackMasterDataController::class, 'UserIndex'])->name('index');
-            Route::post('/create', [BackMasterDataController::class, 'userStore'])->name('store');
-            Route::put('/edit/{id}', [BackMasterDataController::class, 'userUpdate'])->name('update');
-            Route::delete('/delete/{id}', [BackMasterDataController::class, 'userDestroy'])->name('destroy');
+            Route::get('/', [BackUserController::class, 'index'])->name('index');
+            Route::get('/create', [BackUserController::class, 'create'])->name('create');
+            Route::post('/create', [BackUserController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [BackUserController::class, 'edit'])->name('edit');
+            Route::put('/edit/{id}', [BackUserController::class, 'update'])->name('update');
+            Route::delete('/delete/{id}', [BackUserController::class, 'destroy'])->name('destroy');
         });
     });
 
