@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('api_key');
             $table->enum('ojs_version', ['3.3', '3.4']);
             $table->dateTime('last_sync');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
