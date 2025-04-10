@@ -112,7 +112,7 @@
                 <div class="col-lg-6 align-self-center">
                     <div class="about-us-img-wrap about-img-left">
                         <div class="ltn__video-img ltn__video-img-before-none ltn__animation-pulse2">
-                            <img src="{{ asset('front/img/others/18.png') }}" alt="video popup bg image">
+                            <img src="{{ $welcome_speech?->getImage() ?? asset('front/img/others/18.png') }}" alt="video popup bg image">
 
                         </div>
                     </div>
@@ -122,24 +122,19 @@
                         <div class="section-title-area ltn__section-title-2">
                             <h6 class="section-subtitle ltn__secondary-color"><span><i
                                         class="fas fa-square-full"></i></span> Tentang Kami</h6>
-                            <h1 class="section-title">Solutions For Residentials
-                                & Industries!</h1>
-                            <p>Construction is a general term meaning the art and science to form objects
-                                systems organizations, and comes from Latin</p>
+                            <h1 class="section-title">{{ $welcome_speech?->name ?? '-' }}</h1>
+
                         </div>
-                        <p>Construction is a general term meaning the art and science to form objects systems
-                            organizations, and comes from Latin construction and Old French construction. To
-                            construct is the verb: the act of building, and the noun</p>
+                        <p>
+                            {{ Str::limit(strip_tags($welcome_speech?->content ?? '-'), 500, '...') }}
+                        </p>
                         <div class="about-author-info d-flex mt-50">
                             <div class="author-name-designation  align-self-center mr-30">
                                 <!-- <h4 class="mb-0">Jerry Henson</h4>
                                                 <small>/ Shop Director</small> -->
                                 <div class="btn-wrapper mt-0">
-                                    <a class="btn theme-btn-2 btn-effect-1" href="about.html">About Us</a>
+                                    <a class="btn theme-btn-2 btn-effect-1" href="about.html">Selengkapnya</a>
                                 </div>
-                            </div>
-                            <div class="author-sign  align-self-center">
-                                <img src="{{ asset('front/img/icons/icon-img/author-sign.png') }}" alt="#">
                             </div>
                         </div>
                     </div>
@@ -231,7 +226,7 @@
                                             <div class="event-text">
                                                 <h3 class="latest-title bold-font">
                                                     <a style="color: #333;"
-                                                        href="#"
+                                                        href="{{ route('event.show', $event->slug) }}"
                                                         onmouseover="this.style.color='#08652F'"
                                                         onmouseout="this.style.color='#333'">
                                                         {{ $event->title }}
@@ -264,7 +259,7 @@
                                     <div style="font-size: 12px; color: #333;">
                                         {{ $pengumuman->created_at->diffForHumans() }} </div>
                                     <h4 style=" font-size: 16px;"><a
-                                            href="#">
+                                            href="{{ route('announcement.show', $pengumuman->slug) }}">
                                             {{ Str::limit($pengumuman->title, 80) }}
                                         </a></h4>
                                 </div>
@@ -274,6 +269,7 @@
                 </div>
         </div>
         <!-- FEATURE END -->
+    </div>
 
         <!-- PROGRESS BAR AREA START -->
         <div class="ltn__progress-bar-area section-bg-1 pt-120 pb-10">

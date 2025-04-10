@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Front\HomeController;
+use App\Http\Controllers\Front\AnnouncementController;
+use App\Http\Controllers\Front\EventController;
 use App\Http\Controllers\Front\NewsController;
 use App\Http\Controllers\Front\JournalController;
 use App\Http\Controllers\Front\ContactController;
@@ -11,11 +13,14 @@ use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\AnnouncementController as BackAnnouncementController;
 use App\Http\Controllers\Back\EventController as BackEventController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
+use App\Http\Controllers\Back\WelcomeSpeechController as BackWelcomeSpeechController;
 use App\Http\Controllers\Back\JournalController as BackJournalController;
 use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
+
+use App\Models\Announcement;
 
 Route::get('/locale/{locale}', LocaleController::class)->name('locale.change');
 
@@ -24,6 +29,18 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/welcome', [HomeController::class, 'welcomeSpeech'])->name('welcome.speech');
+
+Route::prefix('event')->name('event.')->group(function () {
+    // Route::get('/', [EventController::class, 'index'])->name('index');
+    Route::get('/{slug}', [EventController::class, 'show'])->name('show');
+});
+
+Route::prefix('announcement')->name('announcement.')->group(function () {
+    // Route::get('/', [EventController::class, 'index'])->name('index');
+    Route::get('/{slug}', [AnnouncementController::class, 'show'])->name('show');
+});
 
 Route::prefix('news')->name('news.')->group(function () {
     Route::get('/', [NewsController::class, 'index'])->name('index');
@@ -87,6 +104,11 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
         Route::get('/comment', [BackNewsController::class, 'comment'])->name('comment');
         Route::post('/comment/spam/{id}', [BackNewsController::class, 'commentSpam'])->name('comment.spam');
+    });
+
+    Route::prefix('welcomeSpeech')->name('welcomeSpeech.')->group(function () {
+        Route::get('/', [BackWelcomeSpeechController::class, 'index'])->name('index');
+        Route::put('/edit', [BackWelcomeSpeechController::class, 'update'])->name('update');
     });
 
     Route::prefix('journal')->name('journal.')->group(function () {

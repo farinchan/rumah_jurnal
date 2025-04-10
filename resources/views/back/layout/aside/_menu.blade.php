@@ -114,6 +114,16 @@
             </div>
         </div>
 
+        <div class= "menu-item">
+            <a class="menu-link @if (request()->routeIs('back.welcomeSpeech.index')) active @endif"
+                href="{{ route('back.welcomeSpeech.index') }}">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-star fs-2"></i>
+                </span>
+                <span class="menu-title">Tentang kami</span>
+            </a>
+        </div>
+
 
         <div class="menu-item pt-5">
             <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Jurnal</span>
