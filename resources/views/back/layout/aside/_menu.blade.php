@@ -20,11 +20,21 @@
             </span>
             <div class="menu-sub menu-sub-accordion">
                 <div class="menu-item">
-                    <a class="menu-link active" href="?page=index">
+                    <a class="menu-link @if (request()->routeIs('back.dashboard')) active @endif"
+                    href="{{ route('back.dashboard') }}">
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
                         <span class="menu-title">Default</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a class="menu-link @if (request()->routeIs('back.dashboard.news')) active @endif"
+                    href="{{ route('back.dashboard.news') }}">
+                        <span class="menu-bullet">
+                            <span class="bullet bullet-dot"></span>
+                        </span>
+                        <span class="menu-title">Berita</span>
                     </a>
                 </div>
             </div>
@@ -34,9 +44,10 @@
                 <span class="menu-heading fw-bold text-uppercase fs-7">Post</span>
             </div>
         </div>
-        <div class= "menu-item">
-            <a class="menu-link @if (request()->routeIs('back.announcement.*')) active @endif"
-                href=" {{ route('back.announcement.index') }} ">
+
+        <div class="menu-item">
+            <a class="menu-link @if (request()->routeIs('back.announcement.index')) active @endif"
+                href="{{ route('back.announcement.index') }}">
                 <span class="menu-icon">
                     <i class="ki-duotone ki-information fs-2">
                         <span class="path1"></span>

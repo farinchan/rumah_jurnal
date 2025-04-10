@@ -44,7 +44,15 @@ Route::prefix('contact')->name('contact.')->group(function () {
 });
 
 Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
+
+
     Route::get('/dashboard', [BackDashboardController::class, 'index'])->name('dashboard');
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/visitor-stat', [BackDashboardController::class, 'visistorStat'])->name('visitor.stat');
+
+        Route::get('/news', [BackDashboardController::class, 'news'])->name('news');
+        Route::get('/news-stat', [BackDashboardController::class, 'stat'])->name('news.stat');
+    });
 
     Route::prefix('announcement')->name('announcement.')->group(function () {
         Route::get('/', [BackAnnouncementController::class, 'index'])->name('index');
