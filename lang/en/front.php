@@ -43,4 +43,7 @@ return [
     'publication_fee' => 'Publication Fee',
     'view_journal' => 'View Journal',
     'pay_publication_fee' => 'Pay Publication Fee',
+    'call_for_paper_title' => 'Submit your paper now',
+    'call_for_paper_desc' => 'Submit your research paper and contribute to the advancement of knowledge in your field',
+    'call_for_paper_btn' => 'Submit Now',
 ];
