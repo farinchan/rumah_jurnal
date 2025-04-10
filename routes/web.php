@@ -8,6 +8,7 @@ use App\Http\Controllers\Front\JournalController;
 use App\Http\Controllers\Front\ContactController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
+use App\Http\Controllers\Back\AnnouncementController as BackAnnouncementController;
 use App\Http\Controllers\Back\EventController as BackEventController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
 use App\Http\Controllers\Back\JournalController as BackJournalController;
@@ -44,6 +45,15 @@ Route::prefix('contact')->name('contact.')->group(function () {
 
 Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [BackDashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('announcement')->name('announcement.')->group(function () {
+        Route::get('/', [BackAnnouncementController::class, 'index'])->name('index');
+        Route::get('/create', [BackAnnouncementController::class, 'create'])->name('create');
+        Route::post('/create', [BackAnnouncementController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [BackAnnouncementController::class, 'edit'])->name('edit');
+        Route::put('/edit/{id}', [BackAnnouncementController::class, 'update'])->name('update');
+        Route::delete('/delete/{id}', [BackAnnouncementController::class, 'destroy'])->name('destroy');
+    });
 
     Route::prefix('event')->name('event.')->group(function () {
         Route::get('/', [BackEventController::class, 'index'])->name('index');
