@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->mediumText('content');
             $table->string('image')->nullable();
+            $table->string('file')->nullable();
             $table->string('slug');
             $table->boolean('is_active')->default(true);
             $table->dateTime('start');

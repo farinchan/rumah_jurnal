@@ -41,7 +41,7 @@ class EventController extends Controller
     {
         // dd($request->all());
         $validator = Validator::make($request->all(), [
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8192',
             'file' => 'nullable|mimes:pdf|max:8192',
             'title' => 'required',
             'content' => 'required',
@@ -52,7 +52,7 @@ class EventController extends Controller
             'required' => ':attribute harus diisi',
             'image' => 'File harus berupa gambar',
             'mimes' => 'File harus berupa gambar',
-            'max' => 'Ukuran file maksimal 2MB',
+            'max' => 'Ukuran file maksimal 8MB',
         ]);
 
         if ($validator->fails()) {
