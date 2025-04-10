@@ -14,8 +14,8 @@
                         <h2>{{ $journal->title }}</h2>
                         <div class="widget-2 ltn__menu-widget ltn__menu-widget-2 text-uppercase">
                             <ul>
-                                <li><a href="{{ $journal->url }}">View Journal <span><i class="fas fa-arrow-right"></i></span></a></li>
-                                <li><a href="#">pay publication fee <span><i class="fas fa-arrow-right"></i></span></a></li>
+                                <li><a href="{{ $journal->url }}">{{ __('front.view_journal') }} <span><i class="fas fa-arrow-right"></i></span></a></li>
+                                <li><a href="#">{{ __('front.pay_publication_fee') }}<span><i class="fas fa-arrow-right"></i></span></a></li>
                             </ul>
                         </div>
                         {{-- <h6 class="text-uppercase ltn__secondary-color">Property Seller</h6> --}}
@@ -36,12 +36,12 @@
                             <div class="col-lg-12">
                                 <div class="ltn__team-details-member-about">
                                     <ul>
-                                        <li><strong>Journal Title:</strong> {{ $journal?->title??"-" }}</li>
+                                        <li><strong>{{ __('front.journal_title') }}:</strong> {{ $journal?->title??"-" }}</li>
                                         <li><strong>e-ISSN:</strong> {{ $journal?->onlineIssn??"-" }}</li>
                                         <li><strong>p-ISSN:</strong> {{ $journal?->printIssn??"-" }}</li>
 
-                                        <li><strong>Acredited:</strong> {{ $journal?->indexing?implode(", ", $journal->indexing):"-" }}</li>
-                                        <li><strong>Publication Fee:</strong> @money($journal?->author_fee)</li>
+                                        <li><strong>{{ __('front.acredited') }}:</strong> {{ $journal?->indexing?implode(", ", $journal->indexing):"-" }}</li>
+                                        <li><strong>{{ __('front.publication_fee') }}:</strong> @money($journal?->author_fee)</li>
                                     </ul>
                                 </div>
                             </div>

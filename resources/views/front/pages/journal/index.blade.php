@@ -9,7 +9,7 @@
                 <div class="col-lg-12">
                     <div class="ltn__gallery-menu">
                         <div class="ltn__gallery-filter-menu portfolio-filter text-uppercase mb-50">
-                            <button data-filter="*" class="active">all</button>
+                            <button data-filter="*" class="active">{{ __('front.all') }}</button>
                             <button data-filter=".filter_category_1">Scopus</button>
                             <button data-filter=".filter_category_2">Sinta 1-2</button>
                             <button data-filter=".filter_category_3">Sinta 3-4</button>
@@ -56,7 +56,7 @@
                                 <h4><a href="{{ route('journal.detail', $journal->url_path) }}">
                                         {{ $journal->title }}
                                     </a></h4>
-                                <p>Acredited:
+                                <p>{{ __('front.acredited') }}:
                                     @foreach ($journal->indexing??[] ?? [] as $akreditasi_item)
                                         <strong>{{ $akreditasi_item }},</strong>
                                     @endforeach

@@ -20,14 +20,14 @@ class NewsController extends Controller
             ->paginate(6);
         $news->appends(['q' => $search]);
         $data = [
-            'title' => 'News',
+            'title' => __('front.news'),
             'breadcrumbs' => [
                 [
-                    'name' => 'Home',
+                    'name' => __('front.home'),
                     'link' => route('home')
                 ],
                 [
-                    'name' => 'News',
+                    'name' => __('front.news'),
                     'link' => route('news.index')
                 ]
             ],
@@ -46,11 +46,11 @@ class NewsController extends Controller
             'title' => $news->title,
             'breadcrumbs' => [
                 [
-                    'name' => 'Home',
+                    'name' => __('front.home'),
                     'link' => route('home')
                 ],
                 [
-                    'name' => 'News',
+                    'name' => __('front.news'),
                     'link' => route('news.index')
                 ],
                 [
@@ -75,11 +75,11 @@ class NewsController extends Controller
             'title' => $category->name,
             'breadcrumbs' => [
                 [
-                    'name' => 'Home',
+                    'name' => __('front.home'),
                     'link' => route('home')
                 ],
                 [
-                    'name' => 'News',
+                    'name' => __('front.news'),
                     'link' => route('news.index')
                 ],
                 [

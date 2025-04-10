@@ -29,12 +29,14 @@
                                         <ul>
                                             <li>
                                                 <a href="#"><i class="far fa-eye"></i>{{ $item->viewers->count() }}
-                                                    Views</a>
+                                                    {{ __('front.views') }}</a>
+                                                </a>
                                             </li>
                                             <li>
                                                 <a href="#"><i
                                                         class="far fa-comments"></i>{{ $item->comments->count() }}
-                                                    Comments</a>
+                                                    {{ __('front.comments') }}
+                                                </a>
                                             </li>
                                             <li class="ltn__blog-date">
                                                 <i class="far fa-calendar-alt"></i>{{ $item->created_at->diffForHumans() }}
@@ -57,7 +59,9 @@
                                         </div>
                                         <div class="ltn__blog-btn">
                                             <a href="{{ route('news.detail', $item->slug) }}"><i
-                                                    class="fas fa-arrow-right"></i>Read more</a>
+                                                    class="fas fa-arrow-right"></i>
+                                                {{ __('front.read_more') }}
+                                                </a>
                                         </div>
                                     </div>
                                 </div>
@@ -65,7 +69,9 @@
                             @empty
                             <div class="ltn__blog-item ltn__blog-item-5">
                                 <div class="ltn__blog-brief">
-                                    <h3 class="ltn__blog-title">No news found</h3>
+                                    <h3 class="ltn__blog-title">
+                                        {{ __('front.no_news_found') }}
+                                    </h3>
                                 </div>
                             </div>
                         @endforelse
@@ -129,16 +135,20 @@
                     <aside class="sidebar-area blog-sidebar ltn__right-sidebar">
 
                         <div class="widget ltn__search-widget">
-                            <h4 class="ltn__widget-title ltn__widget-title-border">Search news</h4>
+                            <h4 class="ltn__widget-title ltn__widget-title-border">
+                                {{ __('front.search_news') }}
+                            </h4>
                             <form>
-                                <input type="text" name="q" placeholder="Search your keyword..."
+                                <input type="text" name="q" placeholder="{{ __('front.search_news_placeholder') }}"
                                     value="{{ request()->q }}">
                                 <button type="submit"><i class="fas fa-search"></i></button>
                             </form>
                         </div>
                         <!-- Popular Post Widget -->
                         <div class="widget ltn__popular-post-widget">
-                            <h4 class="ltn__widget-title ltn__widget-title-border">Popular News</h4>
+                            <h4 class="ltn__widget-title ltn__widget-title-border">
+                                {{ __('front.popular_news') }}
+                            </h4>
                             <ul>
                                 @foreach($news_trending as $item_trending)
                                 <li>
@@ -164,7 +174,9 @@
                         </div>
                         <!-- Menu Widget (Category) -->
                         <div class="widget ltn__menu-widget ltn__menu-widget-2 ltn__menu-widget-2-color-2">
-                            <h4 class="ltn__widget-title ltn__widget-title-border">Categories</h4>
+                            <h4 class="ltn__widget-title ltn__widget-title-border">
+                                {{ __('front.category_news') }}
+                            </h4>
                             <ul>
                                 @foreach ($categories as $category)
                                     <li><a href="{{ route('news.category', $category->slug) }}">{{ $category->name }}

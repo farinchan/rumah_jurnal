@@ -11,14 +11,14 @@ class JournalController extends Controller
     public function index()
     {
         $data = [
-            'title' => 'Journal',
+            'title' => __('front.journal'),
             'breadcrumbs' => [
                 [
-                    'name' => 'Home',
+                    'name' => __('front.home'),
                     'link' => route('home')
                 ],
                 [
-                    'name' => 'Journal',
+                    'name' => __('front.journal'),
                     'link' => route('journal.index')
                 ]
                 ],
@@ -37,11 +37,11 @@ class JournalController extends Controller
             'title' => $journal->title,
             'breadcrumbs' => [
                 [
-                    'name' => 'Home',
+                    'name' => __('front.home'),
                     'link' => route('home')
                 ],
                 [
-                    'name' => 'Journal',
+                    'name' => __('front.journal'),
                     'link' => route('journal.index')
                 ],
                 [

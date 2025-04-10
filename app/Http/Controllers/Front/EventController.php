@@ -14,10 +14,17 @@ class EventController extends Controller
         $setting_web = SettingWebsite::first();
 
         $data = [
-            'title' => 'Agenda | ' . $setting_web->name,
-            'meta_description' => strip_tags($setting_web->about),
-            'meta_keywords' => 'Agenda, MAN 1 Padang Panjang, Padang Panjang',
-            'favicon' => $setting_web->favicon,
+            'title' => __('front.agenda') . ' | ' . $setting_web->name,
+            'breadcrumbs' => [
+                [
+                    'name' => __('front.home'),
+                    'link' => route('home')
+                ],
+                [
+                    'name' => __('front.agenda'),
+                    'link' => route('event.index')
+                ]
+            ],
             'setting_web' => $setting_web,
 
             'list_event' => Event::orderBy('start', 'desc')->paginate(12),
@@ -32,9 +39,20 @@ class EventController extends Controller
         $event = Event::where('slug', $slug)->first();
         $data = [
             'title' => $event->title . ' | ' . $setting_web->name,
-            'meta_description' => strip_tags($event->content),
-            'meta_keywords' => $event->title,
-            'favicon' => $setting_web->favicon,
+            'breadcrumbs' => [
+                [
+                    'name' => __('front.home'),
+                    'link' => route('home')
+                ],
+                [
+                    'name' => __('front.agenda'),
+                    'link' => route('event.index')
+                ],
+                [
+                    'name' => $event->title,
+                    'link' => route('event.show', $event->slug)
+                ]
+            ],
             'setting_web' => $setting_web,
 
             'event' => $event,

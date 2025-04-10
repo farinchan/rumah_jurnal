@@ -14,14 +14,14 @@ class ContactController extends Controller
     public function index()
     {
         $data = [
-            'title' => 'Contact Us',
+            'title' => __('front.contact_us'),
             'breadcrumbs' =>  [
                 [
-                    'name' => 'Home',
+                    'name' => __('front.home'),
                     'link' => route('home')
                 ],
                 [
-                    'name' => 'Contact Us',
+                    'name' => __('front.contact_us'),
                     'link' => route('contact.index')
                 ]
                 ],

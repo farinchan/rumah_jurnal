@@ -121,7 +121,7 @@
                     <div class="about-us-info-wrap">
                         <div class="section-title-area ltn__section-title-2">
                             <h6 class="section-subtitle ltn__secondary-color"><span><i
-                                        class="fas fa-square-full"></i></span> Tentang Kami</h6>
+                                        class="fas fa-square-full"></i></span> {{ __('front.about_us') }}</h6>
                             <h1 class="section-title">{{ $welcome_speech?->name ?? '-' }}</h1>
 
                         </div>
@@ -133,7 +133,7 @@
                                 <!-- <h4 class="mb-0">Jerry Henson</h4>
                                                 <small>/ Shop Director</small> -->
                                 <div class="btn-wrapper mt-0">
-                                    <a class="btn theme-btn-2 btn-effect-1" href="about.html">Selengkapnya</a>
+                                    <a class="btn theme-btn-2 btn-effect-1" href="about.html">{{ __('front.read_more') }}</a>
                                 </div>
                             </div>
                         </div>
@@ -151,8 +151,11 @@
                 <div class="col-lg-12">
                     <div class="section-title-area ltn__section-title-2 text-center">
                         <h6 class="section-subtitle ltn__secondary-color"><span><i class="fas fa-square-full"></i></span>
-                            News & Blogs</h6>
-                        <h1 class="section-title">See Our Leatest News <br> & Read Blogs</h1>
+                            {{ __('front.news_blog') }}
+                        </h6>
+                        <h1 class="section-title">
+                            {{ __('front.news_blog_title') }}
+                        </h1>
                     </div>
                 </div>
             </div>
@@ -161,7 +164,7 @@
                     <div class="col-lg-12">
                         <div class="ltn__blog-item ltn__blog-item-3">
                             <div class="ltn__blog-img">
-                                <a href="blog-details.html"><img src="{{ $news->getThumbnail() }}" alt="#"></a>
+                                <a href="{{ route('news.detail', $news->slug) }}"><img src="{{ $news->getThumbnail() }}" alt="#"></a>
                             </div>
                             <div class="ltn__blog-brief">
                                 <div class="ltn__blog-meta">
@@ -175,7 +178,7 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <h3 class="ltn__blog-title"><a href="blog-details.html">
+                                <h3 class="ltn__blog-title"><a href="{{ route('news.detail', $news->slug) }}">
                                         {{ $news->title }}
                                     </a></h3>
                                 <div class="ltn__blog-meta-btn">
@@ -187,7 +190,9 @@
                                         </ul>
                                     </div>
                                     <div class="ltn__blog-btn">
-                                        <a href="blog-details.html">Read more</a>
+                                        <a href="{{ route('news.detail', $news->slug) }}">
+                                            {{ __('front.read_more') }}
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -207,7 +212,7 @@
                     <div class=" col-md-8">
                         <h2
                             style="font-size: 24px; font-weight: bold; color: #333; position: relative; display: inline-block;">
-                            Agenda
+                            {{ __('front.agenda') }}
                             <span
                                 style="display: block; width: 50px; height: 3px; background-color: #08652F; position: absolute; bottom: -15px; left: 0;"></span>
                         </h2>
@@ -242,7 +247,7 @@
                     <div class="col-md-4">
                         <h2
                                 style="font-size: 24px; font-weight: bold; color: #333; position: relative; display: inline-block;" class="mb-5">
-                                Pengumuman
+                                {{ __('front.announcement') }}
                                 <span
                                     style="display: block; width: 50px; height: 3px; background-color: #08652F; position: absolute; bottom: -15px; left: 0;"></span>
                             </h2>
@@ -377,7 +382,7 @@
                                 </a>
                                 <div class="ltn__img-slide-info">
                                     <div class="ltn__img-slide-info-brief">
-                                        <h6>Acredited:
+                                        <h6>{{ __('front.acredited') }}:
                                             @foreach ($journal->indexing ?? [] as $akreditasi_item)
                                                 <strong>{{ $akreditasi_item }},</strong>
                                             @endforeach

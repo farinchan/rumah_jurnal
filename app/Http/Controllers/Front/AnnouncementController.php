@@ -14,10 +14,17 @@ class AnnouncementController extends Controller
         $setting_web = SettingWebsite::first();
 
         $data = [
-            'title' => 'Pengumuman | ' . $setting_web->name,
-            'meta_description' => strip_tags($setting_web->about),
-            'meta_keywords' => 'Pengumuman, MAN 1 Padang Panjang, Padang Panjang',
-            'favicon' => $setting_web->favicon,
+            'title' => __('front.announcement') . ' | ' . $setting_web->name,
+            'breadcrumbs' => [
+                [
+                    'name' => __('front.home'),
+                    'link' => route('home')
+                ],
+                [
+                    'name' => __('front.announcement'),
+                    'link' => route('announcement.index')
+                ]
+            ],
             'setting_web' => $setting_web,
 
             'list_announcement' => Announcement::orderBy('start', 'desc')->paginate(12),
@@ -33,9 +40,20 @@ class AnnouncementController extends Controller
         $announcement = Announcement::where('slug', $slug)->first();
         $data = [
             'title' => $announcement->title . ' | ' . $setting_web->name,
-            'meta_description' => strip_tags($announcement->content),
-            'meta_keywords' => $announcement->title . ', Pengumuman, MAN 1 Padang Panjang, Padang Panjang',
-            'favicon' => $setting_web->favicon,
+            'breadcrumbs' => [
+                [
+                    'name' => __('front.home'),
+                    'link' => route('home')
+                ],
+                [
+                    'name' => __('front.announcement'),
+                    'link' => route('announcement.index')
+                ],
+                [
+                    'name' => $announcement->title,
+                    'link' => route('announcement.show', $announcement->slug)
+                ]
+            ],
             'setting_web' => $setting_web,
 
             'announcement' => $announcement,

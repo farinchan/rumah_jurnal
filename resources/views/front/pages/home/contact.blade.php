@@ -12,7 +12,7 @@
                         <div class="ltn__contact-address-icon">
                             <img src="{{ asset("front/img/icons/10.png") }}" alt="Icon Image">
                         </div>
-                        <h3>Email Address</h3>
+                        <h3>{{ __('front.email_address') }}</h3>
                         <p>
                             {{ $setting_web->email }}
                         </p>
@@ -23,7 +23,7 @@
                         <div class="ltn__contact-address-icon">
                             <img src="{{ asset("front/img/icons/11.png") }}" alt="Icon Image">
                         </div>
-                        <h3>Phone Number</h3>
+                        <h3>{{ __('front.phone_number') }}</h3>
                         <p>
                             {{ $setting_web->phone }}
                         </p>
@@ -34,7 +34,7 @@
                         <div class="ltn__contact-address-icon">
                             <img src="{{ asset("front/img/icons/12.png") }}" alt="Icon Image">
                         </div>
-                        <h3>Office Address</h3>
+                        <h3>{{ __('front.office_address') }}</h3>
                         <p>
                             {{ $setting_web->address }}
                         </p>
@@ -51,13 +51,13 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="ltn__form-box contact-form-box box-shadow white-bg">
-                        <h4 class="title-2">Contact Us</h4>
+                        <h4 class="title-2">>{{ __('front.contact_us') }}</h4>
                         <form id="contact-form" action="{{ route('contact.send') }}" method="post">
                             @csrf
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="input-item input-item-name ltn__custom-icon">
-                                        <input type="text" name="name" placeholder="Enter your name" value="{{ old('name') }}" required>
+                                        <input type="text" name="name" placeholder="{{ __('front.enter_your_name') }}" value="{{ old('name') }}" required>
                                         @error('name')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -65,7 +65,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-item input-item-email ltn__custom-icon">
-                                        <input type="email" name="email" placeholder="Enter email address" value="{{ old('email') }}" required>
+                                        <input type="email" name="email" placeholder="{{ __('front.enter_your_email') }}" value="{{ old('email') }}" required>
                                         @error('email')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -73,7 +73,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-item input-item-phone ltn__custom-icon">
-                                        <input type="text" name="phone" placeholder="Enter phone number" value="{{ old('phone') }}" required>
+                                        <input type="text" name="phone" placeholder="{{ __('front.enter_your_phone') }}" value="{{ old('phone') }}" required>
                                         @error('phone')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -81,7 +81,7 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="input-item  ltn__custom-icon">
-                                        <input type="text" name="subject" placeholder="Enter subject" value="{{ old('subject') }}" required>
+                                        <input type="text" name="subject" placeholder="{{ __('front.enter_subject') }}" value="{{ old('subject') }}" required>
                                         @error('subject')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -89,16 +89,18 @@
                                 </div>
                             </div>
                             <div class="input-item input-item-textarea ltn__custom-icon">
-                                <textarea name="message" placeholder="Enter message" required>{{ old('message') }}</textarea>
+                                <textarea name="message" placeholder="{{ __('front.enter_message') }}" required>{{ old('message') }}</textarea>
                                 @error('message')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
                             <p><label class="input-info-save mb-0"><input type="checkbox" name="agree">
-                                I agree that my submitted data is being collected and stored.
+                                {{ __('front.message_checkbox') }}
                             </label></p>
                             <div class="btn-wrapper mt-0">
-                                <button class="btn theme-btn-1 btn-effect-1 text-uppercase" type="submit">Send Message</button>
+                                <button class="btn theme-btn-1 btn-effect-1 text-uppercase" type="submit">
+                                    {{ __('front.send_message') }}
+                                </button>
                             </div>
                             <p class="form-messege mb-0 mt-20"></p>
                         </form>
