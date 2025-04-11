@@ -3,6 +3,8 @@
 return [
 
     'home' => 'Beranda',
+    'agenda' => 'Agenda',
+    'announcement' => 'Pengumuman',
     'news' => 'Berita',
     'news_all' => 'Semua Berita',
     'journal' => 'Jurnal',

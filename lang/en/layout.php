@@ -3,6 +3,8 @@
 return [
 
     'home' => 'Home',
+    'agenda' => 'Agenda',
+    'announcement' => 'Announcement',
     'news' => 'News',
     'news_all' => 'All News',
     'journal' => 'Journal',

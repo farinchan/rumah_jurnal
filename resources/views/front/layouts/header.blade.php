@@ -87,6 +87,8 @@
                             <div class="ltn__main-menu">
                                 <ul>
                                     <li><a href="{{ route("home") }}">{{ __("layout.home") }}</a></li>
+                                    <li><a href="{{ route("event.index") }}">{{ __("layout.agenda") }}</a></li>
+                                    <li><a href="{{ route("announcement.index") }}">{{ __("layout.announcement") }}</a></li>
                                     <li class="menu-icon"><a href="{{ route('news.index') }}">{{ __("layout.news") }}</a>
                                         <ul>
                                             @foreach ($category_news as $category)
@@ -228,9 +230,11 @@
         </div>
         <div class="ltn__utilize-menu">
             <ul>
-                <li><a href="{{ route("home") }}">{{ __("layout.home") }}</a>
+                <li><a href="{{ route("home") }}">{{ __("layout.home") }}</a></li>
+                <li><a href="{{ route("event.index") }}">{{ __("layout.agenda") }}</a></li>
+                <li><a href="{{ route("announcement.index") }}">{{ __("layout.announcement") }}</a></li>
 
-                </li>
+
                 <li><a href="#">{{ __("layout.news") }}</a>
                     <ul class="sub-menu">
                         <li><a href="{{ route("news.index") }}">{{ __("layout.news_all") }}</a></li>

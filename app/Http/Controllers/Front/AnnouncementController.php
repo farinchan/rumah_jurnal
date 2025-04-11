@@ -27,10 +27,9 @@ class AnnouncementController extends Controller
             ],
             'setting_web' => $setting_web,
 
-            'list_announcement' => Announcement::orderBy('start', 'desc')->paginate(12),
+            'list_announcement' => Announcement::latest()->paginate(10),
         ];
 
-        return redirect()->back();
         return view('front.pages.announcement.index', $data);
     }
 

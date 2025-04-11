@@ -33,12 +33,12 @@ Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/welcome', [HomeController::class, 'welcomeSpeech'])->name('welcome.speech');
 
 Route::prefix('event')->name('event.')->group(function () {
-    // Route::get('/', [EventController::class, 'index'])->name('index');
+    Route::get('/', [EventController::class, 'index'])->name('index');
     Route::get('/{slug}', [EventController::class, 'show'])->name('show');
 });
 
 Route::prefix('announcement')->name('announcement.')->group(function () {
-    // Route::get('/', [EventController::class, 'index'])->name('index');
+    Route::get('/', [AnnouncementController::class, 'index'])->name('index');
     Route::get('/{slug}', [AnnouncementController::class, 'show'])->name('show');
 });
 

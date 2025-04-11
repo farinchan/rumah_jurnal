@@ -27,7 +27,7 @@ class EventController extends Controller
             ],
             'setting_web' => $setting_web,
 
-            'list_event' => Event::orderBy('start', 'desc')->paginate(12),
+            'list_event' => Event::orderBy('start', 'desc')->get(),
         ];
 
         return view('front.pages.event.index', $data);
@@ -54,6 +54,7 @@ class EventController extends Controller
                 ]
             ],
             'setting_web' => $setting_web,
+            'event_latest' => Event::where('start', '>=', now())->orderBy('start', 'asc')->take(6)->get(),
 
             'event' => $event,
         ];
