@@ -82,25 +82,34 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <a href="#"
+                                    <a href="{{ route('back.journal.article.index', [$journal_path, $issue->id]) }}"
+                                        class="btn btn-sm btn-light-primary my-1">
+                                        <i class="ki-duotone ki-eye fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                        </i> Detail
+                                    </a>
+                                    {{-- <a href="#"
                                         class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary"
                                         data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Actions
                                         <i class="ki-duotone ki-down fs-5 ms-1"></i></a>
                                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4"
                                         data-kt-menu="true">
                                         <div class="menu-item px-3">
-                                            <a href="{{ route("back.journal.article.index", [$journal_path, $issue->id]) }}"
+                                            <a href="{{ route('back.journal.article.index', [$journal_path, $issue->id]) }}"
                                                 class="menu-link px-3">Detail</a>
                                         </div>
                                         <div class="menu-item px-3">
-                                            <a href="#" data-bs-toggle="modal" data-bs-target="#edit_issue{{ $issue->id }}"
+                                            <a href="#" data-bs-toggle="modal"
+                                                data-bs-target="#edit_issue{{ $issue->id }}"
                                                 class="menu-link px-3">Edit</a>
                                         </div>
                                         <div class="menu-item px-3">
                                             <a href="#" class="menu-link px-3" data-bs-toggle="modal"
                                                 data-bs-target="#delete_issue{{ $issue->id }}">Delete</a>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </td>
                             </tr>
                         @endforeach
@@ -116,7 +125,8 @@
                 <div class="modal-header">
                     <div>
                         <div class="fs-4 fw-bolder">Tambah Issue</div>
-                        <div class="fs-6 text-muted">Issue yang dibuat tidak akan tampil di OJS, Issue ini hanya sebagai pencatatan saja.</div>
+                        <div class="fs-6 text-muted">Issue yang dibuat tidak akan tampil di OJS, Issue ini hanya sebagai
+                            pencatatan saja.</div>
                     </div>
 
                     <!--begin::Close-->
@@ -126,58 +136,62 @@
                     </div>
                     <!--end::Close-->
                 </div>
-                <form method="post" action="{{ route('back.journal.issue.store', $journal_path) }}" >
+                <form method="post" action="{{ route('back.journal.issue.store', $journal_path) }}">
                     @csrf
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-4">
                                 <label class="form-label required">Volume</label>
-                                <input type="text" name="volume" class="form-control" value="{{ old('volume') }}" required />
+                                <input type="text" name="volume" class="form-control" value="{{ old('volume') }}"
+                                    required />
                                 @error('volume')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label required">Number</label>
-                                <input type="text" name="number" class="form-control" value="{{ old('number') }}" required />
+                                <input type="text" name="number" class="form-control" value="{{ old('number') }}"
+                                    required />
                                 @error('number')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label required">Year</label>
-                                <input type="text" name="year" class="form-control" placeholder="{{ date('Y') }}" value="{{ old('year') }}" required />
+                                <input type="text" name="year" class="form-control"
+                                    placeholder="{{ date('Y') }}" value="{{ old('year') }}" required />
                                 @error('year')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
 
-                                <div class="col-md-12 mt-5">
-                                    <label class="form-label required">Title</label>
-                                    <input type="text" name="title" class="form-control" placeholder="Judul Issue" value="{{ old('title') }}" required />
-                                    @error('title')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
+                            <div class="col-md-12 mt-5">
+                                <label class="form-label required">Title</label>
+                                <input type="text" name="title" class="form-control" placeholder="Judul Issue"
+                                    value="{{ old('title') }}" required />
+                                @error('title')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
 
-                                <div class="col-md-12 mt-5">
-                                    <label class="form-label">Description</label>
-                                    <textarea name="description" class="form-control" rows="6" placeholder="Deskripsi Issue">{{ old('description') }}</textarea>
-                                    @error('description')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
+                            <div class="col-md-12 mt-5">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="6" placeholder="Deskripsi Issue">{{ old('description') }}</textarea>
+                                @error('description')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Simpan</button>
-                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
-
+    {{--
     @foreach ($journal->issues as $issue)
         <div class="modal fade" tabindex="-1" id="edit_issue{{ $issue->id }}">
             <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -272,8 +286,7 @@
                 </div>
             </div>
         </div>
-    @endforeach
-
+    @endforeach --}}
 @endsection
 @section('scripts')
     <script src="{{ asset('back/js/custom/apps/ecommerce/catalog/issue.js') }}"></script>
