@@ -3,8 +3,8 @@
     <!--begin::Brand-->
     <div class="header-brand">
         <!--begin::Logo-->
-        <a href="?page=index">
-            <img alt="Logo" src="{{ asset('back/media/logos/default-dark.svg') }}" class="h-25px h-lg-25px" />
+        <a href="{{ route("back.dashboard") }}">
+            <img alt="Logo" src="{{ Storage::url("setting/logo.png") }}" class="h-35px h-lg-45px" />
         </a>
         <!--end::Logo-->
         <!--begin::Aside minimize-->

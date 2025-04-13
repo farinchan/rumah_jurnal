@@ -3,6 +3,10 @@
 <html lang="en">
 <!--begin::Head-->
 
+@php
+    $setting_web = \App\Models\SettingWebsite::first();
+@endphp
+
 <head>
     <base href="" />
     <title>Rumah Jurnal</title>
