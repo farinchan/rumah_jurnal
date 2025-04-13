@@ -102,6 +102,23 @@ class journalController extends Controller
         return redirect()->back();
     }
 
+    public function issueDestroy($journal_path, $issue_id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = $journal->issues()->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $issue->delete();
+        Alert::success('Success', 'Issue has been deleted');
+        return redirect()->route('back.journal.index', $journal_path);
+    }
+
     public function articleIndex($journal_path, $issue_id)
     {
         $journal = Journal::where('url_path', $journal_path)->first();
@@ -217,5 +234,42 @@ class journalController extends Controller
         $reviewer->delete();
         Alert::success('Success', 'Reviewer has been deleted');
         return redirect()->back();
+    }
+
+    public function settingIndex($journal_path, $issue_id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $data = [
+            'title' => "Vol. " . $issue->volume . " No. " . $issue->number . " (" . $issue->year . "): " . $issue->title,
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => $journal->title,
+                    'link' => route('back.journal.index', $journal_path)
+                ],
+                [
+                    'name' => $issue->title,
+                    'link' => route('back.journal.index', $journal_path)
+                ]
+            ],
+            'journal_path' => $journal_path,
+            'journal' => $journal,
+            'issue' => $issue,
+            // 'submissions' => $issue->submissions->pluck('submission_id'),
+        ];
+        // return response()->json($data);
+        return view('back.pages.journal.detail-setting', $data);
     }
 }

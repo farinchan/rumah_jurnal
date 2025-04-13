@@ -67,7 +67,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link text-active-primary py-5 me-6 @if (request()->routeIs('back.journal.setting.index', [$journal->url_path, $issue->id])) active @endif"
-                    href="{{ route('back.journal.setting.index', [$journal->url_path, $issue->id]) }}">Settings</a>
+                    href="{{ route('back.journal.setting.index', [$journal->url_path, $issue->id]) }}">Pengaturan</a>
             </li>
         </ul>
     </div>
