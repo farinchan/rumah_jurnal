@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Back;
 use App\Http\Controllers\Controller;
 use App\Models\Issue;
 use App\Models\Journal;
+use App\Models\Reviewer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -66,7 +67,7 @@ class journalController extends Controller
         return redirect()->back();
     }
 
-    public function issueUpdate(Request $request, $journal_path, $id)
+    public function issueUpdate(Request $request, $journal_path, $issue_id)
     {
         $validator = Validator::make($request->all(), [
             'volume' => 'required',
@@ -91,7 +92,7 @@ class journalController extends Controller
             return abort(404);
         }
 
-        $issue = $journal->issues()->find($id);
+        $issue = $journal->issues()->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -131,9 +132,90 @@ class journalController extends Controller
             ],
             'journal_path' => $journal_path,
             'journal' => $journal,
-            'issue' => $issue
+            'issue' => $issue,
+            // 'submissions' => $issue->submissions->pluck('submission_id'),
         ];
         // return response()->json($data);
         return view('back.pages.journal.detail-article', $data);
+    }
+
+    public function articleDestroy($journal_path, $issue_id, $id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $submission = $issue->submissions()->find($id);
+        if (!$submission) {
+            return abort(404);
+        }
+
+        $submission->delete();
+        Alert::success('Success', 'Article has been deleted');
+        return redirect()->back();
+    }
+
+    public function reviewerIndex($journal_path, $issue_id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $data = [
+            'title' => "Vol. " . $issue->volume . " No. " . $issue->number . " (" . $issue->year . "): " . $issue->title,
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => $journal->title,
+                    'link' => route('back.journal.index', $journal_path)
+                ],
+                [
+                    'name' => $issue->title,
+                    'link' => route('back.journal.index', $journal_path)
+                ]
+            ],
+            'journal_path' => $journal_path,
+            'journal' => $journal,
+            'issue' => $issue,
+            // 'submissions' => $issue->submissions->pluck('submission_id'),
+        ];
+        // return response()->json($data);
+        return view('back.pages.journal.detail-reviewer', $data);
+    }
+
+    public function reviewerDestroy($journal_path, $issue_id, $id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $reviewer = Reviewer::find($id);
+        if (!$reviewer) {
+            return abort(404);
+        }
+        $reviewer->delete();
+        Alert::success('Success', 'Reviewer has been deleted');
+        return redirect()->back();
     }
 }

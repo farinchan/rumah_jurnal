@@ -8,8 +8,11 @@ class Submission extends Model
 {
     protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $casts = [
-        'publication_keywords' => 'array',
-        'publication_citations' => 'array'
+        'authors' => 'array',
+        'fullTitle' => 'array',
+        'abstract' => 'array',
+        'keywords' => 'array',
+        'citations' => 'array',
     ];
 
     public function issue()
@@ -17,10 +20,33 @@ class Submission extends Model
         return $this->belongsTo(Issue::class, 'issue_id');
     }
 
-
-    public function getSubmissionFile()
+    public function getTitleAttribute()
     {
-        $base_url = parse_url($this->issue->journal->url, PHP_URL_SCHEME) . '://' . parse_url($this->issue->journal->url, PHP_URL_HOST);
-        return $this->file ? $base_url . '/public/submissions/' . $this->issue->journal->context_id . '/' . $this->issue->id . '/' . $this->id . '/' . $this->file : 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg';
+        return $this->fullTitle[$this->locale] ?? '';
+    }
+
+    public function getAuthorsAttribute()
+    {
+        $authorsRaw = json_decode($this->attributes['authors'], true);
+
+        $filtered = collect($authorsRaw)->map(function ($author) {
+            return [
+                'name' => ($author['givenName'][$this->locale] ?? '') . ' ' . ($author['familyName'][$this->locale] ?? ''),
+                'email' => $author['email'] ?? '',
+                'affiliation' => $author['affiliation'][$this->locale] ?? '-',
+            ];
+        });
+        return $filtered->values()->all();
+    }
+
+    public function getAbstractAttribute()
+    {
+        $abstract = json_decode($this->attributes['abstract'], true);
+        return $abstract[$this->attributes['locale']] ?? '';
+    }
+    public function getKeywordsAttribute()
+    {
+        $keywords = json_decode($this->attributes['keywords'], true);
+        return implode(', ', $keywords[$this->attributes['locale']] ?? []);
     }
 }

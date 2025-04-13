@@ -13,5 +13,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::post('/journal/sync', [App\Http\Controllers\Api\JournalController::class, 'journalSync'])->name('journal.sync');
 
     Route::get('/submissions/list', [App\Http\Controllers\Api\JournalController::class, 'submissionsList'])->name('submissions.list');
-    Route::get('/submissions/select', [App\Http\Controllers\Api\JournalController::class, 'submissionsSelect'])->name('submissions.select');
+    Route::post('/submissions/select', [App\Http\Controllers\Api\JournalController::class, 'submissionsSelect'])->name('submissions.select');
+
+    Route::get('/reviewer/list', [App\Http\Controllers\Api\JournalController::class, 'reviewerList'])->name('reviewer.list');
+    Route::post('/reviewer/select', [App\Http\Controllers\Api\JournalController::class, 'reviewerSelect'])->name('reviewer.select');
 });

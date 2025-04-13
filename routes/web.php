@@ -115,10 +115,18 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}', [BackJournalController::class, 'index'])->name('index');
 
         Route::post('/{journal_path}/issue/store', [BackJournalController::class, 'issueStore'])->name('issue.store');
-        Route::put('/{journal_path}/issue/{id}/update', [BackJournalController::class, 'issueUpdate'])->name('issue.update');
-        Route::delete('/{journal_path}/issue/{id}/delete', [BackJournalController::class, 'issueDestroy'])->name('issue.destroy');
+        Route::put('/{journal_path}/issue/{issue_id}/update', [BackJournalController::class, 'issueUpdate'])->name('issue.update');
+        Route::delete('/{journal_path}/issue/{issue_id}/delete', [BackJournalController::class, 'issueDestroy'])->name('issue.destroy');
+
+        Route::get('/{journal_path}/issue/{issue_id}/dashboard', [BackJournalController::class, 'dashboardIndex'])->name('dashboard.index');
 
         Route::get('/{journal_path}/issue/{issue_id}/article', [BackJournalController::class, 'articleIndex'])->name('article.index');
+        Route::delete('/{journal_path}/issue/{issue_id}/article/{id}/destroy', [BackJournalController::class, 'articleDestroy'])->name('article.destroy');
+
+        Route::get('/{journal_path}/issue/{issue_id}/reviewer', [BackJournalController::class, 'reviewerIndex'])->name('reviewer.index');
+        Route::delete('/{journal_path}/issue/{issue_id}/reviewer/{id}/delete', [BackJournalController::class, 'reviewerDestroy'])->name('reviewer.destroy');
+
+        Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
     });
 
 

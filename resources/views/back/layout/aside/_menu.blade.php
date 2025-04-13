@@ -136,7 +136,7 @@
         @foreach ($journal_all as $journal)
             @can($journal->url_path)
                 <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.journal.index', $journal->url_path)) active @endif"
+                    <a class="menu-link @if (request()->segment(3) == $journal->url_path) active @endif"
                         href="{{ route('back.journal.index', $journal->url_path) }}">
                         <span class="menu-icon">
                             <i class="ki-duotone ki-book fs-2">

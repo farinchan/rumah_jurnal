@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Issue;
 use App\Models\Journal;
+use App\Models\Reviewer;
+use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Spatie\Permission\Models\Permission;
@@ -195,14 +198,17 @@ class JournalController extends Controller
 
     public function submissionsSelect(Request $request)
     {
-        $jurnal_path = $request->url_path;
+        $jurnal_path = $request->jurnal_path;
         $submission_id = $request->submission_id;
+        $issue_id = $request->issue_id;
 
         if (!$jurnal_path || !$submission_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error',
-                'error' => 'url_path, submission_id is required'
+                'jurnal_path' => $jurnal_path,
+                'submission_id' => $submission_id,
+                'error' => 'jurnal_path, submission_id is required'
             ], 400);
         }
 
@@ -216,11 +222,20 @@ class JournalController extends Controller
             ], 404);
         }
 
+        $issue = Issue::where('id', $issue_id)->where('journal_id', $jurnal->id)->first();
+
+        if (!$issue) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => 'Issue not found'
+            ], 404);
+        }
+
         try {
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
-                'Authorization'
-                => 'Bearer ' . $jurnal->api_key
+                'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/submissions/' . $submission_id, [
                 'apiToken' => $jurnal->api_key
             ]);
@@ -229,17 +244,43 @@ class JournalController extends Controller
 
                 $publication_response = Http::withHeaders([
                     'Accept' => 'application/json',
-                    'Authorization
-                    ' => 'Bearer ' . $jurnal->api_key
-                ])->get($response->json()["publication"]["_href"], [
+                    'Authorization' => 'Bearer ' . $jurnal->api_key
+                ])->get($response->json()["publications"][0]["_href"], [
                     'apiToken' => $jurnal->api_key
                 ]);
 
                 if ($publication_response->status() === 200) {
+
+                    $submission = Submission::updateOrCreate(
+                        [
+                            'submission_id' => $submission_id,
+                            'issue_id' => $issue->id,
+                        ],
+                        [
+                            'publication_id' => $publication_response->json()["id"],
+                            'locale' => $publication_response->json()["locale"],
+                            'authors' => $publication_response->json()["authors"],
+                            'authorsString' => $publication_response->json()["authorsString"],
+                            'fullTitle' => $publication_response->json()["fullTitle"],
+                            'abstract' => $publication_response->json()["abstract"],
+                            'keywords' => $publication_response->json()["keywords"],
+                            'citations' => $publication_response->json()["citations"],
+                            'urlPublished' => $publication_response->json()["urlPublished"],
+                            'datePublished' => $publication_response->json()["datePublished"],
+                            'status' => $response->json()["status"],
+                            'status_label' => $response->json()["statusLabel"],
+                            'lastModified' => $publication_response->json()["lastModified"],
+                        ]
+                    );
+
                     return response()->json([
                         'success' => true,
-                        'message' => 'Success',
-                        'data' => $publication_response->json()
+                        'message' => 'Submission data has been updated',
+                        'data' => $submission,
+                        'data' => [
+                            'submission' => $submission,
+                            'publication' => $publication_response->json()
+                        ]
                     ], 200);
                 } else {
                     return response()->json([
@@ -248,6 +289,133 @@ class JournalController extends Controller
                         'error' => $publication_response->json()["errorMessage"] ?? "something went wrong"
                     ], $publication_response->status());
                 }
+
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error',
+                    'error' => $response->json()["errorMessage"] ?? "something went wrong"
+                ], $response->status());
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+
+    }
+
+    public function reviewerList(Request $request)
+    {
+        $jurnal = Journal::where('url_path', $request->url_path)->first();
+
+        if (!$jurnal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => 'Journal not found'
+            ], 404);
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $jurnal->api_key
+            ])->get($jurnal->url . '/api/v1/users/reviewers', [
+                'orderBy' => 'id',
+                'count' => 100,
+                'apiToken' => $jurnal->api_key
+            ]);
+
+            if ($response->status() === 200) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Success',
+                    'data' => $response->json()["items"] ?? []
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error',
+                    'error' => $response->json()["errorMessage"] ?? "something went wrong"
+                ], $response->status());
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function reviewerSelect(Request $request)
+    {
+        $jurnal_path = $request->jurnal_path;
+        $issue_id = $request->issue_id;
+        $reviewer_id = $request->reviewer_id;
+
+        if (!$jurnal_path || !$reviewer_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'jurnal_path' => $jurnal_path,
+                'reviewer_id' => $reviewer_id,
+                'error' => 'jurnal_path, submission_id is required'
+            ], 400);
+        }
+
+        $jurnal = Journal::where('url_path', $jurnal_path)->first();
+
+        if (!$jurnal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => 'Journal not found'
+            ], 404);
+        }
+
+        $issue = Issue::where('id', $issue_id)->where('journal_id', $jurnal->id)->first();
+
+        if (!$issue) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => 'Issue not found'
+            ], 404);
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $jurnal->api_key
+            ])->get($jurnal->url . '/api/v1/users/' . $reviewer_id, [
+                'apiToken' => $jurnal->api_key
+            ]);
+
+            if ($response->status() === 200) {
+
+                $reviewer = Reviewer::updateOrCreate(
+                    [
+                        'reviewer_id' => $reviewer_id,
+                        'issue_id' => $issue->id,
+                    ],
+                    [
+                        'name' => $response->json()["fullName"],
+                        'username' => $response->json()["userName"],
+                        'email' => $response->json()["email"],
+                        'phone' => $response->json()["phone"],
+                        'affiliation' => $response->json()["affiliation"]['en_US'] ?? null,
+                    ]
+                );
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reviewer data has been updated',
+                    'data' => $reviewer
+                ], 200);
 
             } else {
                 return response()->json([
