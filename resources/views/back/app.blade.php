@@ -9,37 +9,31 @@
 
 <head>
     <base href="" />
-    <title>Rumah Jurnal</title>
+    <title>{{ $setting_web->name }}</title>
     <meta charset="utf-8" />
-    <meta name="description"
-        content="
-            Rumah Jurnal UIN Sjech M.Djamil Djambek Bukittinggi
-        " />
+    <meta name="description" content="{{ Str::limit(strip_tags($setting_web->about), 200, '...') }}" />
     <meta name="keywords"
         content="
-            tailwind, tailwindcss, metronic, bootstrap, bootstrap 5, angular, VueJs, React, Asp.Net Core, Rails, Spring, Blazor, Django, Express.js,
-            Node.js, Flask, Symfony & Laravel starter kits, admin themes, web design, figma, web development, free templates,
-            free admin themes, bootstrap theme, bootstrap template, bootstrap dashboard, bootstrap dak mode, bootstrap button,
-            bootstrap datepicker, bootstrap timepicker, fullcalendar, datatables, flaticon
-        " />
+            {{ $setting_web->name }}, Admin, OJS, Journal, jurnal, jurnal online, jurnal ilmiah, jurnal internasional, jurnal nasional, jurnal terakreditasi, jurnal terindeks scopus, jurnal terindeks sinta, jurnal terindeks google scholar, jurnal terindeks garuda, jurnal terindeks DOAJ, jurnal terindeks crossref, jurnal terindeks issn, jurnal terindeks e-issn, jurnal terindeks p-issn" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:type" content="article" />
-    <meta property="og:title"
-        content="Metronic - The World's #1 Selling Tailwind CSS & Bootstrap Admin Template by KeenThemes" />
-    <meta property="og:url" content="https://keenthemes.com/metronic" />
-    <meta property="og:site_name" content="Metronic by Keenthemes" />
-    <link rel="canonical" href="http://preview.keenthemes.com?page=index" />
-    <link rel="shortcut icon" href="{{ asset("back/media/logos/favicon.ico")}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ $setting_web->name }}" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:site_name" content="{{ $setting_web->name }}" />
+    <link rel="canonical" href="{{ url()->current() }}" />
+    <link rel="shortcut icon" href="{{ Storage::url($setting_web->favicon) }}" />
     <!--begin::Fonts(mandatory for all pages)-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" /> <!--end::Fonts-->
     <!--begin::Vendor Stylesheets(used for this page only)-->
-    <link href="{{ asset("back/plugins/custom/fullcalendar/fullcalendar.bundle.css")}}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset("back/plugins/custom/datatables/datatables.bundle.css")}}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('back/plugins/custom/fullcalendar/fullcalendar.bundle.css') }}" rel="stylesheet"
+        type="text/css" />
+    <link href="{{ asset('back/plugins/custom/datatables/datatables.bundle.css') }}" rel="stylesheet" type="text/css" />
     <!--end::Vendor Stylesheets-->
     <!--begin::Global Stylesheets Bundle(mandatory for all pages)-->
-    <link href="{{ asset("back/plugins/global/plugins.bundle.css")}}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset("back/css/style.bundle.css")}}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('back/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('back/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
     @yield('styles')
     <!--end::Global Stylesheets Bundle-->
     <script>
@@ -91,11 +85,11 @@
         var hostUrl = "assets/";
     </script>
     <!--begin::Global Javascript Bundle(mandatory for all pages)-->
-    <script src="{{ asset("back/plugins/global/plugins.bundle.js")}}"></script>
-    <script src="{{ asset("back/js/scripts.bundle.js")}}"></script>
+    <script src="{{ asset('back/plugins/global/plugins.bundle.js') }}"></script>
+    <script src="{{ asset('back/js/scripts.bundle.js') }}"></script>
     <!--end::Global Javascript Bundle-->
     <!--begin::Vendors Javascript(used for this page only)-->
-    <script src="{{ asset("back/plugins/custom/fullcalendar/fullcalendar.bundle.js")}}"></script>
+    <script src="{{ asset('back/plugins/custom/fullcalendar/fullcalendar.bundle.js') }}"></script>
     {{-- <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
@@ -107,11 +101,11 @@
     <script src="https://cdn.amcharts.com/lib/5/geodata/usaLow.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZonesLow.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZoneAreasLow.js"></script> --}}
-    <script src="{{ asset("back/plugins/custom/datatables/datatables.bundle.js")}}"></script>
+    <script src="{{ asset('back/plugins/custom/datatables/datatables.bundle.js') }}"></script>
     <!--end::Vendors Javascript-->
     <!--begin::Custom Javascript(used for this page only)-->
-    <script src="{{ asset("back/js/widgets.bundle.js")}}"></script>
-    <script src="{{ asset("back/js/custom/widgets.js")}}"></script>
+    <script src="{{ asset('back/js/widgets.bundle.js') }}"></script>
+    <script src="{{ asset('back/js/custom/widgets.js') }}"></script>
     {{-- <script src="{{ asset("back/js/custom/apps/chat/chat.js")}}"></script>
     <script src="{{ asset("back/js/custom/utilities/modals/users-search.js")}}"></script> --}}
     @include('sweetalert::alert')
