@@ -23,8 +23,7 @@
                                     background-image: url('{{ asset('back/media/svg/files/blank-image-dark.svg') }}');
                                 }
                             </style>
-                            <div class="image-input image-input-outline mb-3"
-                                data-kt-image-input="true">
+                            <div class="image-input image-input-outline mb-3" data-kt-image-input="true">
                                 <div class="image-input-wrapper w-150px h-150px"
                                     style="background-image: url('{{ $user->photo ? asset('storage/' . $user->photo) : asset('back/media/svg/files/blank-image.svg') }}')">
                                 </div>
@@ -66,25 +65,56 @@
                         <div class="card-body pt-0">
                             <div class="form-check mt-3">
                                 <input class="form-check-input" type="checkbox" name="role_admin" value="1"
-                                @if ($user->hasRole('super-admin')) checked @endif id="flexCheckDefault" />
+                                    @if ($user->hasRole('super-admin')) checked @endif id="flexCheckDefault" />
                                 <label class="form-check-label" for="flexCheckDefault">
                                     Super-Admin/Owner
                                 </label>
                             </div>
                             <div class="form-check mt-3">
                                 <input class="form-check-input" type="checkbox" name="role_keuangan" value="1"
-                                @if ($user->hasRole('keuangan')) checked @endif id="flexCheckKantor" />
+                                    @if ($user->hasRole('keuangan')) checked @endif id="flexCheckKantor" />
                                 <label class="form-check-label" for="flexCheckKantor">
                                     Bendahara Keuangan
                                 </label>
                             </div>
                             <div class="form-check mt-3">
                                 <input class="form-check-input" type="checkbox" name="role_editor" value="1"
-                                @if ($user->hasRole('editor')) checked @endif  id="flexCheckAgen" />
+                                    @if ($user->hasRole('editor')) checked @endif id="flexCheckAgen" />
                                 <label class="form-check-label" for="flexCheckAgen">
                                     Editor
                                 </label>
                             </div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_humas" value="1"
+                                    @if ($user->hasRole('humas')) checked @endif id="flexCheckAgen" />
+                                <label class="form-check-label" for="flexCheckAgen">
+                                    Humas
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card card-flush py-4">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h3>Editor - Journal Permission</h3>
+                            </div>
+
+                        </div>
+                        <div class="card-body pt-0">
+                            @php
+                                $permissions = Spatie\Permission\Models\Permission::where('guard_name', 'web')->get();
+                                $userPermissions = $user->getAllPermissions();
+                            @endphp
+                            @foreach ($permissions as $permission)
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                        @if ($userPermissions->contains('name', $permission->name)) checked @endif
+                                        id="flexCheckDefault" />
+                                    <label class="form-check-label" for="flexCheckDefault">
+                                        {{ App\Models\Journal::where('url_path', $permission->name)->first()->name ?? '' }} ({{ $permission->name }})
+                                    </label>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -98,20 +128,23 @@
                         <div class="card-body pt-0">
                             <div class="mb-5 fv-row">
                                 <label class="required form-label">Nama</label>
-                                <input type="text" name="name" class="form-control mb-2"
-                                    placeholder="Nama Staff" value="{{ old('name', $user->name) }}" required />
+                                <input type="text" name="name" class="form-control mb-2" placeholder="Nama Staff"
+                                    value="{{ old('name', $user->name) }}" required />
                             </div>
                             <div class="mb-5 fv-row">
                                 <label class="form-label required">Jenis Kelamin</label>
                                 <select name="gender" class="form-control mb-2" required>
                                     <option value="">Pilih Jenis Kelamin</option>
-                                    <option value="laki-laki" @if (old('gender', $user->gender) == 'laki-laki') selected @endif>Laki-laki</option>
-                                    <option value="perempuan" @if (old('gender', $user->gender) == 'perempuan') selected @endif>Perempuan</option>
+                                    <option value="laki-laki" @if (old('gender', $user->gender) == 'laki-laki') selected @endif>Laki-laki
+                                    </option>
+                                    <option value="perempuan" @if (old('gender', $user->gender) == 'perempuan') selected @endif>Perempuan
+                                    </option>
                                 </select>
                             </div>
                             <div class="mb-5 fv-row">
                                 <label class="form-label">Username</label>
-                                <input type="text" name="username" class="form-control mb-2" placeholder="Username" value="{{ old('username', $user->username) }}" />
+                                <input type="text" name="username" class="form-control mb-2" placeholder="Username"
+                                    value="{{ old('username', $user->username) }}" />
                             </div>
                             <div class="mb-5 fv-row">
                                 <label class="form-label required">Email</label>
@@ -120,8 +153,10 @@
                             </div>
                             <div class="mb-5 fv-row">
                                 <label class="form-label required">Telepon</label>
-                                <input type="text" name="phone" class="form-control mb-2" placeholder="+628XXXXXXX" value="{{ old('phone', $user->phone) }}" required/>
-                                <small class="text-muted">Nomor telepon harus diawali dengan kode negara, contoh :<code>indonesia : +62</code></small>
+                                <input type="text" name="phone" class="form-control mb-2" placeholder="+628XXXXXXX"
+                                    value="{{ old('phone', $user->phone) }}" required />
+                                <small class="text-muted">Nomor telepon harus diawali dengan kode negara, contoh
+                                    :<code>indonesia : +62</code></small>
                             </div>
                         </div>
                     </div>
@@ -134,15 +169,19 @@
                         <div class="card-body pt-0">
                             <div class="mb-5 fv-row">
                                 <label class="form-label">SINTA ID</label>
-                                <input type="text" name="sinta_id" class="form-control mb-2" placeholder="SINTA ID" value="{{ old('sinta_id', $user->sinta_id) }}" />
+                                <input type="text" name="sinta_id" class="form-control mb-2" placeholder="SINTA ID"
+                                    value="{{ old('sinta_id', $user->sinta_id) }}" />
                             </div>
                             <div class="mb-5 fv-row">
                                 <label class="form-label">Scopus ID</label>
-                                <input type="text" name="scopus_id" class="form-control mb-2" placeholder="Scopus ID" value="{{ old('scopus_id', $user->scopus_id) }}" />
+                                <input type="text" name="scopus_id" class="form-control mb-2" placeholder="Scopus ID"
+                                    value="{{ old('scopus_id', $user->scopus_id) }}" />
                             </div>
                             <div class="mb-5 fv-row">
                                 <label class="form-label">Google Scholar ID</label>
-                                <input type="text" name="google_scholar" class="form-control mb-2" placeholder="Google Scholar" value="{{ old('google_scholar', $user->google_scholar) }}" />
+                                <input type="text" name="google_scholar" class="form-control mb-2"
+                                    placeholder="Google Scholar"
+                                    value="{{ old('google_scholar', $user->google_scholar) }}" />
                             </div>
                         </div>
                     </div>
@@ -155,9 +194,10 @@
                         <div class="card-body pt-0">
                             <div class="mb-5 fv-row">
                                 <label class=" form-label">Password</label>
-                                <input type="password" name="password" class="form-control mb-2" placeholder="Password"
-                                     />
-                                    <small class="text-muted">Password minimal 8 karakter, Kosongkan jika tidak ingin mengubah password</small>
+                                <input type="password" name="password" class="form-control mb-2"
+                                    placeholder="Password" />
+                                <small class="text-muted">Password minimal 8 karakter, Kosongkan jika tidak ingin mengubah
+                                    password</small>
                                 @error('password')
                                     <div class="text-danger fs-7">{{ $message }}</div>
                                 @enderror

@@ -117,6 +117,15 @@ class UserController extends Controller
         if ($request->role_editor) {
             $user->assignRole('editor');
         }
+        if ($request->role_humas) {
+            $user->assignRole('humas');
+        }
+
+        if ($request->permissions) {
+            foreach ($request->permissions as $permission) {
+                $user->givePermissionTo($permission);
+            }
+        }
 
         Alert::success('Berhasil', 'Data pengguna berhasil ditambahkan');
         return redirect()->route('back.master.user.index')->with('success', 'Data pengguna berhasil ditambahkan');
@@ -136,6 +145,7 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'photo' => 'nullable|image|mimes:jpg,jpeg,png',
             'name' => 'required',
@@ -203,6 +213,18 @@ class UserController extends Controller
             $user->assignRole('editor');
         } else {
             $user->removeRole('editor');
+        }
+        if ($request->role_humas) {
+            $user->assignRole('humas');
+        } else {
+            $user->removeRole('humas');
+        }
+
+        $user->permissions()->detach();
+        if ($request->permissions) {
+            foreach ($request->permissions as $permission) {
+                $user->givePermissionTo($permission);
+            }
         }
 
         Alert::success('Berhasil', 'Data pengguna berhasil diubah');

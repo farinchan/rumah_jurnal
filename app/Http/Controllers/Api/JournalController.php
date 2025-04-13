@@ -15,6 +15,7 @@ class JournalController extends Controller
 {
     public function journalStore(Request $request)
     {
+        $name = $request->name;
         $url = $request->url;
         $api_key = $request->api_key;
         $url_path = $request->url_path;
@@ -57,6 +58,7 @@ class JournalController extends Controller
                 if ($response_another->status() === 200) {
 
                     $jurnal = new Journal();
+                    $jurnal->name = $name;
                     $jurnal->context_id = $response_another->json()["id"];
                     $jurnal->url = $response_another->json()["url"];
                     $jurnal->url_path = $url_path;
@@ -69,6 +71,8 @@ class JournalController extends Controller
                     $jurnal->ojs_version = $ojs_version;
                     $jurnal->last_sync = now();
                     $jurnal->save();
+
+                    Permission::create(['name' =>  $url_path]);
 
                     return response()->json([
                         'success' => true,

@@ -13,15 +13,16 @@ return new class extends Migration
     {
         Schema::create('journals', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->integer('context_id');
             $table->string('url');
-            $table->string('url_path');
+            $table->string('url_path')->unique();
             $table->string('title');
             $table->mediumText('description')->nullable();
             $table->string('thumbnail')->nullable();
             $table->string('onlineIssn')->nullable();
             $table->string('printIssn')->nullable();
-            $table->integer('author_fee')->nullable();
+            $table->integer('author_fee')->default(0);
             $table->json('indexing')->nullable();
             $table->string('api_key');
             $table->enum('ojs_version', ['3.3', '3.4']);

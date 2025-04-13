@@ -136,16 +136,9 @@
                                     </td>
 
                                     <td>
-                                        @foreach ($user->getPermissionNames() ?? [] as $permission)
-                                            @if ($permission == 'create')
+                                        @foreach ($user->getPermissionNames() ?? [] as $permission) 
                                                 <span class="badge badge-light-success">{{ $permission }}</span>
-                                            @elseif ($permission == 'read')
-                                                <span class="badge badge-light-info">{{ $permission }}</span>
-                                            @elseif ($permission == 'update')
-                                                <span class="badge badge-light-warning">{{ $permission }}</span>
-                                            @elseif ($permission == 'delete')
-                                                <span class="badge badge-light-danger">{{ $permission }}</span>
-                                            @endif
+
                                         @endforeach
                                     </td>
 

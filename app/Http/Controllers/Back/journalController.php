@@ -19,7 +19,7 @@ class journalController extends Controller
             return abort(404);
         }
         $data = [
-            'title' => $journal->name,
+            'title' => $journal->title,
             'breadcrumbs' => [
                 [
                     'name' => 'Dashboard',

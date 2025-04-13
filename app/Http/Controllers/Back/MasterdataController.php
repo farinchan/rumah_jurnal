@@ -31,6 +31,7 @@ class MasterdataController extends Controller
     {
         // dd($reques->all());
         $validator = Validator::make($reques->all(), [
+            'name' => 'required|string|max:255',
             'author_fee' => 'required|numeric',
             'akreditasi' => 'nullable',
         ]);
@@ -41,6 +42,11 @@ class MasterdataController extends Controller
         }
 
         $journal = Journal::find($id);
+        if (!$journal) {
+            Alert::error('Gagal', 'Jurnal tidak ditemukan');
+            return redirect()->back();
+        }
+        $journal->name = $reques->name;
         $journal->author_fee = $reques->author_fee;
         $journal->indexing = $reques->akreditasi;
         $journal->save();

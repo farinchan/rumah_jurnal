@@ -24,6 +24,8 @@
                             </div>
                             <a href="{{ $journal->url }}" target="_blank"
                                 class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $journal->title }}</a>
+                            <div class="fw-semibold text-gray-500  ">Name: {{ $journal->name }}</div>
+                            <div class="fw-semibold text-gray-500  ">Path: {{ $journal->url_path }}</div>
                             <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $journal->onlineIssn }} | p-ISSN:
                                 {{ $journal->printIssn }}</div>
                             <div class="fw-semibold text-gray-500 mb-3 ">Akreditasi:
@@ -96,6 +98,13 @@
                 <form method="post" id="form_import_journal">
                     <div class="modal-body">
                         <div class="row">
+                            <div class="col-md-12 mb-10">
+                                <label class="form-label">Nama Jurnal</label>
+                                <input type="text" name="name" class="form-control"
+                                    placeholder="Short Name Journal" />
+                                <span class="form-text text-muted">Masukkan Nama jurnal yang ingin diimport, direkomendasikan
+                                    menggunakan nama jurnal yang singkat dan jelas</span>
+                            </div>
                             <div class="col-md-8">
                                 <label class="form-label">Link Jurnal</label>
                                 <input type="url" name="url" class="form-control"
@@ -106,14 +115,15 @@
                             <div class="col-md-4">
                                 <label class="form-label">Path Jurnal</label>
                                 <input type="text" name="url_path" class="form-control"
-                                    placeholder="your-journal-path" />
+                                    placeholder="journal-path" />
                             </div>
 
                             <div class="col-md-12 mt-10">
                                 <label class="form-label">Versi OJS</label>
                                 <select name="ojs_version" class="form-select">
+                                    <option value="3.4" disabled>OJS 3.4 - coming soon</option>
                                     <option value="3.3">OJS 3.3</option>
-                                    <option value="3.2">OJS 3.2</option>
+                                    <option value="3.2" disabled>OJS 3.2</option>
                                 </select>
                                 <span class="form-text text-muted">Pilih versi OJS yang digunakan, Pastikan versi OJS yang dipilih sesuai dengan versi OJS jurnal yang ingin diimport
                                 </span>
@@ -121,7 +131,7 @@
 
                             <div class="col-md-12 mt-10">
                                 <label class="form-label">API KEY</label>
-                                <textarea name="api_key" class="form-control" rows="3" placeholder="Deskripsi jurnal"></textarea>
+                                <textarea name="api_key" class="form-control" rows="3" placeholder="APIKEY jurnal"></textarea>
                                 <span class="form-text text-muted">Masukkan API KEY jurnal yang ingin diimport, disarankan
                                     menggunakan apikey administrator jurnal</span><br>
                                 <span class="form-text text-muted">cara mendapatkan API KEY: Klik pada <b>Nama Pengguna</b>
@@ -157,6 +167,13 @@
                         @csrf
                         @method('PUT')
                         <div class="modal-body">
+                            <div class="mb-5">
+                                <label class="form-label">Nama Jurnal</label>
+                                <input type="text" name="name" class="form-control"
+                                    placeholder="Short Name Journal" value="{{ $journal->name }}" />
+                                <span class="form-text text-muted">Masukkan Nama jurnal yang ingin diimport, direkomendasikan
+                                    menggunakan nama jurnal yang singkat dan jelas</span>
+                            </div>
                             <div class="mb-5">
                                 <label class="form-label">Biaya Publikasi</label>
                                 <div class="input-group mb-5">

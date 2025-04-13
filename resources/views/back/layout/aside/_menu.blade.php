@@ -21,7 +21,7 @@
             <div class="menu-sub menu-sub-accordion">
                 <div class="menu-item">
                     <a class="menu-link @if (request()->routeIs('back.dashboard')) active @endif"
-                    href="{{ route('back.dashboard') }}">
+                        href="{{ route('back.dashboard') }}">
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
@@ -30,7 +30,7 @@
                 </div>
                 <div class="menu-item">
                     <a class="menu-link @if (request()->routeIs('back.dashboard.news')) active @endif"
-                    href="{{ route('back.dashboard.news') }}">
+                        href="{{ route('back.dashboard.news') }}">
                         <span class="menu-bullet">
                             <span class="bullet bullet-dot"></span>
                         </span>
@@ -39,207 +39,212 @@
                 </div>
             </div>
         </div>
-        <div class="menu-item pt-5">
-            <div class="menu-content">
-                <span class="menu-heading fw-bold text-uppercase fs-7">Post</span>
-            </div>
-        </div>
 
-        <div class="menu-item">
-            <a class="menu-link @if (request()->routeIs('back.announcement.index')) active @endif"
-                href="{{ route('back.announcement.index') }}">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-information fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                        <span class="path3"></span>
-                    </i>
-                </span>
-                <span class="menu-title">Pengumuman</span>
-            </a>
-        </div>
-
-        <div class= "menu-item">
-            <a class="menu-link @if (request()->routeIs('back.event.*')) active @endif"
-                href=" {{ route('back.event.index') }} ">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-pin fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
-                </span>
-                <span class="menu-title">Agenda</span>
-            </a>
-        </div>
-        <div data-kt-menu-trigger="click"
-            class="menu-item menu-accordion @if (request()->routeIs('back.news.*')) here show @endif">
-            <span class="menu-link">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-document fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
-                </span>
-                <span class="menu-title">Berita</span>
-                <span class="menu-arrow"></span>
-            </span>
-            <div class="menu-sub menu-sub-accordion">
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.news.category')) active @endif"
-                        href="{{ route('back.news.category') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Kategori</span>
-                    </a>
-                </div>
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.news.index')) active @endif"
-                        href="{{ route('back.news.index') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">List Berita</span>
-                    </a>
-                </div>
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.news.comment')) active @endif"
-                        href="{{ route('back.news.comment') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Komentar</span>
-                    </a>
+        @role('humas|super-admin')
+            <div class="menu-item pt-5">
+                <div class="menu-content">
+                    <span class="menu-heading fw-bold text-uppercase fs-7">Post</span>
                 </div>
             </div>
-        </div>
 
-        <div class= "menu-item">
-            <a class="menu-link @if (request()->routeIs('back.welcomeSpeech.index')) active @endif"
-                href="{{ route('back.welcomeSpeech.index') }}">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-star fs-2"></i>
-                </span>
-                <span class="menu-title">Tentang kami</span>
-            </a>
-        </div>
-
-
-        <div class="menu-item pt-5">
-            <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Jurnal</span>
+            <div class="menu-item">
+                <a class="menu-link @if (request()->routeIs('back.announcement.index')) active @endif"
+                    href="{{ route('back.announcement.index') }}">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-information fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                            <span class="path3"></span>
+                        </i>
+                    </span>
+                    <span class="menu-title">Pengumuman</span>
+                </a>
             </div>
-        </div>
-        @php
-            $journal_all = App\Models\Journal::all();
-        @endphp
 
-        @foreach ($journal_all as $journal)
-            @can($journal->url_path)
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->segment(3) == $journal->url_path) active @endif"
-                        href="{{ route('back.journal.index', $journal->url_path) }}">
-                        <span class="menu-icon">
-                            <i class="ki-duotone ki-book fs-2">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                                <span class="path3"></span>
-                                <span class="path4"></span>
-                            </i>
-                        </span>
-                        <span class="menu-title">{{ $journal->title }}</span>
-                    </a>
-                </div>
-            @endcan
-        @endforeach
-
-
-
-
-        <div class="menu-item pt-5">
-            <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Administrator</span>
+            <div class= "menu-item">
+                <a class="menu-link @if (request()->routeIs('back.event.*')) active @endif"
+                    href=" {{ route('back.event.index') }} ">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-pin fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                    </span>
+                    <span class="menu-title">Agenda</span>
+                </a>
             </div>
-        </div>
-
-        <div class="menu-item">
-            <a class="menu-link @if (request()->routeIs('back.message.index')) active @endif"
-                href="{{ route('back.message.index') }}">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-sms fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
+            <div data-kt-menu-trigger="click"
+                class="menu-item menu-accordion @if (request()->routeIs('back.news.*')) here show @endif">
+                <span class="menu-link">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-document fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                    </span>
+                    <span class="menu-title">Berita</span>
+                    <span class="menu-arrow"></span>
                 </span>
-                <span class="menu-title">Inbox</span>
-            </a>
-        </div>
-
-        <div data-kt-menu-trigger="click"
-            class="menu-item menu-accordion @if (request()->routeIs('back.master.*')) here show @endif">
-            <span class="menu-link">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-setting-2 fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
-                </span>
-                <span class="menu-title">Master Data</span>
-                <span class="menu-arrow"></span>
-            </span>
-            <div class="menu-sub menu-sub-accordion">
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.master.journal.*')) active @endif"
-                        href="{{ route('back.master.journal.index') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Journal</span>
-                    </a>
-                </div>
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.master.user.*')) active @endif"
-                        href="{{ route('back.master.user.index') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Pengguna</span>
-                    </a>
+                <div class="menu-sub menu-sub-accordion">
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.news.category')) active @endif"
+                            href="{{ route('back.news.category') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Kategori</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.news.index')) active @endif"
+                            href="{{ route('back.news.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">List Berita</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.news.comment')) active @endif"
+                            href="{{ route('back.news.comment') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Komentar</span>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div data-kt-menu-trigger="click"
-            class="menu-item menu-accordion @if (request()->routeIs('back.setting.*')) here show @endif">
-            <span class="menu-link">
-                <span class="menu-icon">
-                    <i class="ki-duotone ki-setting-2 fs-2">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
-                </span>
-                <span class="menu-title">Pengaturan</span>
-                <span class="menu-arrow"></span>
-            </span>
-            <div class="menu-sub menu-sub-accordion">
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.setting.website')) active @endif"
-                        href="{{ route('back.setting.website') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Website</span>
-                    </a>
-                </div>
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.setting.banner')) active @endif"
-                        href="{{ route('back.setting.banner') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Banner</span>
-                    </a>
+            <div class= "menu-item">
+                <a class="menu-link @if (request()->routeIs('back.welcomeSpeech.index')) active @endif"
+                    href="{{ route('back.welcomeSpeech.index') }}">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-star fs-2"></i>
+                    </span>
+                    <span class="menu-title">Tentang kami</span>
+                </a>
+            </div>
+        @endrole
+
+        @role('editor|super-admin')
+            <div class="menu-item pt-5">
+                <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Jurnal</span>
                 </div>
             </div>
-        </div>
+            @php
+                $journal_all = App\Models\Journal::all();
+            @endphp
+
+
+            @foreach ($journal_all as $journal)
+                @can($journal->url_path)
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->segment(3) == $journal->url_path) active @endif"
+                            href="{{ route('back.journal.index', $journal->url_path) }}">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-book fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">{{ $journal->name }}</span>
+                        </a>
+                    </div>
+                @endcan
+            @endforeach
+        @endrole
+
+
+        @role('super-admin')
+            <div class="menu-item pt-5">
+                <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Administrator</span>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <a class="menu-link @if (request()->routeIs('back.message.index')) active @endif"
+                    href="{{ route('back.message.index') }}">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-sms fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                    </span>
+                    <span class="menu-title">Inbox</span>
+                </a>
+            </div>
+
+            <div data-kt-menu-trigger="click"
+                class="menu-item menu-accordion @if (request()->routeIs('back.master.*')) here show @endif">
+                <span class="menu-link">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-setting-2 fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                    </span>
+                    <span class="menu-title">Master Data</span>
+                    <span class="menu-arrow"></span>
+                </span>
+                <div class="menu-sub menu-sub-accordion">
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.master.journal.*')) active @endif"
+                            href="{{ route('back.master.journal.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Journal</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.master.user.*')) active @endif"
+                            href="{{ route('back.master.user.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Pengguna</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div data-kt-menu-trigger="click"
+                class="menu-item menu-accordion @if (request()->routeIs('back.setting.*')) here show @endif">
+                <span class="menu-link">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-setting-2 fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                    </span>
+                    <span class="menu-title">Pengaturan</span>
+                    <span class="menu-arrow"></span>
+                </span>
+                <div class="menu-sub menu-sub-accordion">
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.setting.website')) active @endif"
+                            href="{{ route('back.setting.website') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Website</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.setting.banner')) active @endif"
+                            href="{{ route('back.setting.banner') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Banner</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endrole
 
     </div>
 

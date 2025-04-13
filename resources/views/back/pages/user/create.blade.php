@@ -86,6 +86,14 @@
                                     Editor
                                 </label>
                             </div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_humas" value="1"
+                                    @if (old('role_humas') == 1) checked @endif id="flexCheckAgen" />
+                                <label class="form-check-label" for="flexCheckAgen">
+                                    Humas
+                                </label>
+                            </div>
+
 
                             @error('status')
                                 <div class="text-danger fs-7">{{ $message }}</div>
@@ -96,16 +104,24 @@
                     <div class="card card-flush py-4">
                         <div class="card-header">
                             <div class="card-title">
-                                <h2>Journal Permission</h2>
+                                <h3>Editor - Journal Permission</h3>
                             </div>
-                            <div class="card-toolbar">
-                                <div class="rounded-circle bg-warning w-15px h-15px" id="kt_ecommerce_add_category_status">
-                                </div>
-                            </div>
+
                         </div>
                         <div class="card-body pt-0">
-
-
+                            @php
+                                $permissions = Spatie\Permission\Models\Permission::where('guard_name', 'web')->get();
+                            @endphp
+                            @foreach ($permissions as $permission)
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]"
+                                        value="{{ $permission->name }}" id="flexCheckDefault" />
+                                    <label class="form-check-label" for="flexCheckDefault">
+                                        {{ App\Models\Journal::where('url_path', $permission->name)->first()->name ?? '' }}
+                                        ({{ $permission->name }})
+                                    </label>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -120,8 +136,8 @@
 
                             <div class="mb-5 fv-row">
                                 <label class="required form-label">Nama</label>
-                                <input type="text" name="name" class="form-control mb-2"
-                                    placeholder="Nama Staff" value="{{ old('name') }}" required />
+                                <input type="text" name="name" class="form-control mb-2" placeholder="Nama Staff"
+                                    value="{{ old('name') }}" required />
                                 @error('name')
                                     <div class="text-danger fs-7">{{ $message }}</div>
                                 @enderror
@@ -130,8 +146,10 @@
                                 <label class="form-label required">Jenis Kelamin</label>
                                 <select name="gender" class="form-control mb-2" required>
                                     <option value="">Pilih Jenis Kelamin</option>
-                                    <option value="laki-laki" @if (old('gender') == 'laki-laki') selected @endif>Laki-laki</option>
-                                    <option value="perempuan" @if (old('gender') == 'perempuan') selected @endif>Perempuan</option>
+                                    <option value="laki-laki" @if (old('gender') == 'laki-laki') selected @endif>Laki-laki
+                                    </option>
+                                    <option value="perempuan" @if (old('gender') == 'perempuan') selected @endif>Perempuan
+                                    </option>
                                 </select>
                                 @error('gender')
                                     <div class="text-danger fs-7">{{ $message }}</div>
@@ -139,7 +157,8 @@
                             </div>
                             <div class="mb-5 fv-row">
                                 <label class=" form-label">Username</label>
-                                <input type="text" name="username" class="form-control mb-2" placeholder="Username" value="{{ old('username') }}"  />
+                                <input type="text" name="username" class="form-control mb-2" placeholder="Username"
+                                    value="{{ old('username') }}" />
                                 @error('username')
                                     <div class="text-danger fs-7">{{ $message }}</div>
                                 @enderror
@@ -154,8 +173,10 @@
                             </div>
                             <div class="mb-5 fv-row">
                                 <label class="form-label required">Telepon</label>
-                                <input type="text" name="phone" class="form-control mb-2" placeholder="+628XXXXXXX" value="{{ old('phone') }}" required/>
-                                <small class="text-muted">Nomor telepon harus diawali dengan kode negara, contoh :<code>indonesia : +62</code></small>
+                                <input type="text" name="phone" class="form-control mb-2" placeholder="+628XXXXXXX"
+                                    value="{{ old('phone') }}" required />
+                                <small class="text-muted">Nomor telepon harus diawali dengan kode negara, contoh
+                                    :<code>indonesia : +62</code></small>
                                 @error('phone')
                                     <div class="text-danger fs-7">{{ $message }}</div>
                                 @enderror
@@ -174,21 +195,24 @@
                                 <div class="row">
                                     <div class="mb-5 fv-row">
                                         <label class="form-label">SINTA ID</label>
-                                        <input type="text" name="sinta_id" class="form-control mb-2" placeholder="SINTA ID" value="{{ old('sinta_id') }}" />
+                                        <input type="text" name="sinta_id" class="form-control mb-2"
+                                            placeholder="SINTA ID" value="{{ old('sinta_id') }}" />
                                         @error('sinta_id')
                                             <div class="text-danger fs-7">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="mb-5 fv-row">
                                         <label class="form-label">Scopus ID</label>
-                                        <input type="text" name="scopus_id" class="form-control mb-2" placeholder="Scopus ID" value="{{ old('scopus_id') }}" />
+                                        <input type="text" name="scopus_id" class="form-control mb-2"
+                                            placeholder="Scopus ID" value="{{ old('scopus_id') }}" />
                                         @error('scopus_id')
                                             <div class="text-danger fs-7">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="mb-5 fv-row">
                                         <label class="form-label">Google Scholar ID</label>
-                                        <input type="text" name="google_scholar" class="form-control mb-2" placeholder="Google Scholar" value="{{ old('google_scholar') }}" />
+                                        <input type="text" name="google_scholar" class="form-control mb-2"
+                                            placeholder="Google Scholar" value="{{ old('google_scholar') }}" />
                                         @error('google_scholar')
                                             <div class="text-danger fs-7">{{ $message }}</div>
                                         @enderror
@@ -208,7 +232,7 @@
                                 <label class="required form-label">Password</label>
                                 <input type="password" name="password" class="form-control mb-2" placeholder="Password"
                                     required />
-                                    <small class="text-muted">Password minimal 8 karakter</small>
+                                <small class="text-muted">Password minimal 8 karakter</small>
                                 @error('password')
                                     <div class="text-danger fs-7">{{ $message }}</div>
                                 @enderror
