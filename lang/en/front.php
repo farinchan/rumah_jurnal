@@ -46,4 +46,9 @@ return [
     'call_for_paper_title' => 'Submit your paper now',
     'call_for_paper_desc' => 'Submit your research paper and contribute to the advancement of knowledge in your field',
     'call_for_paper_btn' => 'Submit Now',
+
+    'search_article' => 'Search Article',
+    'search_article_placeholder' => 'Search Submission ID / Article Title...',
+    'search_article_btn' => 'Search',
+    'all_journal' => 'All Journal',
 ];

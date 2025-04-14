@@ -33,8 +33,9 @@
                             <tr>
                                 <th class="">ID</th>
                                 <th class="min-w-250px">Submission</th>
-                                <th class="min-w-150px text-center">Status</th>
-                                <th class="min-w-100px text-center">Published</th>
+                                <th class="min-w-100px text-start">Status</th>
+                                <th class="min-w-100px text-start">Published</th>
+                                <th class="min-w-150px text-start ">Pembayaran</th>
                                 <th class="min-w-150px text-center">Action</th>
 
                             </tr>
@@ -56,7 +57,7 @@
                                         </div>
                                     </td>
 
-                                    <td class="text-center">
+                                    <td class="text-start">
                                         @if ($submission->status == 1)
                                             <span
                                                 class="badge badge-light-warning fs-7 fw-bold">{{ $submission->status_label }}</span>
@@ -70,8 +71,26 @@
                                             <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
                                         @endif
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-start">
                                         {{ $submission->datePublished ?? '-' }}
+                                    </td>
+                                    <td class="text-start">
+
+                                        @if ($submission->payment_status == 'pending')
+                                            <span
+                                                class="badge badge-light-warning fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                        @elseif ($submission->payment_status == 'paid')
+                                            <span
+                                                class="badge badge-light-success fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                        @elseif ($submission->payment_status == 'refund')
+                                            <span
+                                                class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                        @elseif ($submission->payment_status == 'cancelled')
+                                            <span
+                                                class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                        @else
+                                            <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
+                                        @endif
                                     </td>
                                     <td class="text-end">
                                         <a href="#" class="btn btn-sm btn-light-primary my-1" data-bs-toggle="modal"
@@ -145,7 +164,8 @@
                         <div>
                             <!--begin::synchronize-->
                             <div class="btn btn-icon btn-sm btn-active-light-warning ms-2" data-bs-toggle="tooltip"
-                                data-bs-placement="top" title="Sinkronisasi Data" onclick="selectArticle({{ $submission->submission_id }})">
+                                data-bs-placement="top" title="Sinkronisasi Data"
+                                onclick="selectArticle({{ $submission->submission_id }})">
                                 <i class="ki-duotone ki-arrows-circle fs-1">
                                     <span class="path1"></span>
                                     <span class="path2"></span>
@@ -236,7 +256,9 @@
                         </div>
                         <!--end::Close-->
                     </div>
-                    <form action="{{ route('back.journal.article.destroy', [$journal->url_path, $issue->id, $submission->id]) }}" method="POST">
+                    <form
+                        action="{{ route('back.journal.article.destroy', [$journal->url_path, $issue->id, $submission->id]) }}"
+                        method="POST">
                         @method('DELETE')
                         @csrf
                         <div class="modal-body">
@@ -316,12 +338,12 @@
                                         <div class="d-flex flex-column mw-200px">
                                             <div class="d-flex align-items-center mb-2">
                                                 ${submission.status == 1 ? `
-                                                <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
-                                                ` : submission.status == 3 ? `
-                                                <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
-                                                ` : submission.status == 4 ? `
-                                                <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
-                                                ` :
+                                                    <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
+                                                    ` : submission.status == 3 ? `
+                                                    <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
+                                                    ` : submission.status == 4 ? `
+                                                    <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
+                                                    ` :
                                                 `<span class="badge badge-light-secondary fs-5 p-2">${submission.statusLabel}</span>`
                                                 }
                                             </div>

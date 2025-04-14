@@ -7,6 +7,7 @@ use App\Http\Controllers\Front\AnnouncementController;
 use App\Http\Controllers\Front\EventController;
 use App\Http\Controllers\Front\NewsController;
 use App\Http\Controllers\Front\JournalController;
+use App\Http\Controllers\Front\PaymentController;
 use App\Http\Controllers\Front\ContactController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
@@ -15,12 +16,11 @@ use App\Http\Controllers\Back\EventController as BackEventController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
 use App\Http\Controllers\Back\WelcomeSpeechController as BackWelcomeSpeechController;
 use App\Http\Controllers\Back\JournalController as BackJournalController;
+use App\Http\Controllers\Back\FinanceController as BackFinanceController;
 use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
-
-use App\Models\Announcement;
 
 Route::get('/locale/{locale}', LocaleController::class)->name('locale.change');
 
@@ -53,6 +53,13 @@ Route::prefix('news')->name('news.')->group(function () {
 Route::prefix('journal')->name('journal.')->group(function () {
     Route::get('/', [JournalController::class, 'index'])->name('index');
     Route::get('/{journal_path}', [JournalController::class, 'detail'])->name('detail');
+});
+
+Route::prefix('payment')->name('payment.')->group(function () {
+    Route::get('/', [PaymentController::class, 'index'])->name('index');
+    Route::get('/{journal_path}/submission/{submission_id}', [PaymentController::class, 'submission'])->name('submission');
+    Route::get('/{journal_path}/submission/{submission_id}/pay', [PaymentController::class, 'payment'])->name('payment');
+    Route::post('/{journal_path}/submission/{submission_id}/pay', [PaymentController::class, 'paymentStore'])->name('payment.store');
 });
 
 Route::prefix('contact')->name('contact.')->group(function () {
@@ -129,6 +136,13 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
     });
 
+
+
+
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::get('/verification', [BackFinanceController::class, 'verificationIndex'])->name('verification.index');
+        Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');
+    });
 
     Route::prefix('master')->name('master.')->group(function () {
 

@@ -29,6 +29,10 @@ return new class extends Migration
             $table->string('status_label')->nullable();
             $table->string('lastModified');
             $table->foreignId('issue_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+
+            $table->enum('payment_status', ['pending', 'paid', 'refunded', 'cancelled'])->default('pending');
+            $table->string('invoice_number')->unique()->nullable();
+            $table->string('invoice_file')->nullable();
             $table->timestamps();
         });
     }

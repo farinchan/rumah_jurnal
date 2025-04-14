@@ -126,7 +126,7 @@
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><a href="#">{{ __("layout.payment") }}</a></li>
+                                    <li><a href="{{ route("payment.index") }}">{{ __("layout.payment") }}</a></li>
                                     <li><a href="{{ route("contact.index") }}">{{ __("layout.contact") }}</a></li>
                                 </ul>
                             </div>
@@ -251,7 +251,7 @@
                     </ul>
                 </li>
 
-                <li><a href="#">{{ __("layout.payment") }}</a></li>
+                <li><a href="{{ route("payment.index") }}">{{ __("layout.payment") }}</a></li>
                 <li><a href="{{ route("contact.index") }}">{{ __("layout.contact") }}</a></li>
             </ul>
         </div>

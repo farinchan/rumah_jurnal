@@ -46,4 +46,9 @@ return [
     'call_for_paper_title' => 'kirimkan naskah Anda sekarang juga',
     'call_for_paper_desc' => 'Kirimkan naskah penelitian Anda dan berkontribusilah pada kemajuan pengetahuan di bidang Anda',
     'call_for_paper_btn' => 'Kirim Sekarang',
+
+    'search_article' => 'Cari Artikel',
+    'search_article_placeholder' => 'Cari ID Submision / Judul Artikel...',
+    'search_article_btn' => 'Cari',
+    'all_journal' => 'Semua Jurnal',
 ];

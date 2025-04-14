@@ -174,7 +174,7 @@ class JournalController extends Controller
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/submissions', [
                 'orderBy' => 'dateSubmitted',
-                'count' => 50,
+                'count' => 200,
                 'apiToken' => $jurnal->api_key
             ]);
 

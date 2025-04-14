@@ -157,6 +157,43 @@
             @endforeach
         @endrole
 
+        @role('keuangan|super-admin')
+            <div class="menu-item pt-5">
+                <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Keuangan</span>
+                </div>
+            </div>
+
+            <div class= "menu-item">
+                <a class="menu-link @if (request()->routeIs('back.finance.verification.index')) active @endif"
+                    href="{{ route('back.finance.verification.index') }}">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-two-credit-cart fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                            <span class="path3"></span>
+                            <span class="path4"></span>
+                            <span class="path5"></span>
+                        </i>
+                    </span>
+                    <span class="menu-title">Verifikasi</span>
+                </a>
+            </div>
+            <div class= "menu-item">
+                <a class="menu-link @if (request()->routeIs('back.finance.report.index')) active @endif"
+                    href="{{ route('back.finance.report.index') }}">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-financial-schedule fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                            <span class="path3"></span>
+                            <span class="path4"></span>
+                        </i>
+                    </span>
+                    <span class="menu-title">Laporan</span>
+                </a>
+            </div>
+        @endrole
+
 
         @role('super-admin')
             <div class="menu-item pt-5">
