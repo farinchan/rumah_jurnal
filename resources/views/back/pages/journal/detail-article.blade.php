@@ -68,7 +68,7 @@
                                             <span
                                                 class="badge badge-light-danger fs-7 fw-bold">{{ $submission->status_label }}</span>
                                         @else
-                                            <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
+                                            <span class="badge badge-light-secondary fs-7 fw-bold">{{ $submission->status_label }}</span>
                                         @endif
                                     </td>
                                     <td class="text-start">

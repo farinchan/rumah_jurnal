@@ -20,6 +20,11 @@ class Submission extends Model
         return $this->belongsTo(Issue::class, 'issue_id');
     }
 
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'submission_id');
+    }
+
     public function getTitleAttribute()
     {
         return $this->fullTitle[$this->locale] ?? '';
@@ -48,5 +53,11 @@ class Submission extends Model
     {
         $keywords = json_decode($this->attributes['keywords'], true);
         return implode(', ', $keywords[$this->attributes['locale']] ?? []);
+    }
+
+    public function getCitationsAttribute()
+    {
+        $citations = json_decode($this->attributes['citations'], true);
+        return $citations;
     }
 }

@@ -51,4 +51,28 @@ return [
     'search_article_placeholder' => 'Cari ID Submision / Judul Artikel...',
     'search_article_btn' => 'Cari',
     'all_journal' => 'Semua Jurnal',
+
+    'pay_now_desc' => 'Jika anda pemilik artikel ini, silahkan bayar biaya publikasi untuk artikel ini pada tombol dibawah ini',
+    'pay_now_btn' => 'Bayar Sekarang',
+    'view_invoice' => 'Lihat Invoice',
+    'abstract' => 'Abstrak',
+    'references' => 'Referensi',
+    'keywords' => 'Kata Kunci',
+    'payment_status' => 'Status Pembayaran',
+    'submission_status' => 'Status Pengajuan',
+    'date_published' => 'Tanggal Terbit',
+
+    'no_payment_found' => 'belum ada pembayaran yang dilakukan',
+    'information' => 'Informasi',
+    'finalization' => 'Finalisasi',
+    'article' => 'Artikel',
+    'author_information' => 'Informasi Penulis',
+    'payment_proff' => 'Bukti Pembayaran',
+    'payment_information' => 'Informasi Pembayaran',
+    'payment_timestamp' => 'Tanggal Pembayaran',
+    'payment_method' => 'Metode Pembayaran',
+    'payment_declaration_title' => 'Pernyataan Pembayaran',
+    'payment_declaration_text' => 'Dengan ini saya menyatakan bahwa data yang saya masukkan telah benar dan saya telah melakukan pembayaran biaya publikasi untuk artikel ini. Saya memahami bahwa biaya ini tidak dapat dikembalikan dan akan digunakan untuk mendukung proses penerbitan artikel saya.',
+    'payment_declaration_checkbox' => 'Saya setuju dengan pernyataan di atas',
+
 ];

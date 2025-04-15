@@ -2,7 +2,7 @@
 >>> TABLE OF CONTENTS:
 ===============================================================
 # Google fonts
-# Gutter Code 
+# Gutter Code
 # Normalize
 # Typography
 # Custom Class
@@ -21,7 +21,7 @@
 # Galleries
 # Unit test
 # ScrollUp
-# Owl Carousel 
+# Owl Carousel
 # Slick Slider
 # Background Overlay
 # Scrollbar
@@ -66,7 +66,7 @@ font-family: 'Rajdhani', sans-serif;
 
 
 /* ====================================================
-    Gutter Code 
+    Gutter Code
 ==================================================== */
  .ltn__no-gutter > [class*='col-'] { /* No padding only for child columns */
     padding-right: 0;
@@ -84,9 +84,9 @@ font-family: 'Rajdhani', sans-serif;
     }
     .ltn__custom-gutter > [class*='col-'] {
         padding-right: 0px;
-        padding-left: 0px; 
+        padding-left: 0px;
     }
-    
+
 }
 
 @media(max-width:991px) {  /* Modify this based on column def */
@@ -96,7 +96,7 @@ font-family: 'Rajdhani', sans-serif;
     }
     .ltn__custom-gutter > [class*='col-'] {
         padding-right: 15px;
-        padding-left: 15px; 
+        padding-left: 15px;
     }
 
 }
@@ -110,7 +110,7 @@ font-family: 'Rajdhani', sans-serif;
     }
     .ltn__product-gutter [class*='col-'] {
         padding-right: 8px;
-        padding-left: 8px; 
+        padding-left: 8px;
     }
 
 }
@@ -127,20 +127,20 @@ font-family: 'Rajdhani', sans-serif;
     --ltn__secondary-color-3: #fb412a; /* Lighten */
     --ltn__heading-color: #0B1E33;
     --ltn__paragraph-color: #152E3A;
-    
+
     --ltn__heading-font: 'Rajdhani', sans-serif;
     --ltn__body-font: 'Nunito Sans', sans-serif;
-    
-    /* Footer ACD2D8 8CB2B2  */
-    --ltn__color-1: #8cb2b2; 
-    --ltn__color-2: #ACD2D8; 
-    --ltn__color-3: #A3BCC0; 
-    --ltn__color-4: #84A2A6; 
-    --ltn__color-5: #5C727D; 
-    --ltn__color-6: #969FA5; 
-    --ltn__color-7: #e5e5e5; 
 
-    /* Gradient Colors */ 
+    /* Footer ACD2D8 8CB2B2  */
+    --ltn__color-1: #8cb2b2;
+    --ltn__color-2: #ACD2D8;
+    --ltn__color-3: #A3BCC0;
+    --ltn__color-4: #84A2A6;
+    --ltn__color-5: #5C727D;
+    --ltn__color-6: #969FA5;
+    --ltn__color-7: #e5e5e5;
+
+    /* Gradient Colors */
     --gradient-color-1: linear-gradient(90deg, rgba(242,139,194,1) 0%, rgba(216,177,242,1) 50%);
     --gradient-color-2: linear-gradient(to top, rgba(7,28,31,0) 0%, rgba(7,28,31,1) 90%);
     --gradient-color-3: linear-gradient(to bottom, rgba(7,28,31,0) 0%, rgba(7,28,31,1) 90%);
@@ -158,7 +158,7 @@ font-family: 'Rajdhani', sans-serif;
     --section-bg-8: #2D4A58; /* Black */
 
 
-    /* Border Colors */ 
+    /* Border Colors */
     --border-color-1: #e5eaee; /* White */
     --border-color-2: #1e2021; /* Black */
     --border-color-3: #5C617F; /* Black */
@@ -178,25 +178,25 @@ font-family: 'Rajdhani', sans-serif;
     --ltn__box-shadow-1: 0 16px 32px 0 rgba(7, 28, 31, 0.1);
     --ltn__box-shadow-2: 0 0 4px rgba(0, 0, 0, 0.1); /* like border */
     --ltn__box-shadow-3: 0 1px 6px 0 rgba(32, 33, 36, .28); /* like border GGL */
-    --ltn__box-shadow-4: 0 5px 20px 0 rgba(23, 44, 82, 0.1); 
-    --ltn__box-shadow-5: 0 8px 16px 0 rgba(93, 93, 93, 0.1); 
+    --ltn__box-shadow-4: 0 5px 20px 0 rgba(23, 44, 82, 0.1);
+    --ltn__box-shadow-5: 0 8px 16px 0 rgba(93, 93, 93, 0.1);
     --ltn__box-shadow-6: 0 0 25px 2px rgba(93, 93, 93, 0.2);
     --ltn__box-shadow-7: 0 0 10px 0px rgba(93, 93, 93, 0.2);
 
 
-    /* Common Colors */ 
+    /* Common Colors */
     --black: #000000;
     --black-2: #22355B;
     --white: #fff;
     --white-2: #F2F6F7;
     --white-3: #e8edee;
-    --white-4: #e6ecf0; 
-    --white-5: #f0f4f7; 
-    --white-6: #f1f1f1; 
-    --white-7: #F7F7F7; 
-    --white-8: #FAFAFA; 
-    --white-9: #F2F7FA; 
-    --white-10: #EDEDED; 
+    --white-4: #e6ecf0;
+    --white-5: #f0f4f7;
+    --white-6: #f1f1f1;
+    --white-7: #F7F7F7;
+    --white-8: #FAFAFA;
+    --white-9: #F2F7FA;
+    --white-10: #EDEDED;
     --red: #FF0000;
     --red-2: #f34f3f;
     --red-3: #DB483B;
@@ -230,7 +230,7 @@ font-family: 'Rajdhani', sans-serif;
     --instagram: #e4405f;
     --vk: #3b5998;
     --wechat: #7bb32e;
-    --youtube: #CB2027;              
+    --youtube: #CB2027;
     --email: #F89A1E;
 
 
@@ -415,9 +415,9 @@ ol li {
     .slick-arrow-1 .slick-arrow {
         background-color: transparent;
     }
-    input[type="text"], 
-    input[type="email"], 
-    input[type="password"], 
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
     input[type="submit"] {
         border-color: var(--white);
         color: var(--white);
@@ -802,9 +802,10 @@ code {
 /* ----------------------------------------------------
     Form input box
 ---------------------------------------------------- */
-input[type="text"], 
-input[type="email"], 
-input[type="password"], 
+input[type="text"],
+input[type="email"],
+input[type="datetime-local"],
+input[type="password"],
 input[type="submit"],
 textarea {
     background-color: var(--white);
@@ -820,16 +821,18 @@ textarea {
     border-radius: 0;
     padding-right: 40px;
 }
-input[type="text"]::-webkit-input-placeholder, 
-input[type="email"]::-webkit-input-placeholder, 
-input[type="password"]::-webkit-input-placeholder, 
+input[type="text"]::-webkit-input-placeholder,
+input[type="datetime-local"]::-webkit-input-placeholder,
+input[type="email"]::-webkit-input-placeholder,
+input[type="password"]::-webkit-input-placeholder,
 input[type="submit"]::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder { /* Chrome/Opera/Safari */
     color: var(--ltn__paragraph-color);
     font-size: 14px;
 }
-input[type="text"]:focus, 
-input[type="email"]:focus, 
+input[type="text"]:focus,
+input[type="datetime-local"]:focus,
+input[type="email"]:focus,
 input[type="password"]:focus,
 textarea:focus {
     border-color: var(--ltn__secondary-color);
@@ -1267,7 +1270,7 @@ ul {
 }
 
 /* ----------------------------------------------------
-    Owl Carousel 
+    Owl Carousel
 ---------------------------------------------------- */
 .owl-dots {
     display: block;
@@ -1301,7 +1304,7 @@ ul {
     left: auto;
     right: -60px;
 }
-@media only screen and (max-width: 1200px) { 
+@media only screen and (max-width: 1200px) {
     .owl-arrow-1 .owl-nav > div {
         right: auto;
         left: 0px;
@@ -1517,52 +1520,52 @@ ul {
     Background Overlay
 ---------------------------------------------------- */
 
- .bg-overlay-black-10, 
- .bg-overlay-black-20, 
- .bg-overlay-black-30, 
- .bg-overlay-black-40, 
- .bg-overlay-black-50, 
- .bg-overlay-black-60, 
- .bg-overlay-black-70, 
- .bg-overlay-black-80, 
- .bg-overlay-black-90, 
- .bg-overlay-white-10, 
- .bg-overlay-white-20, 
- .bg-overlay-white-30,  
- .bg-overlay-white-40, 
- .bg-overlay-white-50, 
- .bg-overlay-white-60, 
- .bg-overlay-white-70,  
- .bg-overlay-white-80, 
+ .bg-overlay-black-10,
+ .bg-overlay-black-20,
+ .bg-overlay-black-30,
+ .bg-overlay-black-40,
+ .bg-overlay-black-50,
+ .bg-overlay-black-60,
+ .bg-overlay-black-70,
+ .bg-overlay-black-80,
+ .bg-overlay-black-90,
+ .bg-overlay-white-10,
+ .bg-overlay-white-20,
+ .bg-overlay-white-30,
+ .bg-overlay-white-40,
+ .bg-overlay-white-50,
+ .bg-overlay-white-60,
+ .bg-overlay-white-70,
+ .bg-overlay-white-80,
  .bg-overlay-white-90 {
     z-index: 8;
     position: relative;
  }
- .bg-overlay-black-10:before, 
- .bg-overlay-black-20:before, 
- .bg-overlay-black-30:before, 
- .bg-overlay-black-40:before, 
- .bg-overlay-black-50:before, 
- .bg-overlay-black-60:before, 
- .bg-overlay-black-70:before, 
- .bg-overlay-black-80:before, 
- .bg-overlay-black-90:before, 
- .bg-overlay-white-10:before, 
- .bg-overlay-white-20:before, 
- .bg-overlay-white-30:before, 
- .bg-overlay-white-40:before, 
- .bg-overlay-white-50:before, 
- .bg-overlay-white-60:before, 
- .bg-overlay-white-70:before, 
- .bg-overlay-white-80:before, 
+ .bg-overlay-black-10:before,
+ .bg-overlay-black-20:before,
+ .bg-overlay-black-30:before,
+ .bg-overlay-black-40:before,
+ .bg-overlay-black-50:before,
+ .bg-overlay-black-60:before,
+ .bg-overlay-black-70:before,
+ .bg-overlay-black-80:before,
+ .bg-overlay-black-90:before,
+ .bg-overlay-white-10:before,
+ .bg-overlay-white-20:before,
+ .bg-overlay-white-30:before,
+ .bg-overlay-white-40:before,
+ .bg-overlay-white-50:before,
+ .bg-overlay-white-60:before,
+ .bg-overlay-white-70:before,
+ .bg-overlay-white-80:before,
  .bg-overlay-white-90:before{
-    position: absolute; 
-    content: ""; 
+    position: absolute;
+    content: "";
     left: 0;
-    top: 0; 
+    top: 0;
     height: 100%;
-    width: 100%;  
-    z-index: -1; 
+    width: 100%;
+    z-index: -1;
  }
 .bg-overlay-black-10:before {  background: rgba(0, 0, 0, 0.1);}
 .bg-overlay-black-20:before {  background: rgba(0, 0, 0, 0.2);}
@@ -1586,36 +1589,36 @@ ul {
 
 
 
-.bg-overlay-theme-05, 
-.bg-overlay-theme-10, 
-.bg-overlay-theme-20, 
-.bg-overlay-theme-30, 
-.bg-overlay-theme-40, 
-.bg-overlay-theme-50, 
-.bg-overlay-theme-60, 
-.bg-overlay-theme-70, 
-.bg-overlay-theme-80, 
+.bg-overlay-theme-05,
+.bg-overlay-theme-10,
+.bg-overlay-theme-20,
+.bg-overlay-theme-30,
+.bg-overlay-theme-40,
+.bg-overlay-theme-50,
+.bg-overlay-theme-60,
+.bg-overlay-theme-70,
+.bg-overlay-theme-80,
 .bg-overlay-theme-90 {
     z-index: 9;
     position: relative;
 }
-.bg-overlay-theme-05:before, 
-.bg-overlay-theme-10:before, 
-.bg-overlay-theme-20:before, 
-.bg-overlay-theme-30:before, 
-.bg-overlay-theme-40:before, 
-.bg-overlay-theme-50:before, 
-.bg-overlay-theme-60:before, 
-.bg-overlay-theme-70:before, 
-.bg-overlay-theme-80:before, 
+.bg-overlay-theme-05:before,
+.bg-overlay-theme-10:before,
+.bg-overlay-theme-20:before,
+.bg-overlay-theme-30:before,
+.bg-overlay-theme-40:before,
+.bg-overlay-theme-50:before,
+.bg-overlay-theme-60:before,
+.bg-overlay-theme-70:before,
+.bg-overlay-theme-80:before,
 .bg-overlay-theme-90:before{
-   position: absolute; 
-   content: ""; 
+   position: absolute;
+   content: "";
    left: 0;
-   top: 0; 
+   top: 0;
    height: 100%;
-   width: 100%;  
-   z-index: -1; 
+   width: 100%;
+   z-index: -1;
 }
 .bg-overlay-theme-05:before {  background: rgba(255, 94, 21, 0.05);}
 .bg-overlay-theme-10:before {  background: rgba(255, 94, 21, 0.1);}
@@ -1628,36 +1631,36 @@ ul {
 .bg-overlay-theme-80:before {  background: rgba(255, 94, 21, 0.8);}
 .bg-overlay-theme-90:before {  background: rgba(255, 94, 21, 0.9);}
 
-.bg-overlay-theme-black-05, 
-.bg-overlay-theme-black-10, 
-.bg-overlay-theme-black-20, 
-.bg-overlay-theme-black-30, 
-.bg-overlay-theme-black-40, 
-.bg-overlay-theme-black-50, 
-.bg-overlay-theme-black-60, 
-.bg-overlay-theme-black-70, 
-.bg-overlay-theme-black-80, 
+.bg-overlay-theme-black-05,
+.bg-overlay-theme-black-10,
+.bg-overlay-theme-black-20,
+.bg-overlay-theme-black-30,
+.bg-overlay-theme-black-40,
+.bg-overlay-theme-black-50,
+.bg-overlay-theme-black-60,
+.bg-overlay-theme-black-70,
+.bg-overlay-theme-black-80,
 .bg-overlay-theme-black-90 {
     z-index: 9;
     position: relative;
 }
-.bg-overlay-theme-black-05:before, 
-.bg-overlay-theme-black-10:before, 
-.bg-overlay-theme-black-20:before, 
-.bg-overlay-theme-black-30:before, 
-.bg-overlay-theme-black-40:before, 
-.bg-overlay-theme-black-50:before, 
-.bg-overlay-theme-black-60:before, 
-.bg-overlay-theme-black-70:before, 
-.bg-overlay-theme-black-80:before, 
+.bg-overlay-theme-black-05:before,
+.bg-overlay-theme-black-10:before,
+.bg-overlay-theme-black-20:before,
+.bg-overlay-theme-black-30:before,
+.bg-overlay-theme-black-40:before,
+.bg-overlay-theme-black-50:before,
+.bg-overlay-theme-black-60:before,
+.bg-overlay-theme-black-70:before,
+.bg-overlay-theme-black-80:before,
 .bg-overlay-theme-black-90:before{
-   position: absolute; 
-   content: ""; 
+   position: absolute;
+   content: "";
    left: 0;
-   top: 0; 
+   top: 0;
    height: 100%;
-   width: 100%;  
-   z-index: -1; 
+   width: 100%;
+   z-index: -1;
 }
 .bg-overlay-theme-black-05:before {  background: rgba(7, 28, 31, 0.05);}
 .bg-overlay-theme-black-10:before {  background: rgba(7, 28, 31, 0.1);}
@@ -1673,28 +1676,28 @@ ul {
   Scrollbar
 ---------------------------------------------- */
 .ltn__scrollbar {
-    overflow-y: auto; 
-}  
+    overflow-y: auto;
+}
 .ltn__scrollbar::-webkit-scrollbar {
     width: 2px;
     background-color: #f5f5f5;
     border-radius: 30px;
-}    
+}
 .ltn__scrollbar::-webkit-scrollbar-thumb {
-    background-color: #ddd; 
+    background-color: #ddd;
 }
 
 
 .mean-nav {
-    overflow-y: auto; 
-}  
+    overflow-y: auto;
+}
 .mean-nav::-webkit-scrollbar {
     width: 3px;
     background-color: var(--ltn__primary-color);
     border-radius: 30px;
-}    
+}
 .mean-nav::-webkit-scrollbar-thumb {
-    background-color: var(--ltn__secondary-color); 
+    background-color: var(--ltn__secondary-color);
 }
 
 

@@ -31,7 +31,7 @@
                                         <div class="col-md-12">
                                             <div class="input-item input-item-name ltn__custom-icon">
                                                 <input type="text" name="q" value="{{ request('q') }}"
-                                                    placeholder="{{ __('front.search_article_placeholder') }}" >
+                                                    placeholder="{{ __('front.search_article_placeholder') }}">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -59,7 +59,9 @@
                     <div class="col-lg-12">
                         <div class="ltn__product-item ltn__product-item-3" style="margin-bottom: 20px;">
                             <div class="product-info">
-                                <h2 class="product-title"><a href="product-details.html">{{ $submission->title }}</a></h2>
+                                <h2 class="product-title"><a
+                                        href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">{{ $submission->title }}</a>
+                                </h2>
                                 <div class="product-brief">
                                     <ul>
                                         @foreach ($submission->authors as $author)
@@ -85,22 +87,26 @@
                                         </a>
                                     </p>
                                 </div>
-                                <div >
-                                    <span>Status Pembayaran: </span>
+                                <div>
+                                    <span>{{ __('front.payment_status') }}: </span>
                                     @if ($submission->payment_status == 'paid')
-                                        <span class="badge badge-success text-white">Sudah Dibayar</span>
+                                        <span
+                                            class="badge badge-success text-white">{{ $submission->payment_status }}</span>
                                     @elseif ($submission->payment_status == 'pending')
-                                        <span class="badge badge-warning text-white">Menunggu Pembayaran</span>
+                                        <span
+                                            class="badge badge-warning text-white">{{ $submission->payment_status }}</span>
                                     @elseif ($submission->payment_status == 'cencelled')
-                                        <span class="badge badge-danger text-white">Dibatalkan</span>
+                                        <span
+                                            class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
                                     @elseif ($submission->payment_status == 'refunded')
-                                        <span class="badge badge-danger text-white">Dikembalikan</span>
+                                        <span
+                                            class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
                                     @endif
                                 </div>
-                                <div >
-                                    <span>Date Published: </span>
+                                <div>
+                                    <span>{{ __('front.date_published') }}: </span>
                                     <span>
-                                        {{ $submission->datePublished ?? "-" }}
+                                        {{ $submission->datePublished ?? '-' }}
                                     </span>
                                 </div>
 
@@ -108,18 +114,19 @@
                                 <div class="product-hover-action">
                                     <ul>
                                         <li>
-                                            <a href="#"  title="Detail">
+                                            <a
+                                                href="{{ route('payment.submission', [$journal->url_path, $submission->submission_id]) }}"title="Detail">
                                                 <i class="far fa-eye"></i>
                                             </a>
                                         </li>
                                         <li>
-                                            <a href="#" title="Pay Now" >
+                                            <a href="{{ route('payment.pay', [$journal->url_path, $submission->submission_id]) }}" title="Pay Now">
                                                 <i class="fas fa-credit-card"></i>
                                             </a>
                                         </li>
                                         <li>
-                                            <a href="{{ $submission->urlPublished }}" title="View Publish" data-toggle="modal"
-                                                data-target="#liton_wishlist_modal">
+                                            <a href="{{ $submission->urlPublished }}" title="View Publish"
+                                                data-toggle="modal" data-target="#liton_wishlist_modal">
                                                 <i class="fas fa-file-pdf"></i>
                                             </a>
                                         </li>

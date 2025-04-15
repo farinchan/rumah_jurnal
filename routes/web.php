@@ -58,8 +58,8 @@ Route::prefix('journal')->name('journal.')->group(function () {
 Route::prefix('payment')->name('payment.')->group(function () {
     Route::get('/', [PaymentController::class, 'index'])->name('index');
     Route::get('/{journal_path}/submission/{submission_id}', [PaymentController::class, 'submission'])->name('submission');
-    Route::get('/{journal_path}/submission/{submission_id}/pay', [PaymentController::class, 'payment'])->name('payment');
-    Route::post('/{journal_path}/submission/{submission_id}/pay', [PaymentController::class, 'paymentStore'])->name('payment.store');
+    Route::get('/{journal_path}/submission/{submission_id}/pay', [PaymentController::class, 'pay'])->name('pay');
+    Route::post('/{journal_path}/submission/{submission_id}/pay', [PaymentController::class, 'payStore'])->name('pay.store');
 });
 
 Route::prefix('contact')->name('contact.')->group(function () {
