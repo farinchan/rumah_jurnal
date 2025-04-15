@@ -30,6 +30,13 @@ class Submission extends Model
         return $this->fullTitle[$this->locale] ?? '';
     }
 
+    public function getFullTitleAttribute()
+    {
+        $fullTitleRaw = json_decode($this->attributes['fullTitle'], true);
+
+        return $fullTitleRaw[$this->attributes['locale']] ?? '';
+    }
+
     public function getAuthorsAttribute()
     {
         $authorsRaw = json_decode($this->attributes['authors'], true);

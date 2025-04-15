@@ -141,6 +141,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
     Route::prefix('finance')->name('finance.')->group(function () {
         Route::get('/verification', [BackFinanceController::class, 'verificationIndex'])->name('verification.index');
+        Route::get('/verification/datatable', [BackFinanceController::class, 'verificationDatatable'])->name('verification.datatable');
         Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');
     });
 

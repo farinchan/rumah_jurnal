@@ -176,6 +176,9 @@
                         </i>
                     </span>
                     <span class="menu-title">Verifikasi</span>
+                    <span class="menu-badge">
+                        <span class="badge badge-warning"> {{ App\Models\Payment::where('payment_status', 'pending')->count() }} </span>
+                    </span>
                 </a>
             </div>
             <div class= "menu-item">
