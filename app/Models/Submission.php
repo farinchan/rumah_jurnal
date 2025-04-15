@@ -25,10 +25,7 @@ class Submission extends Model
         return $this->hasMany(Payment::class, 'submission_id');
     }
 
-    public function getTitleAttribute()
-    {
-        return $this->fullTitle[$this->locale] ?? '';
-    }
+    
 
     public function getFullTitleAttribute()
     {

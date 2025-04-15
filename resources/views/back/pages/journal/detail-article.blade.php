@@ -188,7 +188,7 @@
                                 <td>Judul</td>
                                 <td>:</td>
                                 <td>
-                                    {{ $submission->getTitleAttribute() }}
+                                    {{ $submission->fullTitle }}
                                 </td>
                             </tr>
                             <tr>

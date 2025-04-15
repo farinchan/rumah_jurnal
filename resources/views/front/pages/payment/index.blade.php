@@ -60,7 +60,7 @@
                         <div class="ltn__product-item ltn__product-item-3" style="margin-bottom: 20px;">
                             <div class="product-info">
                                 <h2 class="product-title"><a
-                                        href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">{{ $submission->title }}</a>
+                                        href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">{{ $submission->fullTitle }}</a>
                                 </h2>
                                 <div class="product-brief">
                                     <ul>
@@ -115,12 +115,12 @@
                                     <ul>
                                         <li>
                                             <a
-                                                href="{{ route('payment.submission', [$journal->url_path, $submission->submission_id]) }}"title="Detail">
+                                                href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}"title="Detail">
                                                 <i class="far fa-eye"></i>
                                             </a>
                                         </li>
                                         <li>
-                                            <a href="{{ route('payment.pay', [$journal->url_path, $submission->submission_id]) }}" title="Pay Now">
+                                            <a href="{{ route('payment.pay', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}" title="Pay Now">
                                                 <i class="fas fa-credit-card"></i>
                                             </a>
                                         </li>

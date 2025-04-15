@@ -30,7 +30,7 @@
                                                 <div class="product-info">
                                                     <h2 class="product-title">
                                                         <a
-                                                            href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">{{ $submission->title }}</a>
+                                                            href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">{{ $submission->full_title }}</a>
                                                     </h2>
                                                     <div class="product-brief">
                                                         <ul>

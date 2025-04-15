@@ -63,7 +63,7 @@ class PaymentController extends Controller
         }
 
         $data = [
-            'title' =>  $submission->getTitleAttribute(),
+            'title' =>  $submission->fullTitle,
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -99,7 +99,7 @@ class PaymentController extends Controller
         }
 
         $data = [
-            'title' => __('front.payment') . ' - ' . $submission->getTitleAttribute(),
+            'title' => __('front.payment') . ' - ' . $submission->fullTitle,
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),

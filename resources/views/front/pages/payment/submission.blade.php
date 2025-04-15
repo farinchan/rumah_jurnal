@@ -18,7 +18,7 @@
                                 <div class="modal-product-info shop-details-info pl-0">
 
                                     <h3>
-                                        {{ $submission->getTitleAttribute() }}
+                                        {{ $submission->fullTitle }}
                                     </h3>
 
                                     <ul>
