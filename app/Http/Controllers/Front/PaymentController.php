@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Models\Payment;
+use App\Models\PaymentAccount;
 use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -120,7 +121,8 @@ class PaymentController extends Controller
 
             ],
             'submission' => $submission,
-            'journal' => $journal
+            'journal' => $journal,
+            'payment_accounts' => PaymentAccount::all(),
         ];
 
         return view('front.pages.payment.pay', $data);

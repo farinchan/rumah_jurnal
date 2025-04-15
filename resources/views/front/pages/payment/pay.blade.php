@@ -7,7 +7,8 @@
         <div class="container" id="tabbar">
             <div class="row">
                 <div class="col-lg-12">
-                    <form action="{{ route('payment.pay.store', [$journal?->url_path, $submission?->submission_id]) }}" enctype="multipart/form-data" method="POST">
+                    <form action="{{ route('payment.pay.store', [$journal?->url_path, $submission?->submission_id]) }}"
+                        enctype="multipart/form-data" method="POST">
                         <div class="ltn__tab-menu ltn__tab-menu-3 ltn__tab-menu-top-right-- text-uppercase--- text-center">
                             <div class="nav">
                                 <a class="active show" data-toggle="tab" href="#liton_tab_3_1" id="tab_step_1">1.
@@ -87,33 +88,37 @@
                                             <div class="input-item input-item-textarea ltn__custom-icon">
                                                 <input type="text" name="name" placeholder="*Full Name of Author"
                                                     required value="{{ old('name') }}">
-                                                    @error('name')
-                                                        <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
-                                                            {{ $message }}
-                                                        </div>
-                                                    @enderror
+                                                @error('name')
+                                                    <div class="text-danger"
+                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                        {{ $message }}
+                                                    </div>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="input-item  input-item-textarea ltn__custom-icon">
-                                                <input type="email" name="email" placeholder="*Email Address (Active)" required
-                                                    value="{{ old('email') }}">
-                                                    @error('email')
-                                                        <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
-                                                            {{ $message }}
-                                                        </div>
-                                                    @enderror
+                                                <input type="email" name="email" placeholder="*Email Address (Active)"
+                                                    required value="{{ old('email') }}">
+                                                @error('email')
+                                                    <div class="text-danger"
+                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                        {{ $message }}
+                                                    </div>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="input-item input-item-textarea ltn__custom-icon">
                                                 <input type="tel" name="phone"
-                                                    placeholder="*Phone/WhatsApp Number (Active)" required value="{{ old('phone') }}">
-                                                    @error('phone')
-                                                        <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
-                                                            {{ $message }}
-                                                        </div>
-                                                    @enderror
+                                                    placeholder="*Phone/WhatsApp Number (Active)" required
+                                                    value="{{ old('phone') }}">
+                                                @error('phone')
+                                                    <div class="text-danger"
+                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                        {{ $message }}
+                                                    </div>
+                                                @enderror
                                             </div>
                                         </div>
 
@@ -127,14 +132,46 @@
                             </div>
                             <div class="tab-pane fade" id="liton_tab_3_2">
                                 <div class="ltn__product-tab-content-inner">
+                                    <h6>{{ __('front.payment_information') }}</h6>
+                                    <div>
+                                        {{ __('front.payment_information_text') }}
+                                    </div>
+                                    @forelse ($payment_accounts as $account)
+                                        <div class="ltn__checkout-single-content ltn__coupon-code-wrap">
+                                            <h5>
+                                                Transfer Bank - {{ $account->bank }} <br>
+                                                <a class="ltn__secondary-color">
+                                                    {{ $account->account_number }} - An. {{ $account->account_name }}
+                                                </a>
+                                            </h5>
+                                        </div>
+                                    @empty
+                                        <div class="ltn__checkout-single-content ltn__coupon-code-wrap">
+                                            <h5>
+                                                No Accounts Available
+                                            </h5>
+                                        </div>
+                                    @endforelse
+                                    <div>
+                                        {{ __('front.payment_information_fee') }}
+                                    </div>
+                                    <div class="ltn__checkout-single-content ltn__coupon-code-wrap">
+                                        <h5>
+                                            publcation fee:
+                                            <a style="color: #f00; font-weight: 900">
+                                                @money( $submission->issue->journal->author_fee )
+                                            </a>
+                                        </h5>
+                                    </div>
                                     <h6>{{ __('front.payment_proff') }}</h6>
                                     <input type="file" id="myFile" name="payment_file" class="btn theme-btn-3 mb-10"
                                         accept=".png, .jpg, .jpeg, .pdf"><br>
-                                        @error('payment_file')
-                                            <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
-                                                {{ $message }}
-                                            </div>
-                                        @enderror
+                                    @error('payment_file')
+                                        <div class="text-danger"
+                                            style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                     <p>
                                         <small>* At least 1 image is required for a valid submission. Minimum file size is
                                             10 MB.</small><br>
@@ -149,28 +186,40 @@
                                                     placeholder="Payment Time" required
                                                     value="{{ old('payment_timestamp') }}">
                                                 @error('payment_timestamp')
-                                                    <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                    <div class="text-danger"
+                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
                                                         {{ $message }}
                                                     </div>
                                                 @enderror
                                             </div>
                                         </div>
                                     </div>
-                                    <h6>{{ __('front.payment_information') }}</h6>
+                                    <h6>{{ __('front.payment_data') }}</h6>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="input-item">
                                                 <select class="nice-select" name="payment_method" required>
                                                     <option value="" disabled>*{{ __('front.payment_method') }}
                                                     </option>
-                                                    <option value="Transfer ATM" {{ old('payment_method') == 'Transfer ATM' ? 'selected' : '' }}>Transfer ATM</option>
-                                                    <option value="Mobile Banking" {{ old('payment_method') == 'Mobile Banking' ? 'selected' : '' }}>Mobile Banking</option>
-                                                    <option value="Transfer Teller" {{ old('payment_method') == 'Transfer Teller' ? 'selected' : '' }}>Transfer Teller</option>
-                                                    <option value="Internet Banking" {{ old('payment_method') == 'Internet Banking' ? 'selected' : '' }}>Internet Banking</option>
-                                                    <option value="Lainnya" {{ old('payment_method') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                                                    <option value="Transfer ATM"
+                                                        {{ old('payment_method') == 'Transfer ATM' ? 'selected' : '' }}>
+                                                        Transfer ATM</option>
+                                                    <option value="Mobile Banking"
+                                                        {{ old('payment_method') == 'Mobile Banking' ? 'selected' : '' }}>
+                                                        Mobile Banking</option>
+                                                    <option value="Transfer Teller"
+                                                        {{ old('payment_method') == 'Transfer Teller' ? 'selected' : '' }}>
+                                                        Transfer Teller</option>
+                                                    <option value="Internet Banking"
+                                                        {{ old('payment_method') == 'Internet Banking' ? 'selected' : '' }}>
+                                                        Internet Banking</option>
+                                                    <option value="Lainnya"
+                                                        {{ old('payment_method') == 'Lainnya' ? 'selected' : '' }}>Lainnya
+                                                    </option>
                                                 </select>
                                                 @error('payment_method')
-                                                    <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                    <div class="text-danger"
+                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
                                                         {{ $message }}
                                                     </div>
                                                 @enderror
@@ -179,9 +228,11 @@
                                         <div class="col-md-6">
                                             <div class="input-item input-item-textarea ltn__custom-icon">
                                                 <input type="number" name="payment_amount"
-                                                    placeholder="*Transfer Amount (IDR)" required value="{{ old('payment_amount') }}">
+                                                    placeholder="*Transfer Amount (IDR)" required
+                                                    value="{{ old('payment_amount') }}">
                                                 @error('payment_amount')
-                                                    <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                    <div class="text-danger"
+                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
                                                         {{ $message }}
                                                     </div>
                                                 @enderror
@@ -190,9 +241,11 @@
                                         <div class="col-md-6">
                                             <div class="input-item input-item-textarea ltn__custom-icon">
                                                 <input type="text" name="payment_account_name"
-                                                    placeholder="*Account Holder Name" required value="{{ old('payment_account_name') }}">
+                                                    placeholder="*Account Holder Name" required
+                                                    value="{{ old('payment_account_name') }}">
                                                 @error('payment_account_name')
-                                                    <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                    <div class="text-danger"
+                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
                                                         {{ $message }}
                                                     </div>
                                                 @enderror
@@ -201,9 +254,11 @@
                                         <div class="col-md-6">
                                             <div class="input-item input-item-textarea ltn__custom-icon">
                                                 <input type="text" name="payment_account_number"
-                                                    placeholder="*Sender's Account Number" required value="{{ old('payment_account_number') }}">
+                                                    placeholder="*Sender's Account Number" required
+                                                    value="{{ old('payment_account_number') }}">
                                                 @error('payment_account_number')
-                                                    <div class="text-danger" style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                    <div class="text-danger"
+                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
                                                         {{ $message }}
                                                     </div>
                                                 @enderror
@@ -229,13 +284,15 @@
                                         <div class="col-md-12">
                                             <div class="card">
                                                 <div class="card-body">
-                                                    <h5 class="card-title">{{ __('front.payment_declaration_title') }}</h5>
+                                                    <h5 class="card-title">{{ __('front.payment_declaration_title') }}
+                                                    </h5>
                                                     <p class="card-text">
                                                         {{ __('front.payment_declaration_text') }}
                                                     </p>
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox"
-                                                            id="declarationCheck" required checked onclick="return false;">
+                                                            id="declarationCheck" required checked
+                                                            onclick="return false;">
                                                         <label class="form-check-label" for="declarationCheck">
                                                             {{ __('front.payment_declaration_checkbox') }}
                                                         </label>
@@ -263,7 +320,6 @@
         </div>
     </div>
     <!-- APPOINTMENT AREA END -->
-
 @endsection
 
 @section('scripts')

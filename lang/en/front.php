@@ -67,8 +67,12 @@ return [
     'finalization' => 'Finalization',
     'article' => 'Article',
     'author_information' => 'Author Information',
+
     'payment_proff' => 'Payment Proof',
     'payment_information' => 'Payment Information',
+    'payment_information_text' => 'Please make the payment for your article publication fee to the following account',
+    'payment_information_fee' => 'Please make the payment for your article publication fee of',
+    'payment_data' => 'Payment Data',
     'payment_timestamp' => 'Payment Date',
     'payment_method' => 'Payment Method',
     'payment_declaration_title' => 'Payment Declaration',
