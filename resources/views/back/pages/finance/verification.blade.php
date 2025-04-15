@@ -87,11 +87,11 @@
                     <thead>
                         <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
 
-                            <th class="text-start">ID</th>
-                            <th class="text-start ">Submission</th>
-                            <th class="text-start ">journal</th>
-                            <th class="text-start ">Penulis/pembayar</th>
-                            <th class="text-start ">Pembayaran</th>
+                            <th class="text-start min-w-250px">Pembayaran</th>
+                            <th class="text-start min-w-350px">Submission</th>
+                            <th class="text-start min-w-200px">journal</th>
+                            <th class="text-start">Status</th>
+                            <th class="text-end min-w-100px">Action</th>
                         </tr>
                     </thead>
                     <tbody class="fw-semibold text-gray-600">
@@ -119,8 +119,8 @@
                 }
             },
             columns: [{
-                    data: 'id',
-                    name: 'id',
+                    data: 'payment',
+                    name: 'payment',
                     orderable: false,
                     searchable: false
                 },
@@ -133,12 +133,12 @@
                     name: 'journal'
                 },
                 {
-                    data: 'author',
-                    name: 'author'
-                },
-                {
                     data: 'status',
                     name: 'status'
+                },
+                {
+                    data: 'action',
+                    name: 'action'
                 },
 
             ],
@@ -147,7 +147,7 @@
                 $(row).find('td').eq(1).addClass('text-start pe-0');
                 $(row).find('td').eq(2).addClass('text-start pe-0');
                 $(row).find('td').eq(3).addClass('text-start pe-0');
-                $(row).find('td').eq(4).addClass('text-start pe-0');
+                $(row).find('td').eq(4).addClass('text-end ');
 
             }
         });

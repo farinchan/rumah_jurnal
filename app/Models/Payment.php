@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Payment extends Model
 {
@@ -16,5 +17,10 @@ class Payment extends Model
     public function submission()
     {
         return $this->belongsTo(Submission::class);
+    }
+
+    public function paymentProofs()
+    {
+        return Storage::url($this->payment_file)?? '';
     }
 }

@@ -7,6 +7,8 @@ use App\Models\Journal;
 use App\Models\Payment;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class FinanceController extends Controller
 {
@@ -70,15 +72,23 @@ class FinanceController extends Controller
 
         return datatables()
             ->of($payment)
-            ->addColumn('id', function ($payment) {
-                return '<span class="fw-bold">' . $payment->submission->submission_id . '</span>';;
+            ->addColumn('payment', function ($payment) {
+                return '
+                        <div class="d-flex flex-column">
+                            <span class="text-gray-800 mb-1">' . $payment->payment_timestamp->format('d M Y H:i:s') . '</span>
+                            <span>Nama: ' . $payment->name . '</span>
+                            <span>Email:  ' . $payment->email . '</span>
+                            <span>phone: ' . $payment->phone . '</span>
+                        </div>
+                ';
             })
             ->addColumn('submission', function ($payment) {
                 return '
                         <div class="d-flex flex-column">
                             <a href="#"
-                                class="text-gray-800 text-hover-primary mb-1">' . $payment->submission->authorsString . '</a>
-                            <span>' . $payment->submission->fullTitle . '</span>
+                                class="text-gray-800 text-hover-primary"> Submission ID: ' . $payment->submission->submission_id . '</a>
+                                <span class="text-gray-800 ">' . $payment->submission->fullTitle . '</span>
+                            <span >' . $payment->submission->authorsString . '</span>
                         </div>
                 ';
             })
@@ -92,34 +102,85 @@ class FinanceController extends Controller
                         </div>
                 ';
             })
-            ->addColumn('author', function ($payment) {
+            ->addColumn('status', function ($payment) {
+                $status_temp = '';
+                if ($payment->payment_status == 'pending') {
+                    $status_temp = '<span class="badge badge-light-warning text-center">Pending</span>';
+                } elseif ($payment->payment_status == 'accepted') {
+                    $status_temp = '<span class="badge badge-light-success">Accepted</span>';
+                } elseif ($payment->payment_status == 'rejected') {
+                    $status_temp = '<span class="badge badge-light-danger">Rejected</span>';
+                } else {
+                    $status_temp = '<span class="badge badge-light-primary">' . $payment->payment_status . '</span>';
+                }
+                return $status_temp;
+            })
+            ->addColumn('action', function ($payment) {
                 return '
-                        <div class="d-flex flex-column">
-                            <a href="#"
-                                class="text-gray-800 text-hover-primary mb-1">' . $payment->name . '</a>
-                            <span> Email:' . $payment->email . '</span>
-                            <span> Phone:' . $payment->phone . '</span>
-                        </div>
+                    <a href="' . route("back.finance.verification.detail", $payment->id) . '" class="btn btn-sm btn-light-primary my-1">
+                        <i class="ki-duotone ki-eye fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                            <span class="path3"></span>
+                        </i> Detail
+                    </a>
                 ';
             })
-            ->addColumn('status', function ($payment) {
-                if ($payment->payment_status == 'pending') {
-                    return '<span class="badge badge-light-warning">Pending</span>';
-                } elseif ($payment->payment_status == 'accepted') {
-                    return '<span class="badge badge-light-success">Accepted</span>';
-                } elseif ($payment->payment_status == 'rejected') {
-                    return '<span class="badge badge-light-danger">Rejected</span>';
-                } else {
-                    return '<span class="badge badge-light-primary">' . $payment->payment_status . '</span>';
-                }
-            })
             ->rawColumns([
-                'id',
+                'payment',
                 'submission',
                 'journal',
-                'author',
-                'status'
+                'status',
+                'action'
             ])
             ->make(true);
+    }
+
+    public function verificationDetail($id)
+    {
+        $data = [
+            'title' => 'Detail Pembayaran',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Finance',
+                    'link' => route('back.finance.verification.index')
+                ],
+                [
+                    'name' => 'Detail Pembayaran',
+                    'link' => route('back.finance.verification.detail', $id)
+                ]
+            ],
+            'payment' => Payment::with(['submission.issue.journal'])->findOrFail($id),
+        ];
+        return view('back.pages.finance.verification-show', $data);
+    }
+    public function verificationUpdate(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'payment_status' => 'required|in:pending,accepted,rejected',
+            'note' => 'nullable|string',
+        ],
+            [
+                'payment_status.required' => 'Status Pembayaran harus diisi',
+                'payment_status.in' => 'Status Pembayaran tidak valid',
+                'note.string' => 'Catatan harus berupa teks',
+                'note.max' => 'Catatan maksimal 255 karakter',
+            ]
+        );
+        if ($validator->fails()) {
+            Alert::error('Gagal', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        $payment = Payment::findOrFail($id);
+        $payment->update([
+            'payment_status' => $request->payment_status,
+            'note' => $request->note,
+        ]);
+        Alert::success('Berhasil', 'Pembayaran berhasil diperbarui');
+        return redirect()->route('back.finance.verification.index')->with('success', 'Pembayaran berhasil diperbarui');
     }
 }
