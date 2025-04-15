@@ -253,6 +253,15 @@
                             <span class="menu-title">Pengguna</span>
                         </a>
                     </div>
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.master.payment-account.index')) active @endif"
+                            href="{{ route('back.master.payment-account.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Rekening Pembayaran</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 

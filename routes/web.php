@@ -163,6 +163,11 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
             Route::put('/edit/{id}', [BackUserController::class, 'update'])->name('update');
             Route::delete('/delete/{id}', [BackUserController::class, 'destroy'])->name('destroy');
         });
+
+        Route::prefix('payment-account')->name('payment-account.')->group(function () {
+            Route::get('/', [BackMasterDataController::class, 'paymentAccount'])->name('index');
+            Route::put('/update', [BackMasterDataController::class, 'paymentAccountUpdate'])->name('update');
+        });
     });
 
     Route::prefix('message')->name('message.')->group(function () {
