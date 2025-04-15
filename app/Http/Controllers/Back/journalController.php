@@ -119,6 +119,43 @@ class journalController extends Controller
         return redirect()->route('back.journal.index', $journal_path);
     }
 
+    public function dashboardIndex($journal_path, $issue_id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $data = [
+            'title' => "Vol. " . $issue->volume . " No. " . $issue->number . " (" . $issue->year . "): " . $issue->title,
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => $journal->title,
+                    'link' => route('back.journal.index', $journal_path)
+                ],
+                [
+                    'name' => $issue->title,
+                    'link' => route('back.journal.index', $journal_path)
+                ]
+            ],
+            'journal_path' => $journal_path,
+            'journal' => $journal,
+            'issue' => $issue,
+            // 'submissions' => $issue->submissions->pluck('submission_id'),
+        ];
+        // return response()->json($data);
+        return view('back.pages.journal.detail-dashboard', $data);
+    }
+
     public function articleIndex($journal_path, $issue_id)
     {
         $journal = Journal::where('url_path', $journal_path)->first();
