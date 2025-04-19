@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ route('payment.pay', [$journal->url_path, $submission->submission_id]) }}">
     <link rel="canonical" href="{{ route('payment.pay', [$journal->url_path, $submission->submission_id]) }}">
-    <meta property="og:image" content="{{ Storage::url($meta['favicon']) }}">
+    <meta property="og:image" content="{{ $meta['favicon'] }}">
 @endsection
 
 @section('content')
