@@ -9,6 +9,7 @@
                 <div class="col-lg-8">
                     <div class="ltn__blog-details-wrap">
                         <div class="ltn__page-details-inner ltn__blog-details-inner">
+                            <img src="{{ $news->getThumbnail() }}" class="mb-3" alt="#" style="width: 100%;">
                             <div class="ltn__blog-meta">
                                 <ul>
                                     <li class="ltn__blog-category">
