@@ -15,7 +15,7 @@ use App\Http\Controllers\Back\AnnouncementController as BackAnnouncementControll
 use App\Http\Controllers\Back\EventController as BackEventController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
 use App\Http\Controllers\Back\WelcomeSpeechController as BackWelcomeSpeechController;
-use App\Http\Controllers\Back\JournalController as BackJournalController;
+use App\Http\Controllers\Back\journalController as BackJournalController;
 use App\Http\Controllers\Back\FinanceController as BackFinanceController;
 use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
 use App\Http\Controllers\Back\UserController as BackUserController;
