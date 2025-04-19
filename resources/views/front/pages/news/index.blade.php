@@ -24,7 +24,7 @@
                         @forelse ($news as $item)
                             <div class="ltn__blog-item ltn__blog-item-5">
                                 <div class="ltn__blog-img">
-                                    <a href="blog-details.html"><img src="{{ $item->getThumbnail() }}" alt="Image"></a>
+                                    <a href="{{ route('news.detail', $item->slug) }}"><img src="{{ $item->getThumbnail() }}" alt="Image"></a>
                                 </div>
                                 <div class="ltn__blog-brief">
                                     <div class="ltn__blog-meta">

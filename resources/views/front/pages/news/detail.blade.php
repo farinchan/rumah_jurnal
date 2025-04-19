@@ -388,3 +388,21 @@
     </div>
     <!-- BLOG AREA END -->
 @endsection
+
+@section('scripts')
+<script>
+    $.ajax({
+      url: "{{ route('news.visit') }}",
+      data: {
+          news_id: {{ $news->id }}
+      },
+      type: "GET",
+      success: function(response) {
+          console.log(response);
+      },
+      error: function(error) {
+          console.log(error);
+      }
+  });
+</script>
+@endsection

@@ -55,6 +55,8 @@ Route::prefix('news')->name('news.')->group(function () {
 
     Route::get('/category/{slug}', [NewsController::class, 'category'])->name('category');
     Route::post('/comment', [NewsController::class, 'comment'])->name('comment');
+
+    Route::get('/visit/alt', [NewsController::class, 'visit'])->name('visit');
 });
 
 Route::prefix('journal')->name('journal.')->group(function () {
