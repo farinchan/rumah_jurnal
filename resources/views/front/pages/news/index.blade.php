@@ -1,4 +1,17 @@
 @extends('front.app')
+@section('seo')
+    <title>{{ $meta['description'] }}</title>
+    <meta name="description" content="{{ $meta['description'] }}">
+    <meta name="keywords" content="{{ $meta['keywords'] }}">
+    <meta name="author" content="UIN Sjech M.Djamil Djambek Bukittinggi">
+
+    <meta property="og:title" content="{{ $meta['title'] }}">
+    <meta property="og:description" content="{{ $meta['description'] }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ route('news.index') }}">
+    <link rel="canonical" href="{{ route('news.index') }}">
+    <meta property="og:image" content="{{ Storage::url($meta['favicon']) }}">
+@endsection
 
 @section('content')
     @include('front.partials.breadcrumb')
@@ -11,7 +24,7 @@
                         @forelse ($news as $item)
                             <div class="ltn__blog-item ltn__blog-item-5">
                                 <div class="ltn__blog-img">
-                                    <a href="blog-details.html"><img src="{{ $item->getThumbnail() }}" alt="Image"></a>
+                                    <a href="{{ route('news.detail', $item->slug) }}"><img src="{{ $item->getThumbnail() }}" alt="Image"></a>
                                 </div>
                                 <div class="ltn__blog-brief">
                                     <div class="ltn__blog-meta">

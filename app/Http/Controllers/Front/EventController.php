@@ -15,6 +15,12 @@ class EventController extends Controller
 
         $data = [
             'title' => __('front.agenda') . ' | ' . $setting_web->name,
+            'meta' => [
+                'title' => __('front.agenda') . ' | ' . $setting_web->name,
+                'description' => strip_tags($setting_web->about),
+                'keywords' => $setting_web->name . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -38,7 +44,13 @@ class EventController extends Controller
         $setting_web = SettingWebsite::first();
         $event = Event::where('slug', $slug)->first();
         $data = [
-            'title' => $event->title . ' | ' . $setting_web->name,
+            'title' => $event->title,
+            'meta' => [
+                'title' => $event->title . ' | ' . $setting_web->name,
+                'description' => strip_tags($event->content),
+                'keywords' => $setting_web->name . ', ' . $event->title .', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $event->image ?? $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -49,7 +61,7 @@ class EventController extends Controller
                     'link' => route('event.index')
                 ],
                 [
-                    'name' => $event->title,
+                    'name' => 'Detail',
                     'link' => route('event.show', $event->slug)
                 ]
             ],

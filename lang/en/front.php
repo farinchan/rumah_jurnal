@@ -78,4 +78,9 @@ return [
     'payment_declaration_title' => 'Payment Declaration',
     'payment_declaration_text' => 'I hereby declare that the data I have entered is correct and I have made the payment for the publication fee of this article. I understand that this fee is non-refundable and will be used to support the publication process of my article.',
     'payment_declaration_checkbox' => 'I agree with the above statement',
+
+    'login' => 'Login',
+    'login_title' => 'Login <br> To Your Account',
+    'sign_in' => 'Sign In',
+    'forgot_password' => 'Forgot Password?',
 ];

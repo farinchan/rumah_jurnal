@@ -30,6 +30,8 @@ Route::get('generate-storage', function (){
 Route::get('/locale/{locale}', LocaleController::class)->name('locale.change');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/visit', [HomeController::class, 'vistWebsite'])->name('visit.ajax');
+
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
@@ -53,6 +55,8 @@ Route::prefix('news')->name('news.')->group(function () {
 
     Route::get('/category/{slug}', [NewsController::class, 'category'])->name('category');
     Route::post('/comment', [NewsController::class, 'comment'])->name('comment');
+
+    Route::get('/visit/alt', [NewsController::class, 'visit'])->name('visit');
 });
 
 Route::prefix('journal')->name('journal.')->group(function () {

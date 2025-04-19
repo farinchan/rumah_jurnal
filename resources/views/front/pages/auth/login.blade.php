@@ -1,4 +1,17 @@
 @extends('front.app')
+@section('seo')
+    <title>{{ $meta['description'] }}</title>
+    <meta name="description" content="{{ $meta['description'] }}">
+    <meta name="keywords" content="{{ $meta['keywords'] }}">
+    <meta name="author" content="UIN Sjech M.Djamil Djambek Bukittinggi">
+
+    <meta property="og:title" content="{{ $meta['title'] }}">
+    <meta property="og:description" content="{{ $meta['description'] }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ route('contact.index') }}">
+    <link rel="canonical" href="{{ route('contact.index') }}">
+    <meta property="og:image" content="{{ Storage::url($meta['favicon']) }}">
+@endsection
 
 @section('content')
     @include('front.partials.breadcrumb')
@@ -9,9 +22,9 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title-area text-center">
-                        <h1 class="section-title">Masuk <br> Ke Akun Anda </h1>
+                        <h1 class="section-title">{!! __('front.login_title') !!}</h1>
                         <p>
-                            Rumah Jurnal UIN Sjech M. Djamil Jambek Bukittinggi
+                            {{ $setting_web->name }}
                         </p>
                     </div>
                 </div>
@@ -36,10 +49,10 @@
                                 @enderror
                             </div>
                             <div class="btn-wrapper mt-0">
-                                <button class="theme-btn-1 btn btn-block" type="submit">SIGN IN</button>
+                                <button class="theme-btn-1 btn btn-block" type="submit">{{ __('front.sign_in') }}</button>
                             </div>
                             <div class="go-to-btn mt-20">
-                                <a href="#"><small>Lupa Password?</small></a>
+                                <a href="#"><small>{{ __('front.forgot_password') }}</small></a>
                             </div>
                         </form>
                     </div>
