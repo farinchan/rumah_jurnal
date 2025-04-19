@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ route('journal.detail', $journal->url_path) }}">
     <link rel="canonical" href="{{ route('journal.detail', $journal->url_path) }}">
-    <meta property="og:image" content="{{ Storage::url($meta['favicon']) }}">
+    <meta property="og:image" content="{{ $meta['favicon'] }}">
 @endsection
 
 @section('content')

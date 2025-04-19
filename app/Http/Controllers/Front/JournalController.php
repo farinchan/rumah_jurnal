@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Models\SettingWebsite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class JournalController extends Controller
 {
@@ -48,7 +49,7 @@ class JournalController extends Controller
                 'title' => $journal->title . ' | ' . $setting_web->name,
                 'description' => strip_tags($journal->description),
                 'keywords' => $setting_web->name . ', ' . $journal->title . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
-                'favicon' => $journal->getJournalThumbnail() ?? $setting_web->favicon
+                'favicon' => $journal->getJournalThumbnail() ?? Storage::url($setting_web->favicon)
             ],
             'breadcrumbs' => [
                 [

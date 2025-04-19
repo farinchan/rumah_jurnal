@@ -9,6 +9,7 @@ use App\Models\PaymentAccount;
 use App\Models\SettingWebsite;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
@@ -76,7 +77,7 @@ class PaymentController extends Controller
                 'title' => $submission->fullTitle . ' | ' . $setting_web->name,
                 'description' => strip_tags($submission->abstract),
                 'keywords' => $setting_web->name . ', ' . $submission->fullTitle . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
-                'favicon' => $submission?->issue?->journal?->getJournalThumbnail() ?? $setting_web->favicon
+                'favicon' => $submission?->issue?->journal?->getJournalThumbnail() ?? Storage::url($setting_web->favicon)
             ],
             'breadcrumbs' => [
                 [
@@ -118,7 +119,7 @@ class PaymentController extends Controller
                 'title' => __('front.payment') . ' - ' . $submission->fullTitle . ' | ' . $setting_web->name,
                 'description' => strip_tags($submission->abstract),
                 'keywords' => $setting_web->name . ', ' . $submission->fullTitle . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
-                'favicon' => $submission?->issue?->journal?->getJournalThumbnail() ?? $setting_web->favicon
+                'favicon' => $submission?->issue?->journal?->getJournalThumbnail() ?? Storage::url($setting_web->favicon)
             ],
             'breadcrumbs' => [
                 [
