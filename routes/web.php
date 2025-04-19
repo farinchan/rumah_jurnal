@@ -22,6 +22,11 @@ use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
 
+Route::get('generate-storage', function (){
+    \Illuminate\Support\Facades\Artisan::call('storage:link');
+    echo 'ok';
+});
+
 Route::get('/locale/{locale}', LocaleController::class)->name('locale.change');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
