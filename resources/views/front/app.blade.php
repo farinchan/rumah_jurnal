@@ -6,23 +6,28 @@
 @endphp
 
 <head>
+    <title>
+        @isset($title)
+            {{ $title }} |
+        @endisset
+        {{ $setting_web->name }}
+    </title>
+    @yield('seo')
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>{{$setting_web->name}} @if(isset($title)) - {{$title}} @endif</title>
-    <meta name="robots" content="noindex, follow" />
-    <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+
     <!-- Place favicon.png in the root directory -->
-    <link rel="shortcut icon" href="{{asset("front/img/favicon.png")}}" type="image/x-icon" />
+    <link rel="shortcut icon" href="{{ asset('front/img/favicon.png') }}" type="image/x-icon" />
     <!-- Font Icons css -->
-    <link rel="stylesheet" href="{{asset("front/css/font-icons.css")}}">
+    <link rel="stylesheet" href="{{ asset('front/css/font-icons.css') }}">
     <!-- plugins css -->
-    <link rel="stylesheet" href="{{asset("front/css/plugins.css")}}">
+    <link rel="stylesheet" href="{{ asset('front/css/plugins.css') }}">
     <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="{{asset("front/css/style.css")}}">
+    <link rel="stylesheet" href="{{ asset('front/css/style.css') }}">
     <!-- Responsive css -->
-    <link rel="stylesheet" href="{{asset("front/css/responsive.css")}}">
+    <link rel="stylesheet" href="{{ asset('front/css/responsive.css') }}">
     @yield('styles')
 </head>
 
@@ -43,7 +48,7 @@
         @yield('content')
 
 
-     @include('front.layouts.footer')
+        @include('front.layouts.footer')
 
 
     </div>
@@ -61,9 +66,9 @@
     <!-- preloader area end --> --}}
 
     <!-- All JS Plugins -->
-    <script src="{{asset("front/js/plugins.js")}} "></script>
+    <script src="{{ asset('front/js/plugins.js') }} "></script>
     <!-- Main JS -->
-    <script src="{{asset("front/js/main.js")}}"></script>
+    <script src="{{ asset('front/js/main.js') }}"></script>
     @include('sweetalert::alert')
 
     @yield('scripts')

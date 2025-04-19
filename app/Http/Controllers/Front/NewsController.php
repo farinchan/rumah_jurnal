@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\News;
 use App\Models\NewsCategory;
+use App\Models\SettingWebsite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -13,6 +14,8 @@ class NewsController extends Controller
 {
     public function index(Request $request)
     {
+        $setting_web = SettingWebsite::first();
+
         $search = $request->q;
         $news = News::where('title', 'like', "%$search%")
             ->with(['category', 'comments', 'user', 'viewers'])
@@ -20,7 +23,13 @@ class NewsController extends Controller
             ->paginate(6);
         $news->appends(['q' => $search]);
         $data = [
-            'title' => __('front.news'),
+            'title' => __('front.news') . ' | ' . $setting_web->name,
+            'meta' => [
+                'title' => __('front.news') . ' | ' . $setting_web->name,
+                'description' => strip_tags($setting_web->about),
+                'keywords' => $setting_web->name . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -41,9 +50,16 @@ class NewsController extends Controller
 
     public function detail($slug)
     {
+        $setting_web = SettingWebsite::first();
         $news = News::where('slug', $slug)->firstOrFail();
         $data = [
             'title' => $news->title,
+            'meta' => [
+                'title' => $news->title . ' | ' . $setting_web->name,
+                'description' => strip_tags($news->content),
+                'keywords' => $setting_web->name . ', ' . $news->title . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $news->thumbnail ?? $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -69,10 +85,17 @@ class NewsController extends Controller
 
     public function category($slug)
     {
+        $setting_web = SettingWebsite::first();
         $category = NewsCategory::where('slug', $slug)->firstOrFail();
         $news = $category->news()->latest()->paginate(6);
         $data = [
             'title' => $category->name,
+            'meta' => [
+                'title' => $category->name . ' | ' . $setting_web->name,
+                'description' => strip_tags($setting_web->about),
+                'keywords' => $setting_web->name . ', ' . $category->name . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),

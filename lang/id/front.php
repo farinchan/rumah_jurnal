@@ -78,4 +78,8 @@ return [
     'payment_declaration_text' => 'Dengan ini saya menyatakan bahwa data yang saya masukkan telah benar dan saya telah melakukan pembayaran biaya publikasi untuk artikel ini. Saya memahami bahwa biaya ini tidak dapat dikembalikan dan akan digunakan untuk mendukung proses penerbitan artikel saya.',
     'payment_declaration_checkbox' => 'Saya setuju dengan pernyataan di atas',
 
+    'login' => 'Masuk',
+    'login_title' => 'Masuk <br> Ke Akun Anda',
+    'sign_in' => 'Masuk',
+    'forgot_password' => 'Lupa Password?',
 ];

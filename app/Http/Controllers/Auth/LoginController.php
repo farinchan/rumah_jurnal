@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\SettingWebsite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -12,7 +13,27 @@ class LoginController extends Controller
 {
     public function index()
     {
-        $data = [];
+        $setting_web = SettingWebsite::first();
+        $data = [
+            'title' => __('front.login') . ' | ' . $setting_web->name,
+            'meta' => [
+                'title' => __('front.login') . ' | ' . $setting_web->name,
+                'description' => strip_tags($setting_web->about),
+                'keywords' => $setting_web->name . ', Contact Us, Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $setting_web->favicon
+            ],
+            'breadcrumbs' =>  [
+                [
+                    'name' => __('front.home'),
+                    'link' => route('home')
+                ],
+                [
+                    'name' => __('front.login'),
+                    'link' => route('contact.index')
+                ]
+            ],
+            'setting_web' => SettingWebsite::first()
+        ];
         return view('front.pages.auth.login', $data);
     }
 

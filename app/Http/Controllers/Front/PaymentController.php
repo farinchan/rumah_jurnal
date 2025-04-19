@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
+use App\Models\SettingWebsite;
 use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -18,9 +19,15 @@ class PaymentController extends Controller
     {
         $journal_id = $request->journal_id;
         $q = $request->q;
-
+        $setting_web = SettingWebsite::first();
         $data = [
-            'title' => __('front.payment'),
+            'title' => __('front.payment') . ' | ' . $setting_web->name,
+            'meta' => [
+                'title' => __('front.payment') . ' | ' . $setting_web->name,
+                'description' => strip_tags($setting_web->about),
+                'keywords' => $setting_web->name . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -62,9 +69,15 @@ class PaymentController extends Controller
         if ($submission->issue->journal->url_path != $journal->url_path) {
             abort(404);
         }
-
+        $setting_web = SettingWebsite::first();
         $data = [
             'title' =>  $submission->fullTitle,
+            'meta' => [
+                'title' => $submission->fullTitle . ' | ' . $setting_web->name,
+                'description' => strip_tags($submission->abstract),
+                'keywords' => $setting_web->name . ', ' . $submission->fullTitle . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $submission?->issue?->journal?->getJournalThumbnail() ?? $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -98,9 +111,15 @@ class PaymentController extends Controller
         if ($submission->issue->journal->url_path != $journal->url_path) {
             abort(404);
         }
-
+        $setting_web = SettingWebsite::first();
         $data = [
             'title' => __('front.payment') . ' - ' . $submission->fullTitle,
+            'meta' => [
+                'title' => __('front.payment') . ' - ' . $submission->fullTitle . ' | ' . $setting_web->name,
+                'description' => strip_tags($submission->abstract),
+                'keywords' => $setting_web->name . ', ' . $submission->fullTitle . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $submission?->issue?->journal?->getJournalThumbnail() ?? $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),

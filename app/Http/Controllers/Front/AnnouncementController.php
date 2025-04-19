@@ -15,6 +15,12 @@ class AnnouncementController extends Controller
 
         $data = [
             'title' => __('front.announcement') . ' | ' . $setting_web->name,
+            'meta' => [
+                'title' => __('front.announcement') . ' | ' . $setting_web->name,
+                'description' => strip_tags($setting_web->about),
+                'keywords' => $setting_web->name . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -38,7 +44,13 @@ class AnnouncementController extends Controller
         $setting_web = SettingWebsite::first();
         $announcement = Announcement::where('slug', $slug)->first();
         $data = [
-            'title' => $announcement->title . ' | ' . $setting_web->name,
+            'title' => $announcement->title,
+            'meta' => [
+                'title' => $announcement->title . ' | ' . $setting_web->name,
+                'description' => strip_tags($announcement->content),
+                'keywords' => $setting_web->name . ', ' . $announcement->title .', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $announcement->image ?? $setting_web->favicon
+            ],
             'breadcrumbs' => [
                 [
                     'name' => __('front.home'),
@@ -49,7 +61,7 @@ class AnnouncementController extends Controller
                     'link' => route('announcement.index')
                 ],
                 [
-                    'name' => $announcement->title,
+                    'name' => 'Detail',
                     'link' => route('announcement.show', $announcement->slug)
                 ]
             ],

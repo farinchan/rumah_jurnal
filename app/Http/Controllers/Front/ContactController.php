@@ -13,8 +13,15 @@ class ContactController extends Controller
 {
     public function index()
     {
+        $setting_web = SettingWebsite::first();
         $data = [
-            'title' => __('front.contact_us'),
+            'title' => __('front.contact_us') . ' | ' . $setting_web->name,
+            'meta' => [
+                'title' => __('front.contact_us') . ' | ' . $setting_web->name,
+                'description' => strip_tags($setting_web->about),
+                'keywords' => $setting_web->name . ', Contact Us, Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'favicon' => $setting_web->favicon
+            ],
             'breadcrumbs' =>  [
                 [
                     'name' => __('front.home'),
