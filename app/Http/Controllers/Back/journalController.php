@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 
-class journalController extends Controller
+class JournalController extends Controller
 {
     public function index($journal_path)
     {
