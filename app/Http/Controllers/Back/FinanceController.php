@@ -180,6 +180,18 @@ class FinanceController extends Controller
             'payment_status' => $request->payment_status,
             'note' => $request->note,
         ]);
+
+        if ($request->payment_status == 'accepted') {
+            $submission = Submission::findOrFail($payment->submission_id);
+            $submission->update([
+                'payment_status' => 'paid',
+            ]);
+        } else{
+            $submission = Submission::findOrFail($payment->submission_id);
+            $submission->update([
+                'payment_status' => 'pending',
+            ]);
+        }
         Alert::success('Berhasil', 'Pembayaran berhasil diperbarui');
         return redirect()->route('back.finance.verification.index')->with('success', 'Pembayaran berhasil diperbarui');
     }
