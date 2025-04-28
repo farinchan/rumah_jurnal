@@ -47,7 +47,7 @@
                                                 <span class="text-bold text-gray-800">
                                                     {{ $reviewer->email }}
                                                 </span>
-                                                
+
 
                                                 <a class="badge badge-light-success cursor-pointer my-1">
                                                     <i class="ki-duotone ki-send fs-5 text-success me-3">
@@ -295,7 +295,7 @@
                         </div>
                         <!--end::Close-->
                     </div>
-                    <form action="#" method="POST">
+                    <form action="{{ route('back.email.send-mail') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="modal-body">
                             <div class="mb-5">
@@ -310,9 +310,42 @@
                             </div>
                             <div class="mb-5">
                                 <label class="form-label">Body</label>
-                                <textarea class="form-control form-control-solid" rows="5" placeholder="Body" id="kt_docs_ckeditor_classic"
-                                    name="body">
+                                <textarea class="form-control form-control-solid" rows="5" placeholder="Body"
+                                    id="kt_docs_ckeditor_classic_{{ $reviewer->id }}" name="body">
+                                    <p>
+                                        Yth. <b>{{ $reviewer->name }}</b><br>
+                                        {{ $reviewer->affiliation }}
+                                    </p>
+                                    <br>
+                                    <hr>
+                                        <table border="0" cellpadding="5" cellspacing="0">
+                                            <tr>
+                                                <td colspan="3">
+                                                    <b>{{ $setting_web->name }}</b>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Alamat</td>
+                                                <td>:</td>
+                                                <td>{{ $setting_web->address }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Email</td>
+                                                <td>:</td>
+                                                <td>{{ $setting_web->email }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Website</td>
+                                                <td>:</td>
+                                                <td>{{ request()->getSchemeAndHttpHost() }}</td>
+                                            </tr>
+                                        </table>
                                 </textarea>
+                            </div>
+                            <div class="mb-5">
+                                <label class="form-label">Lampiran</label>
+                                <input type="file" class="form-control form-control-solid" name="attachment"
+                                    id="attachment" accept=".pdf" />
                             </div>
 
                         </div>
@@ -435,16 +468,18 @@
             });
         }
     </script>
-    <script src="{{ asset("back/plugins/custom/ckeditor/ckeditor-classic.bundle.js") }}"></script>
+    <script src="{{ asset('back/plugins/custom/ckeditor/ckeditor-classic.bundle.js') }}"></script>
 
-    <script>
-        ClassicEditor
-            .create(document.querySelector('#kt_docs_ckeditor_classic'))
-            .then(editor => {
-                console.log(editor);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    </script>
+    @foreach ($issue->reviewers as $reviewer)
+        <script>
+            ClassicEditor
+                .create(document.querySelector('#kt_docs_ckeditor_classic_' + {{ $reviewer->id }}))
+                .then(editor => {
+                    console.log(editor);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        </script>
+    @endforeach
 @endsection

@@ -28,10 +28,13 @@
                             <div class="fw-semibold text-gray-500  ">Path: {{ $journal->url_path }}</div>
                             <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $journal->onlineIssn }} | p-ISSN:
                                 {{ $journal->printIssn }}</div>
-                            <div class="fw-semibold text-gray-500 mb-3 ">Akreditasi:
-                                @foreach ($journal->indexing??[] as $akreditasi_item)
+                            <div class="fw-semibold text-gray-500  ">Akreditasi:
+                                @foreach ($journal->indexing ?? [] as $akreditasi_item)
                                     <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
                                 @endforeach
+                            </div>
+                            <div class="fw-semibold text-gray-500 mb-3 ">
+                                Editor Chief: {{ $journal->editor_chief_name ?? '-' }}
                             </div>
                             <div class="d-flex flex-center flex-wrap mb-3">
                                 <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
@@ -102,7 +105,8 @@
                                 <label class="form-label">Nama Jurnal</label>
                                 <input type="text" name="name" class="form-control"
                                     placeholder="Short Name Journal" />
-                                <span class="form-text text-muted">Masukkan Nama jurnal yang ingin diimport, direkomendasikan
+                                <span class="form-text text-muted">Masukkan Nama jurnal yang ingin diimport,
+                                    direkomendasikan
                                     menggunakan nama jurnal yang singkat dan jelas</span>
                             </div>
                             <div class="col-md-8">
@@ -114,8 +118,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Path Jurnal</label>
-                                <input type="text" name="url_path" class="form-control"
-                                    placeholder="journal-path" />
+                                <input type="text" name="url_path" class="form-control" placeholder="journal-path" />
                             </div>
 
                             <div class="col-md-12 mt-10">
@@ -125,7 +128,8 @@
                                     <option value="3.3">OJS 3.3</option>
                                     <option value="3.2" disabled>OJS 3.2</option>
                                 </select>
-                                <span class="form-text text-muted">Pilih versi OJS yang digunakan, Pastikan versi OJS yang dipilih sesuai dengan versi OJS jurnal yang ingin diimport
+                                <span class="form-text text-muted">Pilih versi OJS yang digunakan, Pastikan versi OJS yang
+                                    dipilih sesuai dengan versi OJS jurnal yang ingin diimport
                                 </span>
                             </div>
 
@@ -163,7 +167,7 @@
                         </div>
                         <!--end::Close-->
                     </div>
-                    <form method="post" action="{{ route("back.master.journal.update", $journal->id) }}">
+                    <form method="post" action="{{ route('back.master.journal.update', $journal->id) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="modal-body">
@@ -171,52 +175,58 @@
                                 <label class="form-label">Nama Jurnal</label>
                                 <input type="text" name="name" class="form-control"
                                     placeholder="Short Name Journal" value="{{ $journal->name }}" />
-                                <span class="form-text text-muted">Masukkan Nama jurnal yang ingin diimport, direkomendasikan
+                                <span class="form-text text-muted">Masukkan Nama jurnal yang ingin diimport,
+                                    direkomendasikan
                                     menggunakan nama jurnal yang singkat dan jelas</span>
                             </div>
                             <div class="mb-5">
                                 <label class="form-label">Biaya Publikasi</label>
                                 <div class="input-group mb-5">
                                     <span class="input-group-text" id="basic-addon3">Rp.</span>
-                                    <input type="number" name="author_fee" class="form-control" value="{{ $journal->author_fee }}"
-                                    placeholder="100XXX" />
+                                    <input type="number" name="author_fee" class="form-control"
+                                        value="{{ $journal->author_fee }}" placeholder="100XXX" />
                                 </div>
                             </div>
                             <div class="mb-5">
-                                 <label class="form-label">Akreditasi Jurnal</label>
+                                <label class="form-label">Akreditasi Jurnal</label>
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Scopus Q1" id="scopus_q1" @if (in_array('Scopus Q1', $journal->indexing??[])) checked @endif />
+                                                value="Scopus Q1" id="scopus_q1"
+                                                @if (in_array('Scopus Q1', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="scopus_q1">
                                                 Scopus Q1
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Scopus Q2" id="scopus_q2" @if (in_array('Scopus Q2', $journal->indexing??[])) checked @endif />
+                                                value="Scopus Q2" id="scopus_q2"
+                                                @if (in_array('Scopus Q2', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="scopus_q2">
                                                 Scopus Q2
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Scopus Q3" id="scopus_q3" @if (in_array('Scopus Q3', $journal->indexing??[])) checked @endif />
+                                                value="Scopus Q3" id="scopus_q3"
+                                                @if (in_array('Scopus Q3', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="scopus_q3">
                                                 Scopus Q3
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Scopus Q4" id="scopus_q4" @if (in_array('Scopus Q4', $journal->indexing??[])) checked @endif />
+                                                value="Scopus Q4" id="scopus_q4"
+                                                @if (in_array('Scopus Q4', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="scopus_q4">
                                                 Scopus Q4
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Scopus Non-Q" id="scopus_non_q" @if (in_array('Scopus Non-Q', $journal->indexing??[])) checked @endif />
+                                                value="Scopus Non-Q" id="scopus_non_q"
+                                                @if (in_array('Scopus Non-Q', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="scopus_non_q">
                                                 Scopus Non-Q
                                             </label>
@@ -225,47 +235,97 @@
                                     <div class="col-md-6">
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Sinta 1" id="sinta_1" @if (in_array('Sinta 1', $journal->indexing??[])) checked @endif />
+                                                value="Sinta 1" id="sinta_1"
+                                                @if (in_array('Sinta 1', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="sinta_1">
                                                 Sinta 1
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Sinta 2" id="sinta_2" @if (in_array('Sinta 2', $journal->indexing??[])) checked @endif />
+                                                value="Sinta 2" id="sinta_2"
+                                                @if (in_array('Sinta 2', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="sinta_2">
                                                 Sinta 2
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Sinta 3" id="sinta_3" @if (in_array('Sinta 3', $journal->indexing??[])) checked @endif />
+                                                value="Sinta 3" id="sinta_3"
+                                                @if (in_array('Sinta 3', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="sinta_3">
                                                 Sinta 3
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Sinta 4" id="sinta_4" @if (in_array('Sinta 4', $journal->indexing??[])) checked @endif />
+                                                value="Sinta 4" id="sinta_4"
+                                                @if (in_array('Sinta 4', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="sinta_4">
                                                 Sinta 4
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Sinta 5" id="sinta_5" @if (in_array('Sinta 5', $journal->indexing??[])) checked @endif />
+                                                value="Sinta 5" id="sinta_5"
+                                                @if (in_array('Sinta 5', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="sinta_5">
                                                 Sinta 5
                                             </label>
                                         </div>
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
-                                                value="Sinta 6" id="sinta_6" @if (in_array('Sinta 6', $journal->indexing??[])) checked @endif />
+                                                value="Sinta 6" id="sinta_6"
+                                                @if (in_array('Sinta 6', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="sinta_6">
                                                 Sinta 6
                                             </label>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="mb-5">
+                                <label class="form-label required">Editor In Chief</label>
+                                <input type="text" name="editor_chief_name" class="form-control"
+                                    value="{{ $journal->editor_chief_name }}" placeholder="Name of Editor Chief"
+                                    required />
+                            </div>
+                            <div class="mb-5">
+                                <label class="form-label mb-3 required">Tanda Tangan Editor In Chief</label><br>
+                                <!--begin::Image input placeholder-->
+                                <style>
+                                    .image-input-placeholder {
+                                        background-image: url('@if ($journal->editor_chief_signature) {{ Storage::url($journal->editor_chief_signature) }} @else {{ asset('back/media/svg/files/blank-image.svg') }} @endif');
+                                        '
+
+                                    }
+                                </style>
+                                <div class="image-input image-input-empty image-input-outline image-input-placeholder mb-3 ms-5"
+                                    data-kt-image-input="true">
+                                    <div class="image-input-wrapper w-150px h-150px"></div>
+                                    <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Ubah Thumbnail">
+                                        <i class="ki-duotone ki-pencil fs-7">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        <input type="file" name="editor_chief_signature" accept=".png, .jpg, .jpeg" />
+                                        <input type="hidden" name="avatar_remove" />
+                                    </label>
+                                    <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="cancel" data-bs-toggle="tooltip" title="Batalkan Thumbnail">
+                                        <i class="ki-duotone ki-cross fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                    </span>
+                                    <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="remove" data-bs-toggle="tooltip" title="Hapus Thumbnail">
+                                        <i class="ki-duotone ki-cross fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -291,7 +351,7 @@
                         </div>
                         <!--end::Close-->
                     </div>
-                    <form action="{{ route("back.master.journal.destroy", $journal->id) }}" method="post">
+                    <form action="{{ route('back.master.journal.destroy', $journal->id) }}" method="post">
                         @csrf
                         @method('delete')
                         <div class="modal-body">

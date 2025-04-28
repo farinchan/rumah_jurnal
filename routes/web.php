@@ -12,6 +12,7 @@ use App\Http\Controllers\Front\ContactController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\AnnouncementController as BackAnnouncementController;
+use App\Http\Controllers\Back\EmailController;
 use App\Http\Controllers\Back\EventController as BackEventController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
 use App\Http\Controllers\Back\WelcomeSpeechController as BackWelcomeSpeechController;
@@ -137,15 +138,19 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}/issue/{issue_id}/dashboard', [BackJournalController::class, 'dashboardIndex'])->name('dashboard.index');
 
         Route::get('/{journal_path}/issue/{issue_id}/article', [BackJournalController::class, 'articleIndex'])->name('article.index');
+        Route::put('/{journal_path}/issue/{issue_id}/article/{id}/update', [BackJournalController::class, 'articleUpdate'])->name('article.update');
         Route::delete('/{journal_path}/issue/{issue_id}/article/{id}/destroy', [BackJournalController::class, 'articleDestroy'])->name('article.destroy');
+        Route::get('/loa/submission/{id}/generate', [BackJournalController::class, 'loaGenerate'])->name('loa.generate');
+        Route::get('/loa/submission/{id}/mail-send', [BackJournalController::class, 'loaMailSend'])->name('loa.mail-send');
+        Route::get('/invoice/submission/{id}/generate', [BackJournalController::class, 'invoiceGenerate'])->name('invoice.generate');
+        Route::get('/invoice/submission/{id}/mail-send', [BackJournalController::class, 'invoiceMailSend'])->name('invoice.mail-send');
+        Route::get('/confirm-payment/submission/{id}/generate', [BackJournalController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
 
         Route::get('/{journal_path}/issue/{issue_id}/reviewer', [BackJournalController::class, 'reviewerIndex'])->name('reviewer.index');
         Route::delete('/{journal_path}/issue/{issue_id}/reviewer/{id}/delete', [BackJournalController::class, 'reviewerDestroy'])->name('reviewer.destroy');
 
         Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
     });
-
-
 
 
     Route::prefix('finance')->name('finance.')->group(function () {
@@ -191,5 +196,9 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
         Route::get('/banner', [BackSettingController::class, 'banner'])->name('banner');
         Route::put('/banner/{id}/update', [BackSettingController::class, 'bannerUpdate'])->name('banner-update');
+    });
+
+    Route::prefix('email')->name('email.')->group(function () {
+        Route::post('/send-mail', [EmailController::class, 'sendEmail'])->name('send-mail');
     });
 });

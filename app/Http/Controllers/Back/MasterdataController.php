@@ -8,6 +8,7 @@ use App\Models\PaymentAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Str;
 
 class MasterdataController extends Controller
 {
@@ -28,13 +29,15 @@ class MasterdataController extends Controller
         return view('back.pages.master.journal.index', $data);
     }
 
-    public function journalupdate(Request $reques, $id)
+    public function journalupdate(Request $request, $id)
     {
-        // dd($reques->all());
-        $validator = Validator::make($reques->all(), [
+        // dd($request->all());
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'author_fee' => 'required|numeric',
             'akreditasi' => 'nullable',
+            'editor_chief_name' => 'nullable|string|max:255',
+            'editor_chief_signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8192',
         ]);
 
         if ($validator->fails()) {
@@ -47,9 +50,16 @@ class MasterdataController extends Controller
             Alert::error('Gagal', 'Jurnal tidak ditemukan');
             return redirect()->back();
         }
-        $journal->name = $reques->name;
-        $journal->author_fee = $reques->author_fee;
-        $journal->indexing = $reques->akreditasi;
+        $journal->name = $request->name;
+        $journal->author_fee = $request->author_fee;
+        $journal->indexing = $request->akreditasi;
+        $journal->editor_chief_name = $request->editor_chief_name;
+        if ($request->hasFile('editor_chief_signature')) {
+            $file = $request->file('editor_chief_signature');
+            $filePath = $file->storeAs('journal-signature', Str::random(10) . '.' . $file->getClientOriginalExtension(), 'public');
+            $journal->editor_chief_signature = $filePath;
+        }
+
         $journal->save();
 
         Alert::success('Berhasil', 'Data berhasil diubah');
@@ -100,7 +110,7 @@ class MasterdataController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-    
+
 
         if($request->delete_account) {
             $account_delete = json_decode($request->delete_account, true);

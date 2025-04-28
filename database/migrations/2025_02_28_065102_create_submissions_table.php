@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('submission_id');
             $table->string('publication_id')->nullable();
+            $table->string('number')->nullable();
             $table->string('locale')->nullable();
 
             $table->json('authors')->nullable();

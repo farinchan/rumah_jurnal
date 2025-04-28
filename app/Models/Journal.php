@@ -31,4 +31,5 @@ class Journal extends Model
     {
         return $this->hasMany(Issue::class, 'journal_id');
     }
+
 }

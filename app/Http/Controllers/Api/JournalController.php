@@ -7,6 +7,7 @@ use App\Models\Issue;
 use App\Models\Journal;
 use App\Models\Reviewer;
 use App\Models\Submission;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Spatie\Permission\Models\Permission;
@@ -62,11 +63,11 @@ class JournalController extends Controller
                     $jurnal->context_id = $response_another->json()["id"];
                     $jurnal->url = $response_another->json()["url"];
                     $jurnal->url_path = $url_path;
-                    $jurnal->title = $response_another->json()["name"]["en_US"]?? $url_path;
-                    $jurnal->description = $response_another->json()["about"]["en_US"]?? "No Description";
-                    $jurnal->thumbnail = $response_another->json()["journalThumbnail"]['en_US']['uploadName']?? null;
-                    $jurnal->onlineIssn = $response_another->json()["onlineIssn"]?? null;
-                    $jurnal->printIssn = $response_another->json()["printIssn"]?? null;
+                    $jurnal->title = $response_another->json()["name"]["en_US"] ?? $url_path;
+                    $jurnal->description = $response_another->json()["about"]["en_US"] ?? "No Description";
+                    $jurnal->thumbnail = $response_another->json()["journalThumbnail"]['en_US']['uploadName'] ?? null;
+                    $jurnal->onlineIssn = $response_another->json()["onlineIssn"] ?? null;
+                    $jurnal->printIssn = $response_another->json()["printIssn"] ?? null;
                     $jurnal->api_key = $api_key;
                     $jurnal->ojs_version = $ojs_version;
                     $jurnal->last_sync = now();
@@ -79,7 +80,6 @@ class JournalController extends Controller
                         'message' => 'Success',
                         'data' => $jurnal
                     ], 200);
-
                 } else {
                     return response()->json([
                         'success' => false,
@@ -87,7 +87,6 @@ class JournalController extends Controller
                         'error' => $response_another->json()["errorMessage"] ?? "something went wrong"
                     ], $response_another->status());
                 }
-
             } else {
                 return response()->json([
                     'success' => false,
@@ -125,11 +124,11 @@ class JournalController extends Controller
             ]);
 
             if ($response->status() === 200) {
-                $jurnal->title = $response->json()["name"]["en_US"]?? $jurnal->title;
-                $jurnal->description = $response->json()["about"]["en_US"]?? $jurnal->description;
-                $jurnal->thumbnail = $response->json()["journalThumbnail"]['en_US']['uploadName']?? $jurnal->thumbnail;
-                $jurnal->onlineIssn = $response->json()["onlineIssn"]?? $jurnal->onlineIssn;
-                $jurnal->printIssn = $response->json()["printIssn"]?? $jurnal->printIssn;
+                $jurnal->title = $response->json()["name"]["en_US"] ?? $jurnal->title;
+                $jurnal->description = $response->json()["about"]["en_US"] ?? $jurnal->description;
+                $jurnal->thumbnail = $response->json()["journalThumbnail"]['en_US']['uploadName'] ?? $jurnal->thumbnail;
+                $jurnal->onlineIssn = $response->json()["onlineIssn"] ?? $jurnal->onlineIssn;
+                $jurnal->printIssn = $response->json()["printIssn"] ?? $jurnal->printIssn;
                 $jurnal->last_sync = now();
                 $jurnal->save();
 
@@ -254,14 +253,26 @@ class JournalController extends Controller
                 ]);
 
                 if ($publication_response->status() === 200) {
+                    $year = Carbon::now()->year;
+                    $last = Submission::whereYear('created_at', $year)
+                        ->orderBy('number', 'desc')
+                        ->first();
+                    $newNumber = $last ? $last->number + 1 : 1;
+                    // Format jadi 4 digit
+                    $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
 
-                    $submission = Submission::updateOrCreate(
+                    $submission = Submission::where('submission_id', $submission_id)
+                        ->where('issue_id', $issue->id)
+                        ->first();
+
+                    Submission::updateOrCreate(
                         [
                             'submission_id' => $submission_id,
                             'issue_id' => $issue->id,
                         ],
                         [
                             'publication_id' => $publication_response->json()["id"],
+                            'number' => $submission ? $submission->number : $formattedNumber,
                             'locale' => $publication_response->json()["locale"],
                             'authors' => $publication_response->json()["authors"],
                             'authorsString' => $publication_response->json()["authorsString"],
@@ -293,7 +304,6 @@ class JournalController extends Controller
                         'error' => $publication_response->json()["errorMessage"] ?? "something went wrong"
                     ], $publication_response->status());
                 }
-
             } else {
                 return response()->json([
                     'success' => false,
@@ -308,7 +318,6 @@ class JournalController extends Controller
                 'error' => $th->getMessage()
             ], 500);
         }
-
     }
 
     public function reviewerList(Request $request)
@@ -420,7 +429,6 @@ class JournalController extends Controller
                     'message' => 'Reviewer data has been updated',
                     'data' => $reviewer
                 ], 200);
-
             } else {
                 return response()->json([
                     'success' => false,
@@ -435,6 +443,5 @@ class JournalController extends Controller
                 'error' => $th->getMessage()
             ], 500);
         }
-
     }
 }

@@ -2,7 +2,6 @@
 @section('content')
     <div id="kt_content_container" class=" container-xxl ">
         @include('back.pages.journal.detail-header')
-
         <div class="card mb-5 mb-lg-10">
             <div class="card-header">
                 <div class="card-title">
@@ -32,12 +31,13 @@
                         <thead class="border-gray-200 fs-5 fw-semibold bg-lighten">
                             <tr>
                                 <th class="">ID</th>
-                                <th class="min-w-250px">Submission</th>
-                                <th class="min-w-100px text-start">Status</th>
-                                <th class="min-w-100px text-start">Published</th>
-                                <th class="min-w-150px text-start ">Pembayaran</th>
-                                <th class="min-w-150px text-center">Action</th>
-
+                                <th class="min-w-350px">Submission</th>
+                                <th class="min-w-300px">Reviewer</th>
+                                <th class="min-w-100px text-start">Status Submission</th>
+                                @if ($journal->author_fee != 0)
+                                    <th class="min-w-150px text-start ">Pembayaran</th>
+                                @endif
+                                <th class="min-w-250px text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody class="fw-6 fw-semibold text-gray-600">
@@ -52,11 +52,28 @@
                                                 class="text-gray-800 text-hover-primary mb-1">{{ $submission->authorsString }}</a>
                                             <span>
                                                 {!! is_array($submission->fullTitle) ? implode(', ', $submission->fullTitle) : $submission->fullTitle !!}
-
+                                            </span>
+                                            <span class="text-muted fw-bold">
+                                                Published date: {{ $submission->datePublished ?? '-' }}
                                             </span>
                                         </div>
                                     </td>
-
+                                    <td>
+                                        <ul>
+                                            @forelse ($submission->reviewers as $reviewer)
+                                                <li>
+                                                    <span class="text-gray-800 fw-bold">
+                                                        {{ $reviewer->name }}
+                                                    </span>
+                                                    <br>
+                                                    {{ $reviewer->affiliation }}
+                                                </li>
+                                            @empty
+                                                <li style="list-style: none" class="text-muted">Reviewer belum ditambahkan
+                                                </li>
+                                            @endforelse
+                                        </ul>
+                                    </td>
                                     <td class="text-start">
                                         @if ($submission->status == 1)
                                             <span
@@ -68,37 +85,45 @@
                                             <span
                                                 class="badge badge-light-danger fs-7 fw-bold">{{ $submission->status_label }}</span>
                                         @else
-                                            <span class="badge badge-light-secondary fs-7 fw-bold">{{ $submission->status_label }}</span>
+                                            <span
+                                                class="badge badge-light-secondary fs-7 fw-bold">{{ $submission->status_label }}</span>
                                         @endif
                                     </td>
-                                    <td class="text-start">
-                                        {{ $submission->datePublished ?? '-' }}
-                                    </td>
-                                    <td class="text-start">
-
-                                        @if ($submission->payment_status == 'pending')
-                                            <span
-                                                class="badge badge-light-warning fs-7 fw-bold">{{ $submission->payment_status }}</span>
-                                        @elseif ($submission->payment_status == 'paid')
-                                            <span
-                                                class="badge badge-light-success fs-7 fw-bold">{{ $submission->payment_status }}</span>
-                                        @elseif ($submission->payment_status == 'refund')
-                                            <span
-                                                class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
-                                        @elseif ($submission->payment_status == 'cancelled')
-                                            <span
-                                                class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
-                                        @else
-                                            <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
-                                        @endif
-                                    </td>
+                                    @if ($journal->author_fee != 0)
+                                        <td class="text-start">
+                                            @if ($submission->payment_status == 'pending')
+                                                <span
+                                                    class="badge badge-light-warning fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                            @elseif ($submission->payment_status == 'paid')
+                                                <span
+                                                    class="badge badge-light-success fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                            @elseif ($submission->payment_status == 'refund')
+                                                <span
+                                                    class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                            @elseif ($submission->payment_status == 'cancelled')
+                                                <span
+                                                    class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                            @else
+                                                <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
+                                            @endif
+                                        </td>
+                                    @endif
                                     <td class="text-end">
-                                        <a href="#" class="btn btn-sm btn-light-primary my-1" data-bs-toggle="modal"
+                                        <a href="#" class="btn btn-sm btn-light-info my-1" data-bs-toggle="modal"
                                             data-bs-target="#modal_view_article_{{ $submission->submission_id }}">
                                             <i class="ki-duotone ki-eye fs-2">
                                                 <span class="path1"></span>
                                                 <span class="path2"></span>
                                                 <span class="path3"></span>
+                                            </i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-light-primary my-1" data-bs-toggle="modal"
+                                            data-bs-target="#modal_action_article_{{ $submission->submission_id }}">
+                                            <i class="ki-duotone ki-menu fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                                <span class="path3"></span>
+                                                <span class="path4"></span>
                                             </i>
                                         </a>
                                         <a href="#" class="btn btn-sm btn-light-danger my-1" data-bs-toggle="modal"
@@ -120,14 +145,11 @@
                                     </td>
                                 </tr>
                             @endforelse
-
-
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
     </div>
     <div class="modal fade" id="modal_select_article" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
@@ -153,14 +175,12 @@
             </div>
         </div>
     </div>
-
     @foreach ($issue->submissions as $submission)
         <div class="modal fade" tabindex="-1" id="modal_view_article_{{ $submission->submission_id }}">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3 class="modal-title">Submission ID {{ $submission->submission_id }}</h3>
-
                         <div>
                             <!--begin::synchronize-->
                             <div class="btn btn-icon btn-sm btn-active-light-warning ms-2" data-bs-toggle="tooltip"
@@ -171,7 +191,6 @@
                                     <span class="path2"></span>
                                 </i>
                             </div>
-
                             <!--begin::Close-->
                             <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal"
                                 aria-label="Close">
@@ -181,73 +200,95 @@
                             <!--end::Close-->
                         </div>
                     </div>
-
-                    <div class="modal-body">
-                        <table class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
-                            <tr>
-                                <td>Judul</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $submission->fullTitle }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Penulis</td>
-                                <td>:</td>
-                                <td>
-                                    <ul>
-                                        @foreach ($submission->getAuthorsAttribute() as $author)
-                                            <li>
-                                                <span class="text-gray-800 fw-bold">
-                                                    {{ $author['name'] }}
-                                                </span>
-                                                <br>
-                                                {{ $author['affiliation'] }}
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Abstrak</td>
-                                <td>:</td>
-                                <td>
-                                    {!! $submission->abstract !!}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Keywords</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $submission->keywords }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Published</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $submission->datePublished }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Terakhir Diubah</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $submission->lastModified }}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
+                    <form
+                        action="{{ route('back.journal.article.update', [$journal->url_path, $issue->id, $submission->id]) }}"
+                        method="POST">
+                        @method('PUT')
+                        @csrf
+                        <div class="modal-body">
+                            <table class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
+                                <tr>
+                                    <td>Judul</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $submission->fullTitle }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Penulis</td>
+                                    <td>:</td>
+                                    <td>
+                                        <ul>
+                                            @foreach ($submission->getAuthorsAttribute() as $author)
+                                                <li>
+                                                    <span class="text-gray-800 fw-bold">
+                                                        {{ $author['name'] }}
+                                                    </span>
+                                                    <br>
+                                                    {{ $author['affiliation'] }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Abstrak</td>
+                                    <td>:</td>
+                                    <td>
+                                        {!! $submission->abstract !!}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Keywords</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $submission->keywords }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Published</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $submission->datePublished }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Terakhir Diubah</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $submission->lastModified }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Reviewer</td>
+                                    <td>:</td>
+                                    <td>
+                                        <select class="form-select" data-control="select2"
+                                            data-placeholder="Select an option"
+                                            data-dropdown-parent="#modal_view_article_{{ $submission->submission_id }}"
+                                            name="reviewer[]" data-allow-clear="true" multiple="multiple">
+                                            <option></option>
+                                            @foreach ($reviewers as $reviewer)
+                                                <option value="{{ $reviewer->id }}" {{ $submission->reviewers->contains($reviewer->id) ? 'selected' : '' }}>{{ $reviewer->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-warning">Update</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-
         <div class="modal fade" tabindex="-1" id="modal_delete_article_{{ $submission->submission_id }}">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3 class="modal-title">Modal title</h3>
-
+                        <h3 class="modal-title">Hapus Submission</h3>
                         <!--begin::Close-->
                         <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal"
                             aria-label="Close">
@@ -270,12 +311,92 @@
                                 </span>
                             </p>
                         </div>
-
                         <div class="modal-footer">
                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-danger">Hapus</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" tabindex="-1" id="modal_action_article_{{ $submission->submission_id }}">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Menu</h3>
+                        <!--begin::Close-->
+                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal"
+                            aria-label="Close">
+                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span
+                                    class="path2"></span></i>
+                        </div>
+                        <!--end::Close-->
+                    </div>
+                    <div class="modal-body">
+                        @if ($journal->author_fee != 0)
+                            <div class="mb-10">
+                                <div class="mb-3">
+                                    <label class="d-flex align-items-center fs-5 fw-semibold">
+                                        <span class="required">Invoice</span>
+                                    </label>
+                                    <div class="fs-7 fw-semibold text-muted">
+                                        Invoice untuk pembayaran articel jurnal
+                                    </div>
+                                </div>
+                                <div class="fv-row fv-plugins-icon-container">
+                                    <div class="d-flex">
+                                        <a href="{{ route('back.journal.invoice.mail-send', $submission->id) }}" class="btn btn-light w-100 mx-3 btn-loading">
+                                            <i class="ki-duotone ki-send fs-2 ">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            Kirim ke Author
+                                        </a>
+                                        <a href="{{ route('back.journal.invoice.generate', $submission->id) }}"
+                                            class="btn btn-light w-100 mx-3">
+                                            <i class="ki-duotone ki-file-down fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        <div class="mb-10">
+                            <div class="mb-3">
+                                <label class="d-flex align-items-center fs-5 fw-semibold">
+                                    <span class="required">Letter of Acceptence (LOA)</span>
+                                </label>
+                                <div class="fs-7 fw-semibold text-muted">
+                                    LOA dapat dikirim/download saat tagihan articel sudah diselesaikan
+                                </div>
+                            </div>
+                            <div class="fv-row fv-plugins-icon-container">
+                                <div class="d-flex">
+
+
+                                    <a href="{{ route('back.journal.loa.mail-send', $submission->id) }}"
+                                        class="btn btn-light w-100 mx-3 btn-loading">
+                                        <i class="ki-duotone ki-send fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        Kirim ke Author
+                                    </a>
+                                    <a href="{{ route('back.journal.loa.generate', $submission->id) }}"
+                                        class="btn btn-light w-100 mx-3 ">
+                                        <i class="ki-duotone ki-file-down fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -338,12 +459,12 @@
                                         <div class="d-flex flex-column mw-200px">
                                             <div class="d-flex align-items-center mb-2">
                                                 ${submission.status == 1 ? `
-                                                    <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
-                                                    ` : submission.status == 3 ? `
-                                                    <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
-                                                    ` : submission.status == 4 ? `
-                                                    <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
-                                                    ` :
+                                                                                                                            <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
+                                                                                                                            ` : submission.status == 3 ? `
+                                                                                                                            <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
+                                                                                                                            ` : submission.status == 4 ? `
+                                                                                                                            <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
+                                                                                                                            ` :
                                                 `<span class="badge badge-light-secondary fs-5 p-2">${submission.statusLabel}</span>`
                                                 }
                                             </div>
@@ -380,7 +501,6 @@
                     Swal.showLoading();
                 }
             });
-
             // Proceed with the AJAX request
             $.ajax({
                 url: "{{ route('api.v1.submissions.select') }}",

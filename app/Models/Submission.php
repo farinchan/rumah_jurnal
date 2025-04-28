@@ -25,7 +25,7 @@ class Submission extends Model
         return $this->hasMany(Payment::class, 'submission_id');
     }
 
-    
+
 
     public function getFullTitleAttribute()
     {
@@ -40,8 +40,9 @@ class Submission extends Model
 
         $filtered = collect($authorsRaw)->map(function ($author) {
             return [
+                'id' => $author['id'] ?? '',
                 'name' => ($author['givenName'][$this->locale] ?? '') . ' ' . ($author['familyName'][$this->locale] ?? ''),
-                'email' => $author['email'] ?? '',
+                'email' => $author['email'] ?? null,
                 'affiliation' => $author['affiliation'][$this->locale] ?? '-',
             ];
         });
@@ -63,5 +64,10 @@ class Submission extends Model
     {
         $citations = json_decode($this->attributes['citations'], true);
         return $citations;
+    }
+
+    public function reviewers()
+    {
+        return $this->belongsToMany(Reviewer::class, 'submission_reviewer');
     }
 }
