@@ -33,6 +33,14 @@
                         </div> --}}
                         <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                             <div class="d-flex align-items-center">
+                                <div class="fs-4 fw-bold" >
+                                    @money($journal->author_fee)
+                                </div>
+                            </div>
+                            <div class="fw-semibold fs-6 text-gray-500">Biaya Publikasi</div>
+                        </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center">
                                 <div class="fs-4 fw-bold" data-kt-countup="true"
                                     data-kt-countup-value="{{ $issue->submissions->count() }}">
                                     0

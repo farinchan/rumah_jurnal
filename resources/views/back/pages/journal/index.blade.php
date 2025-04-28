@@ -39,9 +39,8 @@
                                 </div>
                             </th>
                             <th class="min-w-200px">Issue</th>
-                            <th class="text-end ">Volume</th>
-                            <th class="text-end ">Number</th>
-                            <th class="text-end ">Year</th>
+                            <th class="text-end ">Article</th>
+                            <th class="text-end ">Reviewer</th>
                             <th class="text-end ">Status</th>
                             <th class="text-end min-w-70px">Actions</th>
                         </tr>
@@ -59,20 +58,22 @@
 
                                         <div class="ms-5">
                                             <a href="#" class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1"
-                                                data-kt-ecommerce-category-filter="category_name">{{ $issue->title }}</a>
+                                                data-kt-ecommerce-category-filter="category_name">Vol. {{ $issue->volume }}
+                                                No. {{ $issue->number }} ({{ $issue->year }}): {{ $issue->title }}</a>
                                             <div class="text-muted fs-7 fw-bold">
                                                 {{ Str::limit(strip_tags($issue->description), 100) }}...</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="text-end pe-0">
-                                    <span class="fw-bold">{{ $issue->volume }}</span>
+                                    <span class="fw-bold">
+                                        {{ $issue->submissions->count() }}
+                                    </span>
                                 </td>
                                 <td class="text-end pe-0">
-                                    <span class="fw-bold">{{ $issue->number }}</span>
-                                </td>
-                                <td class="text-end pe-0">
-                                    <span class="fw-bold">{{ $issue->year }}</span>
+                                    <span class="fw-bold">
+                                        {{ $issue->reviewers->count() }}
+                                    </span>
                                 </td>
                                 <td class="text-end pe-0">
                                     @if ($issue->status == 'published')

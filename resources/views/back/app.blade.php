@@ -90,17 +90,6 @@
     <!--end::Global Javascript Bundle-->
     <!--begin::Vendors Javascript(used for this page only)-->
     <script src="{{ asset('back/plugins/custom/fullcalendar/fullcalendar.bundle.js') }}"></script>
-    {{-- <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/radar.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/geodata/continentsLow.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/geodata/usaLow.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZonesLow.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZoneAreasLow.js"></script> --}}
     <script src="{{ asset('back/plugins/custom/datatables/datatables.bundle.js') }}"></script>
     <!--end::Vendors Javascript-->
     <!--begin::Custom Javascript(used for this page only)-->
@@ -109,6 +98,23 @@
     {{-- <script src="{{ asset("back/js/custom/apps/chat/chat.js")}}"></script>
     <script src="{{ asset("back/js/custom/utilities/modals/users-search.js")}}"></script> --}}
     @include('sweetalert::alert')
+
+    <script>
+        document.addEventListener('click', function(e) {
+            // Cek apakah yang diklik itu <a> dengan class 'btn-loading'
+            if (e.target.matches('a.btn-loading')) {
+
+                Swal.fire({
+                    title: 'Loading...',
+                    text: 'Sedang memproses data',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+        });
+    </script>
 
     @yield('scripts')
     <!--end::Custom Javascript-->

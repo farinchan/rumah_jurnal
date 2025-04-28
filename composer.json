@@ -7,11 +7,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1",
+        "phpoffice/phppresentation": "dev-master",
         "realrashid/sweet-alert": "^7.2",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-permission": "^6.10",

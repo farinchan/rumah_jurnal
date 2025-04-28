@@ -6,7 +6,7 @@
             <div class="card-header">
                 <h3 class="card-title">Pengaturan</h3>
             </div>
-            <form action="{{ route('back.journal.issue.update', [$journal->url_path, $issue->id]) }}" method="POST">
+            <form action="{{ route('back.journal.issue.update', [$journal->url_path, $issue->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="card-body">
@@ -60,6 +60,18 @@
                                     Unpublished</option>
                             </select>
                             @error('status')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+                        <div class="col-md-12 mt-5">
+                            <label class="form-label">LOA Template</label>
+                            <input type="file" name="loa_template" class="form-control"
+                                placeholder="URL LOA Template" value="{{ $issue->loa_template }}" />
+                                @if ($issue->loa_template)
+                                   File Template: <a href="{{ asset('storage/' . $issue->loa_template) }}" target="_blank">Lihat
+                                        Template LOA</a>
+                                @endif
+                            @error('loa_template')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
