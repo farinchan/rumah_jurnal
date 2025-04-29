@@ -105,7 +105,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Nominal Transfer</label>
                         <input type="text" name="payment_amount" class="form-control mb-2" placeholder="Nominal Transfer"
-                            value="@money($payment->payment_amount)" readonly />
+                            value="{{ $payment->payment_amount }}" readonly />
                     </div>
                 </div>
                 <div class="row">

@@ -172,13 +172,13 @@
                                         <h5>
                                             publcation fee:
                                             <a style="color: #f00; font-weight: 900">
-                                                @money( $submission->issue->journal->author_fee )
+                                                @money($submission->issue->journal->author_fee)
                                             </a>
                                         </h5>
                                     </div>
                                     <h6>{{ __('front.payment_proff') }}</h6>
-                                    <input type="file" id="myFile" name="payment_file" class="btn theme-btn-3 mb-10"
-                                        accept=".png, .jpg, .jpeg, .pdf"><br>
+                                    <input type="file" id="myFile" name="payment_file"
+                                        class="btn theme-btn-3 mb-10" accept=".png, .jpg, .jpeg, .pdf"><br>
                                     @error('payment_file')
                                         <div class="text-danger"
                                             style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
@@ -240,9 +240,22 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="input-item input-item-textarea ltn__custom-icon">
-                                                <input type="number" name="payment_amount"
-                                                    placeholder="*Transfer Amount (IDR)" required
-                                                    value="{{ old('payment_amount') }}">
+                                                <select class="nice-select" name="payment_amount" required>
+                                                    <option value="" disabled>*{{ __('front.payment_amount') }}
+                                                    </option>
+                                                    <option value="60% - @money($submission->issue->journal->author_fee * 0.6)" int="{{ $submission->issue->journal->author_fee * 0.6 }}"
+                                                        {{ old('payment_amount') == "60% - @money( $submission->issue->journal->author_fee * 0.6 )" ? 'selected' : '' }}>
+                                                        60% - @money($submission->issue->journal->author_fee * 0.6)
+                                                    </option>
+                                                    <option value="40% - @money($submission->issue->journal->author_fee * 0.4)" int="{{ $submission->issue->journal->author_fee * 0.4 }}"
+                                                        {{ old('payment_amount') == "40% -  @money( $submission->issue->journal->author_fee * 0.4 )" ? 'selected' : '' }}>
+                                                        40% - @money($submission->issue->journal->author_fee * 0.4)
+                                                    </option>
+
+                                                </select>
+
+                                                <input type="hidden" name="payment_amount_int" id="payment_amount_int">
+
                                                 @error('payment_amount')
                                                     <div class="text-danger"
                                                         style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
@@ -356,6 +369,17 @@
         $('#next_3').on('click', function() {
             console.log('next_3 clicked');
             $('#tab_step_4').trigger('click');
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('select[name="payment_amount"]').on('change', function() {
+                var selectedOption = $(this).find('option:selected');
+                var intValue = selectedOption.attr('int');
+                $('#payment_amount_int').val(intValue);
+            });
+            // Trigger change event on page load to set the initial value
+            $('select[name="payment_amount"]').trigger('change');
         });
     </script>
 @endsection

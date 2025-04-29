@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ConfirmPaymentMail extends Mailable
+class FeeReviewerMail extends Mailable
 {
     use Queueable, SerializesModels;
     public $mailData;
@@ -39,7 +39,7 @@ class ConfirmPaymentMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.confirm_payment_mail',
+            view: 'email.fee_reviewer_mail',
         );
     }
 
@@ -53,7 +53,7 @@ class ConfirmPaymentMail extends Mailable
         if (isset($this->mailData['attachments'])) {
             return [
                 Attachment::fromPath($this->mailData['attachments'])
-                    ->as('Payment Confirmation.pdf')
+                    ->as('Fee.pdf')
                     ->withMime('application/pdf'),
             ];
         }

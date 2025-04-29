@@ -31,7 +31,7 @@ class JournalController extends Controller
                     'link' => route('journal.index')
                 ]
                 ],
-            'journals' => Journal::latest()->paginate(6),
+            'journals' => Journal::latest()->get(),
         ];
         return view('front.pages.journal.index', $data);
     }

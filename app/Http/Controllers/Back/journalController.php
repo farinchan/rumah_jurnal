@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CertificateReviewerMail;
+use App\Mail\FeeReviewerMail;
 use App\Mail\InvoiceMail;
 use App\Mail\LoaMail;
+use App\Mail\SkReviewerMail;
 use App\Models\Issue;
 use App\Models\Journal;
 use App\Models\PaymentAccount;
 use App\Models\Reviewer;
+use App\Models\ReviewerFileIssue;
 use App\Models\SettingWebsite;
 use App\Models\Submission;
 use App\Models\SubmissionReviewer;
@@ -20,16 +24,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
-use PhpOffice\PhpPresentation\IOFactory;
-use PhpOffice\PhpPresentation\PhpPresentation;
-use PhpOffice\PhpPresentation\Shape\RichText;
-use PhpOffice\PhpPresentation\Writer\Pdf\DomPDF as PdfWriter;
 use ZipArchive;
 
 class journalController extends Controller
 {
-
-
 
     public function index($journal_path)
     {
@@ -193,7 +191,7 @@ class journalController extends Controller
             return abort(404);
         }
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::with('submissions.payments')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -255,11 +253,14 @@ class journalController extends Controller
 
         SubmissionReviewer::where('submission_id', $submission->id)->delete();
 
-        foreach ($request->reviewer as $reviewer) {
-            SubmissionReviewer::create([
-                'submission_id' => $submission->id,
-                'reviewer_id' => $reviewer,
-            ]);
+        if ($request->reviewer) {
+
+            foreach ($request->reviewer as $reviewer) {
+                SubmissionReviewer::create([
+                    'submission_id' => $submission->id,
+                    'reviewer_id' => $reviewer,
+                ]);
+            }
         }
 
         Alert::success('Success', 'Reviewer has been added');
@@ -319,11 +320,294 @@ class journalController extends Controller
             'journal_path' => $journal_path,
             'journal' => $journal,
             'issue' => $issue,
+            'file_sk' =>ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type','sk')->first(),
+            'file_certificate' =>ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type','certificate')->first(),
+            'file_fee' =>ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type','fee')->first(),
             'setting_web' => SettingWebsite::first(),
             // 'submissions' => $issue->submissions->pluck('submission_id'),
         ];
         // return response()->json($data);
         return view('back.pages.journal.detail-reviewer', $data);
+    }
+
+    public function reviewerFileSkStore(Request $request, $journal_path, $issue_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|mimes:pdf|max:10240',
+        ], [
+            'file.required' => 'File harus diisi',
+            'file.mimes' => 'File harus berupa pdf',
+            'file.max' => 'File tidak boleh lebih dari 10 MB',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $file = $request->file('file');
+        $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+        ReviewerFileIssue::updateOrCreate(
+            ['issue_id' => $issue_id, 'file_type' => 'sk'],
+            ['file' => $file->storeAs('reviewer_file/sk', $filename, 'public')]
+        );
+
+        Alert::success('Success', 'File has been uploaded');
+        return redirect()->back();
+    }
+
+    public function reviewerFileSkSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
+    {
+
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $reviwer = Reviewer::where('issue_id', $issue_id)->get();
+        if (!$reviwer) {
+            Alert::error('Error', 'Reviewer not found');
+            return redirect()->back();
+        }
+
+        $file = ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type','sk')->first();
+        if (!$file) {
+            Alert::error('Error', 'File not found');
+            return redirect()->back();
+        }
+
+        $data = [
+            'subject' => 'SK Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+            'journal' => $issue->journal->title,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'attachments' => storage_path('app/public/' . $file->file),
+            'setting_web' => SettingWebsite::first(),
+        ];
+
+        $emailAddress = [];
+        if ($request->email) {
+            $emailAddress = $email;
+        } else{
+            foreach ($reviwer as $reviewer) {
+                if ($reviewer->email) {
+                    $emailAddress[] = $reviewer->email;
+                }
+            }
+        }
+
+        $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+        if ($mailEnvirontment == 'production') {
+            Mail::to($emailAddress)->send(new SkReviewerMail($data));
+        } else {
+            // For testing purpose
+            Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new SkReviewerMail($data));
+        }
+
+
+        Alert::success('Success', 'email has been sent');
+        return redirect()->back();
+    }
+    public function reviewerFileCertificateStore(Request $request, $journal_path, $issue_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|mimes:pdf|max:10240',
+        ], [
+            'file.required' => 'File harus diisi',
+            'file.mimes' => 'File harus berupa pdf',
+            'file.max' => 'File tidak boleh lebih dari 10 MB',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $file = $request->file('file');
+        $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+        ReviewerFileIssue::updateOrCreate(
+            ['issue_id' => $issue_id, 'file_type' => 'certificate'],
+            ['file' => $file->storeAs('reviewer_file/certificate', $filename, 'public')]
+        );
+
+        Alert::success('Success', 'File has been uploaded');
+        return redirect()->back();
+    }
+
+    public function reviewerFileCertificateSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
+    {
+
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $reviwer = Reviewer::where('issue_id', $issue_id)->get();
+        if (!$reviwer) {
+            Alert::error('Error', 'Reviewer not found');
+            return redirect()->back();
+        }
+
+        $file = ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type','certificate')->first();
+        if (!$file) {
+            Alert::error('Error', 'File not found');
+            return redirect()->back();
+        }
+
+        $data = [
+            'subject' => 'Certificate Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+            'journal' => $issue->journal->title,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'attachments' => storage_path('app/public/' . $file->file),
+            'setting_web' => SettingWebsite::first(),
+        ];
+
+        $emailAddress = [];
+        if ($request->email) {
+            $emailAddress = $email;
+        } else{
+            foreach ($reviwer as $reviewer) {
+                if ($reviewer->email) {
+                    $emailAddress[] = $reviewer->email;
+                }
+            }
+        }
+
+        $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+        if ($mailEnvirontment == 'production') {
+            Mail::to($emailAddress)->send(new CertificateReviewerMail($data));
+        } else {
+            // For testing purpose
+            Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new CertificateReviewerMail($data));
+        }
+
+        Alert::success('Success', 'email has been sent');
+        return redirect()->back();
+    }
+
+    public function reviewerFileFeeStore(Request $request, $journal_path, $issue_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|mimes:pdf|max:10240',
+        ], [
+            'file.required' => 'File harus diisi',
+            'file.mimes' => 'File harus berupa pdf',
+            'file.max' => 'File tidak boleh lebih dari 10 MB',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $file = $request->file('file');
+        $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+        ReviewerFileIssue::updateOrCreate(
+            ['issue_id' => $issue_id, 'file_type' => 'fee'],
+            ['file' => $file->storeAs('reviewer_file/fee', $filename, 'public')]
+        );
+
+        Alert::success('Success', 'File has been uploaded');
+        return redirect()->back();
+    }
+
+    public function reviewerFileFeeSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
+    {
+
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $reviwer = Reviewer::where('issue_id', $issue_id)->get();
+        if (!$reviwer) {
+            Alert::error('Error', 'Reviewer not found');
+            return redirect()->back();
+        }
+
+        $file = ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type','fee')->first();
+        if (!$file) {
+            Alert::error('Error', 'File not found');
+            return redirect()->back();
+        }
+
+        $data = [
+            'subject' => 'Fee Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+            'journal' => $issue->journal->title,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'attachments' => storage_path('app/public/' . $file->file),
+            'setting_web' => SettingWebsite::first(),
+        ];
+
+        $emailAddress = [];
+        if ($request->email) {
+            $emailAddress = $email;
+        } else{
+            foreach ($reviwer as $reviewer) {
+                if ($reviewer->email) {
+                    $emailAddress[] = $reviewer->email;
+                }
+            }
+        }
+
+        $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+        if ($mailEnvirontment == 'production') {
+            Mail::to($emailAddress)->send(new FeeReviewerMail($data));
+        } else {
+            // For testing purpose
+            Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new FeeReviewerMail($data));
+        }
+
+        Alert::success('Success', 'email has been sent');
+        return redirect()->back();
+
     }
 
     public function reviewerDestroy($journal_path, $issue_id, $id)
@@ -610,7 +894,7 @@ class journalController extends Controller
                     'affiliation' => $author['affiliation'],
                     'title' => $submission->fullTitle,
                     'journal' => $issue->journal->title,
-                       'journal_path' => $issue->journal->url_path,
+                    'journal_path' => $issue->journal->url_path,
                     'journal_fee' => $issue->journal->author_fee,
                     'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
                     'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
@@ -640,36 +924,5 @@ class journalController extends Controller
         }
         Alert::success('Success', 'Email has been sent');
         return redirect()->back();
-    }
-
-    public function confirmPaymentGenerate($submission)
-    {
-        $submission = Submission::find($submission);
-        if (!$submission) {
-            Alert::error('Error', 'Submission not found');
-            return redirect()->back()->with('error', 'Submission not found');
-        }
-
-        // Load PPTX template
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
-
-        $data = [
-            'name' => $submission->authors[0]['name'],
-            'affiliation' => $submission->authors[0]['affiliation'],
-            'title' => $submission->fullTitle,
-            'journal' => $issue->journal->title,
-            'editon' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
-            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-            'id' => $submission->submission_id,
-            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-        ];
-
-        // dd($data);
-        $pdf = Pdf::loadView('back.pages.journal.pdf.confirm-payment', $data)->setPaper('A4', 'portrait');
-        return $pdf->stream('Confirm-Payment-' . $submission->submission_id . '.pdf');
     }
 }

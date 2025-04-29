@@ -156,7 +156,8 @@ class PaymentController extends Controller
             'invoice_id' => 'nullable',
             'payment_timestamp' => 'required|date',
             'payment_method' => 'required',
-            'payment_amount' => 'required|numeric',
+            'payment_amount' => 'required',
+            'payment_amount_int' => 'required|numeric',
             'payment_account_number' => 'required|max:255',
             'payment_account_name' => 'required|max:255',
             'payment_file' => 'required|mimes:jpg,jpeg,png,pdf|max:10240', // 10 MB
@@ -171,7 +172,8 @@ class PaymentController extends Controller
                 'payment_timestamp.datetime' => 'Payment timestamp must be a valid date and time',
                 'payment_method.required' => 'Payment method is required',
                 'payment_amount.required' => 'Payment amount is required',
-                'payment_amount.numeric' => 'Payment amount must be a number',
+                'payment_amount_int.required' => 'Payment amount integer is required',
+                'payment_amount_int.numeric' => 'Payment amount integer must be a number',
                 'payment_account_number.required' => 'Account number is required',
                 'payment_account_name.required' => 'Account name is required',
                 'payment_file.required' => 'Payment file is required',
@@ -193,6 +195,7 @@ class PaymentController extends Controller
         $paayment->payment_timestamp = $request->payment_timestamp;
         $paayment->payment_method = $request->payment_method;
         $paayment->payment_amount = $request->payment_amount;
+        $paayment->payment_amount_int = $request->payment_amount_int;
         $paayment->payment_account_number = $request->payment_account_number;
         $paayment->payment_account_name = $request->payment_account_name;
         $paayment->name = $request->name;

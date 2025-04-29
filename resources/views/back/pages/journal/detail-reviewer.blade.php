@@ -10,7 +10,7 @@
                             <h3>Reviewer</h3>
                         </div>
                         <div class="card-toolbar">
-                            <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal"
+                            <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal" id="btn_add_reviewer"
                                 data-bs-target="#modal_select_article">
                                 <i class="ki-duotone ki-plus fs-2"></i> Tambah Reviewer
                             </a>
@@ -48,14 +48,6 @@
                                                     {{ $reviewer->email }}
                                                 </span>
 
-
-                                                <a class="badge badge-light-success cursor-pointer my-1">
-                                                    <i class="ki-duotone ki-send fs-5 text-success me-3">
-                                                        <span class="path1"></span>
-                                                        <span class="path2"></span>
-                                                    </i>
-                                                    Kirim SK
-                                                </a>
                                                 <span class="badge badge-light-warning cursor-pointer my-1"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#modal_send_email_{{ $reviewer->reviewer_id }}">
@@ -117,42 +109,170 @@
                             Upload SK Reviewer untuk edisi ini
                         </span>
                         <div class="d-flex align-self-center mb-3">
-                            <div class="flex-grow-1 me-3">
-                                <input type="file" class="form-control form-control-solid" name="sk_reviewer"
-                                    id="sk_reviewer" accept=".pdf" />
-                                <small class="form-text text-muted">
-                                    File harus dalam format PDF
-                                </small>
-                            </div>
-                            <button type="button" class="btn btn-primary btn-icon flex-shrink-0" data-bs-toggle="tooltip"
-                                data-bs-placement="right" title="Upload untuk menambah/mengubah SK">
-                                <i class="ki-duotone ki-file-up fs-1">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </button>
+                            <form
+                                action="{{ route('back.journal.reviewer.file-sk.store', [$journal->url_path, $issue->id]) }}"
+                                method="POST" enctype="multipart/form-data" class="d-flex flex-grow-1">
+                                @csrf
+                                <div class="flex-grow-1 me-3">
+                                    <input type="file" class="form-control form-control-solid" name="file"
+                                        id="sk_reviewer" accept=".pdf" />
+                                    <small class="form-text text-muted">
+                                        File harus dalam format PDF
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-icon flex-shrink-0"
+                                    data-bs-toggle="tooltip" data-bs-placement="right"
+                                    title="Upload untuk menambah/mengubah SK">
+                                    <i class="ki-duotone ki-file-up fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </button>
+                            </form>
                         </div>
 
-                        <button type="button" class="btn btn-light-info w-100 mb-5" data-bs-toggle="tooltip"
-                            data-bs-placement="right" title="Lihat File SK ">
-                            <i class="ki-duotone ki-eye fs-1">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                                <span class="path3"></span>
-                            </i>
-                            Lihat File
-                        </button>
-                        <button type="button" class="btn btn-light-success w-100 mb-3" data-bs-toggle="tooltip"
-                            data-bs-placement="right" title="Kirim SK ke semua reviewer via email">
-                            <i class="ki-duotone ki-send fs-1">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                            Kirim SK Reviewer
-                        </button>
+                        @if ($file_sk)
+                            <div class="btn-group w-100 mb-5">
+                                <a href="{{ Storage::url($file_sk->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Lihat File SK ">
+                                    <i class="ki-duotone ki-eye fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>
+                                    Lihat
+                                </a>
+
+                                <a href="{{ route('back.journal.reviewer.file-sk.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Kirim SK ke semua reviewer via email">
+                                    <i class="ki-duotone ki-file-added fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    Kirim
+                                </a>
+                            </div>
+                        @endif
 
                     </div>
                 </div>
+                <div class="card card-xxl-stretch mb-5 mb-xxl-10">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3 class="text-gray-800">Sertifikat Reviewer</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="fs-5 fw-semibold text-gray-600 pb-6 d-block">
+                            Upload Sertifikat Reviewer untuk edisi ini
+                        </span>
+                        <div class="d-flex align-self-center mb-3">
+                            <form
+                                action="{{ route('back.journal.reviewer.file-certificate.store', [$journal->url_path, $issue->id]) }}"
+                                method="POST" enctype="multipart/form-data" class="d-flex flex-grow-1">
+                                @csrf
+                                <div class="flex-grow-1 me-3">
+                                    <input type="file" class="form-control form-control-solid" name="file"
+                                        id="certificate_reviewer" accept=".pdf" />
+                                    <small class="form-text text-muted">
+                                        File harus dalam format PDF
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-icon flex-shrink-0"
+                                    data-bs-toggle="tooltip" data-bs-placement="right"
+                                    title="Upload untuk menambah/mengubah Sertifikat">
+                                    <i class="ki-duotone ki-file-up fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </button>
+                            </form>
+                        </div>
+
+                        @if ($file_certificate)
+                            <div class="btn-group w-100 mb-5">
+                                <a href="{{ Storage::url($file_certificate->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Lihat File Sertifikat ">
+                                    <i class="ki-duotone ki-eye fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>
+                                    Lihat
+                                </a>
+
+                                <a href="{{ route('back.journal.reviewer.file-certificate.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Kirim Sertifikat ke semua reviewer via email">
+                                    <i class="ki-duotone ki-file-added fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    Kirim
+                                </a>
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+                <div class="card card-xxl-stretch mb-5 mb-xxl-10">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3 class="text-gray-800">Pembayaran Reviewer</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="fs-5 fw-semibold text-gray-600 pb-6 d-block">
+                            Upload File Pembayaran Reviewer untuk edisi ini
+                        </span>
+                        <div class="d-flex align-self-center mb-3">
+                            <form
+                                action="{{ route('back.journal.reviewer.file-fee.store', [$journal->url_path, $issue->id]) }}"
+                                method="POST" enctype="multipart/form-data" class="d-flex flex-grow-1">
+                                @csrf
+                                <div class="flex-grow-1 me-3">
+                                    <input type="file" class="form-control form-control-solid" name="file"
+                                        id="file_fee_reviewer" accept=".pdf" />
+                                    <small class="form-text text-muted">
+                                        File harus dalam format PDF
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-icon flex-shrink-0"
+                                    data-bs-toggle="tooltip" data-bs-placement="right"
+                                    title="Upload untuk menambah/mengubah File Fee">
+                                    <i class="ki-duotone ki-file-up fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </button>
+                            </form>
+                        </div>
+
+                        @if ($file_fee)
+                            <div class="btn-group w-100 mb-5">
+                                <a href="{{ Storage::url($file_fee->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Lihat File Fee ">
+                                    <i class="ki-duotone ki-eye fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>
+                                    Lihat
+                                </a>
+
+                                <a href="{{ route('back.journal.reviewer.file-fee.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Kirim File Fee ke semua reviewer via email">
+                                    <i class="ki-duotone ki-file-added fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    Kirim
+                                </a>
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -172,6 +292,20 @@
                         </h1>
                         <div class="text-muted fw-semibold fs-5">
                             Pilih reviewer yang akan ditambahkan ke edisi ini
+                        </div>
+                    </div>
+                    <div class="mb-10">
+                        <div class="input-group mb-5">
+                            <span class="input-group-text" id="basic-addon1">
+                                <i class="ki-duotone ki-profile-user fs-1">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                            <input type="text" id="search_reviewer" class="form-control "
+                                placeholder="Cari Nama Reviewer" />
                         </div>
                     </div>
                     <div class="mh-475px scroll-y me-n7 pe-7" id="list_article">
@@ -364,29 +498,30 @@
         let reviewer = @json($issue->reviewers->pluck('reviewer_id'));
         let data = [];
         $(document).ready(function() {
-            $('#list_article').html(`
-                <div class="text-center">
-                    <div class="spinner spinner-primary spinner-lg"></div>
-                    Loading...
-                </div>
-            `);
-            $.ajax({
-                url: "{{ route('api.v1.reviewer.list') }}",
-                type: 'GET',
-                data: {
-                    url_path: "{{ $journal->url_path }}"
-                },
-                success: function(response) {
-                    console.log(response);
-                    // Filter out the reviewer that are already in the issue
-                    let filter_data = response.data.filter(item => {
-                        return !reviewer.map(Number).includes(item.id);
-                    });
-                    console.log(filter_data);
-                    $('#list_article').html('');
-                    filter_data.forEach(reviewer => {
-                        $('#list_article').append(`
-                        <div class="border border-hover-primary p-7 rounded mb-7">
+            $('#btn_add_reviewer').on('click', function() {
+                $('#list_article').html(`
+                    <div class="text-center">
+                        <div class="spinner spinner-primary spinner-lg"></div>
+                        Loading...
+                    </div>
+                `);
+                $.ajax({
+                    url: "{{ route('api.v1.reviewer.list') }}",
+                    type: 'GET',
+                    data: {
+                        url_path: "{{ $journal->url_path }}"
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        // Filter out the reviewer that are already in the issue
+                        let filter_data = response.data.filter(item => {
+                            return !reviewer.map(Number).includes(item.id);
+                        });
+                        console.log(filter_data);
+                        $('#list_article').html('');
+                        filter_data.forEach(reviewer => {
+                            $('#list_article').append(`
+                        <div class="border border-hover-primary p-7 rounded mb-7 reviewer-item" data-name="${reviewer.fullName.toLowerCase()}">
                             <div class="d-flex flex-stack pb-3">
                                 <div class="d-flex">
                                     <div class="">
@@ -411,11 +546,25 @@
                             </div>
                         </div>
                     `);
-                    });
-                },
-                error: function(xhr) {
-                    alert('Terjadi kesalahan');
-                }
+                        });
+
+                        // Add search functionality
+                        $('#search_reviewer').on('input', function() {
+                            let searchValue = $(this).val().toLowerCase();
+                            $('.reviewer-item').each(function() {
+                                let name = $(this).data('name');
+                                if (name.includes(searchValue)) {
+                                    $(this).show();
+                                } else {
+                                    $(this).hide();
+                                }
+                            });
+                        });
+                    },
+                    error: function(xhr) {
+                        alert('Terjadi kesalahan');
+                    }
+                });
             });
         });
 

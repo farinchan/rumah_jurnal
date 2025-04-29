@@ -144,9 +144,14 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/loa/submission/{id}/mail-send', [BackJournalController::class, 'loaMailSend'])->name('loa.mail-send');
         Route::get('/invoice/submission/{id}/generate', [BackJournalController::class, 'invoiceGenerate'])->name('invoice.generate');
         Route::get('/invoice/submission/{id}/mail-send', [BackJournalController::class, 'invoiceMailSend'])->name('invoice.mail-send');
-        Route::get('/confirm-payment/submission/{id}/generate', [BackJournalController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
 
         Route::get('/{journal_path}/issue/{issue_id}/reviewer', [BackJournalController::class, 'reviewerIndex'])->name('reviewer.index');
+        Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-sk', [BackJournalController::class, 'reviewerFileSkStore'])->name('reviewer.file-sk.store');
+        Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-sk-send-mail/{email?}', [BackJournalController::class, 'reviewerFileSkSendMail'])->name('reviewer.file-sk.send-mail');
+        Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-certificate', [BackJournalController::class, 'reviewerFileCertificateStore'])->name('reviewer.file-certificate.store');
+        Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-certificate-send-mail/{email?}', [BackJournalController::class, 'reviewerFileCertificateSendMail'])->name('reviewer.file-certificate.send-mail');
+        Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-fee', [BackJournalController::class, 'reviewerFileFeeStore'])->name('reviewer.file-fee.store');
+        Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-fee-send-mail/{email?}', [BackJournalController::class, 'reviewerFileFeeSendMail'])->name('reviewer.file-fee.send-mail');
         Route::delete('/{journal_path}/issue/{issue_id}/reviewer/{id}/delete', [BackJournalController::class, 'reviewerDestroy'])->name('reviewer.destroy');
 
         Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
@@ -158,6 +163,8 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/verification/datatable', [BackFinanceController::class, 'verificationDatatable'])->name('verification.datatable');
         Route::get('/verification/{id}/detail', [BackFinanceController::class, 'verificationDetail'])->name('verification.detail');
         Route::put('/verification/{id}/update', [BackFinanceController::class, 'verificationUpdate'])->name('verification.update');
+        Route::get('/confirm-payment/{id}/generate', [BackFinanceController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
+        Route::get('/confirm-payment/{id}/mail-send', [BackFinanceController::class, 'confirmPaymentMailSend'])->name('confirm-payment.mail-send');
         Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');
     });
 

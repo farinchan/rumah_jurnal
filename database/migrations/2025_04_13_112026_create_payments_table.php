@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('invoice_number')->nullable();
             $table->timestamp('payment_timestamp')->nullable();
             $table->string('payment_method')->nullable();
-            $table->integer('payment_amount')->nullable();
+            $table->string('payment_amount')->nullable();
+            $table->integer('payment_amount_int')->nullable();
             $table->string('payment_account_number')->nullable();
             $table->string('payment_account_name')->nullable();
             $table->string('payment_file')->nullable();

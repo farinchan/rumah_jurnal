@@ -19,7 +19,7 @@
                             <option value="4" data-select2-id="select2-data-125-ax5i">24 Hours</option>
                         </select>
                     </div>
-                    <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal"
+                    <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal" id="btn_add_article"
                         data-bs-target="#modal_select_article">
                         <i class="ki-duotone ki-plus fs-2"></i> Tambah Artikel
                     </a>
@@ -169,6 +169,18 @@
                             Pilih artikel yang akan dimasukkan ke dalam edisi ini
                         </div>
                     </div>
+                    <div class="mb-10">
+                        <div class="input-group mb-5">
+                            <span class="input-group-text" id="basic-addon1">
+                                <i class="ki-duotone ki-search-list fs-1">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                </i>
+                            </span>
+                            <input type="text" id="search_article" class="form-control " placeholder="Cari Submission ID/Judul" />
+                        </div>
+                    </div>
                     <div class="mh-475px scroll-y me-n7 pe-7" id="list_article">
                     </div>
                 </div>
@@ -200,81 +212,156 @@
                             <!--end::Close-->
                         </div>
                     </div>
+
                     <form
                         action="{{ route('back.journal.article.update', [$journal->url_path, $issue->id, $submission->id]) }}"
                         method="POST">
                         @method('PUT')
                         @csrf
                         <div class="modal-body">
-                            <table class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
-                                <tr>
-                                    <td>Judul</td>
-                                    <td>:</td>
-                                    <td>
-                                        {{ $submission->fullTitle }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Penulis</td>
-                                    <td>:</td>
-                                    <td>
-                                        <ul>
-                                            @foreach ($submission->getAuthorsAttribute() as $author)
-                                                <li>
-                                                    <span class="text-gray-800 fw-bold">
-                                                        {{ $author['name'] }}
-                                                    </span>
-                                                    <br>
-                                                    {{ $author['affiliation'] }}
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Abstrak</td>
-                                    <td>:</td>
-                                    <td>
-                                        {!! $submission->abstract !!}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Keywords</td>
-                                    <td>:</td>
-                                    <td>
-                                        {{ $submission->keywords }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Published</td>
-                                    <td>:</td>
-                                    <td>
-                                        {{ $submission->datePublished }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Terakhir Diubah</td>
-                                    <td>:</td>
-                                    <td>
-                                        {{ $submission->lastModified }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Reviewer</td>
-                                    <td>:</td>
-                                    <td>
-                                        <select class="form-select" data-control="select2"
-                                            data-placeholder="Select an option"
-                                            data-dropdown-parent="#modal_view_article_{{ $submission->submission_id }}"
-                                            name="reviewer[]" data-allow-clear="true" multiple="multiple">
-                                            <option></option>
-                                            @foreach ($reviewers as $reviewer)
-                                                <option value="{{ $reviewer->id }}" {{ $submission->reviewers->contains($reviewer->id) ? 'selected' : '' }}>{{ $reviewer->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                </tr>
-                            </table>
+                            @if ($journal->author_fee != 0)
+                            <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab"
+                                        href="#kt_tab_pane_1_submission_{{ $submission->id }}">Informasi</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab"
+                                        href="#kt_tab_pane_2_submission_{{ $submission->id }}">History Pembayaran</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="myTabContent">
+                                <div class="tab-pane fade show active"
+                                    id="kt_tab_pane_1_submission_{{ $submission->id }}" role="tabpanel">
+                                    @endif
+                                    <table class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
+                                        <tr>
+                                            <td>Judul</td>
+                                            <td>:</td>
+                                            <td>
+                                                {{ $submission->fullTitle }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Penulis</td>
+                                            <td>:</td>
+                                            <td>
+                                                <ul>
+                                                    @foreach ($submission->getAuthorsAttribute() as $author)
+                                                        <li>
+                                                            <span class="text-gray-800 fw-bold">
+                                                                {{ $author['name'] }}
+                                                            </span>
+                                                            <br>
+                                                            {{ $author['affiliation'] }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Abstrak</td>
+                                            <td>:</td>
+                                            <td>
+                                                {!! $submission->abstract !!}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Keywords</td>
+                                            <td>:</td>
+                                            <td>
+                                                {{ $submission->keywords }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Published</td>
+                                            <td>:</td>
+                                            <td>
+                                                {{ $submission->datePublished }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Terakhir Diubah</td>
+                                            <td>:</td>
+                                            <td>
+                                                {{ $submission->lastModified }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Reviewer</td>
+                                            <td>:</td>
+                                            <td>
+                                                <select class="form-select" data-control="select2"
+                                                    data-placeholder="Select an option"
+                                                    data-dropdown-parent="#modal_view_article_{{ $submission->submission_id }}"
+                                                    name="reviewer[]" data-allow-clear="true" multiple="multiple">
+                                                    <option></option>
+                                                    @foreach ($reviewers as $reviewer)
+                                                        <option value="{{ $reviewer->id }}"
+                                                            {{ $submission->reviewers->contains($reviewer->id) ? 'selected' : '' }}>
+                                                            {{ $reviewer->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    @if ($journal->author_fee != 0)
+                                </div>
+                                <div class="tab-pane fade" id="kt_tab_pane_2_submission_{{ $submission->id }}"
+                                    role="tabpanel">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-rounded table-striped border gy-7 gs-7">
+                                            <thead>
+                                                <tr class="fw-semibold fs-6 text-gray-800 border-bottom-2 border-gray-200">
+                                                    <th>Waktu</th>
+                                                    <th>Pembayar</th>
+                                                    <th>Jumlah Pembayaran</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse ($submission->payments as $payment)
+                                                    <tr>
+                                                        <td>
+                                                            {{ Carbon\Carbon::parse($payment->created_at)->translatedFormat('l, d F Y H:i:s') }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $payment->payment_account_name }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $payment->payment_amount }}
+                                                        </td>
+                                                        <td>
+                                                            @if ($payment->payment_status == 'pending')
+                                                                <span
+                                                                    class="badge badge-light-warning fs-7 fw-bold">{{ $payment->payment_status }}</span>
+                                                            @elseif ($payment->payment_status == 'accepted')
+                                                                <span
+                                                                    class="badge badge-light-success fs-7 fw-bold">{{ $payment->payment_status }}</span>
+                                                            @elseif ($payment->payment_status == 'rejected')
+                                                                <span
+                                                                    class="badge badge-light-danger fs-7 fw-bold">{{ $payment->payment_status }}</span>
+                                                            @else
+                                                                <span
+                                                                    class="badge badge-light-secondary fs-7 fw-bold">{{ $payment->payment_status }}</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                    @empty
+                                                    <tr>
+                                                        <td colspan="4" class="text-center text-muted fw-semibold fs-6">
+                                                            Belum ada history pembayaran
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
@@ -345,7 +432,8 @@
                                 </div>
                                 <div class="fv-row fv-plugins-icon-container">
                                     <div class="d-flex">
-                                        <a href="{{ route('back.journal.invoice.mail-send', $submission->id) }}" class="btn btn-light w-100 mx-3 btn-loading">
+                                        <a href="{{ route('back.journal.invoice.mail-send', $submission->id) }}"
+                                            class="btn btn-light w-100 mx-3 btn-loading">
                                             <i class="ki-duotone ki-send fs-2 ">
                                                 <span class="path1"></span>
                                                 <span class="path2"></span>
@@ -407,87 +495,108 @@
         let submissions = @json($issue->submissions->pluck('submission_id'));
         let data = [];
         $(document).ready(function() {
-            $('#list_article').html(`
-                <div class="text-center">
-                    <div class="spinner spinner-primary spinner-lg"></div>
-                    Loading...
-                </div>
-            `);
-            $.ajax({
-                url: "{{ route('api.v1.submissions.list') }}",
-                type: 'GET',
-                data: {
-                    url_path: "{{ $journal->url_path }}"
-                },
-                success: function(response) {
-                    console.log(response);
-                    // Filter out the submissions that are already in the issue
-                    let filter_data = response.data.filter(item => {
-                        return !submissions.map(Number).includes(item.id);
-                    });
-                    console.log(filter_data);
-                    $('#list_article').html('');
-                    filter_data.forEach(submission => {
-                        $('#list_article').append(`
-                        <div class="border border-hover-primary p-7 rounded mb-7">
-                            <div class="d-flex flex-stack pb-3">
-                                <div class="d-flex">
-                                    <div class="">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="text-gray-900 fw-bold text-hover-primary fs-5 me-4">
-                                                ${submission.publications[0].authorsString}
-                                            </a>
-                                        </div>
-                                        <span class="text-muted fw-semibold mb-3">
-                                            ${submission.publications[0].fullTitle.en_US}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div clas="d-flex">
-                                    <div class="text-end pb-3 w-100px">
-                                        <span class="text-muted fs-7">Submission ID</span><br>
-                                        <span class="text-gray-900 fw-bold fs-5">
-                                            ${submission.id}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-0">
-                                <div class="d-flex flex-column">
-                                    <div class="separator separator-dashed border-muted my-5"></div>
-                                    <div class="d-flex flex-stack">
-                                        <div class="d-flex flex-column mw-200px">
-                                            <div class="d-flex align-items-center mb-2">
-                                                ${submission.status == 1 ? `
-                                                                                                                            <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
-                                                                                                                            ` : submission.status == 3 ? `
-                                                                                                                            <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
-                                                                                                                            ` : submission.status == 4 ? `
-                                                                                                                            <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
-                                                                                                                            ` :
-                                                `<span class="badge badge-light-secondary fs-5 p-2">${submission.statusLabel}</span>`
-                                                }
+
+            $('#btn_add_article').on('click', function() {
+                // Show the loading spinner
+                $('#list_article').html(`
+                    <div class="text-center">
+                        <div class="spinner spinner-primary spinner-lg"></div>
+                        Loading...
+                    </div>
+                `);
+
+                $.ajax({
+                    url: "{{ route('api.v1.submissions.list') }}",
+                    type: 'GET',
+                    data: {
+                        url_path: "{{ $journal->url_path }}"
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        // Filter out the submissions that are already in the issue
+                        let filter_data = response.data.filter(item => {
+                            return !submissions.map(Number).includes(item.id);
+                        });
+                        console.log(filter_data);
+                        $('#list_article').html('');
+                        filter_data.forEach(submission => {
+                            $('#list_article').append(`
+                            <div class="border border-hover-primary p-7 rounded mb-7 submission-item" data-title="${submission.publications[0].fullTitle.en_US}" data-id="${submission.id}">
+                                <div class="d-flex flex-stack pb-3">
+                                    <div class="d-flex">
+                                        <div class="">
+                                            <div class="d-flex align-items-center">
+                                                <a href="#" class="text-gray-900 fw-bold text-hover-primary fs-5 me-4">
+                                                    ${submission.publications[0].authorsString}
+                                                </a>
                                             </div>
+                                            <span class="text-muted fw-semibold mb-3">
+                                                ${submission.publications[0].fullTitle.en_US}
+                                            </span>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-primary"
-                                            onclick="selectArticle(${submission.id})">
-                                            Pilih Artikel
-                                        </button>
+                                    </div>
+                                    <div clas="d-flex">
+                                        <div class="text-end pb-3 w-100px">
+                                            <span class="text-muted fs-7">Submission ID</span><br>
+                                            <span class="text-gray-900 fw-bold fs-5">
+                                                ${submission.id}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-0">
+                                    <div class="d-flex flex-column">
+                                        <div class="separator separator-dashed border-muted my-5"></div>
+                                        <div class="d-flex flex-stack">
+                                            <div class="d-flex flex-column mw-200px">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    ${submission.status == 1 ? `
+                                                        <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
+                                                        ` : submission.status == 3 ? `
+                                                        <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
+                                                        ` : submission.status == 4 ? `
+                                                        <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
+                                                        ` :
+                                                    `<span class="badge badge-light-secondary fs-5 p-2">${submission.statusLabel}</span>`
+                                                    }
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-primary"
+                                                onclick="selectArticle(${submission.id})">
+                                                Pilih Artikel
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `);
-                    });
-                },
-                error: function(xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: 'Terjadi kesalahan saat mengambil data dari OJS' + xhr.status,
-                    });
-                }
+                        `);
+                        });
+
+                        // Add search functionality with filter for ID or title
+                        $('#search_article').on('input', function() {
+                            let searchValue = $(this).val().toLowerCase();
+                            $('.submission-item').each(function() {
+                                let title = $(this).data('title').toLowerCase();
+                                let id = $(this).data('id').toString();
+                                if (title.includes(searchValue) || id.includes(searchValue)) {
+                                    $(this).show();
+                                } else {
+                                    $(this).hide();
+                                }
+                            });
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Terjadi kesalahan saat mengambil data dari OJS' + xhr.status,
+                        });
+                    }
+                });
+
             });
+
         });
 
         function selectArticle(id) {

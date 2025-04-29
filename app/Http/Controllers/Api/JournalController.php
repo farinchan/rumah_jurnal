@@ -132,8 +132,6 @@ class JournalController extends Controller
                 $jurnal->last_sync = now();
                 $jurnal->save();
 
-                Permission::create(['name' =>  $jurnal->url_path]);
-
                 return response()->json([
                     'success' => true,
                     'message' => 'Success',

@@ -75,6 +75,7 @@ return [
     'payment_data' => 'Payment Data',
     'payment_timestamp' => 'Payment Date',
     'payment_method' => 'Payment Method',
+    'payment_amount' => 'Payment Amount',
     'payment_declaration_title' => 'Payment Declaration',
     'payment_declaration_text' => 'I hereby declare that the data I have entered is correct and I have made the payment for the publication fee of this article. I understand that this fee is non-refundable and will be used to support the publication process of my article.',
     'payment_declaration_checkbox' => 'I agree with the above statement',
