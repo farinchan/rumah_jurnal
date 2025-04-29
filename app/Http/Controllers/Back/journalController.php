@@ -20,16 +20,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
-use PhpOffice\PhpPresentation\IOFactory;
-use PhpOffice\PhpPresentation\PhpPresentation;
-use PhpOffice\PhpPresentation\Shape\RichText;
-use PhpOffice\PhpPresentation\Writer\Pdf\DomPDF as PdfWriter;
 use ZipArchive;
 
 class journalController extends Controller
 {
-
-
 
     public function index($journal_path)
     {
@@ -193,7 +187,7 @@ class journalController extends Controller
             return abort(404);
         }
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::with('submissions.payments')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -255,11 +249,14 @@ class journalController extends Controller
 
         SubmissionReviewer::where('submission_id', $submission->id)->delete();
 
-        foreach ($request->reviewer as $reviewer) {
-            SubmissionReviewer::create([
-                'submission_id' => $submission->id,
-                'reviewer_id' => $reviewer,
-            ]);
+        if ($request->reviewer) {
+
+            foreach ($request->reviewer as $reviewer) {
+                SubmissionReviewer::create([
+                    'submission_id' => $submission->id,
+                    'reviewer_id' => $reviewer,
+                ]);
+            }
         }
 
         Alert::success('Success', 'Reviewer has been added');
@@ -610,7 +607,7 @@ class journalController extends Controller
                     'affiliation' => $author['affiliation'],
                     'title' => $submission->fullTitle,
                     'journal' => $issue->journal->title,
-                       'journal_path' => $issue->journal->url_path,
+                    'journal_path' => $issue->journal->url_path,
                     'journal_fee' => $issue->journal->author_fee,
                     'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
                     'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
@@ -640,36 +637,5 @@ class journalController extends Controller
         }
         Alert::success('Success', 'Email has been sent');
         return redirect()->back();
-    }
-
-    public function confirmPaymentGenerate($submission)
-    {
-        $submission = Submission::find($submission);
-        if (!$submission) {
-            Alert::error('Error', 'Submission not found');
-            return redirect()->back()->with('error', 'Submission not found');
-        }
-
-        // Load PPTX template
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
-
-        $data = [
-            'name' => $submission->authors[0]['name'],
-            'affiliation' => $submission->authors[0]['affiliation'],
-            'title' => $submission->fullTitle,
-            'journal' => $issue->journal->title,
-            'editon' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
-            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-            'id' => $submission->submission_id,
-            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-        ];
-
-        // dd($data);
-        $pdf = Pdf::loadView('back.pages.journal.pdf.confirm-payment', $data)->setPaper('A4', 'portrait');
-        return $pdf->stream('Confirm-Payment-' . $submission->submission_id . '.pdf');
     }
 }

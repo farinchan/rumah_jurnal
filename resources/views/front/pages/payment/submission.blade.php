@@ -203,7 +203,7 @@
                                                         <br>
                                                         {{ Str::mask($payment->payment_account_number, '*', 4, strlen($payment->payment_account_number) - 8) }}
                                                     </td>
-                                                    <td>@money($payment->payment_amount)</td>
+                                                    <td>{{ $payment->payment_amount }}</td>
                                                     <td>
                                                         @if ($payment->payment_status == 'pending')
                                                             <span

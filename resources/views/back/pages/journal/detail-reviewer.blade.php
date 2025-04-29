@@ -10,7 +10,7 @@
                             <h3>Reviewer</h3>
                         </div>
                         <div class="card-toolbar">
-                            <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal"
+                            <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal" id="btn_add_reviewer"
                                 data-bs-target="#modal_select_article">
                                 <i class="ki-duotone ki-plus fs-2"></i> Tambah Reviewer
                             </a>
@@ -172,6 +172,20 @@
                         </h1>
                         <div class="text-muted fw-semibold fs-5">
                             Pilih reviewer yang akan ditambahkan ke edisi ini
+                        </div>
+                    </div>
+                    <div class="mb-10">
+                        <div class="input-group mb-5">
+                            <span class="input-group-text" id="basic-addon1">
+                                <i class="ki-duotone ki-profile-user fs-1">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                            <input type="text" id="search_reviewer" class="form-control "
+                                placeholder="Cari Nama Reviewer" />
                         </div>
                     </div>
                     <div class="mh-475px scroll-y me-n7 pe-7" id="list_article">
@@ -364,29 +378,30 @@
         let reviewer = @json($issue->reviewers->pluck('reviewer_id'));
         let data = [];
         $(document).ready(function() {
-            $('#list_article').html(`
-                <div class="text-center">
-                    <div class="spinner spinner-primary spinner-lg"></div>
-                    Loading...
-                </div>
-            `);
-            $.ajax({
-                url: "{{ route('api.v1.reviewer.list') }}",
-                type: 'GET',
-                data: {
-                    url_path: "{{ $journal->url_path }}"
-                },
-                success: function(response) {
-                    console.log(response);
-                    // Filter out the reviewer that are already in the issue
-                    let filter_data = response.data.filter(item => {
-                        return !reviewer.map(Number).includes(item.id);
-                    });
-                    console.log(filter_data);
-                    $('#list_article').html('');
-                    filter_data.forEach(reviewer => {
-                        $('#list_article').append(`
-                        <div class="border border-hover-primary p-7 rounded mb-7">
+            $('#btn_add_reviewer').on('click', function() {
+                $('#list_article').html(`
+                    <div class="text-center">
+                        <div class="spinner spinner-primary spinner-lg"></div>
+                        Loading...
+                    </div>
+                `);
+                $.ajax({
+                    url: "{{ route('api.v1.reviewer.list') }}",
+                    type: 'GET',
+                    data: {
+                        url_path: "{{ $journal->url_path }}"
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        // Filter out the reviewer that are already in the issue
+                        let filter_data = response.data.filter(item => {
+                            return !reviewer.map(Number).includes(item.id);
+                        });
+                        console.log(filter_data);
+                        $('#list_article').html('');
+                        filter_data.forEach(reviewer => {
+                            $('#list_article').append(`
+                        <div class="border border-hover-primary p-7 rounded mb-7 reviewer-item" data-name="${reviewer.fullName.toLowerCase()}">
                             <div class="d-flex flex-stack pb-3">
                                 <div class="d-flex">
                                     <div class="">
@@ -411,11 +426,25 @@
                             </div>
                         </div>
                     `);
-                    });
-                },
-                error: function(xhr) {
-                    alert('Terjadi kesalahan');
-                }
+                        });
+
+                        // Add search functionality
+                        $('#search_reviewer').on('input', function() {
+                            let searchValue = $(this).val().toLowerCase();
+                            $('.reviewer-item').each(function() {
+                                let name = $(this).data('name');
+                                if (name.includes(searchValue)) {
+                                    $(this).show();
+                                } else {
+                                    $(this).hide();
+                                }
+                            });
+                        });
+                    },
+                    error: function(xhr) {
+                        alert('Terjadi kesalahan');
+                    }
+                });
             });
         });
 

@@ -61,7 +61,7 @@
                                                 data-kt-ecommerce-category-filter="category_name">Vol. {{ $issue->volume }}
                                                 No. {{ $issue->number }} ({{ $issue->year }}): {{ $issue->title }}</a>
                                             <div class="text-muted fs-7 fw-bold">
-                                                {{ Str::limit(strip_tags($issue->description), 100) }}...</div>
+                                                {{ Str::limit(strip_tags($issue->description), 300) }}...</div>
                                         </div>
                                     </div>
                                 </td>

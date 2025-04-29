@@ -5,6 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -12,13 +13,14 @@ use Illuminate\Queue\SerializesModels;
 class ConfirmPaymentMail extends Mailable
 {
     use Queueable, SerializesModels;
-
+    public $mailData;
     /**
      * Create a new message instance.
      */
-    public function __construct()
+
+    public function __construct($mailData)
     {
-        //
+        $this->mailData = $mailData;
     }
 
     /**
@@ -27,7 +29,7 @@ class ConfirmPaymentMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Confirm Payment Mail',
+            subject: $this->mailData['subject'],
         );
     }
 
@@ -37,7 +39,7 @@ class ConfirmPaymentMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'email.confirm_payment_mail',
         );
     }
 
@@ -48,6 +50,14 @@ class ConfirmPaymentMail extends Mailable
      */
     public function attachments(): array
     {
+        if (isset($this->mailData['attachments'])) {
+            return [
+                Attachment::fromPath($this->mailData['attachments'])
+                    ->as('Payment Confirmation.pdf')
+                    ->withMime('application/pdf'),
+            ];
+        }
+
         return [];
     }
 }

@@ -91,7 +91,7 @@
                             <th class="text-start min-w-350px">Submission</th>
                             <th class="text-start min-w-200px">journal</th>
                             <th class="text-start">Status</th>
-                            <th class="text-end min-w-100px">Action</th>
+                            <th class="text-end min-w-150px">Action</th>
                         </tr>
                     </thead>
                     <tbody class="fw-semibold text-gray-600">

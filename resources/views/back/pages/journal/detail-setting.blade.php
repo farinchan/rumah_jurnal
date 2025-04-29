@@ -63,18 +63,6 @@
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        <div class="col-md-12 mt-5">
-                            <label class="form-label">LOA Template</label>
-                            <input type="file" name="loa_template" class="form-control"
-                                placeholder="URL LOA Template" value="{{ $issue->loa_template }}" />
-                                @if ($issue->loa_template)
-                                   File Template: <a href="{{ asset('storage/' . $issue->loa_template) }}" target="_blank">Lihat
-                                        Template LOA</a>
-                                @endif
-                            @error('loa_template')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
                     </div>
                 </div>
                 <div class="card-footer text-end">
