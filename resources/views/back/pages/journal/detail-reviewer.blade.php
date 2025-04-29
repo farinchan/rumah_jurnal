@@ -48,14 +48,6 @@
                                                     {{ $reviewer->email }}
                                                 </span>
 
-
-                                                <a class="badge badge-light-success cursor-pointer my-1">
-                                                    <i class="ki-duotone ki-send fs-5 text-success me-3">
-                                                        <span class="path1"></span>
-                                                        <span class="path2"></span>
-                                                    </i>
-                                                    Kirim SK
-                                                </a>
                                                 <span class="badge badge-light-warning cursor-pointer my-1"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#modal_send_email_{{ $reviewer->reviewer_id }}">
@@ -117,42 +109,170 @@
                             Upload SK Reviewer untuk edisi ini
                         </span>
                         <div class="d-flex align-self-center mb-3">
-                            <div class="flex-grow-1 me-3">
-                                <input type="file" class="form-control form-control-solid" name="sk_reviewer"
-                                    id="sk_reviewer" accept=".pdf" />
-                                <small class="form-text text-muted">
-                                    File harus dalam format PDF
-                                </small>
-                            </div>
-                            <button type="button" class="btn btn-primary btn-icon flex-shrink-0" data-bs-toggle="tooltip"
-                                data-bs-placement="right" title="Upload untuk menambah/mengubah SK">
-                                <i class="ki-duotone ki-file-up fs-1">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </button>
+                            <form
+                                action="{{ route('back.journal.reviewer.file-sk.store', [$journal->url_path, $issue->id]) }}"
+                                method="POST" enctype="multipart/form-data" class="d-flex flex-grow-1">
+                                @csrf
+                                <div class="flex-grow-1 me-3">
+                                    <input type="file" class="form-control form-control-solid" name="file"
+                                        id="sk_reviewer" accept=".pdf" />
+                                    <small class="form-text text-muted">
+                                        File harus dalam format PDF
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-icon flex-shrink-0"
+                                    data-bs-toggle="tooltip" data-bs-placement="right"
+                                    title="Upload untuk menambah/mengubah SK">
+                                    <i class="ki-duotone ki-file-up fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </button>
+                            </form>
                         </div>
 
-                        <button type="button" class="btn btn-light-info w-100 mb-5" data-bs-toggle="tooltip"
-                            data-bs-placement="right" title="Lihat File SK ">
-                            <i class="ki-duotone ki-eye fs-1">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                                <span class="path3"></span>
-                            </i>
-                            Lihat File
-                        </button>
-                        <button type="button" class="btn btn-light-success w-100 mb-3" data-bs-toggle="tooltip"
-                            data-bs-placement="right" title="Kirim SK ke semua reviewer via email">
-                            <i class="ki-duotone ki-send fs-1">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                            Kirim SK Reviewer
-                        </button>
+                        @if ($file_sk)
+                            <div class="btn-group w-100 mb-5">
+                                <a href="{{ Storage::url($file_sk->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Lihat File SK ">
+                                    <i class="ki-duotone ki-eye fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>
+                                    Lihat
+                                </a>
+
+                                <a href="{{ route('back.journal.reviewer.file-sk.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Kirim SK ke semua reviewer via email">
+                                    <i class="ki-duotone ki-file-added fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    Kirim
+                                </a>
+                            </div>
+                        @endif
 
                     </div>
                 </div>
+                <div class="card card-xxl-stretch mb-5 mb-xxl-10">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3 class="text-gray-800">Sertifikat Reviewer</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="fs-5 fw-semibold text-gray-600 pb-6 d-block">
+                            Upload Sertifikat Reviewer untuk edisi ini
+                        </span>
+                        <div class="d-flex align-self-center mb-3">
+                            <form
+                                action="{{ route('back.journal.reviewer.file-certificate.store', [$journal->url_path, $issue->id]) }}"
+                                method="POST" enctype="multipart/form-data" class="d-flex flex-grow-1">
+                                @csrf
+                                <div class="flex-grow-1 me-3">
+                                    <input type="file" class="form-control form-control-solid" name="file"
+                                        id="certificate_reviewer" accept=".pdf" />
+                                    <small class="form-text text-muted">
+                                        File harus dalam format PDF
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-icon flex-shrink-0"
+                                    data-bs-toggle="tooltip" data-bs-placement="right"
+                                    title="Upload untuk menambah/mengubah Sertifikat">
+                                    <i class="ki-duotone ki-file-up fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </button>
+                            </form>
+                        </div>
+
+                        @if ($file_certificate)
+                            <div class="btn-group w-100 mb-5">
+                                <a href="{{ Storage::url($file_certificate->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Lihat File Sertifikat ">
+                                    <i class="ki-duotone ki-eye fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>
+                                    Lihat
+                                </a>
+
+                                <a href="{{ route('back.journal.reviewer.file-certificate.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Kirim Sertifikat ke semua reviewer via email">
+                                    <i class="ki-duotone ki-file-added fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    Kirim
+                                </a>
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+                <div class="card card-xxl-stretch mb-5 mb-xxl-10">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3 class="text-gray-800">Pembayaran Reviewer</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="fs-5 fw-semibold text-gray-600 pb-6 d-block">
+                            Upload File Pembayaran Reviewer untuk edisi ini
+                        </span>
+                        <div class="d-flex align-self-center mb-3">
+                            <form
+                                action="{{ route('back.journal.reviewer.file-fee.store', [$journal->url_path, $issue->id]) }}"
+                                method="POST" enctype="multipart/form-data" class="d-flex flex-grow-1">
+                                @csrf
+                                <div class="flex-grow-1 me-3">
+                                    <input type="file" class="form-control form-control-solid" name="file"
+                                        id="file_fee_reviewer" accept=".pdf" />
+                                    <small class="form-text text-muted">
+                                        File harus dalam format PDF
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-icon flex-shrink-0"
+                                    data-bs-toggle="tooltip" data-bs-placement="right"
+                                    title="Upload untuk menambah/mengubah File Fee">
+                                    <i class="ki-duotone ki-file-up fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </button>
+                            </form>
+                        </div>
+
+                        @if ($file_fee)
+                            <div class="btn-group w-100 mb-5">
+                                <a href="{{ Storage::url($file_fee->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Lihat File Fee ">
+                                    <i class="ki-duotone ki-eye fs-1">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>
+                                    Lihat
+                                </a>
+
+                                <a href="{{ route('back.journal.reviewer.file-fee.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Kirim File Fee ke semua reviewer via email">
+                                    <i class="ki-duotone ki-file-added fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    Kirim
+                                </a>
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
