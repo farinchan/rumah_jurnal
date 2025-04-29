@@ -40,7 +40,7 @@ class PaymentController extends Controller
                 ]
             ],
             'journals' => Journal::all(),
-            'submissions' => Submission::with('issue.journal')
+            'submissions' =>Submission::with('issue.journal')
                 ->when($journal_id, function ($query) use ($journal_id) {
                     return $query->whereHas('issue.journal', function ($query) use ($journal_id) {
                         $query->where('id', $journal_id);
@@ -53,7 +53,7 @@ class PaymentController extends Controller
                     });
                 })
                 ->latest()
-                ->paginate(6)
+                ->paginate(6) ,
         ];
         return view('front.pages.payment.index', $data);
     }
@@ -97,6 +97,10 @@ class PaymentController extends Controller
             'journal' => $journal
         ];
 
+        // return response()->json([
+        //     'status' => true,
+        //     'data' => $data
+        // ]);
         return view('front.pages.payment.submission', $data);
     }
 

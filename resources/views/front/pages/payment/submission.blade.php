@@ -57,23 +57,25 @@
 
                                     <hr>
                                     <div class="ltn__social-media">
-                                        <ul>
-                                            <li>{{ __('front.payment_status') }}:</li>
-                                            @if ($submission->payment_status == 'paid')
-                                                <span
-                                                    class="badge badge-success text-white">{{ $submission->payment_status }}</span>
-                                            @elseif ($submission->payment_status == 'pending')
-                                                <span
-                                                    class="badge badge-warning text-white">{{ $submission->payment_status }}</span>
-                                            @elseif ($submission->payment_status == 'cencelled')
-                                                <span
-                                                    class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
-                                            @elseif ($submission->payment_status == 'refunded')
-                                                <span
-                                                    class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
-                                            @endif
+                                        @if ($journal->author_fee > 0)
+                                            <ul>
+                                                <li>{{ __('front.payment_status') }}:</li>
+                                                @if ($submission->payment_status == 'paid')
+                                                    <span
+                                                        class="badge badge-success text-white">{{ $submission->payment_status }}</span>
+                                                @elseif ($submission->payment_status == 'pending')
+                                                    <span
+                                                        class="badge badge-warning text-white">{{ $submission->payment_status }}</span>
+                                                @elseif ($submission->payment_status == 'cencelled')
+                                                    <span
+                                                        class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
+                                                @elseif ($submission->payment_status == 'refunded')
+                                                    <span
+                                                        class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
+                                                @endif
 
-                                        </ul>
+                                            </ul>
+                                        @endif
                                         <ul>
                                             <li>
                                                 {{ __('front.submission_status') }}:
@@ -105,28 +107,30 @@
                                         </ul>
                                     </div>
                                     <hr>
-                                    <div class="ltn__product-details-menu-2">
+                                    @if ($journal->author_fee > 0)
+                                        <div class="ltn__product-details-menu-2">
 
-                                        {{ __('front.pay_now_desc') }}
+                                            {{ __('front.pay_now_desc') }}
 
-                                        <ul>
+                                            <ul>
 
-                                            <li>
-                                                <a href="#" class="theme-btn-1 btn btn-effect-1" >
-                                                    <i class="fas fa-file-invoice"></i>
-                                                    <span>{{ __('front.view_invoice') }}</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ route('payment.pay', [$journal->url_path, $submission->submission_id]) }}" class="theme-btn-1 btn btn-effect-1"
-                                                    title="{{ __('front.pay_now_btn') }}" >
-                                                    <i class="fas fa-credit-card"></i>
-                                                    <span>{{ __('front.pay_now_btn') }}</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-
+                                                <li>
+                                                    <a href="#" class="theme-btn-1 btn btn-effect-1">
+                                                        <i class="fas fa-file-invoice"></i>
+                                                        <span>{{ __('front.view_invoice') }}</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('payment.pay', [$journal->url_path, $submission->submission_id]) }}"
+                                                        class="theme-btn-1 btn btn-effect-1"
+                                                        title="{{ __('front.pay_now_btn') }}">
+                                                        <i class="fas fa-credit-card"></i>
+                                                        <span>{{ __('front.pay_now_btn') }}</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    @endif
 
                                 </div>
                             </div>
@@ -140,8 +144,10 @@
                                     href="#liton_tab_details_1_1">{{ __('front.abstract') }}</a>
                                 <a data-toggle="tab" href="#liton_tab_details_1_2"
                                     class="">{{ __('front.references') }}</a>
-                                <a data-toggle="tab" href="#liton_tab_details_1_3"
-                                    class="">{{ __('front.payment') }}</a>
+                                @if ($journal->author_fee > 0)
+                                    <a data-toggle="tab" href="#liton_tab_details_1_3"
+                                        class="">{{ __('front.payment') }}</a>
+                                @endif
                             </div>
                         </div>
                         <div class="tab-content">
@@ -187,7 +193,8 @@
                                         <tbody>
                                             @forelse ($submission->payments as $payment)
                                                 <tr>
-                                                    <td>{{ \Carbon\Carbon::parse($payment->created_at)->translatedFormat('l, d F Y H:i') }}</td>
+                                                    <td>{{ \Carbon\Carbon::parse($payment->created_at)->translatedFormat('l, d F Y H:i') }}
+                                                    </td>
                                                     <td>
                                                         <strong>{{ $payment->name }}</strong>
                                                         <br>
@@ -199,7 +206,7 @@
                                                     <td>
                                                         {{ $payment->payment_method }}
                                                         <br>
-                                                         {{ $payment->payment_account_name }}
+                                                        {{ $payment->payment_account_name }}
                                                         <br>
                                                         {{ Str::mask($payment->payment_account_number, '*', 4, strlen($payment->payment_account_number) - 8) }}
                                                     </td>
@@ -223,11 +230,11 @@
                                                 </tr>
 
                                             @empty
-                                            <tr>
-                                                <td colspan="6" class="text-center">
-                                                    <strong>{{ __('front.no_payment_found') }}</strong>
-                                                </td>
-                                            </tr>
+                                                <tr>
+                                                    <td colspan="6" class="text-center">
+                                                        <strong>{{ __('front.no_payment_found') }}</strong>
+                                                    </td>
+                                                </tr>
                                             @endforelse
 
                                         </tbody>

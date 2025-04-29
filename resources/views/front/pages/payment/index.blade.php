@@ -96,25 +96,44 @@
                                         <br>
                                         <strong>Issue:</strong>
                                         <a href="{{ route('journal.detail', $submission->issue->journal->url_path) }}">
-                                            {{ $submission->issue->title }}
+                                            Vol. {{ $submission->issue->volume }} No. {{ $submission->issue->number }}
+                                            ({{ $submission->issue->year }}): {{ $submission->issue->title }}
                                         </a>
                                     </p>
                                 </div>
+                                @if ($submission?->issue?->journal?->author_fee > 0)
+                                    <div>
+                                        <span>{{ __('front.payment_status') }}: </span>
+                                        @if ($submission->payment_status == 'paid')
+                                            <span
+                                                class="badge badge-success text-white">{{ $submission->payment_status }}</span>
+                                        @elseif ($submission->payment_status == 'pending')
+                                            <span
+                                                class="badge badge-warning text-white">{{ $submission->payment_status }}</span>
+                                        @elseif ($submission->payment_status == 'cencelled')
+                                            <span
+                                                class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
+                                        @elseif ($submission->payment_status == 'refunded')
+                                            <span
+                                                class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
+                                        @endif
+                                    </div>
+                                @endif
                                 <div>
-                                    <span>{{ __('front.payment_status') }}: </span>
-                                    @if ($submission->payment_status == 'paid')
-                                        <span
-                                            class="badge badge-success text-white">{{ $submission->payment_status }}</span>
-                                    @elseif ($submission->payment_status == 'pending')
-                                        <span
-                                            class="badge badge-warning text-white">{{ $submission->payment_status }}</span>
-                                    @elseif ($submission->payment_status == 'cencelled')
-                                        <span
-                                            class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
-                                    @elseif ($submission->payment_status == 'refunded')
-                                        <span
-                                            class="badge badge-danger text-white">{{ $submission->payment_status }}</span>
-                                    @endif
+                                    <span>{{ __('front.submission_status') }}: </span>
+                                    @if ($submission->status == 1)
+                                                    <span
+                                                        class="badge badge-warning fs-7 text-white">{{ $submission->status_label }}</span>
+                                                @elseif ($submission->status == 3)
+                                                    <span
+                                                        class="badge badge-success fs-7 text-white">{{ $submission->status_label }}</span>
+                                                @elseif ($submission->status == 4)
+                                                    <span
+                                                        class="badge badge-danger fs-7 text-white">{{ $submission->status_label }}</span>
+                                                @else
+                                                    <span
+                                                        class="badge badge-secondary fs-7 text-white">{{ $submission->status_label }}</span>
+                                                @endif
                                 </div>
                                 <div>
                                     <span>{{ __('front.date_published') }}: </span>
@@ -132,11 +151,14 @@
                                                 <i class="far fa-eye"></i>
                                             </a>
                                         </li>
-                                        <li>
-                                            <a href="{{ route('payment.pay', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}" title="Pay Now">
-                                                <i class="fas fa-credit-card"></i>
-                                            </a>
-                                        </li>
+                                        @if ($submission?->issue?->journal?->author_fee > 0)
+                                            <li>
+                                                <a href="{{ route('payment.pay', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}"
+                                                    title="Pay Now">
+                                                    <i class="fas fa-credit-card"></i>
+                                                </a>
+                                            </li>
+                                        @endif
                                         <li>
                                             <a href="{{ $submission->urlPublished }}" title="View Publish"
                                                 data-toggle="modal" data-target="#liton_wishlist_modal">
