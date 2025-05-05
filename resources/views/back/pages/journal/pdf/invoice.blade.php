@@ -73,15 +73,15 @@
 
         <p style="margin-top: 20px;">
             Has made an administration payment to {{ $journal }}
-            with an amount of <strong>@money($journal_fee)</strong> Please transfer your payment via <strong>Bank
+            with an amount of <strong> {{ $payment_percent }}% - @money($payment_amount)</strong> Please transfer your payment via <strong>Bank
                 {{ $payment_account->bank }} - Nomor Rekening : {{ $payment_account->account_number }} - An.
                 {{ $payment_account->account_name }}.</strong> Payment Deadline is
-            <strong>{{ now()->addWeek()->format('d F Y') }}.</strong>
+            <strong>{{ $payment_due_date }}.</strong>
         </p>
 
         <p style="margin-top: -5px;">
             If you have made a payment, please confirm the payment via the following url : <a
-                href="https://s.id/payment-confirm">https://s.id/payment-confirm</a>
+                href="https://rumahjurnal.uinbukittinggi.ac.id/payment">https://rumahjurnal.uinbukittinggi.ac.id/payment</a>
         </p>
         <p style="margin-top: -5px;">
             If you have anything to ask, please get in touch Mrs. Herlinda via WhatsApp

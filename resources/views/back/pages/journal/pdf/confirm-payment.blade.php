@@ -72,7 +72,7 @@
         </p>
 
         <p style="margin-top: 20px;">
-            Thank you for paying the journal publication fees. you have made a payment in the name of {{ $payment_account_name }} an amount {{ $payment_amount }} on {{ $payment_timestamp }}.
+            Thank you for paying the journal publication fees. you have made a payment in the name of {{ $payment_account_name }} an amount @money($payment_amount) on {{ $payment_timestamp }}.
         </p>
 
         <p style="margin-top: -5px;">

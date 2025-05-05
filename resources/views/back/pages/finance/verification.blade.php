@@ -87,9 +87,10 @@
                     <thead>
                         <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
 
-                            <th class="text-start min-w-250px">Pembayaran</th>
-                            <th class="text-start min-w-350px">Submission</th>
-                            <th class="text-start min-w-200px">journal</th>
+                            <th class="text-start min-w-250px">Informasi Pembayar</th>
+                            <th class="text-start min-w-300px">Invoice</th>
+                            <th class="text-start min-w-450px">Submission</th>
+                            <th class="text-start min-w-350px">journal</th>
                             <th class="text-start">Status</th>
                             <th class="text-end min-w-150px">Action</th>
                         </tr>
@@ -125,6 +126,10 @@
                     searchable: false
                 },
                 {
+                    data: 'invoice',
+                    name: 'invoice',
+                },
+                {
                     data: 'submission',
                     name: 'submission',
                 },
@@ -147,7 +152,8 @@
                 $(row).find('td').eq(1).addClass('text-start pe-0');
                 $(row).find('td').eq(2).addClass('text-start pe-0');
                 $(row).find('td').eq(3).addClass('text-start pe-0');
-                $(row).find('td').eq(4).addClass('text-end ');
+                $(row).find('td').eq(4).addClass('text-start pe-0');
+                $(row).find('td').eq(5).addClass('text-end ');
 
             }
         });

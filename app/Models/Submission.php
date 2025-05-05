@@ -20,12 +20,10 @@ class Submission extends Model
         return $this->belongsTo(Issue::class, 'issue_id');
     }
 
-    public function payments()
+    public function paymentInvoices()
     {
-        return $this->hasMany(Payment::class, 'submission_id');
+        return $this->hasMany(PaymentInvoice::class, 'submission_id');
     }
-
-
 
     public function getFullTitleAttribute()
     {

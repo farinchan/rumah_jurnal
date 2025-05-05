@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
+use App\Models\PaymentInvoice;
 use App\Models\SettingWebsite;
 use App\Models\Submission;
 use Illuminate\Http\Request;
@@ -60,6 +61,8 @@ class PaymentController extends Controller
 
     public function submission(Request $request, $journal_path, $submission_id)
     {
+        return redirect()->route('payment.pay', [$journal_path,  $submission_id]);
+
         $submission = Submission::with('issue.journal')
             ->where('submission_id', $submission_id)
             ->whereHas('issue.journal', function ($query) use ($journal_path) {
@@ -94,7 +97,8 @@ class PaymentController extends Controller
                 ]
             ],
             'submission' => $submission,
-            'journal' => $journal
+            'journal' => $journal,
+
         ];
 
         // return response()->json([
@@ -118,7 +122,7 @@ class PaymentController extends Controller
         }
         $setting_web = SettingWebsite::first();
         $data = [
-            'title' => __('front.payment') . ' - ' . $submission->fullTitle,
+            'title' => __('front.payment') . ' - Submission ID ' . $submission->submission_id,
             'meta' => [
                 'title' => __('front.payment') . ' - ' . $submission->fullTitle . ' | ' . $setting_web->name,
                 'description' => strip_tags($submission->abstract),
@@ -147,6 +151,7 @@ class PaymentController extends Controller
             'submission' => $submission,
             'journal' => $journal,
             'payment_accounts' => PaymentAccount::all(),
+            'payment_invoices' => PaymentInvoice::where('submission_id', $submission->id)->where('is_paid', false)->get(),
         ];
 
         return view('front.pages.payment.pay', $data);
@@ -158,12 +163,9 @@ class PaymentController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'submission_id' => 'required|exists:submissions,id',
-                'invoice_id' => 'nullable',
+                'payment_invoice_id' => 'required|exists:payment_invoices,id',
                 'payment_timestamp' => 'required|date',
                 'payment_method' => 'required',
-                'payment_amount' => 'required',
-                'payment_amount_int' => 'required|numeric',
                 'payment_account_number' => 'required|max:255',
                 'payment_account_name' => 'required|max:255',
                 'payment_file' => 'required|mimes:jpg,jpeg,png,pdf|max:10240', // 10 MB
@@ -172,23 +174,25 @@ class PaymentController extends Controller
                 'phone' => 'required|max:255',
             ],
             [
-                'submission_id.required' => 'Submission ID is required',
-                'submission_id.exists' => 'Submission ID not found',
+                'payment_invoice_id.required' => 'Payment invoice ID is required',
+                'payment_invoice_id.exists' => 'Payment invoice ID is not valid',
                 'payment_timestamp.required' => 'Payment timestamp is required',
                 'payment_timestamp.datetime' => 'Payment timestamp must be a valid date and time',
                 'payment_method.required' => 'Payment method is required',
-                'payment_amount.required' => 'Payment amount is required',
-                'payment_amount_int.required' => 'Payment amount integer is required',
-                'payment_amount_int.numeric' => 'Payment amount integer must be a number',
-                'payment_account_number.required' => 'Account number is required',
                 'payment_account_name.required' => 'Account name is required',
+                'payment_account_number.required' => 'Account number is required',
+                'payment_account_number.max' => 'Account number must not exceed 255 characters',
+                'payment_account_name.max' => 'Account name must not exceed 255 characters',
                 'payment_file.required' => 'Payment file is required',
                 'payment_file.mimes' => 'Payment file must be a jpg, jpeg, png, or pdf file',
                 'payment_file.max' => 'Payment file size must not exceed 10 MB',
                 'name.required' => 'Name is required',
+                'name.max' => 'Name must not exceed 255 characters',
                 'email.required' => 'Email is required',
+                'email.max' => 'Email must not exceed 255 characters',
                 'email.email' => 'Email must be a valid email address',
-                'phone.required' => 'Phone number is required'
+                'phone.required' => 'Phone number is required',
+                'phone.max' => 'Phone number must not exceed 255 characters',
             ]
         );
         if ($validator->fails()) {
@@ -197,17 +201,14 @@ class PaymentController extends Controller
         }
 
         $paayment = new Payment();
-        $paayment->submission_id = $request->submission_id;
+        $paayment->payment_invoice_id = $request->payment_invoice_id;
         $paayment->payment_timestamp = $request->payment_timestamp;
         $paayment->payment_method = $request->payment_method;
-        $paayment->payment_amount = $request->payment_amount;
-        $paayment->payment_amount_int = $request->payment_amount_int;
         $paayment->payment_account_number = $request->payment_account_number;
         $paayment->payment_account_name = $request->payment_account_name;
         $paayment->name = $request->name;
         $paayment->email = $request->email;
         $paayment->phone = $request->phone;
-        $paayment->submission_id = $request->submission_id;
         if ($request->hasFile('payment_file')) {
             $file = $request->file('payment_file');
             $filename = Str::random(10) . '_' . time() . '.' . $file->getClientOriginalExtension();
@@ -216,6 +217,6 @@ class PaymentController extends Controller
         $paayment->save();
 
         Alert::success('Success', 'Payment has been created');
-        return redirect()->route('payment.submission', ['journal_path' => $journal_path, 'submission_id' => $submission_id]);
+        return redirect()->route('payment.index');
     }
 }

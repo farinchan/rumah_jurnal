@@ -9,13 +9,13 @@
             </div>
             <div class="card-body pt-0">
                 <h3 class="text-gray-800 text-hover-primary mb-4">
-                    {{ $payment->submission->submission_id }} - {{ $payment->submission->full_title }}
+                    {{ $payment->paymentInvoice->submission->submission_id }} - {{ $payment->paymentInvoice->submission->full_title }}
                 </h3>
 
                 <div class="mb-4">
                     <h5 class="fw-bold">Authors:</h5>
                     <ul class="list-unstyled ms-5">
-                        @foreach ($payment->submission->authors as $author)
+                        @foreach ($payment->paymentInvoice->submission->authors as $author)
                             <li class="mb-2">
                                 <span class="text-gray-800 fw-bold">{{ $author['name'] }}</span>,
                                 <span class="text-muted">{{ $author['affiliation'] }}</span>
@@ -25,15 +25,15 @@
                 </div>
                 <div class="mb-2">
                     <h5 class="fw-bold">Journal:</h5>
-                    <a href="{{ route('journal.detail', $payment->submission->issue->journal->url_path) }}"
+                    <a href="{{ route('journal.detail', $payment->paymentInvoice->submission->issue->journal->url_path) }}"
                         class="text-gray-800 text-hover-primary ms-5">
-                        {{ $payment->submission->issue->journal->title }}
+                        {{ $payment->paymentInvoice->submission->issue->journal->title }}
                     </a>
                 </div>
                 <div>
                     <h5 class="fw-bold">Issue:</h5>
                     <a href="#" class="text-gray-800 text-hover-primary ms-5">
-                        {{ $payment->submission->issue->title }}
+                        {{ $payment->paymentInvoice->submission->issue->title }}
                     </a>
                 </div>
             </div>
@@ -70,6 +70,33 @@
         <div class="card card-flush mb-5">
             <div class="card-header">
                 <div class="card-title">
+                    <h2>Invoice Pembayaran</h2>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+
+                <div class="mb-5 fv-row">
+                    <label class="form-label">Persentase Pembayaran</label>
+                    <input type="text"  class="form-control mb-2"
+                        placeholder="Persentase Pembayaran"
+                        value="{{ $payment->paymentInvoice->payment_percent }} %"
+                        readonly />
+                </div>
+
+                <div class="mb-5 fv-row">
+                    <label class="form-label">Jumlah Pembayaran</label>
+                    <input type="text" name="payment_amount" class="form-control mb-2"
+                        placeholder="Nominal Pembayaran"
+                        value="@money($payment->paymentInvoice->payment_amount)"
+                        readonly />
+                </div>
+
+
+            </div>
+        </div>
+        <div class="card card-flush mb-5">
+            <div class="card-header">
+                <div class="card-title">
                     <h2>Data Pembayaran</h2>
                 </div>
             </div>
@@ -97,16 +124,12 @@
                         readonly />
                 </div>
                 <div class="row mb-5">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-label">Metode Pembayaran</label>
                         <input type="text" name="payment_method" class="form-control mb-2"
                             placeholder="Metode Pembayaran" value="{{ $payment->payment_method }}" readonly />
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Nominal Transfer</label>
-                        <input type="text" name="payment_amount" class="form-control mb-2" placeholder="Nominal Transfer"
-                            value="{{ $payment->payment_amount }}" readonly />
-                    </div>
+
                 </div>
                 <div class="row">
 
@@ -151,7 +174,7 @@
                     <div class="mb-5 fv-row">
                         <label class="form-label">Keterangan</label>
                         <textarea name="payment_note" class="form-control mb-2" rows="5"
-                            placeholder="Berikan Keterangan Untuk Pembayaran Ini">{{ $payment->payment_note }}</textarea>
+                            placeholder="Berikan Keterangan Untuk Pembayaran Ini maksimal 255 karakter">{{ $payment->payment_note }}</textarea>
                     </div>
 
                 </div>

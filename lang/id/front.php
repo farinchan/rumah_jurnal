@@ -70,7 +70,8 @@ return [
     'payment_proff' => 'Bukti Pembayaran',
     'payment_information' => 'Informasi Pembayaran',
     'payment_information_text' => 'Silahkan Lakukan Pembayaran Biaya Publikasi Artikel Anda pada Rekening Berikut',
-    'payment_information_fee' => 'Silahkan Lakukan Pembayaran Biaya Publikasi Artikel Anda Sebesar',
+    'payment_information_fee' => 'Silahkan Pilih Tagihan yang ingin dibayar di bawah ini',
+    'payment_information_amount' => 'Silahkan Lakukan Pembayaran Artikel Anda Sebesar',
     'payment_data' => 'Data Pembayaran',
     'payment_timestamp' => 'Tanggal Pembayaran',
     'payment_method' => 'Metode Pembayaran',
@@ -83,4 +84,13 @@ return [
     'login_title' => 'Masuk <br> Ke Akun Anda',
     'sign_in' => 'Masuk',
     'forgot_password' => 'Lupa Password?',
+
+    'bill' => 'Tagihan',
+    'unpaid' => 'Belum Dibayar',
+    'paid' => 'Sudah Dibayar',
+    'no_invoice_found' => 'Tidak ada tagihan ditemukan',
+    'percentage' => 'Persentase',
+    'amount_to_be_paid' => 'Jumlah yang harus dibayar',
+    'due_date' => 'Tanggal Jatuh Tempo',
+    'invoice_number' => 'Nomor Invoice',
 ];

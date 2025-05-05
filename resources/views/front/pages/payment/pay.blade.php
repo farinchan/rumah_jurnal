@@ -42,11 +42,15 @@
                                         <div class="col-lg-12">
                                             <div class="ltn__product-item ltn__product-item-3" style="margin-bottom: 20px;">
                                                 <div class="product-info">
-                                                    <h2 class="product-title">
+                                                    {{-- <h2 class="product-title">
                                                         <a
                                                             href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">{{ $submission->full_title }}</a>
+                                                    </h2> --}}
+                                                    <h2 class="product-title"><a
+                                                            href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">
+                                                            Submmission ID: {{ $submission->submission_id }}</a>
                                                     </h2>
-                                                    <div class="product-brief">
+                                                    {{-- <div class="product-brief">
                                                         <ul>
                                                             @foreach ($submission->authors as $author)
                                                                 <li style="margin-top: 0px;">
@@ -57,7 +61,7 @@
                                                             @endforeach
 
                                                         </ul>
-                                                    </div>
+                                                    </div> --}}
 
                                                     <div>
                                                         <p>
@@ -66,12 +70,14 @@
                                                                 href="{{ route('journal.detail', $submission->issue->journal->url_path) }}">
                                                                 {{ $submission->issue->journal->title }}
                                                             </a>
+
+
                                                             <br>
-                                                            <strong>Issue:</strong>
+                                                            {{-- <strong>Issue:</strong>
                                                             <a
                                                                 href="{{ route('journal.detail', $submission->issue->journal->url_path) }}">
                                                                 {{ $submission->issue->title }}
-                                                            </a>
+                                                            </a> --}}
                                                         </p>
                                                     </div>
                                                     <div>
@@ -168,15 +174,47 @@
                                     <div>
                                         {{ __('front.payment_information_fee') }}
                                     </div>
+                                    <div class="input-item input-item-textarea ltn__custom-icon">
+                                        <select class="nice-select" name="payment_invoice_id" required>
+                                            @forelse ($payment_invoices as $invoice)
+                                                <option value="{{ $invoice->id }}" int="{{ $invoice->payment_amount }}"
+                                                    percentage="{{ $invoice->payment_percent }}"
+                                                    {{ old('payment_invoice_id') == $invoice->id ? 'selected' : '' }}>
+                                                    INVOICE
+                                                    {{ $invoice->invoice_number }}/JRNL/UINSMDD/{{ $invoice->created_at->format('Y') }}
+                                                </option>
+                                            @empty
+                                                <option value="" disabled selected>
+                                                    {{ __('front.no_invoice_found') }}
+                                                </option>
+                                            @endforelse
+                                        </select>
+
+                                        @error('payment_invoice_id')
+                                            <div class="text-danger"
+                                                style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        {{ __('front.payment_information_amount') }}
+                                    </div>
                                     <div class="ltn__checkout-single-content ltn__coupon-code-wrap">
-                                        <h5>
-                                            publcation fee:
-                                            <a style="color: #f00; font-weight: 900">
-                                                @money($submission->issue->journal->author_fee)
+
+                                        <h5> {{ __('front.percentage') }}:
+                                            <a style="color: #f00; font-weight: 900" id="payment_amount_percentage">
+                                                0
+                                            </a>
+                                            <br>
+                                            {{ __('front.amount_to_be_paid') }}:
+                                            <a style="color: #f00; font-weight: 900" id="payment_amount_int">
+                                                0
                                             </a>
                                         </h5>
                                     </div>
                                     <h6>{{ __('front.payment_proff') }}</h6>
+
                                     <input type="file" id="myFile" name="payment_file"
                                         class="btn theme-btn-3 mb-10" accept=".png, .jpg, .jpeg, .pdf"><br>
                                     @error('payment_file')
@@ -209,7 +247,7 @@
                                     </div>
                                     <h6>{{ __('front.payment_data') }}</h6>
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <div class="input-item">
                                                 <select class="nice-select" name="payment_method" required>
                                                     <option value="" disabled>*{{ __('front.payment_method') }}
@@ -238,32 +276,7 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="input-item input-item-textarea ltn__custom-icon">
-                                                <select class="nice-select" name="payment_amount" required>
-                                                    <option value="" disabled>*{{ __('front.payment_amount') }}
-                                                    </option>
-                                                    <option value="60% - @money($submission->issue->journal->author_fee * 0.6)" int="{{ $submission->issue->journal->author_fee * 0.6 }}"
-                                                        {{ old('payment_amount') == "60% - @money( $submission->issue->journal->author_fee * 0.6 )" ? 'selected' : '' }}>
-                                                        60% - @money($submission->issue->journal->author_fee * 0.6)
-                                                    </option>
-                                                    <option value="40% - @money($submission->issue->journal->author_fee * 0.4)" int="{{ $submission->issue->journal->author_fee * 0.4 }}"
-                                                        {{ old('payment_amount') == "40% -  @money( $submission->issue->journal->author_fee * 0.4 )" ? 'selected' : '' }}>
-                                                        40% - @money($submission->issue->journal->author_fee * 0.4)
-                                                    </option>
 
-                                                </select>
-
-                                                <input type="hidden" name="payment_amount_int" id="payment_amount_int">
-
-                                                @error('payment_amount')
-                                                    <div class="text-danger"
-                                                        style="margin-top: -30px; margin-bottom: 20px; font-size: 12px;">
-                                                        {{ $message }}
-                                                    </div>
-                                                @enderror
-                                            </div>
-                                        </div>
                                         <div class="col-md-6">
                                             <div class="input-item input-item-textarea ltn__custom-icon">
                                                 <input type="text" name="payment_account_name"
@@ -373,13 +386,20 @@
     </script>
     <script>
         $(document).ready(function() {
-            $('select[name="payment_amount"]').on('change', function() {
+            $('select[name="payment_invoice_id"]').on('change', function() {
                 var selectedOption = $(this).find('option:selected');
                 var intValue = selectedOption.attr('int');
-                $('#payment_amount_int').val(intValue);
+                var formattedValue = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR'
+                }).format(intValue);
+                var percentage = selectedOption.attr('percentage');
+
+                $('#payment_amount_int').text(formattedValue);
+                $('#payment_amount_percentage').text(percentage + '%');
             });
             // Trigger change event on page load to set the initial value
-            $('select[name="payment_amount"]').trigger('change');
+            $('select[name="payment_invoice_id"]').trigger('change');
         });
     </script>
 @endsection

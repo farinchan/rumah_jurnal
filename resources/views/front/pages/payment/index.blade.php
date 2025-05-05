@@ -73,6 +73,10 @@
                         <div class="ltn__product-item ltn__product-item-3" style="margin-bottom: 20px;">
                             <div class="product-info">
                                 <h2 class="product-title"><a
+                                        href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">
+                                        Submmission ID: {{ $submission->submission_id }}</a>
+                                </h2>
+                                {{-- <h2 class="product-title"><a
                                         href="{{ route('payment.submission', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}">{{ $submission->fullTitle }}</a>
                                 </h2>
                                 <div class="product-brief">
@@ -85,7 +89,7 @@
                                         @endforeach
 
                                     </ul>
-                                </div>
+                                </div> --}}
 
                                 <div>
                                     <p>
@@ -94,11 +98,11 @@
                                             {{ $submission->issue->journal->title }}
                                         </a>
                                         <br>
-                                        <strong>Issue:</strong>
+                                        {{-- <strong>Issue:</strong>
                                         <a href="{{ route('journal.detail', $submission->issue->journal->url_path) }}">
                                             Vol. {{ $submission->issue->volume }} No. {{ $submission->issue->number }}
                                             ({{ $submission->issue->year }}): {{ $submission->issue->title }}
-                                        </a>
+                                        </a> --}}
                                     </p>
                                 </div>
                                 @if ($submission?->issue?->journal?->author_fee > 0)
@@ -122,18 +126,18 @@
                                 <div>
                                     <span>{{ __('front.submission_status') }}: </span>
                                     @if ($submission->status == 1)
-                                                    <span
-                                                        class="badge badge-warning fs-7 text-white">{{ $submission->status_label }}</span>
-                                                @elseif ($submission->status == 3)
-                                                    <span
-                                                        class="badge badge-success fs-7 text-white">{{ $submission->status_label }}</span>
-                                                @elseif ($submission->status == 4)
-                                                    <span
-                                                        class="badge badge-danger fs-7 text-white">{{ $submission->status_label }}</span>
-                                                @else
-                                                    <span
-                                                        class="badge badge-secondary fs-7 text-white">{{ $submission->status_label }}</span>
-                                                @endif
+                                        <span
+                                            class="badge badge-warning fs-7 text-white">{{ $submission->status_label }}</span>
+                                    @elseif ($submission->status == 3)
+                                        <span
+                                            class="badge badge-success fs-7 text-white">{{ $submission->status_label }}</span>
+                                    @elseif ($submission->status == 4)
+                                        <span
+                                            class="badge badge-danger fs-7 text-white">{{ $submission->status_label }}</span>
+                                    @else
+                                        <span
+                                            class="badge badge-secondary fs-7 text-white">{{ $submission->status_label }}</span>
+                                    @endif
                                 </div>
                                 <div>
                                     <span>{{ __('front.date_published') }}: </span>
@@ -141,9 +145,136 @@
                                         {{ $submission->datePublished ?? '-' }}
                                     </span>
                                 </div>
+                                <br>
 
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="ltn__faq-inner ltn__faq-inner-2">
+                                            <div id="accordion_2">
+                                                @foreach ($submission->paymentInvoices as $invoice)
+                                                    <div class="card">
+                                                        <h6 class="collapsed ltn__card-title" data-toggle="collapse"
+                                                            data-target="#item-{{ $invoice->id }}" aria-expanded="false">
+                                                            INVOICE {{ $invoice->invoice_number }}/JRNL/UINSMDD/{{ $invoice->created_at->format('Y') }} -
+                                                            @if ($invoice->is_paid)
+                                                                <span
+                                                                    class="badge badge-success text-white">{{ __('front.paid') }}</span>
+                                                            @else
+                                                                <span
+                                                                    class="badge badge-danger text-white">{{ __('front.unpaid') }}</span>
+                                                            @endif
+                                                        </h6>
+                                                        <div id="item-{{ $invoice->id }}"
+                                                            class="collapse {{ $invoice->is_paid ? '' : 'show' }}"
+                                                            data-parent="#accordion_2">
+                                                            <div class="card-body">
+                                                                <p>
 
-                                <div class="product-hover-action">
+                                                                    <table>
+                                                                        <tr>
+                                                                            <th>{{ __('front.invoice_number') }}</th>
+                                                                            <td> : </td>
+                                                                            <td>{{ $invoice->invoice_number }}/JRNL/UINSMDD/{{ $invoice->created_at->format('Y') }}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>{{ __('front.due_date') }}</th>
+                                                                            <td> : </td>
+                                                                            <td>{{ \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('l, d F Y') }}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>{{ __('front.percentage') }}</th>
+                                                                            <td> : </td>
+                                                                            <td>{{ $invoice->payment_percent }}%</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>{{ __('front.amount_to_be_paid') }}</th>
+                                                                            <td> : </td>
+                                                                            <td>@money($invoice->payment_amount)</td>
+                                                                        </tr>
+                                                                    </table>
+
+                                                                </p>
+                                                                @if (!$invoice->is_paid)
+                                                                <button class="btn theme-btn-1 btn-effect-1 text-uppercase"
+                                                                    onclick="window.location.href='{{ route('payment.pay', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}'">
+                                                                    {{ __('front.pay_now_btn') }}
+                                                                </button>
+                                                                @endif
+                                                                <table class="table table-bordered mt-3">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th class="text-center" scope="col" colspan="6">
+                                                                               History
+                                                                                    Pembayaran
+                                                                            </th>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th scope="col">Waktu</th>
+                                                                            <th scope="col">Pengguna</th>
+                                                                            <th scope="col">Pembayaran</th>
+                                                                            <th scope="col">Status</th>
+                                                                            <th scope="col">Keterangan</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @forelse ($invoice->payments as $payment)
+                                                                            <tr>
+                                                                                <td>{{ \Carbon\Carbon::parse($payment->created_at)->translatedFormat('l, d F Y H:i') }}
+                                                                                </td>
+                                                                                <td>
+                                                                                    <strong>{{ $payment->name }}</strong>
+                                                                                    <br>
+                                                                                    {{ Str::mask($payment->phone, '*', 4, strlen($payment->phone) - 7) }}
+                                                                                    <br>
+                                                                                    {{ Str::mask($payment->email, '*', 3, strpos($payment->email, '@') - 3) }}
+
+                                                                                </td>
+                                                                                <td>
+                                                                                    {{ $payment->payment_method }}
+                                                                                    <br>
+                                                                                    {{ $payment->payment_account_name }}
+                                                                                    <br>
+                                                                                    {{ Str::mask($payment->payment_account_number, '*', 4, strlen($payment->payment_account_number) - 8) }}
+                                                                                </td>
+                                                                                <td>
+                                                                                    @if ($payment->payment_status == 'pending')
+                                                                                        <span
+                                                                                            class="badge badge-warning text-white">{{ $payment->payment_status }}</span>
+                                                                                    @elseif ($payment->payment_status == 'accepted')
+                                                                                        <span
+                                                                                            class="badge badge-success text-white">{{ $payment->payment_status }}</span>
+                                                                                    @elseif ($payment->payment_status == 'rejected')
+                                                                                        <span
+                                                                                            class="badge badge-danger text-white">{{ $payment->payment_status }}</span>
+                                                                                    @else
+                                                                                        <span
+                                                                                            class="badge badge-secondary text-white">{{ $payment->payment_status }}</span>
+                                                                                    @endif
+                                                                                </td>
+                                                                                <td>{{ $payment->payment_note }}</td>
+                                                                            </tr>
+
+                                                                        @empty
+                                                                            <tr>
+                                                                                <td colspan="6" class="text-center">
+                                                                                    <strong>{{ __('front.no_payment_found') }}</strong>
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endforelse
+
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- <div class="product-hover-action">
                                     <ul>
                                         <li>
                                             <a
@@ -166,7 +297,7 @@
                                             </a>
                                         </li>
                                     </ul>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>
