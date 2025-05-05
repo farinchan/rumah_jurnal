@@ -354,7 +354,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @forelse ($submission->payments as $payment)
+                                                @forelse ($submission->paymentInvoices as $payment)
                                                     <tr>
                                                         <td>
                                                             {{ Carbon\Carbon::parse($payment->created_at)->translatedFormat('l, d F Y H:i:s') }}
@@ -461,12 +461,25 @@
                                         <span class="required">Invoice</span>
                                     </label>
                                     <div class="fs-7 fw-semibold text-muted">
-                                        Invoice untuk pembayaran articel jurnal
+                                        Tagihan 1 - 60% (@money($journal->author_fee*0.6)) -
+                                        @php
+                                            $tagihan1 = $submission->paymentInvoices->where('payment_percent', 60)->first();
+                                        @endphp
+                                        @if ($tagihan1)
+                                            @if ($tagihan1->is_paid)
+                                                <span class="text-success fs-7 fw-bold">Lunas</span>
+                                            @else
+                                                <span class="text-warning fs-7 fw-bold">Belum Dibayar</span>
+                                            @endif
+                                        @else
+                                            <span class="text-danger fw-bold">Belum Dibuat</span>
+
+                                        @endif
                                     </div>
                                 </div>
-                                <div class="fv-row fv-plugins-icon-container">
+                                <div class="fv-row fv-plugins-icon-container mb-3">
                                     <div class="d-flex">
-                                        <a href="{{ route('back.journal.invoice.mail-send', $submission->id) }}"
+                                        <a href="{{ route('back.journal.invoice.mail-send1', $submission->id) }}"
                                             class="btn btn-light w-100 mx-3 btn-loading">
                                             <i class="ki-duotone ki-send fs-2 ">
                                                 <span class="path1"></span>
@@ -474,7 +487,45 @@
                                             </i>
                                             Kirim ke Author
                                         </a>
-                                        <a href="{{ route('back.journal.invoice.generate', $submission->id) }}"
+                                        <a href="{{ route('back.journal.invoice.generate1', $submission->id) }}"
+                                            class="btn btn-light w-100 mx-3">
+                                            <i class="ki-duotone ki-file-down fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="fs-7 fw-semibold text-muted">
+                                     Tagihan 2 - 40% (@money($journal->author_fee*0.4)) -
+                                     @php
+                                            $tagihan2 = $submission->paymentInvoices->where('payment_percent', 40)->first();
+                                        @endphp
+                                        @if ($tagihan2)
+                                            @if ($tagihan2->is_paid)
+                                                <span class="text-success fs-7 fw-bold">Lunas</span>
+                                            @else
+                                                <span class="text-warning fs-7 fw-bold">Belum Dibayar</span>
+                                            @endif
+                                        @else
+                                            <span class="text-danger fw-bold">Belum Dibuat</span>
+
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="fv-row fv-plugins-icon-container">
+                                    <div class="d-flex">
+                                        <a href="{{ route('back.journal.invoice.mail-send2', $submission->id) }}"
+                                            class="btn btn-light w-100 mx-3 btn-loading">
+                                            <i class="ki-duotone ki-send fs-2 ">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            Kirim ke Author
+                                        </a>
+                                        <a href="{{ route('back.journal.invoice.generate2', $submission->id) }}"
                                             class="btn btn-light w-100 mx-3">
                                             <i class="ki-duotone ki-file-down fs-2">
                                                 <span class="path1"></span>

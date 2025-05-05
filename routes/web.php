@@ -142,8 +142,11 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::delete('/{journal_path}/issue/{issue_id}/article/{id}/destroy', [BackJournalController::class, 'articleDestroy'])->name('article.destroy');
         Route::get('/loa/submission/{id}/generate', [BackJournalController::class, 'loaGenerate'])->name('loa.generate');
         Route::get('/loa/submission/{id}/mail-send', [BackJournalController::class, 'loaMailSend'])->name('loa.mail-send');
-        Route::get('/invoice/submission/{id}/generate', [BackJournalController::class, 'invoiceGenerate'])->name('invoice.generate');
-        Route::get('/invoice/submission/{id}/mail-send', [BackJournalController::class, 'invoiceMailSend'])->name('invoice.mail-send');
+        Route::get('/invoice/submission/{id}/generate-1', [BackJournalController::class, 'invoiceGenerate1'])->name('invoice.generate1');
+        Route::get('/invoice/submission/{id}/generate-2', [BackJournalController::class, 'invoiceGenerate2'])->name('invoice.generate2');
+        Route::get('/invoice/submission/{id}/mail-send-1', [BackJournalController::class, 'invoiceMailSend1'])->name('invoice.mail-send1');
+        Route::get('/invoice/submission/{id}/mail-send-2', [BackJournalController::class, 'invoiceMailSend2'])->name('invoice.mail-send2');
+
 
         Route::get('/{journal_path}/issue/{issue_id}/editor', [BackJournalController::class, 'editorIndex'])->name('editor.index');
         Route::post('/{journal_path}/issue/{issue_id}/editor/file-sk', [BackJournalController::class, 'editorFileSkStore'])->name('editor.file-sk.store');

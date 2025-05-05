@@ -13,12 +13,8 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('submission_id')->constrained()->onDelete('cascade');
-            $table->string('invoice_number')->nullable();
             $table->timestamp('payment_timestamp')->nullable();
             $table->string('payment_method')->nullable();
-            $table->string('payment_amount')->nullable();
-            $table->integer('payment_amount_int')->nullable();
             $table->string('payment_account_number')->nullable();
             $table->string('payment_account_name')->nullable();
             $table->string('payment_file')->nullable();
@@ -27,6 +23,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->enum('payment_status', ['pending', 'accepted', 'rejected'])->default('pending');
             $table->text('payment_note')->nullable();
+            $table->foreignId('payment_invoice_id')->nullable()->constrained('payment_invoices')->onDelete('cascade');
             $table->timestamps();
         });
     }

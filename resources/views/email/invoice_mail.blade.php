@@ -41,19 +41,29 @@
                                 </p>
 
                                 <p style="margin-bottom:2px; color:#3F4254; line-height:1.6">
-                                    Please make an initial payment of 60% from the total payment of
-                                    <strong>@money($mailData['journal_fee'])</strong> to proceed with the processing of
-                                    your article. The remaining 40% should be paid once your article reaches the
-                                    production stage. Payment can be made via <strong>Bank
+                                    @if ($mailData['payment_percent'] == 60)
+                                        Make a payment of {{ $mailData['payment_percent'] }}% amounting to
+                                        <strong>@money($mailData['payment_amount'])</strong> to proceed with the review
+                                        stage of your article.
+                                    @elseif ($mailData['payment_percent'] == 40)
+                                        Make a payment of {{ $mailData['payment_percent'] }}% amounting to
+                                        <strong>@money($mailData['payment_amount'])</strong> to proceed with the production
+                                        stage of your article.
+                                    @else
+                                        Make a payment of {{ $mailData['payment_percent'] }}% amounting to
+                                        <strong>@money($mailData['payment_amount'])</strong> to proceed your article.
+                                    @endif
+                                    Payment can be made via <strong>Bank
                                         {{ $mailData['payment_account']['bank'] }}
                                         - Account Number: {{ $mailData['payment_account']['account_number'] }} - Account
                                         Name:
                                         {{ $mailData['payment_account']['account_name'] }}</strong>. Payment Deadline
                                     for the initial
-                                    payment is <strong>{{ now()->addWeek()->format('d F Y') }}.</strong> Please send the
+                                    payment is <strong>{{ $mailData['payment_due_date'] }}.</strong> Please send the
                                     proof of payment to our email at
                                     <strong>
-                                        <a href="{{ route("payment.pay", [ $mailData['journal_path'],$mailData['id'] ]) }}">{{ route("payment.pay", [ $mailData['journal_path'],$mailData['id'] ]) }}</a>
+                                        <a
+                                            href="{{ route('payment.pay', [$mailData['journal_path'], $mailData['id']]) }}">{{ route('payment.pay', [$mailData['journal_path'], $mailData['id']]) }}</a>
                                     </strong>.
 
                                     <br>
