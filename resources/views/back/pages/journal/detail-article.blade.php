@@ -32,6 +32,7 @@
                             <tr>
                                 <th class="">ID</th>
                                 <th class="min-w-350px">Submission</th>
+                                <th class="min-w-300px">Editor</th>
                                 <th class="min-w-300px">Reviewer</th>
                                 <th class="min-w-100px text-start">Status Submission</th>
                                 @if ($journal->author_fee != 0)
@@ -57,6 +58,22 @@
                                                 Published date: {{ $submission->datePublished ?? '-' }}
                                             </span>
                                         </div>
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            @forelse ($submission->editors as $editor)
+                                                <li>
+                                                    <span class="text-gray-800 fw-bold">
+                                                        {{ $editor->name }}
+                                                    </span>
+                                                    <br>
+                                                    {{ $editor->affiliation }}
+                                                </li>
+                                            @empty
+                                                <li style="list-style: none" class="text-muted">Reviewer belum ditambahkan
+                                                </li>
+                                            @endforelse
+                                        </ul>
                                     </td>
                                     <td>
                                         <ul>
@@ -285,6 +302,23 @@
                                             <td>:</td>
                                             <td>
                                                 {{ $submission->lastModified }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Editor</td>
+                                            <td>:</td>
+                                            <td>
+                                                <select class="form-select" data-control="select2"
+                                                    data-placeholder="Select an option"
+                                                    data-dropdown-parent="#modal_view_article_{{ $submission->submission_id }}"
+                                                    name="editor[]" data-allow-clear="true" multiple="multiple">
+                                                    <option></option>
+                                                    @foreach ($editors as $editor)
+                                                        <option value="{{ $editor->id }}"
+                                                            {{ $submission->editors->contains($editor->id) ? 'selected' : '' }}>
+                                                            {{ $editor->name }}</option>
+                                                    @endforeach
+                                                </select>
                                             </td>
                                         </tr>
                                         <tr>

@@ -40,7 +40,7 @@ class PaymentController extends Controller
                 ]
             ],
             'journals' => Journal::all(),
-            'submissions' =>Submission::with('issue.journal')
+            'submissions' => $request->q ? Submission::with('issue.journal')
                 ->when($journal_id, function ($query) use ($journal_id) {
                     return $query->whereHas('issue.journal', function ($query) use ($journal_id) {
                         $query->where('id', $journal_id);
@@ -53,7 +53,7 @@ class PaymentController extends Controller
                     });
                 })
                 ->latest()
-                ->paginate(6) ,
+                ->get() : [],
         ];
         return view('front.pages.payment.index', $data);
     }
@@ -155,20 +155,22 @@ class PaymentController extends Controller
     public function payStore(Request $request, $journal_path, $submission_id)
     {
         // dd($request->all());
-        $validator = Validator::make($request->all(), [
-            'submission_id' => 'required|exists:submissions,id',
-            'invoice_id' => 'nullable',
-            'payment_timestamp' => 'required|date',
-            'payment_method' => 'required',
-            'payment_amount' => 'required',
-            'payment_amount_int' => 'required|numeric',
-            'payment_account_number' => 'required|max:255',
-            'payment_account_name' => 'required|max:255',
-            'payment_file' => 'required|mimes:jpg,jpeg,png,pdf|max:10240', // 10 MB
-            'name' => 'required|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|max:255',
-        ],
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'submission_id' => 'required|exists:submissions,id',
+                'invoice_id' => 'nullable',
+                'payment_timestamp' => 'required|date',
+                'payment_method' => 'required',
+                'payment_amount' => 'required',
+                'payment_amount_int' => 'required|numeric',
+                'payment_account_number' => 'required|max:255',
+                'payment_account_name' => 'required|max:255',
+                'payment_file' => 'required|mimes:jpg,jpeg,png,pdf|max:10240', // 10 MB
+                'name' => 'required|max:255',
+                'email' => 'required|email|max:255',
+                'phone' => 'required|max:255',
+            ],
             [
                 'submission_id.required' => 'Submission ID is required',
                 'submission_id.exists' => 'Submission ID not found',

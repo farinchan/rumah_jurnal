@@ -70,4 +70,9 @@ class Submission extends Model
     {
         return $this->belongsToMany(Reviewer::class, 'submission_reviewer');
     }
+
+    public function editors()
+    {
+        return $this->belongsToMany(Editor::class, 'submission_editor');
+    }
 }
