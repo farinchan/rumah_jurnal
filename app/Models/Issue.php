@@ -18,6 +18,11 @@ class Issue extends Model
         return $this->hasMany(Submission::class, 'issue_id');
     }
 
+    public function editors()
+    {
+        return $this->hasMany(Editor::class, 'issue_id');
+    }
+
     public function reviewers()
     {
         return $this->hasMany(Reviewer::class, 'issue_id');

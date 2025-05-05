@@ -17,4 +17,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     Route::get('/reviewer/list', [App\Http\Controllers\Api\JournalController::class, 'reviewerList'])->name('reviewer.list');
     Route::post('/reviewer/select', [App\Http\Controllers\Api\JournalController::class, 'reviewerSelect'])->name('reviewer.select');
+
+    Route::get('/editor/list', [App\Http\Controllers\Api\JournalController::class, 'editorList'])->name('editor.list');
+    Route::post('/editor/select', [App\Http\Controllers\Api\JournalController::class, 'editorSelect'])->name('editor.select');
 });

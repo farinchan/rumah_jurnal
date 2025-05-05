@@ -145,6 +145,15 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/invoice/submission/{id}/generate', [BackJournalController::class, 'invoiceGenerate'])->name('invoice.generate');
         Route::get('/invoice/submission/{id}/mail-send', [BackJournalController::class, 'invoiceMailSend'])->name('invoice.mail-send');
 
+        Route::get('/{journal_path}/issue/{issue_id}/editor', [BackJournalController::class, 'editorIndex'])->name('editor.index');
+        Route::post('/{journal_path}/issue/{issue_id}/editor/file-sk', [BackJournalController::class, 'editorFileSkStore'])->name('editor.file-sk.store');
+        Route::get('/{journal_path}/issue/{issue_id}/editor/file-sk-send-mail/{email?}', [BackJournalController::class, 'editorFileSkSendMail'])->name('editor.file-sk.send-mail');
+        Route::post('/{journal_path}/issue/{issue_id}/editor/file-certificate', [BackJournalController::class, 'editorFileCertificateStore'])->name('editor.file-certificate.store');
+        Route::get('/{journal_path}/issue/{issue_id}/editor/file-certificate-send-mail/{email?}', [BackJournalController::class, 'editorFileCertificateSendMail'])->name('editor.file-certificate.send-mail');
+        Route::post('/{journal_path}/issue/{issue_id}/editor/file-fee', [BackJournalController::class, 'editorFileFeeStore'])->name('editor.file-fee.store');
+        Route::get('/{journal_path}/issue/{issue_id}/editor/file-fee-send-mail/{email?}', [BackJournalController::class, 'editorFileFeeSendMail'])->name('editor.file-fee.send-mail');
+        Route::delete('/{journal_path}/issue/{issue_id}/editor/{id}/delete', [BackJournalController::class, 'editorDestroy'])->name('editor.destroy');
+
         Route::get('/{journal_path}/issue/{issue_id}/reviewer', [BackJournalController::class, 'reviewerIndex'])->name('reviewer.index');
         Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-sk', [BackJournalController::class, 'reviewerFileSkStore'])->name('reviewer.file-sk.store');
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-sk-send-mail/{email?}', [BackJournalController::class, 'reviewerFileSkSendMail'])->name('reviewer.file-sk.send-mail');
