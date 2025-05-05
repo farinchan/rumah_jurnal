@@ -14,13 +14,14 @@ class Payment extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function submission()
+    public function paymentInvoice()
     {
-        return $this->belongsTo(Submission::class);
+        return $this->hasOne(PaymentInvoice::class, 'id', 'payment_invoice_id');
     }
 
     public function paymentProofs()
     {
         return Storage::url($this->payment_file)?? '';
     }
+
 }

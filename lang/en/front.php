@@ -71,7 +71,8 @@ return [
     'payment_proff' => 'Payment Proof',
     'payment_information' => 'Payment Information',
     'payment_information_text' => 'Please make the payment for your article publication fee to the following account',
-    'payment_information_fee' => 'Please make the payment for your article publication fee of',
+    'payment_information_fee' => 'Please select the bill you want to pay below',
+    'payment_information_amount' => 'Please make the payment for your article in the amount of',
     'payment_data' => 'Payment Data',
     'payment_timestamp' => 'Payment Date',
     'payment_method' => 'Payment Method',
@@ -84,4 +85,14 @@ return [
     'login_title' => 'Login <br> To Your Account',
     'sign_in' => 'Sign In',
     'forgot_password' => 'Forgot Password?',
+
+    'bill' => 'Bill',
+    'unpaid' => 'Unpaid',
+    'paid' => 'Paid',
+    'no_invoice_found' => 'No invoice found',
+    'percentage' => 'Percentage',
+    'amount_to_be_paid' => 'Amount to be paid',
+    'due_date' => 'Due Date',
+    'invoice_number' => 'Invoice Number',
+
 ];

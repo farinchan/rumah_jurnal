@@ -7,6 +7,7 @@ use App\Mail\ConfirmPaymentMail;
 use App\Models\Issue;
 use App\Models\Journal;
 use App\Models\Payment;
+use App\Models\PaymentInvoice;
 use App\Models\SettingWebsite;
 use App\Models\Submission;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -33,7 +34,7 @@ class FinanceController extends Controller
                     'link' => route('back.finance.verification.index')
                 ]
             ],
-            'payment' => Payment::with(['submission'])
+            'payment' => Payment::with(['paymentInvoice'])
                 ->orderBy('created_at', 'desc')
                 ->get(),
             'journals' => Journal::all()
@@ -52,14 +53,14 @@ class FinanceController extends Controller
 
         // $payment = Submission::all();
         // dd($payment);
-        $payment = Payment::with(['submission'])
+        $payment = Payment::with(['paymentInvoice.submission'])
             ->when($journal_id, function ($query) use ($journal_id) {
-                return $query->whereHas('submission.issue', function ($q) use ($journal_id) {
+                return $query->whereHas('paymentInvoice.submission.issue', function ($q) use ($journal_id) {
                     $q->where('journal_id', $journal_id);
                 });
             })
             ->when($submission_search, function ($query) use ($submission_search) {
-                return $query->whereHas('submission', function ($q) use ($submission_search) {
+                return $query->whereHas('paymentInvoice.submission', function ($q) use ($submission_search) {
                     $q->where('submission_id', 'like', '%' . $submission_search . '%')
                         ->orWhere('fullTitle', 'like', '%' . $submission_search . '%')
                         ->orWhere('authorsString', 'like', '%' . $submission_search . '%');
@@ -77,6 +78,10 @@ class FinanceController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // return response()->json([
+        //     'data' => $payment,
+        // ]);
+
         return datatables()
             ->of($payment)
             ->addColumn('payment', function ($payment) {
@@ -89,13 +94,22 @@ class FinanceController extends Controller
                         </div>
                 ';
             })
+            ->addColumn('invoice', function ($payment) {
+                return '
+                        <div class="d-flex flex-column">
+                            <span class="text-gray-800 mb-1">INVOICE ' . $payment->paymentInvoice->invoice_number . '/JRNL/UINSMDD/' . $payment->paymentInvoice->created_at->format('Y') . '</span>
+                            <span>Persentase: ' . $payment->paymentInvoice->payment_percent . '%</span>
+                            <span>Jumlah: Rp ' . number_format($payment->paymentInvoice->payment_amount, 0, ',', '.') . '</span>
+                        </div>
+                ';
+            })
             ->addColumn('submission', function ($payment) {
                 return '
                         <div class="d-flex flex-column">
                             <a href="#"
-                                class="text-gray-800 text-hover-primary"> Submission ID: ' . $payment->submission->submission_id . '</a>
-                                <span class="text-gray-800 ">' . $payment->submission->fullTitle . '</span>
-                            <span >' . $payment->submission->authorsString . '</span>
+                                class="text-gray-800 text-hover-primary"> Submission ID: ' . $payment->paymentInvoice->submission->submission_id . '</a>
+                                <span class="text-gray-800 ">' . $payment->paymentInvoice->submission->fullTitle . '</span>
+                            <span >' . $payment->paymentInvoice->submission->authorsString . '</span>
                         </div>
                 ';
             })
@@ -104,8 +118,8 @@ class FinanceController extends Controller
                 return '
                         <div class="d-flex flex-column">
                             <a href="#"
-                                class="text-gray-800 text-hover-primary mb-1">' . $payment->submission->issue->journal->title . '</a>
-                            <span> Vol. ' . $payment->submission->issue->volume . ' No. ' . $payment->submission->issue->number . ' (' . $payment->submission->issue->year . '): ' . $payment->submission->issue->title .  '</span>
+                                class="text-gray-800 text-hover-primary mb-1">' . $payment->paymentInvoice->submission->issue->journal->title . '</a>
+                            <span> Vol. ' . $payment->paymentInvoice->submission->issue->volume . ' No. ' . $payment->paymentInvoice->submission->issue->number . ' (' . $payment->paymentInvoice->submission->issue->year . '): ' . $payment->paymentInvoice->submission->issue->title .  '</span>
                         </div>
                 ';
             })
@@ -124,7 +138,7 @@ class FinanceController extends Controller
             })
             ->addColumn('action', function ($payment) {
                 if ($payment->payment_status == 'accepted') {
-                return '
+                    return '
                     <a href="' . route("back.finance.verification.detail", $payment->id) . '" class="btn btn-sm btn-light-primary my-1">
                         <i class="ki-duotone ki-eye fs-2">
                             <span class="path1"></span>
@@ -159,6 +173,7 @@ class FinanceController extends Controller
             })
             ->rawColumns([
                 'payment',
+                'invoice',
                 'submission',
                 'journal',
                 'status',
@@ -185,10 +200,11 @@ class FinanceController extends Controller
                     'link' => route('back.finance.verification.detail', $id)
                 ]
             ],
-            'payment' => Payment::with(['submission.issue.journal'])->findOrFail($id),
+            'payment' => Payment::with(['paymentInvoice.submission.issue.journal'])->findOrFail($id),
         ];
         return view('back.pages.finance.verification-show', $data);
     }
+
     public function verificationUpdate(Request $request, $id)
     {
         $validator = Validator::make(
@@ -217,27 +233,31 @@ class FinanceController extends Controller
 
         if ($request->payment_status == 'accepted') {
 
+            $payment->paymentInvoice->update([
+                'is_paid' => 1,
+            ]);
+
             $mailData = [
                 'subject' => 'Confirmation Payment Accepted',
-                'number' => $submission->number ?? "0000",
-                'year' => $payment->submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                'authorString' => $payment->submission->authorsString,
-                'name' => $payment->submission->authors[0]['name'],
-                'affiliation' => $payment->submission->authors[0]['affiliation'],
-                'title' => $payment->submission->fullTitle,
-                'journal' => $payment->submission->issue->journal->title,
-                'edition' => 'Vol. ' . $payment->submission->issue->volume . ' No. ' . $payment->submission->issue->number . ' Tahun ' . $payment->submission->issue->year,
+                'number' => $payment->paymentInvoice->invoice_number ?? "0000",
+                'year' => $payment->paymentInvoice->created_at->format('Y') ?? Carbon::now()->format('Y'),
+                'authorString' => $payment->paymentInvoice->submission->authorsString,
+                'name' => $payment->paymentInvoice->submission->authors[0]['name'],
+                'affiliation' => $payment->paymentInvoice->submission->authors[0]['affiliation'],
+                'title' => $payment->paymentInvoice->submission->fullTitle,
+                'journal' => $payment->paymentInvoice->submission->issue->journal->title,
+                'edition' => 'Vol. ' . $payment->paymentInvoice->submission->issue->volume . ' No. ' . $payment->paymentInvoice->submission->issue->number . ' Tahun ' . $payment->paymentInvoice->submission->issue->year,
                 'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                'id' => $payment->submission->submission_id,
-                'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($payment->submission->issue->journal->getJournalThumbnail())),
+                'id' => $payment->paymentInvoice->submission->submission_id,
+                'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($payment->paymentInvoice->submission->issue->journal->getJournalThumbnail())),
                 'payment_account_name' => $payment->payment_account_name,
-                'payment_amount' => $payment->payment_amount,
+                'payment_amount' => $payment->paymentInvoice->payment_amount,
                 'payment_timestamp' => $payment->payment_timestamp->translatedFormat('d F Y H:i:s'),
                 'setting_web' => SettingWebsite::first(),
             ];
 
             $pdf = Pdf::loadView('back.pages.journal.pdf.confirm-payment', $mailData)->setPaper('A4', 'portrait');
-            $path = 'arsip/payment/' . 'Confirm-Payment-' . $payment->submission->submission_id . '-' . $payment->submission->id . '-' . Carbon::now()->format('d-m-Y') . '.pdf';
+            $path = 'arsip/payment/' . 'Confirm-Payment-' . $payment->paymentInvoice->submission->submission_id . '-' . $payment->paymentInvoice->submission->id . '-' . Carbon::now()->format('d-m-Y') . '.pdf';
 
             Storage::disk('public')->put($path, $pdf->output());
             $mailData['attachments'] = storage_path('app/public/' . $path);
@@ -250,10 +270,11 @@ class FinanceController extends Controller
             }
         }
 
-        $authorFee = $payment->submission->issue->journal->author_fee;
-        $paymentTotal = Payment::where('submission_id', $payment->submission_id)->where('payment_status', 'accepted')->sum('payment_amount_int');
-        if ($paymentTotal >= $authorFee) {
-            $submission = Submission::findOrFail($payment->submission_id);
+        $paymentCompleteCheck = PaymentInvoice::where('submission_id', $payment->paymentInvoice->submission_id)->where('is_paid', 1)->pluck('payment_percent')->toArray();
+        $paymentCompleteCheck = array_sum($paymentCompleteCheck);
+
+        if ($paymentCompleteCheck >= 100) {
+            $submission = Submission::findOrFail($payment->paymentInvoice->submission_id);
             $submission->update([
                 'payment_status' => 'paid',
             ]);
@@ -265,37 +286,37 @@ class FinanceController extends Controller
 
     public function confirmPaymentGenerate(Request $request, $id)
     {
-        $payment = Payment::with(['submission.issue.journal'])->findOrFail($id);
+        $payment = Payment::with(['paymentInvoice.submission.issue.journal'])->findOrFail($id);
         if (!$payment) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
 
         $data = [
-            'number' => $submission->number ?? "0000",
-            'year' => $payment->submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
-            'name' => $payment->submission->authors[0]['name'],
-            'affiliation' => $payment->submission->authors[0]['affiliation'],
-            'title' => $payment->submission->fullTitle,
-            'journal' => $payment->submission->issue->journal->title,
-            'edition' => 'Vol. ' . $payment->submission->issue->volume . ' No. ' . $payment->submission->issue->number . ' Tahun ' . $payment->submission->issue->year,
+            'number' => $payment->paymentInvoice->invoice_number ?? "0000",
+            'year' => $payment->paymentInvoice->created_at->format('Y') ?? Carbon::now()->format('Y'),
+            'name' => $payment->paymentInvoice->submission->authors[0]['name'],
+            'affiliation' => $payment->paymentInvoice->submission->authors[0]['affiliation'],
+            'title' => $payment->paymentInvoice->submission->fullTitle,
+            'journal' => $payment->paymentInvoice->submission->issue->journal->title,
+            'edition' => 'Vol. ' . $payment->paymentInvoice->submission->issue->volume . ' No. ' . $payment->paymentInvoice->submission->issue->number . ' Tahun ' . $payment->paymentInvoice->submission->issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-            'id' => $payment->submission->submission_id,
-            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($payment->submission->issue->journal->getJournalThumbnail())),
+            'id' => $payment->paymentInvoice->submission->submission_id,
+            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($payment->paymentInvoice->submission->issue->journal->getJournalThumbnail())),
             'payment_account_name' => $payment->payment_account_name,
-            'payment_amount' => $payment->payment_amount,
+            'payment_amount' => $payment->paymentInvoice->payment_amount,
             'payment_timestamp' => $payment->payment_timestamp->translatedFormat('d F Y H:i:s'),
         ];
 
 
         // dd($data);
         $pdf = Pdf::loadView('back.pages.journal.pdf.confirm-payment', $data)->setPaper('A4', 'portrait');
-        return $pdf->stream('Confirm-Payment-' . $payment->submission->submission_id . '.pdf');
+        return $pdf->stream('Confirm-Payment-' . $payment->paymentInvoice->submission->submission_id . '.pdf');
     }
 
     public function confirmPaymentMailSend(Request $request, $id)
     {
-        $payment = Payment::with(['submission.issue.journal'])->findOrFail($id);
+        $payment = Payment::with(['paymentInvoice.submission.issue.journal'])->findOrFail($id);
         if (!$payment) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
@@ -303,25 +324,25 @@ class FinanceController extends Controller
 
         $data = [
             'subject' => 'Confirmation Payment Accepted',
-            'number' => $submission->number ?? "0000",
-            'year' => $payment->submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
-            'authorString' => $payment->submission->authorsString,
-            'name' => $payment->submission->authors[0]['name'],
-            'affiliation' => $payment->submission->authors[0]['affiliation'],
-            'title' => $payment->submission->fullTitle,
-            'journal' => $payment->submission->issue->journal->title,
-            'edition' => 'Vol. ' . $payment->submission->issue->volume . ' No. ' . $payment->submission->issue->number . ' Tahun ' . $payment->submission->issue->year,
+            'number' => $payment->paymentInvoice->invoice_number ?? "0000",
+            'year' => $payment->paymentInvoice->created_at->format('Y') ?? Carbon::now()->format('Y'),
+            'authorString' => $payment->paymentInvoice->submission->authorsString,
+            'name' => $payment->paymentInvoice->submission->authors[0]['name'],
+            'affiliation' => $payment->paymentInvoice->submission->authors[0]['affiliation'],
+            'title' => $payment->paymentInvoice->submission->fullTitle,
+            'journal' => $payment->paymentInvoice->submission->issue->journal->title,
+            'edition' => 'Vol. ' . $payment->paymentInvoice->submission->issue->volume . ' No. ' . $payment->paymentInvoice->submission->issue->number . ' Tahun ' . $payment->paymentInvoice->submission->issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-            'id' => $payment->submission->submission_id,
-            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($payment->submission->issue->journal->getJournalThumbnail())),
+            'id' => $payment->paymentInvoice->submission->submission_id,
+            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($payment->paymentInvoice->submission->issue->journal->getJournalThumbnail())),
             'payment_account_name' => $payment->payment_account_name,
-            'payment_amount' => $payment->payment_amount,
+            'payment_amount' => $payment->paymentInvoice->payment_amount,
             'payment_timestamp' => $payment->payment_timestamp->translatedFormat('d F Y H:i:s'),
             'setting_web' => SettingWebsite::first(),
         ];
 
         $pdf = Pdf::loadView('back.pages.journal.pdf.confirm-payment', $data)->setPaper('A4', 'portrait');
-        $path = 'arsip/payment/' . 'Confirm-Payment-' . $payment->submission->submission_id . '-' . $payment->submission->id . '-' . Carbon::now()->format('d-m-Y') . '.pdf';
+        $path = 'arsip/payment/' . 'Confirm-Payment-' . $payment->paymentInvoice->submission->submission_id . '-' . $payment->paymentInvoice->submission->id . '-' . Carbon::now()->format('d-m-Y') . '.pdf';
 
         Storage::disk('public')->put($path, $pdf->output());
         $data['attachments'] = storage_path('app/public/' . $path);

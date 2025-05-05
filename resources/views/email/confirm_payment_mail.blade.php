@@ -42,7 +42,7 @@
 
                                 <p style="margin-bottom:2px; color:#3F4254; line-height:1.6">
                                     Thank you for paying the journal publication fees. you have made a payment in the
-                                    name of {{ $mailData['payment_account_name']  }} an amount {{ $mailData['payment_amount']  }} on
+                                    name of {{ $mailData['payment_account_name']  }} an amount @money($mailData['payment_amount']) on
                                     {{ $mailData['payment_timestamp'] }}.
 
                                     <br>
