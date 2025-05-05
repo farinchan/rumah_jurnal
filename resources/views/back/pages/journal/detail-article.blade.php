@@ -343,18 +343,22 @@
                                 </div>
                                 <div class="tab-pane fade" id="kt_tab_pane_2_submission_{{ $submission->id }}"
                                     role="tabpanel">
+                                    @foreach ($submission->paymentInvoices as $invoice)
                                     <div class="table-responsive">
                                         <table class="table table-hover table-rounded table-striped border gy-7 gs-7">
                                             <thead>
+                                                <tr class="fw-bold text-center fs-6 text-gray-800 border-bottom-2 border-gray-200">
+                                                    <th colspan="4">INVOICE {{ $invoice->invoice_number }}/JRNL/UINSMDD/{{ $invoice->created_at->format('Y') }}</th>
+                                                </tr>
                                                 <tr class="fw-semibold fs-6 text-gray-800 border-bottom-2 border-gray-200">
                                                     <th>Waktu</th>
                                                     <th>Pembayar</th>
-                                                    <th>Jumlah Pembayaran</th>
+                                                    <th>Metode Pembayaran</th>
                                                     <th>Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @forelse ($submission->paymentInvoices as $payment)
+                                                @forelse ($invoice->payments as $payment)
                                                     <tr>
                                                         <td>
                                                             {{ Carbon\Carbon::parse($payment->created_at)->translatedFormat('l, d F Y H:i:s') }}
@@ -363,7 +367,7 @@
                                                             {{ $payment->payment_account_name }}
                                                         </td>
                                                         <td>
-                                                            {{ $payment->payment_amount }}
+                                                            {{ $payment->payment_method }}
                                                         </td>
                                                         <td>
                                                             @if ($payment->payment_status == 'pending')
@@ -392,6 +396,7 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    @endforeach
                                 </div>
                             </div>
                             @endif

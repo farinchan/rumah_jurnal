@@ -211,13 +211,13 @@ class FinanceController extends Controller
             $request->all(),
             [
                 'payment_status' => 'required|in:pending,accepted,rejected',
-                'note' => 'nullable|string',
+                'payment_note' => 'nullable|string|max:255',
             ],
             [
                 'payment_status.required' => 'Status Pembayaran harus diisi',
                 'payment_status.in' => 'Status Pembayaran tidak valid',
-                'note.string' => 'Catatan harus berupa teks',
-                'note.max' => 'Catatan maksimal 255 karakter',
+                'payment_note.string' => 'Catatan harus berupa teks',
+                'payment_note.max' => 'Catatan maksimal 255 karakter',
             ]
         );
         if ($validator->fails()) {
@@ -228,7 +228,7 @@ class FinanceController extends Controller
         $payment = Payment::findOrFail($id);
         $payment->update([
             'payment_status' => $request->payment_status,
-            'note' => $request->note,
+            'payment_note' => $request->payment_note,
         ]);
 
         if ($request->payment_status == 'accepted') {
@@ -257,7 +257,7 @@ class FinanceController extends Controller
             ];
 
             $pdf = Pdf::loadView('back.pages.journal.pdf.confirm-payment', $mailData)->setPaper('A4', 'portrait');
-            $path = 'arsip/payment/' . 'Confirm-Payment-' . $payment->paymentInvoice->submission->submission_id . '-' . $payment->paymentInvoice->submission->id . '-' . Carbon::now()->format('d-m-Y') . '.pdf';
+            $path = 'arsip/payment/' . $payment->paymentInvoice->created_at->format('Y') . '/' . $payment->paymentInvoice->invoice_number . '/confirm-payment-' . $payment->paymentInvoice->submission->submission_id . '.pdf';
 
             Storage::disk('public')->put($path, $pdf->output());
             $mailData['attachments'] = storage_path('app/public/' . $path);
@@ -341,11 +341,15 @@ class FinanceController extends Controller
             'setting_web' => SettingWebsite::first(),
         ];
 
-        $pdf = Pdf::loadView('back.pages.journal.pdf.confirm-payment', $data)->setPaper('A4', 'portrait');
-        $path = 'arsip/payment/' . 'Confirm-Payment-' . $payment->paymentInvoice->submission->submission_id . '-' . $payment->paymentInvoice->submission->id . '-' . Carbon::now()->format('d-m-Y') . '.pdf';
+        if (Storage::exists('arsip/payment/' . $payment->paymentInvoice->created_at->format('Y') . '/' . $payment->paymentInvoice->invoice_number . '/confirm-payment-' . $payment->paymentInvoice->submission->submission_id . '.pdf')) {
+            $data['attachments'] = storage_path('app/public/arsip/payment/' . $payment->paymentInvoice->created_at->format('Y') . '/' . $payment->paymentInvoice->invoice_number . '/confirm-payment-' . $payment->paymentInvoice->submission->submission_id . '.pdf');
+        } else {
+            $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
+            $path = 'arsip/payment/' . $payment->paymentInvoice->created_at->format('Y') . '/' . $payment->paymentInvoice->invoice_number . '/confirm-payment-' . $payment->paymentInvoice->submission->submission_id . '.pdf';
 
-        Storage::disk('public')->put($path, $pdf->output());
-        $data['attachments'] = storage_path('app/public/' . $path);
+            Storage::disk('public')->put($path, $pdf->output());
+            $data['attachments'] = storage_path('app/public/' . $path);
+        }
 
         $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
         if ($mailEnvirontment == 'production') {
