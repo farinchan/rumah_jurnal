@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('printIssn')->nullable();
             $table->integer('author_fee')->default(0);
             $table->json('indexing')->nullable();
+            $table->json('indexing_others')->nullable();
             $table->string('api_key');
             $table->enum('ojs_version', ['3.3', '3.4']);
             $table->dateTime('last_sync');

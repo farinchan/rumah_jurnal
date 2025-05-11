@@ -20,4 +20,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     Route::get('/editor/list', [App\Http\Controllers\Api\JournalController::class, 'editorList'])->name('editor.list');
     Route::post('/editor/select', [App\Http\Controllers\Api\JournalController::class, 'editorSelect'])->name('editor.select');
+
+    Route::get('/journal/list', [App\Http\Controllers\Api\JournalController::class, 'journalList'])->name('journal.list');
+    Route::post('/journal/get/{context_id}', [App\Http\Controllers\Api\JournalController::class, 'journalGet'])->name('journal.get');
+
+
+    Route::get('/data/banner', [App\Http\Controllers\Api\DataController::class, 'dataBanner'])->name('data.banner');
+    
+    Route::get('/data/journal', [App\Http\Controllers\Api\DataController::class, 'dataJournal'])->name('data.journal');
+    Route::get('/data/journal/{context_id}', [App\Http\Controllers\Api\DataController::class, 'dataJournalContext'])->name('data.journal.context');
+
 });
