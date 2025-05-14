@@ -25,8 +25,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::post('/journal/get/{context_id}', [App\Http\Controllers\Api\JournalController::class, 'journalGet'])->name('journal.get');
 
 
+    Route::get('/data/website', [App\Http\Controllers\Api\DataController::class, 'datawebsite'])->name('data.website');
     Route::get('/data/banner', [App\Http\Controllers\Api\DataController::class, 'dataBanner'])->name('data.banner');
-    
+
     Route::get('/data/journal', [App\Http\Controllers\Api\DataController::class, 'dataJournal'])->name('data.journal');
     Route::get('/data/journal/{context_id}', [App\Http\Controllers\Api\DataController::class, 'dataJournalContext'])->name('data.journal.context');
 
