@@ -82,7 +82,25 @@
                                             <h5 style="margin-bottom: 0px;">
                                                 {{ $reviewer->name }}
                                             </h5>
-                                            {{ $reviewer->affiliation }}
+                                            {{ $reviewer->affiliation }} <br>
+                                            Jurnal Yang Dikelola:
+                                            @php
+
+                                                $journals = App\Models\reviewer::where('reviewer_id', $reviewer->reviewer_id)
+                                                    ->with(['issue.journal']) // ambil relasi sampai journal
+                                                    ->get()
+                                                    ->pluck('issue.journal') // ambil jurnal dari tiap issue
+                                                    ->unique('id') // hilangkan duplikat jurnal
+                                                    ->values(); // reset index
+                                            @endphp
+                                            <ul>
+                                                @foreach ($journals ?? [] as $journal)
+                                                    <li style="margin-top: 0px; margin-left: 15px">
+                                                        <a href="{{ route("journal.detail", $journal->url_path) }}">{{ $journal->title }}</a>
+
+                                                    </li>
+                                                @endforeach
+                                            </ul>
                                             </p>
                                         </li>
                                         @empty

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('reviewers', function (Blueprint $table) {
             $table->id();
-            $table->string('reviewer_id')->unique();
+            $table->string('reviewer_id')->nullable();
             $table->string('name');
             $table->string('username')->nullable();
             $table->string('email')->nullable();
