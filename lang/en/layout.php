@@ -15,4 +15,5 @@ return [
     'dashboard' => 'Dashboard',
     'newsletter' => 'Subscribe for receive update journal and news',
 
+    'team' => 'Team',
 ];

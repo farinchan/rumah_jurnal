@@ -15,4 +15,5 @@ return [
     'dashboard' => 'Dasbor',
     'newsletter' => 'Berlangganan untuk menerima pembaruan jurnal dan berita',
 
+    'team' => 'Tim',
 ];

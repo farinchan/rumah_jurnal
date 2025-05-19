@@ -22,6 +22,7 @@ use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
+use App\Http\Controllers\Front\TeamController;
 
 Route::get('generate-storage', function (){
     \Illuminate\Support\Facades\Artisan::call('storage:link');
@@ -48,6 +49,11 @@ Route::prefix('event')->name('event.')->group(function () {
 Route::prefix('announcement')->name('announcement.')->group(function () {
     Route::get('/', [AnnouncementController::class, 'index'])->name('index');
     Route::get('/{slug}', [AnnouncementController::class, 'show'])->name('show');
+});
+
+Route::prefix('team')->name('team.')->group(function () {
+    Route::get('/editor', [TeamController::class, 'editor'])->name('editor');
+    Route::get('/reviewer', [TeamController::class, 'reviewer'])->name('reviewer');
 });
 
 Route::prefix('news')->name('news.')->group(function () {
