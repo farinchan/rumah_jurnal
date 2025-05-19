@@ -37,7 +37,8 @@
                                                         @foreach ($journals as $journal)
                                                             <option
                                                                 {{ $journal->url_path == request('journal') ? 'selected' : '' }}
-                                                                value="{{ $journal->url_path }}">{{ $journal->title }}</option>
+                                                                value="{{ $journal->url_path }}">{{ $journal->title }}
+                                                            </option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -82,10 +83,28 @@
                                             <h5 style="margin-bottom: 0px;">
                                                 {{ $editor->name }}
                                             </h5>
-                                            {{ $editor->affiliation }}
+                                            {{ $editor->affiliation }} <br>
+                                            Jurnal Yang Dikelola:
+                                            @php
+
+                                                $journals = App\Models\Editor::where('editor_id', $editor->editor_id)
+                                                    ->with(['issue.journal']) // ambil relasi sampai journal
+                                                    ->get()
+                                                    ->pluck('issue.journal') // ambil jurnal dari tiap issue
+                                                    ->unique('id') // hilangkan duplikat jurnal
+                                                    ->values(); // reset index
+                                            @endphp
+                                            <ul>
+                                                @foreach ($journals ?? [] as $journal)
+                                                    <li style="margin-top: 0px; margin-left: 15px">
+                                                        <a href="{{ route("journal.detail", $journal->url_path) }}">{{ $journal->title }}</a>
+
+                                                    </li>
+                                                @endforeach
+                                            </ul>
                                             </p>
                                         </li>
-                                        @empty
+                                    @empty
                                         <li>
                                             <p>
                                             <h5 style="margin-bottom: 0px;">
@@ -98,10 +117,10 @@
                             </div>
                         </div>
                     </div>
-                    @empty
+                @empty
                     <div class="card">
                         <h3 class="card-title" style="text-align: center; margin: 10px;">
-                           Editor Not Found
+                            Editor Not Found
                         </h3>
                     </div>
                 @endforelse

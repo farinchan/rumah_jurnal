@@ -179,7 +179,7 @@
                             <li>
                                 <a href="#">
                                     <img src="
-                                    @if (app()->getLocale() == 'en') {{ asset('back/media/flags/united-kingdom.svg') }}
+                                    @if (app()->getLocale() == 'en') {{ asset('back/media/flags/united-states.svg') }}
                                     @else
                                         {{ asset('back/media/flags/indonesia.svg') }} @endif"
                                         alt="Image" style="width: 30px;">

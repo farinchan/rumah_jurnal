@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('editors', function (Blueprint $table) {
             $table->id();
-            $table->string('editor_id')->unique();
+            $table->string('editor_id')->nullable();
             $table->string('name');
             $table->string('username')->nullable();
             $table->string('email')->nullable();
