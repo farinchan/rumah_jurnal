@@ -40,6 +40,7 @@
                             </th>
                             <th class="min-w-200px">Issue</th>
                             <th class="text-end ">Article</th>
+                            <th class="text-end ">Editor</th>
                             <th class="text-end ">Reviewer</th>
                             <th class="text-end ">Status</th>
                             <th class="text-end min-w-70px">Actions</th>
@@ -64,6 +65,11 @@
                                                 {{ Str::limit(strip_tags($issue->description), 300) }}...</div>
                                         </div>
                                     </div>
+                                </td>
+                                <td class="text-end pe-0">
+                                    <span class="fw-bold">
+                                        {{ $issue->editors->count() }}
+                                    </span>
                                 </td>
                                 <td class="text-end pe-0">
                                     <span class="fw-bold">
