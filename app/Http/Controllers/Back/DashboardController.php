@@ -21,7 +21,7 @@ class DashboardController extends Controller
             'breadcrumb' => [
                 [
                     'name' => 'Dashboard',
-                     'link' => route('back.dashboard')
+                    'link' => route('back.dashboard')
                 ],
             ],
 
@@ -34,19 +34,33 @@ class DashboardController extends Controller
     {
 
 
-        $data = [
-            'visitor_monthly' => Visitor::select(DB::raw('Date(created_at) as date'), DB::raw('count(*) as total'))
-                ->orderBy('date', 'desc')
-                ->limit(30)
-                ->groupBy('date')
-                ->get(),
-            'visitor_platfrom' => Visitor::select('platform', DB::raw('count(*) as total'))
-                ->groupBy('platform')
-                ->get(),
-            'visitor_browser' => Visitor::select('browser', DB::raw('count(*) as total'))
-                ->groupBy('browser')
-                ->get(),
-        ];
+        $data = cache()->remember('visitor_stats', 60, function () {
+            return [
+                'visitor_monthly' => Visitor::select(DB::raw('Date(created_at) as date'), DB::raw('count(*) as total'))
+                    ->orderBy('date', 'desc')
+                    ->limit(30)
+                    ->groupBy('date')
+                    ->get(),
+                'visitor_platfrom' => Visitor::select('platform', DB::raw('count(*) as total'))
+                    ->groupBy('platform')
+                    ->get(),
+                'visitor_browser' => Visitor::select('browser', DB::raw('count(*) as total'))
+                    ->groupBy('browser')
+                    ->get(),
+                'visitor_country' => Visitor::select('country', DB::raw('count(*) as total'))
+                    ->whereNotNull('country')
+                    ->groupBy('country')
+                    ->orderBy('total', 'desc')
+                    ->get()
+                    ->map(function ($item) {
+                        $countryName = $item->country;
+
+                        $hash = substr(md5($countryName), 0, 6);
+                        $item->color = "#{$hash}";
+                        return $item;
+                    }),
+            ];
+        });
         return response()->json($data);
     }
 
@@ -86,6 +100,7 @@ class DashboardController extends Controller
             'news_viewer_browser' => NewsViewer::select('browser', DB::raw('count(*) as total'))
                 ->groupBy('browser')
                 ->get(),
+
         ];
         return response()->json($data);
     }
