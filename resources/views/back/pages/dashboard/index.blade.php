@@ -21,6 +21,22 @@
             </div>
         </div>
         <div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
+            <div class="col-xl-12">
+                <div class="card card-flush h-lg-100">
+                    <div class="card-header pt-5">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bold text-gray-900">Statistik pengunjung website Berdasarkan
+                                Negara</span>
+                        </h3>
+                    </div>
+                    <div class="card-body pt-0 px-0">
+                        {{-- INI TEMPAT STAT NYA --}}
+                        <div id="chart_4" class="px-5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
             <div class="col-xl-6">
                 <div class="card card-flush h-lg-100">
                     <div class="card-header pt-5">
@@ -248,6 +264,44 @@
         });
         chart_3.render();
 
+        var chart_4 = new ApexCharts(document.querySelector("#chart_4"), {
+            series: [{
+                data: []
+            }],
+            chart: {
+                height: 350,
+                type: 'bar',
+                events: {
+                    click: function(chart, w, e) {
+                        // console.log(chart, w, e)
+                    }
+                }
+            },
+            colors: [],
+            plotOptions: {
+                bar: {
+                    columnWidth: '45%',
+                    distributed: true,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                show: false
+            },
+            xaxis: {
+                categories: [],
+                labels: {
+                    style: {
+                        colors: [],
+                        fontSize: '12px'
+                    }
+                }
+            }
+        });
+        chart_4.render();
+
         $.ajax({
             url: "{{ route('back.dashboard.visitor.stat') }}",
             type: "GET",
@@ -301,6 +355,34 @@
                             return item.total;
                         })
                     }]
+                });
+                chart_4.updateOptions({
+                    xaxis: {
+                        categories: response.visitor_country.map(function(item) {
+                            if (item.country == '') {
+                                return 'Unknown';
+                            } else {
+                                return item.country;
+                            }
+                        }),
+                        labels: {
+                            style: {
+                                colors: response.visitor_country.map(function(item) {
+                                    return item.color;
+                                }),
+                                fontSize: '14px'
+                            }
+                        }
+                    },
+                    series: [{
+                        name: 'Jumlah',
+                        data: response.visitor_browser.map(function(item) {
+                            return item.total;
+                        })
+                    }],
+                    colors: response.visitor_country.map(function(item) {
+                        return item.color;
+                    })
                 });
             }
         });

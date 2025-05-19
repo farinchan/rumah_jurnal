@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Back;
 
+use App\Exports\articleIssueExport;
 use App\Http\Controllers\Controller;
 use App\Mail\CertificateEditorMail;
 use App\Mail\CertificateReviewerMail;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use ZipArchive;
 
 class journalController extends Controller
@@ -310,6 +312,47 @@ class journalController extends Controller
         $submission->delete();
         Alert::success('Success', 'Article has been deleted');
         return redirect()->back();
+    }
+
+    public function articleExport($journal_path, $issue_id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        return Excel::download(new articleIssueExport($issue_id), 'Article-' . $issue->volume . '-' . $issue->number . '-' . $issue->year . '.xlsx');
+        // $issue = Issue::with(['submissions'])
+        //     ->where('id', $issue_id)
+        //     ->first()->submissions
+        //     ->map(function ($submissions) {
+        //         return [
+        //             'submission_id' => $submissions->id,
+        //             'authors' => $submissions->authorsString,
+        //             'title' => $submissions->FullTitle,
+        //             'status' => $submissions->status_label,
+        //             'url_published' => $submissions->urlPublished,
+        //             'editors' => $submissions->editors->map(function ($editor) {
+        //                 return [
+        //                     'name' => $editor->name,
+        //                     'email' => $editor->email,
+        //                 ];
+        //             }),
+        //             'reviewers' => $submissions->reviewers->map(function ($reviewer) {
+        //                 return [
+        //                     'name' => $reviewer->name,
+        //                     'email' => $reviewer->email,
+        //                 ];
+        //             }),
+        //         ];
+        //     });
+
+        // return response()->json($issue);
     }
 
     public function loaGenerate($submission)
@@ -1102,6 +1145,35 @@ class journalController extends Controller
         return redirect()->back();
     }
 
+    public function editorUpdate($journal_path, $issue_id, $id)
+    {
+        $validator = Validator::make(request()->all(), [
+            'account_bank' => 'required|string',
+            'account_number' => 'required|string',
+        ], [
+            'account_bank.required' => 'Bank harus diisi',
+            'account_number.required' => 'Nomor Rekening harus diisi',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $editor = Editor::where('issue_id', $issue_id)->find($id);
+        if (!$editor) {
+            Alert::error('Error', 'Editor not found');
+            return redirect()->back();
+        }
+
+        $editor->update([
+            'account_bank' => request()->account_bank,
+            'account_number' => request()->account_number,
+        ]);
+        Alert::success('Success', 'Editor has been updated');
+        return redirect()->back();
+    }
+
     public function editorDestroy($journal_path, $issue_id, $id)
     {
         $journal = Journal::where('url_path', $journal_path)->first();
@@ -1169,6 +1241,8 @@ class journalController extends Controller
         // return response()->json($data);
         return view('back.pages.journal.detail-reviewer', $data);
     }
+
+
 
     public function reviewerFileSkStore(Request $request, $journal_path, $issue_id)
     {
@@ -1447,6 +1521,35 @@ class journalController extends Controller
         }
 
         Alert::success('Success', 'email has been sent');
+        return redirect()->back();
+    }
+
+    public function reviewerUpdate($journal_path, $issue_id, $id)
+    {
+        $validator = Validator::make(request()->all(), [
+            'account_bank' => 'required|string',
+            'account_number' => 'required|string',
+        ], [
+            'account_bank.required' => 'Bank harus diisi',
+            'account_number.required' => 'Nomor Rekening harus diisi',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $reviewer = Reviewer::where('issue_id', $issue_id)->find($id);
+        if (!$reviewer) {
+            Alert::error('Error', 'Reviewer not found');
+            return redirect()->back();
+        }
+
+        $reviewer->update([
+            'account_bank' => request()->account_bank,
+            'account_number' => request()->account_number,
+        ]);
+        Alert::success('Success', 'Reviewer has been updated');
         return redirect()->back();
     }
 

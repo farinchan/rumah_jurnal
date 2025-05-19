@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('affiliation')->nullable();
             $table->json('groups')->nullable();
+            $table->string('account_bank')->nullable();
+            $table->string('account_name')->nullable();
+            $table->string('account_number')->nullable();
             $table->foreignId('issue_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

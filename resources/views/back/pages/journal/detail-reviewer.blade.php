@@ -25,6 +25,7 @@
                                         <th class="min-w-250px">Reviewer</th>
                                         <th class="min-w-150px text-start">Email</th>
                                         <th class="min-w-100px text-start">No. Telp</th>
+                                        <th class="min-w-150px text-start">Rekening</th>
                                         <th class="min-w-150px text-center">Action</th>
                                     </tr>
                                 </thead>
@@ -60,6 +61,13 @@
                                             </td>
                                             <td class="text-start">
                                                 {{ $reviewer->phone }}
+                                            </td>
+                                            <td class="text-start">
+                                              <span class="fw-bold">{{ $reviewer->account_bank }}</span><br>
+                                              @if ($reviewer->account_number)
+
+                                              No. Rek: {{ $reviewer->account_number  }}
+                                              @endif
                                             </td>
                                             <td class="text-end">
                                                 <a href="#" class="btn btn-sm btn-light-primary my-1"
@@ -133,8 +141,8 @@
 
                         @if ($file_sk)
                             <div class="btn-group w-100 mb-5">
-                                <a href="{{ Storage::url($file_sk->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Lihat File SK ">
+                                <a href="{{ Storage::url($file_sk->file) }}" class="btn btn-light-primary"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat File SK ">
                                     <i class="ki-duotone ki-eye fs-1">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
@@ -143,7 +151,8 @@
                                     Lihat
                                 </a>
 
-                                <a href="{{ route('back.journal.reviewer.file-sk.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                <a href="{{ route('back.journal.reviewer.file-sk.send-mail', [$journal->url_path, $issue->id]) }}"
+                                    class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
                                     title="Kirim SK ke semua reviewer via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
@@ -191,8 +200,8 @@
 
                         @if ($file_certificate)
                             <div class="btn-group w-100 mb-5">
-                                <a href="{{ Storage::url($file_certificate->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Lihat File Sertifikat ">
+                                <a href="{{ Storage::url($file_certificate->file) }}" class="btn btn-light-primary"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat File Sertifikat ">
                                     <i class="ki-duotone ki-eye fs-1">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
@@ -201,7 +210,8 @@
                                     Lihat
                                 </a>
 
-                                <a href="{{ route('back.journal.reviewer.file-certificate.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                <a href="{{ route('back.journal.reviewer.file-certificate.send-mail', [$journal->url_path, $issue->id]) }}"
+                                    class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
                                     title="Kirim Sertifikat ke semua reviewer via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
@@ -249,8 +259,8 @@
 
                         @if ($file_fee)
                             <div class="btn-group w-100 mb-5">
-                                <a href="{{ Storage::url($file_fee->file) }}" class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Lihat File Fee ">
+                                <a href="{{ Storage::url($file_fee->file) }}" class="btn btn-light-primary"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat File Fee ">
                                     <i class="ki-duotone ki-eye fs-1">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
@@ -259,7 +269,8 @@
                                     Lihat
                                 </a>
 
-                                <a href="{{ route('back.journal.reviewer.file-fee.send-mail', [$journal->url_path, $issue->id]) }}" class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                <a href="{{ route('back.journal.reviewer.file-fee.send-mail', [$journal->url_path, $issue->id]) }}"
+                                    class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
                                     title="Kirim File Fee ke semua reviewer via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
@@ -339,45 +350,172 @@
                             <!--end::Close-->
                         </div>
                     </div>
-                    <div class="modal-body">
-                        <table class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
-                            <tr>
-                                <td>Nama</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $reviewer->name }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Affiliasi</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $reviewer->affiliation }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>username</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $reviewer->username }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Email</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $reviewer->email }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>No. Telp</td>
-                                <td>:</td>
-                                <td>
-                                    {{ $reviewer->phone }}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
+                    <form action="{{ route('back.journal.reviewer.update', [$journal->url_path, $issue->id, $reviewer->id]) }}" method="post">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            <table class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
+                                <tr>
+                                    <td>Nama</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $reviewer->name }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Affiliasi</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $reviewer->affiliation }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>username</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $reviewer->username }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Email</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $reviewer->email }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>No. Telp</td>
+                                    <td>:</td>
+                                    <td>
+                                        {{ $reviewer->phone }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Rekening</td>
+                                    <td>:</td>
+                                    <td>
+                                        <select class="form-select" data-control="select2" data-placeholder="Pilih Bank"
+                                            data-dropdown-parent="#modal_view_article_{{ $reviewer->reviewer_id }}"
+                                            name="account_bank" data-allow-clear="false">
+                                            <option></option>
+                                            @php
+                                                $banks = [
+                                                    'Bank Mandiri',
+                                                    'Bank Rakyat Indonesia (BRI)',
+                                                    'Bank Central Asia (BCA)',
+                                                    'Bank Negara Indonesia (BNI)',
+                                                    'Bank Tabungan Negara (BTN)',
+                                                    'Bank CIMB Niaga',
+                                                    'Bank Danamon',
+                                                    'Bank Permata',
+                                                    'Bank Panin',
+                                                    'Bank Maybank Indonesia',
+                                                    'Bank Mega',
+                                                    'Bank Sinarmas',
+                                                    'Bank Bukopin',
+                                                    'Bank OCBC NISP',
+                                                    'Bank BTPN',
+                                                    'Bank JTrust Indonesia',
+                                                    'Bank UOB Indonesia',
+                                                    'Bank Commonwealth',
+                                                    'Bank BJB',
+                                                    'Bank DKI',
+                                                    'Bank Jateng',
+                                                    'Bank Jatim',
+                                                    'Bank Sumut',
+                                                    'Bank Nagari',
+                                                    'Bank Sumsel Babel',
+                                                    'Bank Lampung',
+                                                    'Bank Kalsel',
+                                                    'Bank Kaltimtara',
+                                                    'Bank Kalteng',
+                                                    'Bank Sulselbar',
+                                                    'Bank SulutGo',
+                                                    'Bank NTB Syariah',
+                                                    'Bank NTT',
+                                                    'Bank Maluku Malut',
+                                                    'Bank Papua',
+                                                    'Bank Bengkulu',
+                                                    'Bank Sulteng',
+                                                    'Bank Sultra',
+                                                    'Bank Aceh Syariah',
+                                                    'Bank Banten',
+                                                    'Bank Muamalat',
+                                                    'Bank Syariah Indonesia (BSI)',
+                                                    'Bank Victoria',
+                                                    'Bank MNC',
+                                                    'Bank Artos Indonesia',
+                                                    'Bank QNB Indonesia',
+                                                    'Bank INA Perdana',
+                                                    'Bank Amar Indonesia',
+                                                    'Bank Capital Indonesia',
+                                                    'Bank Harda Internasional',
+                                                    'Bank Index Selindo',
+                                                    'Bank Mestika Dharma',
+                                                    'Bank Mayapada',
+                                                    'Bank Mayora',
+                                                    'Bank Multiarta Sentosa',
+                                                    'Bank Nationalnobu',
+                                                    'Bank Prima Master',
+                                                    'Bank Sahabat Sampoerna',
+                                                    'Bank SBI Indonesia',
+                                                    'Bank Seabank Indonesia',
+                                                    'Bank Shinhan Indonesia',
+                                                    'Bank Woori Saudara',
+                                                    'Bank HSBC Indonesia',
+                                                    'Bank Standard Chartered',
+                                                    'Bank Citibank',
+                                                    'Bank ANZ Indonesia',
+                                                    'Bank DBS Indonesia',
+                                                    'Bank Resona Perdania',
+                                                    'Bank Mizuho Indonesia',
+                                                    'Bank Sumitomo Mitsui Indonesia',
+                                                    'Bank BNP Paribas Indonesia',
+                                                    'Bank Rabobank International Indonesia',
+                                                    'Bank of China Indonesia',
+                                                    'Bank of India Indonesia',
+                                                    'Bank ICBC Indonesia',
+                                                    'Bank CTBC Indonesia',
+                                                    'Bank Maybank Syariah Indonesia',
+                                                    'Bank BCA Syariah',
+                                                    'Bank BRI Syariah',
+                                                    'Bank BNI Syariah',
+                                                    'Bank Panin Dubai Syariah',
+                                                    'Bank Victoria Syariah',
+                                                    'Bank Aladin Syariah',
+                                                    'Bank Jago',
+                                                    'Bank Neo Commerce',
+                                                    'Bank Digital BCA (blu)',
+                                                    'Bank SeaBank',
+                                                    'Bank Allo Bank',
+                                                    'Bank Raya Indonesia',
+                                                    'Bank KEB Hana Indonesia',
+                                                    'Bank Mandiri Taspen',
+                                                    'Bank Fama International',
+                                                    'Bank Bisnis Internasional',
+                                                    'Bank Oke Indonesia',
+                                                    'Bank KB Bukopin Syariah',
+                                                    'Bank BSI (Bank Syariah Indonesia)',
+                                                ];
+                                            @endphp
+                                            @foreach ($banks as $bank)
+                                                <option value="{{ $bank }}"
+                                                    {{ isset($reviewer->account_bank) && $reviewer->account_bank == $bank ? 'selected' : '' }}>
+                                                    {{ $bank }}</option>
+                                            @endforeach
+                                        </select>
+                                        <input type="text" class="form-control mt-2" placeholder="No. Rekening"
+                                            name="account_number" value="{{ $reviewer->account_number }}" />
+
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

@@ -31,7 +31,7 @@ Route::get('generate-storage', function (){
 Route::get('/locale/{locale}', LocaleController::class)->name('locale.change');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/visit', [HomeController::class, 'vistWebsite'])->name('visit.ajax');
+Route::get('/visit', [HomeController::class, 'vistWebsite'])->name('visit.ajax')->middleware('TrustProxies');
 
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
@@ -57,7 +57,7 @@ Route::prefix('news')->name('news.')->group(function () {
     Route::get('/category/{slug}', [NewsController::class, 'category'])->name('category');
     Route::post('/comment', [NewsController::class, 'comment'])->name('comment');
 
-    Route::get('/visit/alt', [NewsController::class, 'visit'])->name('visit');
+    Route::get('/visit/alt', [NewsController::class, 'visit'])->name('visit')->middleware('TrustProxies');
 });
 
 Route::prefix('journal')->name('journal.')->group(function () {
@@ -140,6 +140,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}/issue/{issue_id}/article', [BackJournalController::class, 'articleIndex'])->name('article.index');
         Route::put('/{journal_path}/issue/{issue_id}/article/{id}/update', [BackJournalController::class, 'articleUpdate'])->name('article.update');
         Route::delete('/{journal_path}/issue/{issue_id}/article/{id}/destroy', [BackJournalController::class, 'articleDestroy'])->name('article.destroy');
+        Route::get('/{journal_path}/issue/{issue_id}/article-export', [BackJournalController::class, 'articleExport'])->name('article.export');
         Route::get('/loa/submission/{id}/generate', [BackJournalController::class, 'loaGenerate'])->name('loa.generate');
         Route::get('/loa/submission/{id}/mail-send', [BackJournalController::class, 'loaMailSend'])->name('loa.mail-send');
         Route::get('/invoice/submission/{id}/generate-1', [BackJournalController::class, 'invoiceGenerate1'])->name('invoice.generate1');
@@ -155,6 +156,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}/issue/{issue_id}/editor/file-certificate-send-mail/{email?}', [BackJournalController::class, 'editorFileCertificateSendMail'])->name('editor.file-certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/editor/file-fee', [BackJournalController::class, 'editorFileFeeStore'])->name('editor.file-fee.store');
         Route::get('/{journal_path}/issue/{issue_id}/editor/file-fee-send-mail/{email?}', [BackJournalController::class, 'editorFileFeeSendMail'])->name('editor.file-fee.send-mail');
+        Route::put('/{journal_path}/issue/{issue_id}/editor/{id}/update', [BackJournalController::class, 'editorUpdate'])->name('editor.update');
         Route::delete('/{journal_path}/issue/{issue_id}/editor/{id}/delete', [BackJournalController::class, 'editorDestroy'])->name('editor.destroy');
 
         Route::get('/{journal_path}/issue/{issue_id}/reviewer', [BackJournalController::class, 'reviewerIndex'])->name('reviewer.index');
@@ -164,6 +166,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-certificate-send-mail/{email?}', [BackJournalController::class, 'reviewerFileCertificateSendMail'])->name('reviewer.file-certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-fee', [BackJournalController::class, 'reviewerFileFeeStore'])->name('reviewer.file-fee.store');
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-fee-send-mail/{email?}', [BackJournalController::class, 'reviewerFileFeeSendMail'])->name('reviewer.file-fee.send-mail');
+        Route::put('/{journal_path}/issue/{issue_id}/reviewer/{id}/update', [BackJournalController::class, 'reviewerUpdate'])->name('reviewer.update');
         Route::delete('/{journal_path}/issue/{issue_id}/reviewer/{id}/delete', [BackJournalController::class, 'reviewerDestroy'])->name('reviewer.destroy');
 
         Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
