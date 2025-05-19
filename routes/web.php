@@ -31,7 +31,7 @@ Route::get('generate-storage', function (){
 Route::get('/locale/{locale}', LocaleController::class)->name('locale.change');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/visit', [HomeController::class, 'vistWebsite'])->name('visit.ajax');
+Route::get('/visit', [HomeController::class, 'vistWebsite'])->name('visit.ajax')->middleware('TrustProxies');
 
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
@@ -57,7 +57,7 @@ Route::prefix('news')->name('news.')->group(function () {
     Route::get('/category/{slug}', [NewsController::class, 'category'])->name('category');
     Route::post('/comment', [NewsController::class, 'comment'])->name('comment');
 
-    Route::get('/visit/alt', [NewsController::class, 'visit'])->name('visit');
+    Route::get('/visit/alt', [NewsController::class, 'visit'])->name('visit')->middleware('TrustProxies');
 });
 
 Route::prefix('journal')->name('journal.')->group(function () {

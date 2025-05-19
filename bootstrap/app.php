@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append:[
             \App\Http\Middleware\LocaleMiddleware::class,
         ]);
+         $middleware->alias([
+            'TrustProxies' => \App\Http\Middleware\TrustProxies::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
