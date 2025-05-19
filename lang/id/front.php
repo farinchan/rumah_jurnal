@@ -93,4 +93,8 @@ return [
     'amount_to_be_paid' => 'Jumlah yang harus dibayar',
     'due_date' => 'Tanggal Jatuh Tempo',
     'invoice_number' => 'Nomor Invoice',
+
+    'team' => 'Tim',
+    'no_editor' => 'Editor Tidak Ada',
+    'no_reviewer' => 'Reviewer Tidak Ada',
 ];

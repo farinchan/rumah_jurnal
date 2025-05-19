@@ -95,4 +95,8 @@ return [
     'due_date' => 'Due Date',
     'invoice_number' => 'Invoice Number',
 
+    'team' => 'Team',
+    'no_editor' => 'No Editor Found',
+    'no_reviewer' => 'No Reviewer Found',
+
 ];
