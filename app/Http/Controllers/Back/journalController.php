@@ -1102,6 +1102,35 @@ class journalController extends Controller
         return redirect()->back();
     }
 
+     public function editorUpdate($journal_path, $issue_id, $id)
+    {
+        $validator = Validator::make(request()->all(), [
+            'account_bank' => 'required|string',
+            'account_number' => 'required|string',
+        ], [
+            'account_bank.required' => 'Bank harus diisi',
+            'account_number.required' => 'Nomor Rekening harus diisi',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $editor = Editor::where('issue_id', $issue_id)->find($id);
+        if (!$editor) {
+            Alert::error('Error', 'Editor not found');
+            return redirect()->back();
+        }
+
+        $editor->update([
+            'account_bank' => request()->account_bank,
+            'account_number' => request()->account_number,
+        ]);
+        Alert::success('Success', 'Editor has been updated');
+        return redirect()->back();
+    }
+
     public function editorDestroy($journal_path, $issue_id, $id)
     {
         $journal = Journal::where('url_path', $journal_path)->first();
@@ -1169,6 +1198,8 @@ class journalController extends Controller
         // return response()->json($data);
         return view('back.pages.journal.detail-reviewer', $data);
     }
+
+
 
     public function reviewerFileSkStore(Request $request, $journal_path, $issue_id)
     {
@@ -1447,6 +1478,35 @@ class journalController extends Controller
         }
 
         Alert::success('Success', 'email has been sent');
+        return redirect()->back();
+    }
+
+    public function reviewerUpdate($journal_path, $issue_id, $id)
+    {
+        $validator = Validator::make(request()->all(), [
+            'account_bank' => 'required|string',
+            'account_number' => 'required|string',
+        ], [
+            'account_bank.required' => 'Bank harus diisi',
+            'account_number.required' => 'Nomor Rekening harus diisi',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $reviewer = Reviewer::where('issue_id', $issue_id)->find($id);
+        if (!$reviewer) {
+            Alert::error('Error', 'Reviewer not found');
+            return redirect()->back();
+        }
+
+        $reviewer->update([
+            'account_bank' => request()->account_bank,
+            'account_number' => request()->account_number,
+        ]);
+        Alert::success('Success', 'Reviewer has been updated');
         return redirect()->back();
     }
 

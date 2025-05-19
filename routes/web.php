@@ -155,6 +155,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}/issue/{issue_id}/editor/file-certificate-send-mail/{email?}', [BackJournalController::class, 'editorFileCertificateSendMail'])->name('editor.file-certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/editor/file-fee', [BackJournalController::class, 'editorFileFeeStore'])->name('editor.file-fee.store');
         Route::get('/{journal_path}/issue/{issue_id}/editor/file-fee-send-mail/{email?}', [BackJournalController::class, 'editorFileFeeSendMail'])->name('editor.file-fee.send-mail');
+        Route::put('/{journal_path}/issue/{issue_id}/editor/{id}/update', [BackJournalController::class, 'editorUpdate'])->name('editor.update');
         Route::delete('/{journal_path}/issue/{issue_id}/editor/{id}/delete', [BackJournalController::class, 'editorDestroy'])->name('editor.destroy');
 
         Route::get('/{journal_path}/issue/{issue_id}/reviewer', [BackJournalController::class, 'reviewerIndex'])->name('reviewer.index');
@@ -164,6 +165,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-certificate-send-mail/{email?}', [BackJournalController::class, 'reviewerFileCertificateSendMail'])->name('reviewer.file-certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-fee', [BackJournalController::class, 'reviewerFileFeeStore'])->name('reviewer.file-fee.store');
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-fee-send-mail/{email?}', [BackJournalController::class, 'reviewerFileFeeSendMail'])->name('reviewer.file-fee.send-mail');
+        Route::put('/{journal_path}/issue/{issue_id}/reviewer/{id}/update', [BackJournalController::class, 'reviewerUpdate'])->name('reviewer.update');
         Route::delete('/{journal_path}/issue/{issue_id}/reviewer/{id}/delete', [BackJournalController::class, 'reviewerDestroy'])->name('reviewer.destroy');
 
         Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
