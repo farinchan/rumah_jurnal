@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Back;
 
+use App\Exports\articleIssueExport;
 use App\Http\Controllers\Controller;
 use App\Mail\CertificateEditorMail;
 use App\Mail\CertificateReviewerMail;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use ZipArchive;
 
 class journalController extends Controller
@@ -310,6 +312,47 @@ class journalController extends Controller
         $submission->delete();
         Alert::success('Success', 'Article has been deleted');
         return redirect()->back();
+    }
+
+    public function articleExport($journal_path, $issue_id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        return Excel::download(new articleIssueExport($issue_id), 'Article-' . $issue->volume . '-' . $issue->number . '-' . $issue->year . '.xlsx');
+        // $issue = Issue::with(['submissions'])
+        //     ->where('id', $issue_id)
+        //     ->first()->submissions
+        //     ->map(function ($submissions) {
+        //         return [
+        //             'submission_id' => $submissions->id,
+        //             'authors' => $submissions->authorsString,
+        //             'title' => $submissions->FullTitle,
+        //             'status' => $submissions->status_label,
+        //             'url_published' => $submissions->urlPublished,
+        //             'editors' => $submissions->editors->map(function ($editor) {
+        //                 return [
+        //                     'name' => $editor->name,
+        //                     'email' => $editor->email,
+        //                 ];
+        //             }),
+        //             'reviewers' => $submissions->reviewers->map(function ($reviewer) {
+        //                 return [
+        //                     'name' => $reviewer->name,
+        //                     'email' => $reviewer->email,
+        //                 ];
+        //             }),
+        //         ];
+        //     });
+
+        // return response()->json($issue);
     }
 
     public function loaGenerate($submission)
@@ -1102,7 +1145,7 @@ class journalController extends Controller
         return redirect()->back();
     }
 
-     public function editorUpdate($journal_path, $issue_id, $id)
+    public function editorUpdate($journal_path, $issue_id, $id)
     {
         $validator = Validator::make(request()->all(), [
             'account_bank' => 'required|string',

@@ -140,6 +140,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/{journal_path}/issue/{issue_id}/article', [BackJournalController::class, 'articleIndex'])->name('article.index');
         Route::put('/{journal_path}/issue/{issue_id}/article/{id}/update', [BackJournalController::class, 'articleUpdate'])->name('article.update');
         Route::delete('/{journal_path}/issue/{issue_id}/article/{id}/destroy', [BackJournalController::class, 'articleDestroy'])->name('article.destroy');
+        Route::get('/{journal_path}/issue/{issue_id}/article-export', [BackJournalController::class, 'articleExport'])->name('article.export');
         Route::get('/loa/submission/{id}/generate', [BackJournalController::class, 'loaGenerate'])->name('loa.generate');
         Route::get('/loa/submission/{id}/mail-send', [BackJournalController::class, 'loaMailSend'])->name('loa.mail-send');
         Route::get('/invoice/submission/{id}/generate-1', [BackJournalController::class, 'invoiceGenerate1'])->name('invoice.generate1');
