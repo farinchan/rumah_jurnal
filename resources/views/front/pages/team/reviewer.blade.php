@@ -65,38 +65,28 @@
     <div class="container mb-100 ">
         <div class="ltn__faq-inner ltn__faq-inner-2">
             <div id="accordion_2">
-                @forelse ($issues as $issue)
                     <div class="card">
                         <h6 class="collapsed ltn__card-title" data-toggle="collapse"
-                            data-target="#team-{{ $issue->id }}" aria-expanded="{{ $loop->last ? 'true' : 'false' }}">
-                            Vol. {{ $issue->volume }} No. {{ $issue->number }} ({{ $issue->year }}):
-                            {{ $issue->title }}
+                            data-target="#team-1" aria-expanded="true">
+                           Reviewer List
                         </h6>
-                        <div id="team-{{ $issue->id }}" class="collapse {{ $loop->last ? 'show' : '' }}"
+                        <div id="team-1" class="collapse show"
                             data-parent="#accordion_2">
                             <div class="card-body">
                                 <ul>
-                                    @forelse ($issue->reviewers as $reviewer)
+                                    @forelse ($reviewers ?? [] as $reviewer)
                                         <li>
                                             <p>
                                             <h5 style="margin-bottom: 0px;">
-                                                {{ $reviewer->name }}
+                                                {{ $reviewer['fullName'] }}
                                             </h5>
-                                            {{ $reviewer->affiliation }} <br>
+                                            {{ $reviewer["affiliation"] }} <br>
                                             Jurnal Yang Dikelola:
-                                            @php
 
-                                                $journals = App\Models\reviewer::where('reviewer_id', $reviewer->reviewer_id)
-                                                    ->with(['issue.journal']) // ambil relasi sampai journal
-                                                    ->get()
-                                                    ->pluck('issue.journal') // ambil jurnal dari tiap issue
-                                                    ->unique('id') // hilangkan duplikat jurnal
-                                                    ->values(); // reset index
-                                            @endphp
                                             <ul>
-                                                @foreach ($journals ?? [] as $journal)
+                                                @foreach ($reviewer['jurnal'] ?? [] as $journal)
                                                     <li style="margin-top: 0px; margin-left: 15px">
-                                                        <a href="{{ route("journal.detail", $journal->url_path) }}">{{ $journal->title }}</a>
+                                                        <a href="{{ route("journal.detail", $journal["path"]) }}">{{ $journal["name"] }}</a>
 
                                                     </li>
                                                 @endforeach
@@ -116,13 +106,11 @@
                             </div>
                         </div>
                     </div>
-                    @empty
-                    <div class="card">
+                    {{-- <div class="card">
                         <h3 class="card-title" style="text-align: center; margin: 10px;">
                            Reviewer Not Found
                         </h3>
-                    </div>
-                @endforelse
+                    </div> --}}
             </div>
         </div>
     </div>

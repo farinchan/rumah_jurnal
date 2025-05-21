@@ -66,64 +66,64 @@
     <div class="container mb-100 ">
         <div class="ltn__faq-inner ltn__faq-inner-2">
             <div id="accordion_2">
-                @forelse ($issues as $issue)
-                    <div class="card">
-                        <h6 class="collapsed ltn__card-title" data-toggle="collapse"
-                            data-target="#team-{{ $issue->id }}" aria-expanded="{{ $loop->last ? 'true' : 'false' }}">
-                            Vol. {{ $issue->volume }} No. {{ $issue->number }} ({{ $issue->year }}):
-                            {{ $issue->title }}
-                        </h6>
-                        <div id="team-{{ $issue->id }}" class="collapse {{ $loop->last ? 'show' : '' }}"
-                            data-parent="#accordion_2">
-                            <div class="card-body">
-                                <ul>
-                                    @forelse ($issue->editors as $editor)
-                                        <li>
-                                            <p>
-                                            <h5 style="margin-bottom: 0px;">
-                                                {{ $editor->name }}
-                                            </h5>
-                                            {{ $editor->affiliation }} <br>
-                                            Jurnal Yang Dikelola:
-                                            @php
+                <div class="card">
+                    <h6 class="collapsed ltn__card-title" data-toggle="collapse" data-target="#team-1" aria-expanded="true">
+                        Editor List
+                    </h6>
+                    <div id="team-1" class="collapse show" data-parent="#accordion_2">
+                        <div class="card-body">
+                            <ul>
+                                @forelse ($editors ?? [] as $editor)
+                                    <li>
+                                        <p>
+                                        <h5 style="margin-bottom: 0px;">
+                                            {{ $editor['fullName'] }}
+                                        </h5>
+                                        <span id="affiliation_{{ $editor['id'] }}">
+                                            {{ $editor['affiliation'] }}
+                                        </span>
+                                        <script>
+                                            fetch('/api/v1/editor/get-editor?path={{ request('journal') }}&editor_id={{ $editor['id'] }}')
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    document.getElementById('affiliation_{{ $editor['id'] }}').textContent = data.data.affiliation.en_US;
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error fetching affiliation:', error);
+                                                });
+                                        </script>
+                                        <br>
+                                        Jurnal Yang Dikelola:
 
-                                                $journals = App\Models\Editor::where('editor_id', $editor->editor_id)
-                                                    ->with(['issue.journal']) // ambil relasi sampai journal
-                                                    ->get()
-                                                    ->pluck('issue.journal') // ambil jurnal dari tiap issue
-                                                    ->unique('id') // hilangkan duplikat jurnal
-                                                    ->values(); // reset index
-                                            @endphp
-                                            <ul>
-                                                @foreach ($journals ?? [] as $journal)
-                                                    <li style="margin-top: 0px; margin-left: 15px">
-                                                        <a href="{{ route("journal.detail", $journal->url_path) }}">{{ $journal->title }}</a>
+                                        <ul>
+                                            @foreach ($editor['jurnal'] ?? [] as $journal)
+                                                <li style="margin-top: 0px; margin-left: 15px">
+                                                    <a
+                                                        href="{{ route('journal.detail', $journal['path']) }}">{{ $journal['name'] }}</a>
 
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                            </p>
-                                        </li>
-                                    @empty
-                                        <li>
-                                            <p>
-                                            <h5 style="margin-bottom: 0px;">
-                                                {{ __('front.no_editor') }}
-                                            </h5>
-                                            </p>
-                                        </li>
-                                    @endforelse
-                                </ul>
-                            </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        </p>
+                                    </li>
+                                @empty
+                                    <li>
+                                        <p>
+                                        <h5 style="margin-bottom: 0px;">
+                                            {{ __('front.no_editor') }}
+                                        </h5>
+                                        </p>
+                                    </li>
+                                @endforelse
+                            </ul>
                         </div>
                     </div>
-                @empty
-                    <div class="card">
+                </div>
+                {{-- <div class="card">
                         <h3 class="card-title" style="text-align: center; margin: 10px;">
-                            Editor Not Found
+                           editor Not Found
                         </h3>
-                    </div>
-                @endforelse
+                    </div> --}}
             </div>
         </div>
     </div>

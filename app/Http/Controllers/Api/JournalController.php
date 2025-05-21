@@ -571,4 +571,234 @@ class JournalController extends Controller
             ], 500);
         }
     }
+
+
+
+    public function editorListCache(Request $request)
+    {
+        $journals = Journal::get();
+
+        if (!$journals) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => 'Journal not found'
+            ], 404);
+        }
+
+
+        foreach ($journals as $journal) {
+            try {
+                $this->editorCache($request, $journal->url_path);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error',
+                    'error' => $th->getMessage()
+                ], 500);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success refresh editor list',
+        ], 200);
+    }
+
+    private function editorCache(Request $request, $url_path)
+    {
+        $jurnal = Journal::where('url_path', $url_path)->first();
+        // cache()->forget($url_path . '_reviewer_list_cache');
+
+        try {
+            $cacheKey =  $url_path . '_editor_list_cache';
+            $cachedData = cache()->get($cacheKey);
+
+            if ($cachedData) {
+                return $cachedData;
+            }
+
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $jurnal->api_key
+            ])->get($jurnal->url . '/api/v1/users', [
+                'roleIds' => '16,17',
+                'orderBy' => 'id',
+                'count' => 100,
+                'apiToken' => $jurnal->api_key
+            ]);
+
+            if ($response->status() === 200) {
+                $data = [
+                    'journal' => $jurnal->title,
+                    'url_path' => $jurnal->url_path,
+                    'message' => 'Success get editor list',
+                    'editor' => collect($response->json()["items"] ?? [])->map(function ($item) {
+                        return [
+                            'id' => $item['id'] ?? null,
+                            'fullName' => $item['fullName'] ?? null,
+                            'email' => $item['email'] ?? null,
+                            'userName' => $item['userName'] ?? null,
+                            'affiliation' => $item['affiliation']['en_US'] ?? null,
+                        ];
+                    })->all(),
+                ];
+
+                cache()->put($cacheKey, $data, now()->addMinutes(120));
+
+
+                return $data;
+            } else {
+                return [
+                    'message' => 'Error: ' . $response->status(),
+                ];
+            }
+        } catch (\Throwable $th) {
+            return [
+                'message' => 'Error: ' . $th->getMessage(),
+            ];
+        }
+    }
+
+    public function reviewerListCache(Request $request)
+    {
+        $journals = Journal::get();
+
+        if (!$journals) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => 'Journal not found'
+            ], 404);
+        }
+
+
+        foreach ($journals as $journal) {
+            try {
+                $this->reviewerCache($request, $journal->url_path);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error',
+                    'error' => $th->getMessage()
+                ], 500);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success refresh reviewer list',
+        ], 200);
+    }
+
+    private function reviewerCache(Request $request, $url_path)
+    {
+        $jurnal = Journal::where('url_path', $url_path)->first();
+        // cache()->forget($url_path . '_reviewer_list_cache');
+
+        try {
+            $cacheKey =  $url_path . '_reviewer_list_cache';
+            $cachedData = cache()->get($cacheKey);
+
+            if ($cachedData) {
+                return $cachedData;
+            }
+
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $jurnal->api_key
+            ])->get($jurnal->url . '/api/v1/users/reviewers', [
+                'orderBy' => 'id',
+                'count' => 100,
+                'apiToken' => $jurnal->api_key
+            ]);
+
+            if ($response->status() === 200) {
+                $data = [
+                    'journal' => $jurnal->title,
+                    'url_path' => $jurnal->url_path,
+                    'message' => 'Success get reviewer list',
+                    'reviewer' => collect($response->json()["items"] ?? [])->map(function ($item) {
+                        return [
+                            'id' => $item['id'] ?? null,
+                            'fullName' => $item['fullName'] ?? null,
+                            'email' => $item['email'] ?? null,
+                            'userName' => $item['userName'] ?? null,
+                            'affiliation' => $item['affiliation']['en_US'] ?? null,
+                        ];
+                    })->all(),
+                ];
+
+                cache()->put($cacheKey, $data, now()->addMinutes(120));
+
+
+                return $data;
+            } else {
+                return [
+                    'message' => 'Error: ' . $response->status(),
+                ];
+            }
+        } catch (\Throwable $th) {
+            return [
+                'message' => 'Error: ' . $th->getMessage(),
+            ];
+        }
+    }
+
+    public function editorGet(Request $request)
+    {
+        $path = $request->path;
+        $editor_id = $request->editor_id;
+        $jurnal = Journal::where("url_path", $path)->first();
+
+        if (!$jurnal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => 'Journal not found'
+            ], 404);
+        }
+
+        $cacheKey = $path . '_editor_' . $editor_id . '_cache';
+        $cachedData = cache()->get($cacheKey);
+
+        if ($cachedData) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Success (from cache)',
+                'data' => $cachedData
+            ], 200);
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $jurnal->api_key
+            ])->get($jurnal->url . '/api/v1/users/' . $editor_id, [
+                'apiToken' => $jurnal->api_key
+            ]);
+
+            if ($response->status() === 200) {
+                $data = $response->json();
+                cache()->put($cacheKey, $data, now()->addDays(2));
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Success',
+                    'data' => $data
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error',
+                    'error' => $response->json()["errorMessage"] ?? "something went wrong"
+                ], $response->status());
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
 }
