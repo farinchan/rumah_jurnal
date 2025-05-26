@@ -43,7 +43,7 @@
             correspondence author, was accepted for publication in {{ $journal }}.
         </p>
 
-        <p style="margin-top: 30px;">Your article will be published in Edition {{ $editon }}.</p>
+        <p style="margin-top: 30px;">Your article will be published in Edition {{ $edition }}.</p>
 
         <p style="margin-top: 20px;">Thank you for making Journal {{ $journal }} a vehicle for your
             research interests.</p>
