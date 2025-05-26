@@ -485,7 +485,7 @@
                                             <span class="text-warning fs-7 fw-bold">Belum Dibayar</span>
                                         @endif
                                     @else
-                                        <span class="text-danger fw-bold">Belum Dibuat</span>
+                                        <span class="text-danger fw-bold">Belum Terbit</span>
                                     @endif
                                 </div>
                             </div>
@@ -522,11 +522,11 @@
                                             <span class="text-warning fs-7 fw-bold">Belum Dibayar</span>
                                         @endif
                                     @else
-                                        <span class="text-danger fw-bold">Belum Dibuat</span>
+                                        <span class="text-danger fw-bold">Belum Terbit</span>
                                     @endif
                                 </div>
                             </div>
-                            <div class="fv-row fv-plugins-icon-container">
+                            <div class="fv-row fv-plugins-icon-container mb-3">
                                 <div class="d-flex">
                                     <a href="{{ route('back.journal.invoice.mail-send2', $submission->id) }}"
                                         class="btn btn-light w-100 mx-3 btn-loading">
@@ -537,6 +537,43 @@
                                         Kirim ke Author
                                     </a>
                                     <a href="{{ route('back.journal.invoice.generate2', $submission->id) }}"
+                                        class="btn btn-light w-100 mx-3">
+                                        <i class="ki-duotone ki-file-down fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        Download
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="fs-7 fw-semibold text-muted">
+                                    Tagihan 100% (@money($journal->author_fee)) -
+                                    @php
+                                        $tagihan3 = $submission->paymentInvoices->where('payment_percent', 100)->first();
+                                    @endphp
+                                    @if ($tagihan3)
+                                        @if ($tagihan3->is_paid)
+                                            <span class="text-success fs-7 fw-bold">Lunas</span>
+                                        @else
+                                            <span class="text-warning fs-7 fw-bold">Belum Dibayar</span>
+                                        @endif
+                                    @else
+                                        <span class="text-danger fw-bold">Belum Terbit</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="fv-row fv-plugins-icon-container">
+                                <div class="d-flex">
+                                    <a href="{{ route('back.journal.invoice.mail-send3', $submission->id) }}"
+                                        class="btn btn-light w-100 mx-3 btn-loading">
+                                        <i class="ki-duotone ki-send fs-2 ">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        Kirim ke Author
+                                    </a>
+                                    <a href="{{ route('back.journal.invoice.generate3', $submission->id) }}"
                                         class="btn btn-light w-100 mx-3">
                                         <i class="ki-duotone ki-file-down fs-2">
                                             <span class="path1"></span>
