@@ -252,8 +252,8 @@ class journalController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'reviewer' => 'required|array',
-            'editor' => 'required|array',
+            'reviewer' => 'nullable|array',
+            'editor' => 'nullable|array',
         ], [
             'reviewer.required' => 'Reviewer harus dipilih',
             'reviewer.array' => 'Reviewer harus dipilih',
@@ -263,6 +263,10 @@ class journalController extends Controller
             Alert::error('Error', $validator->errors()->all());
             return redirect()->back()->withErrors($validator)->withInput();
         }
+
+        $submission->update([
+            'free_charge' => $request->free_charge ? 1 : 0,
+        ]);
 
 
         SubmissionReviewer::where('submission_id', $submission->id)->delete();
@@ -288,7 +292,7 @@ class journalController extends Controller
             }
         }
 
-        Alert::success('Success', 'Reviewer has been added');
+        Alert::success('Success', 'Artcle has been updated');
         return redirect()->back();
     }
 

@@ -114,23 +114,29 @@
                                         @endif
                                     </td>
                                     @if ($journal->author_fee != 0)
-                                        <td class="text-start">
-                                            @if ($submission->payment_status == 'pending')
-                                                <span
-                                                    class="badge badge-light-warning fs-7 fw-bold">{{ $submission->payment_status }}</span>
-                                            @elseif ($submission->payment_status == 'paid')
-                                                <span
-                                                    class="badge badge-light-success fs-7 fw-bold">{{ $submission->payment_status }}</span>
-                                            @elseif ($submission->payment_status == 'refund')
-                                                <span
-                                                    class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
-                                            @elseif ($submission->payment_status == 'cancelled')
-                                                <span
-                                                    class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
-                                            @else
-                                                <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
-                                            @endif
-                                        </td>
+                                        @if ($submission->free_charge)
+                                            <td class="text-start">
+                                                <span class="badge badge-light-primary fs-7 fw-bold">Free Charge</span>
+                                            </td>
+                                        @else
+                                            <td class="text-start">
+                                                @if ($submission->payment_status == 'pending')
+                                                    <span
+                                                        class="badge badge-light-warning fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                                @elseif ($submission->payment_status == 'paid')
+                                                    <span
+                                                        class="badge badge-light-success fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                                @elseif ($submission->payment_status == 'refund')
+                                                    <span
+                                                        class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                                @elseif ($submission->payment_status == 'cancelled')
+                                                    <span
+                                                        class="badge badge-light-danger fs-7 fw-bold">{{ $submission->payment_status }}</span>
+                                                @else
+                                                    <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
+                                                @endif
+                                            </td>
+                                        @endif
                                     @endif
                                     <td class="text-end">
                                         <a href="#" class="btn btn-sm btn-light-info my-1" data-bs-toggle="modal"
@@ -346,6 +352,21 @@
                                         </select>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td>Gratis Biaya</td>
+                                    <td>:</td>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="1"
+                                                @if ($submission->free_charge) checked @endif id="free_charge"
+                                                name="free_charge" />
+                                            <label class="form-check-label" for="free_charge">
+                                                Ya, (Gratis Biaya publikasi)
+                                            </label>
+                                        </div>
+
+                                    </td>
+                                </tr>
                             </table>
                             @if ($journal->author_fee != 0)
                         </div>
@@ -550,7 +571,9 @@
                                 <div class="fs-7 fw-semibold text-muted">
                                     Tagihan 100% (@money($journal->author_fee)) -
                                     @php
-                                        $tagihan3 = $submission->paymentInvoices->where('payment_percent', 100)->first();
+                                        $tagihan3 = $submission->paymentInvoices
+                                            ->where('payment_percent', 100)
+                                            ->first();
                                     @endphp
                                     @if ($tagihan3)
                                         @if ($tagihan3->is_paid)
@@ -684,12 +707,12 @@
                                             <div class="d-flex flex-column mw-200px">
                                                 <div class="d-flex align-items-center mb-2">
                                                     ${submission.status == 1 ? `
-                                                            <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
-                                                            ` : submission.status == 3 ? `
-                                                            <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
-                                                            ` : submission.status == 4 ? `
-                                                            <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
-                                                            ` :
+                                                                        <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
+                                                                        ` : submission.status == 3 ? `
+                                                                        <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
+                                                                        ` : submission.status == 4 ? `
+                                                                        <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
+                                                                        ` :
                                                     `<span class="badge badge-light-secondary fs-5 p-2">${submission.statusLabel}</span>`
                                                     }
                                                 </div>
