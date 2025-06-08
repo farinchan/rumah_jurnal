@@ -516,7 +516,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 60,
                 'payment_amount' => $issue->journal->author_fee * 0.6,
-                'payment_due_date' => Carbon::now()->addDays(7),
+                'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
         }
@@ -609,7 +609,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 60,
                 'payment_amount' => $issue->journal->author_fee * 0.6,
-                'payment_due_date' => Carbon::now()->addDays(7),
+                'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
         }
@@ -689,7 +689,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 40,
                 'payment_amount' => $issue->journal->author_fee * 0.4,
-                'payment_due_date' => Carbon::now()->addDays(7),
+                'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
         }
@@ -777,7 +777,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 40,
                 'payment_amount' => $issue->journal->author_fee * 0.4,
-                'payment_due_date' => Carbon::now()->addDays(7),
+                'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
         }
@@ -856,7 +856,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 100,
                 'payment_amount' => $issue->journal->author_fee ,
-                'payment_due_date' => Carbon::now()->addDays(7),
+                'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
         }
@@ -949,7 +949,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 100,
                 'payment_amount' => $issue->journal->author_fee,
-                'payment_due_date' => Carbon::now()->addDays(7),
+                'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
         }
