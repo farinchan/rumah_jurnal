@@ -101,7 +101,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <h6>{{ __('front.author_information') }}</h6>
+                                    <h6>{{ __('front.author_information') }} ></h6>
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="input-item input-item-textarea ltn__custom-icon">
@@ -130,7 +130,7 @@
                                         <div class="col-md-6">
                                             <div class="input-item input-item-textarea ltn__custom-icon">
                                                 <input type="tel" name="phone"
-                                                    placeholder="*Phone/WhatsApp Number (Active)" required
+                                                    placeholder="*Phone/WhatsApp Number (Active)"
                                                     value="{{ old('phone') }}">
                                                 @error('phone')
                                                     <div class="text-danger"
@@ -346,7 +346,8 @@
                                         <a href="#tabbar" class="btn theme-btn-1 btn-effect-1 text-uppercase"
                                             id="prev_3">Prev
                                             Step</a>
-                                        <button type="submit" class="btn theme-btn-1 btn-effect-1 text-uppercase">
+                                        <button id="submit" type="submit_btn"
+                                            class="btn theme-btn-1 btn-effect-1 text-uppercase">
                                             Submit
                                         </button>
                                     </div>
@@ -362,26 +363,88 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $('#next_1').on('click', function() {
+        $('#next_1').on('click', function(e) {
+            // Cek field pada tab 1
+            var name = $('input[name="name"]').val().trim();
+            var email = $('input[name="email"]').val().trim();
+            var phone = $('input[name="phone"]').val().trim();
+
+            if (!name || !email || !phone) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Incomplete Fields',
+                    text: 'Please fill in all required fields (Name, Email, Phone) before proceeding.',
+                });
+                e.preventDefault();
+                return false;
+            }
             console.log('next_1 clicked');
             $('#tab_step_2').trigger('click');
+        });
+        $('#tab_step_2').on('click', function() {
+            console.log('tab_step_2 clicked');
+            // Cek apakah tab 2 sudah diisi
+            var name = $('input[name="name"]').val().trim();
+            var email = $('input[name="email"]').val().trim();
+            var phone = $('input[name="phone"]').val().trim();
+            if (!name || !email || !phone) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Incomplete Fields',
+                    text: 'Please fill in all required fields (Name, Email, Phone) before proceeding to Payment Information.',
+                });
+                return false;
+            }
         });
         $('#prev_2').on('click', function() {
             console.log('prev_2 clicked');
             $('#tab_step_1').trigger('click');
         });
         $('#next_2').on('click', function() {
+            // Cek field pada tab 2
+            var paymentInvoiceId = $('select[name="payment_invoice_id"]').val();
+            var paymentFile = $('input[name="payment_file"]').val();
+            var paymentTimestamp = $('input[name="payment_timestamp"]').val();
+            var paymentMethod = $('select[name="payment_method"]').val();
+            var paymentAccountName = $('input[name="payment_account_name"]').val().trim();
+            var paymentAccountNumber = $('input[name="payment_account_number"]').val().trim();
+
+            if (!paymentInvoiceId || !paymentFile || !paymentTimestamp || !paymentMethod || !paymentAccountName || !
+                paymentAccountNumber) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Incomplete Fields',
+                    text: 'Please fill in all required fields (Payment Invoice, Payment File, Payment Timestamp, Payment Method, Account Holder Name, Account Number) before proceeding.',
+                });
+                return false;
+            }
             console.log('next_2 clicked');
             $('#tab_step_3').trigger('click');
+        });
+        $('#tab_step_3').on('click', function() {
+            console.log('tab_step_3 clicked');
+            // Cek apakah tab 3 sudah diisi
+            var paymentInvoiceId = $('select[name="payment_invoice_id"]').val();
+            var paymentFile = $('input[name="payment_file"]').val();
+            var paymentTimestamp = $('input[name="payment_timestamp"]').val();
+            var paymentMethod = $('select[name="payment_method"]').val();
+            var paymentAccountName = $('input[name="payment_account_name"]').val().trim();
+            var paymentAccountNumber = $('input[name="payment_account_number"]').val().trim();
+            if (!paymentInvoiceId || !paymentFile || !paymentTimestamp || !paymentMethod || !paymentAccountName || !
+                paymentAccountNumber) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Incomplete Fields',
+                    text: 'Please fill in all required fields (Payment Invoice, Payment File, Payment Timestamp, Payment Method, Account Holder Name, Account Number) before proceeding to Finalization.',
+                });
+                return false;
+            }
         });
         $('#prev_3').on('click', function() {
             console.log('prev_3 clicked');
             $('#tab_step_2').trigger('click');
-        });
-        $('#next_3').on('click', function() {
-            console.log('next_3 clicked');
-            $('#tab_step_4').trigger('click');
         });
     </script>
     <script>
@@ -400,6 +463,8 @@
             });
             // Trigger change event on page load to set the initial value
             $('select[name="payment_invoice_id"]').trigger('change');
+
+
         });
     </script>
 @endsection
