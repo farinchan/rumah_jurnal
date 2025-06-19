@@ -40,16 +40,17 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $api_key
             ])->get($url . '/api/v1/contexts', [
-                'apiToken' => $api_key
+                'apiToken' => $api_key,
+                'count' => 100,
             ]);
 
             if ($response->status() === 200) {
                 $another = collect($response->json()["items"])->firstWhere('urlPath', $url_path);
-                $response_another = Http::withHeaders([
+                $response_another = Http::retry(3, 100)->timeout(120)->withHeaders([
                     'Accept' => 'application/json',
                     'Authorization' => 'Bearer ' . $api_key
                 ])->get(
@@ -117,7 +118,7 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/contexts/' . $jurnal->context_id, [
@@ -167,7 +168,7 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/submissions', [
@@ -235,7 +236,7 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/submissions/' . $submission_id, [
@@ -244,7 +245,7 @@ class JournalController extends Controller
 
             if ($response->status() === 200) {
 
-                $publication_response = Http::withHeaders([
+                $publication_response = Http::retry(3, 100)->timeout(120)->withHeaders([
                     'Accept' => 'application/json',
                     'Authorization' => 'Bearer ' . $jurnal->api_key
                 ])->get($response->json()["publications"][0]["_href"], [
@@ -331,8 +332,10 @@ class JournalController extends Controller
             ], 404);
         }
 
+        $data = [];
+
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/users/reviewers', [
@@ -342,17 +345,25 @@ class JournalController extends Controller
             ]);
 
             if ($response->status() === 200) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Success',
-                    'data' => $response->json()["items"] ?? []
-                ], 200);
+                array_push($data, $response->json()["items"]);
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => 'Error',
                     'error' => $response->json()["errorMessage"] ?? "something went wrong"
                 ], $response->status());
+            }
+            $response2 = Http::retry(3, 100)->timeout(120)->withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $jurnal->api_key
+            ])->get($jurnal->url . '/api/v1/users/reviewers', [
+                'orderBy' => 'id',
+                'count' => 100,
+                'offset' => 101,
+                'apiToken' => $jurnal->api_key
+            ]);
+            if ($response2->status() === 200) {
+                array_push($data, $response2->json()["items"]);
             }
         } catch (\Throwable $th) {
             return response()->json([
@@ -361,8 +372,13 @@ class JournalController extends Controller
                 'error' => $th->getMessage()
             ], 500);
         }
-    }
 
+        return response()->json([
+            'success' => true,
+            'message' => 'Success',
+            'data' => collect($data)->flatten(1)->all()
+        ], 200);
+    }
 
     public function reviewerSelect(Request $request)
     {
@@ -401,7 +417,7 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/users/' . $reviewer_id, [
@@ -458,7 +474,7 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/users', [
@@ -527,7 +543,7 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/users/' . $editor_id, [
@@ -618,7 +634,7 @@ class JournalController extends Controller
                 return $cachedData;
             }
 
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/users', [
@@ -704,7 +720,7 @@ class JournalController extends Controller
                 return $cachedData;
             }
 
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/users/reviewers', [
@@ -771,7 +787,7 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $jurnal->api_key
             ])->get($jurnal->url . '/api/v1/users/' . $editor_id, [
