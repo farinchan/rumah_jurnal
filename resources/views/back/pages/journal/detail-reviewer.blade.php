@@ -26,6 +26,7 @@
                                         <th class="min-w-150px text-start">Email</th>
                                         <th class="min-w-100px text-start">No. Telp</th>
                                         <th class="min-w-150px text-start">Rekening</th>
+                                        <th class="min-w-150px text-start">NPWP</th>
                                         <th class="min-w-150px text-center">Action</th>
                                     </tr>
                                 </thead>
@@ -41,6 +42,9 @@
                                                         class="text-gray-800 text-hover-primary mb-1">{{ $reviewer->name }}</a>
                                                     <span>
                                                         {{ $reviewer->affiliation }}
+                                                    </span>
+                                                    <span class="">
+                                                       NIK. {{ $reviewer->nik?? '-' }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -68,6 +72,13 @@
 
                                               No. Rek: {{ $reviewer->account_number  }}
                                               @endif
+                                            </td>
+                                            <td class="text-start">
+                                                @if ($reviewer->npwp)
+                                                    <span class="fw-bold">{{ $reviewer->npwp }}</span>
+                                                @else
+                                                    <span class="text-muted">Tidak ada NPWP</span>
+                                                @endif
                                             </td>
                                             <td class="text-end">
                                                 <a href="#" class="btn btn-sm btn-light-primary my-1"
@@ -391,6 +402,14 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <td class="required">NIK</td>
+                                    <td>:</td>
+                                    <td>
+                                        <input type="text" class="form-control" name="nik"
+                                            value="{{ $reviewer->nik }}" placeholder="Nomor Induk Kependudukan"  required />
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>Rekening</td>
                                     <td>:</td>
                                     <td>
@@ -507,6 +526,14 @@
                                         <input type="text" class="form-control mt-2" placeholder="No. Rekening"
                                             name="account_number" value="{{ $reviewer->account_number }}" />
 
+                                    </td>
+                                </tr>
+                                 <tr>
+                                    <td class="">NPWP</td>
+                                    <td>:</td>
+                                    <td>
+                                        <input type="text" class="form-control" name="npwp"
+                                            value="{{ $reviewer->npwp }}" placeholder="Nomor Pokok Wajib Pajak" />
                                     </td>
                                 </tr>
                             </table>
