@@ -189,6 +189,8 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/confirm-payment/{id}/generate', [BackFinanceController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
         Route::get('/confirm-payment/{id}/mail-send', [BackFinanceController::class, 'confirmPaymentMailSend'])->name('confirm-payment.mail-send');
         Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');
+        Route::get('/report/datatable', [BackFinanceController::class, 'reportDatatable'])->name('report.datatable');
+        Route::get('/report/export', [BackFinanceController::class, 'reportExport'])->name('report.export');
     });
 
     Route::prefix('master')->name('master.')->group(function () {

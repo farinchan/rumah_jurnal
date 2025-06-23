@@ -361,4 +361,130 @@ class FinanceController extends Controller
         Alert::success('Berhasil', 'Email konfirmasi pembayaran berhasil dikirim');
         return redirect()->route('back.finance.verification.index')->with('success', 'Email konfirmasi pembayaran berhasil dikirim');
     }
+
+    public function reportIndex()
+    {
+        $data = [
+            'title' => 'Laporan Keuangan',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Finance',
+                    'link' => route('back.finance.report.index')
+                ]
+            ],
+            'journals' => Journal::all()
+        ];
+        return view('back.pages.finance.report', $data);
+    }
+
+    public function reportDatatable(Request $request)
+    {
+        $journal_id = $request->journal_id;
+        $date_end = $request->date_end ?? now()->toDateString();
+        $date_start = $request->date_start ?? now()->subMonth()->toDateString();
+
+
+        $payment = Payment::with(['paymentInvoice.submission.issue.journal'])
+            ->when($journal_id, function ($query) use ($journal_id) {
+                return $query->whereHas('paymentInvoice.submission.issue', function ($q) use ($journal_id) {
+                    $q->where('journal_id', $journal_id);
+                });
+            })
+            ->when($date_start, function ($query) use ($date_start) {
+                return $query->whereDate('payment_timestamp', '>=', date('Y-m-d H:i:s', strtotime($date_start)));
+            })
+            ->when($date_end, function ($query) use ($date_end) {
+                return $query->whereDate('payment_timestamp', '<=', date('Y-m-d H:i:s', strtotime($date_end)));
+            })
+            ->where('payment_status', 'accepted')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $total_income = $payment->sum('paymentInvoice.payment_amount');
+        $total_expense = 0;
+        $total_balance = $total_income - $total_expense;
+
+        return datatables()
+            ->of($payment)
+            ->addColumn('invoice', function ($payment) {
+                return '
+                        <div class="d-flex flex-column">
+                            <span class="text-gray-800 mb-1">INVOICE ' . $payment->paymentInvoice->invoice_number . '/JRNL/UINSMDD/' . $payment->paymentInvoice->created_at->format('Y') . '</span>
+                            <span>Persentase: ' . $payment->paymentInvoice->payment_percent . '%</span>
+                            <span>Jumlah: Rp ' . number_format($payment->paymentInvoice->payment_amount, 0, ',', '.') . '</span>
+                        </div>
+                ';
+            })
+            ->addColumn('journal', function ($payment) {
+                return '
+                        <div class="d-flex flex-column">
+                            <a href="#"
+                                class="text-gray-800 text-hover-primary mb-1">' . $payment->paymentInvoice->submission->issue->journal->title . '</a>
+                            <span> Vol. ' . $payment->paymentInvoice->submission->issue->volume . ' No. ' . $payment->paymentInvoice->submission->issue->number . ' (' . $payment->paymentInvoice->submission->issue->year . '): ' . $payment->paymentInvoice->submission->issue->title .  '</span>
+                        </div>
+                ';
+            })
+            ->addColumn('date', function ($payment) {
+                return '<span class="fw-bold">' . Carbon::parse($payment->created_at)->format('d M Y') . '</span>';
+            })
+
+            ->addColumn('amount', function ($payment) {
+                return '<span class="text-success">+ Rp ' . number_format($payment->paymentInvoice->payment_amount, 0, ',', '.') . '</span>';
+            })
+            ->addColumn('type', function ($payment) {
+                $payment->type = 'income';
+                return '<span class="badge badge-' . ($payment->type == 'income' ? 'success' : 'danger') . '">' . $payment->type . '</span>';
+            })
+            ->addColumn('payment_info', function ($payment) {
+                return '<ul>
+                            <li>
+                                <span class="fw-bold">Nama Pembayar:</span>
+                                <span>' . $payment->payment_account_name . '</span>
+                            </li>
+                            <li>
+                                <span class="fw-bold">Metode Pembayaran:</span>
+                                <span>' . ($payment->payment_method ?? '-') . '</span>
+                            </li>
+
+                            <li>
+                                <span class="fw-bold">Note:</span>
+                                <span>' . ($payment->payment_note ?? '-') . '</span>
+                            </li>
+                        </ul>';
+            })
+            ->addColumn('attachment', function ($payment) {
+                if ($payment->payment_file) {
+                    return '<a href="' . asset('storage/' . $payment->payment_file) . '" target="_blank">
+                        <i class="ki-duotone ki-file-added text-primary fs-3x" data-bs-toggle="tooltip" data-bs-placement="right" title="Lihat File">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                    </a>';
+                } else {
+                    return '<i class="ki-duotone ki-file-deleted text-danger fs-3x" data-bs-toggle="tooltip" data-bs-placement="right" title="File Tidak Ada">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>';
+                }
+            })
+            ->with([
+                'total_income' => $total_income,
+                'total_expense' => $total_expense,
+                'total_balance' => $total_balance,
+            ])
+            ->rawColumns([
+                'invoice',
+                'journal',
+                'date',
+                'amount',
+                'type',
+                'payment_info',
+                'attachment'
+            ])
+            ->make(true);
+    }
 }
