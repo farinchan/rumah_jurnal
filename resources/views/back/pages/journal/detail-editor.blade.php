@@ -392,12 +392,12 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Rekening</td>
+                                    <td class="required">Rekening</td>
                                     <td>:</td>
                                     <td>
                                         <select class="form-select" data-control="select2" data-placeholder="Pilih Bank"
                                             data-dropdown-parent="#modal_view_article_{{ $editor->editor_id }}"
-                                            name="account_bank" data-allow-clear="false">
+                                            name="account_bank" data-allow-clear="false" required>
                                             <option></option>
                                             @php
                                                 $banks = [
@@ -506,7 +506,7 @@
                                             @endforeach
                                         </select>
                                         <input type="text" class="form-control mt-2" placeholder="No. Rekening"
-                                            name="account_number" value="{{ $editor->account_number }}" />
+                                            name="account_number" value="{{ $editor->account_number }}" required />
 
                                     </td>
                                 </tr>

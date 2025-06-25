@@ -1452,8 +1452,6 @@ class journalController extends Controller
         return view('back.pages.journal.detail-reviewer', $data);
     }
 
-
-
     public function reviewerFileSkStore(Request $request, $journal_path, $issue_id)
     {
         $validator = Validator::make($request->all(), [
@@ -1737,11 +1735,20 @@ class journalController extends Controller
     public function reviewerUpdate($journal_path, $issue_id, $id)
     {
         $validator = Validator::make(request()->all(), [
+            'nik' => 'required|string|max:100',
             'account_bank' => 'required|string',
             'account_number' => 'required|string',
+            'npwp' => 'nullable|string|max:100',
         ], [
+            'nik.required' => 'NIK harus diisi',
+            'nik.string' => 'NIK harus berupa string',
+            'nik.max' => 'NIK tidak boleh lebih dari 100 karakter',
+            'account_bank.string' => 'Bank harus berupa string',
             'account_bank.required' => 'Bank harus diisi',
             'account_number.required' => 'Nomor Rekening harus diisi',
+            'account_number.string' => 'Nomor Rekening harus berupa string',
+            'npwp.string' => 'NPWP harus berupa string',
+            'npwp.max' => 'NPWP tidak boleh lebih dari 100 karakter',
         ]);
 
         if ($validator->fails()) {
@@ -1756,8 +1763,10 @@ class journalController extends Controller
         }
 
         $reviewer->update([
+            'nik' => request()->nik,
             'account_bank' => request()->account_bank,
             'account_number' => request()->account_number,
+            'npwp' => request()->npwp,
         ]);
         Alert::success('Success', 'Reviewer has been updated');
         return redirect()->back();
