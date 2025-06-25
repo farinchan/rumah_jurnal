@@ -10,7 +10,8 @@
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
                     <div class="btn-group">
 
-                        <a href="#" class="btn btn-light-primary" id="export_excel">
+                        <a href="#" id="export_excel"
+                            class="btn btn-light-primary" id="export_excel">
                             <i class="ki-duotone ki-file-down fs-2">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
@@ -37,10 +38,21 @@
 
                         <label class="form-label fs-6 fw-bold">Jurnal</label>
                         <select class="form-select form-select-solid" data-control="select2"
-                            data-placeholder="Select an option" name="schedule_id" id="schedule_id">
-                            <option value="1">Semua Jurnal</option>
+                            data-placeholder="Select an option" name="journal_id" id="journal_id">
+                            @if (auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('keuangan'))
+                                <option value="" selected>Semua Jurnal</option>
+                            @endif
                             @foreach ($journals as $journal)
-                                <option value="{{ $journal->id }}">{{ $journal->title }}</option>
+                                @if (auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('keuangan'))
+                                    <option value="{{ $journal->id }}">{{ $journal->title }}</option>
+                                @else
+                                    @php
+                                        $permissionNames = Auth::user()->getPermissionNames();
+                                    @endphp
+                                    @if ($journal->permissions->contains($journal->url_path, $permissionNames))
+                                        <option value="{{ $journal->id }}">{{ $journal->title }}</option>
+                                    @endif
+                                @endif
                             @endforeach
 
                         </select>
@@ -55,7 +67,8 @@
                     <div class="col-md-4">
                         <label class="form-label fs-6 fw-bold">Sampai Tanggal</label>
                         <input type="date" name="date_end" class="form-control form-control-solid" placeholder="Date End"
-                            id="date_end" value="{{ \Carbon\Carbon::createFromDate(now()->year, 12, 31)->format('Y-m-d') }}" />
+                            id="date_end"
+                            value="{{ \Carbon\Carbon::createFromDate(now()->year, 12, 31)->format('Y-m-d') }}" />
                     </div>
                 </div>
                 <div class="row">
@@ -93,13 +106,12 @@
                 <table class="table align-middle table-row-dashed fs-6 gy-5" id="table_finance">
                     <thead>
                         <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                            <th class="min-w-200px">Invoice</th>
-                            <th class="min-w-300px">Journal</th>
-                            <th class="min-w-125px">Tanggal</th>
-                            <th class="min-w-150px">Jumlah</th>
-                            <th class="min-w-50px">Type</th>
-                            <th class="min-w-200px">Payment Info</th>
-                            <th class="min-w-100px">Lampiran</th>
+                            <th class="min-w-200px">Jurnal</th>
+                            <th class="min-w-300px">Penulis</th>
+                            <th class="min-w-300px">Artikel</th>
+                            <th class="min-w-200px">Edisi</th>
+                            <th class="min-w-400px">Status Pembayaran</th>
+                            <th class="min-w-100px">LoA</th>
 
 
                         </tr>
@@ -121,38 +133,34 @@
                 ajax: {
                     url: "{{ route('back.finance.report.datatable') }}",
                     data: function(d) {
-                        d.schedule_id = $('#schedule_id').val();
+                        d.journal_id = $('#journal_id').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
                     }
                 },
                 columns: [{
-                        data: 'invoice',
-                        name: 'invoice'
-                    },
-                    {
                         data: 'journal',
                         name: 'journal'
                     },
                     {
-                        data: 'date',
-                        name: 'date'
+                        data: 'author',
+                        name: 'author'
                     },
                     {
-                        data: 'amount',
-                        name: 'amount'
+                        data: 'submission',
+                        name: 'submission'
                     },
                     {
-                        data: 'type',
-                        name: 'type'
+                        data: 'edition',
+                        name: 'edition'
                     },
                     {
                         data: 'payment_info',
                         name: 'payment_info'
                     },
                     {
-                        data: 'attachment',
-                        name: 'attachment'
+                        data: 'loa',
+                        name: 'loa'
                     }
                 ]
             });
@@ -180,14 +188,14 @@
                 $('#balance').text('Rp ' + summary.total_balance.toLocaleString());
 
                 $('#export_excel').attr('href',
-                    "{{ route('back.finance.report.export') }}?schedule_id=" +
-                    $('#schedule_id').val() + "&date_start=" + $('#date_start').val() + "&date_end=" +
+                    "{{ route('back.finance.report.export') }}?journal_id=" +
+                    $('#journal_id').val() + "&date_start=" + $('#date_start').val() + "&date_end=" +
                     $(
                         '#date_end').val());
 
             });
 
-            $('#schedule_id').on('change', function() {
+            $('#journal_id').on('change', function() {
                 table.ajax.reload();
             });
 
@@ -199,8 +207,14 @@
                 table.ajax.reload();
             });
 
-
-
+            $('#export_excel').on('click', function(e) {
+                e.preventDefault();
+                let url = "{{ route('back.finance.report.export') }}";
+                url += '?journal_id=' + encodeURIComponent($('#journal_id').val());
+                url += '&date_start=' + encodeURIComponent($('#date_start').val());
+                url += '&date_end=' + encodeURIComponent($('#date_end').val());
+                window.location.href = url;
+            });
 
         });
     </script>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Back;
 
+use App\Exports\FinanceReportExport;
 use App\Http\Controllers\Controller;
 use App\Mail\ConfirmPaymentMail;
 use App\Models\Issue;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class FinanceController extends Controller
@@ -388,87 +390,94 @@ class FinanceController extends Controller
         $date_start = $request->date_start ?? now()->subMonth()->toDateString();
 
 
-        $payment = Payment::with(['paymentInvoice.submission.issue.journal'])
+        $submission = Submission::with(['paymentInvoices.submission.issue.journal'])
             ->when($journal_id, function ($query) use ($journal_id) {
-                return $query->whereHas('paymentInvoice.submission.issue', function ($q) use ($journal_id) {
-                    $q->where('journal_id', $journal_id);
+                return $query->whereHas('issue.journal', function ($q) use ($journal_id) {
+                    $q->where('id', $journal_id);
                 });
             })
             ->when($date_start, function ($query) use ($date_start) {
-                return $query->whereDate('payment_timestamp', '>=', date('Y-m-d H:i:s', strtotime($date_start)));
+                return $query->whereHas('paymentInvoices', function ($q) use ($date_start) {
+                    $q->whereDate('created_at', '>=', date('Y-m-d H:i:s', strtotime($date_start)));
+                });
             })
             ->when($date_end, function ($query) use ($date_end) {
-                return $query->whereDate('payment_timestamp', '<=', date('Y-m-d H:i:s', strtotime($date_end)));
+                return $query->whereHas('paymentInvoices', function ($q) use ($date_end) {
+                    $q->whereDate('created_at', '<=', date('Y-m-d H:i:s', strtotime($date_end)));
+                });
             })
-            ->where('payment_status', 'accepted')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $total_income = $payment->sum('paymentInvoice.payment_amount');
+
+
+
+        $total_income = $submission->sum(function ($item) {
+            return $item->paymentInvoices->where('is_paid', 1)->sum('payment_amount');
+        });
+        // dd($total_income);
         $total_expense = 0;
         $total_balance = $total_income - $total_expense;
 
         return datatables()
-            ->of($payment)
-            ->addColumn('invoice', function ($payment) {
-                return '
-                        <div class="d-flex flex-column">
-                            <span class="text-gray-800 mb-1">INVOICE ' . $payment->paymentInvoice->invoice_number . '/JRNL/UINSMDD/' . $payment->paymentInvoice->created_at->format('Y') . '</span>
-                            <span>Persentase: ' . $payment->paymentInvoice->payment_percent . '%</span>
-                            <span>Jumlah: Rp ' . number_format($payment->paymentInvoice->payment_amount, 0, ',', '.') . '</span>
-                        </div>
-                ';
-            })
-            ->addColumn('journal', function ($payment) {
+            ->of($submission)
+            ->addColumn('journal', function ($submission) {
                 return '
                         <div class="d-flex flex-column">
                             <a href="#"
-                                class="text-gray-800 text-hover-primary mb-1">' . $payment->paymentInvoice->submission->issue->journal->title . '</a>
-                            <span> Vol. ' . $payment->paymentInvoice->submission->issue->volume . ' No. ' . $payment->paymentInvoice->submission->issue->number . ' (' . $payment->paymentInvoice->submission->issue->year . '): ' . $payment->paymentInvoice->submission->issue->title .  '</span>
+                                class="text-gray-800 text-hover-primary mb-1">' . $submission->issue->journal->title . '</a>
                         </div>
                 ';
             })
-            ->addColumn('date', function ($payment) {
-                return '<span class="fw-bold">' . Carbon::parse($payment->created_at)->format('d M Y') . '</span>';
-            })
+            ->addColumn('author', function ($submission) {
+                $author = "";
+                $authorList = '';
+                foreach ($submission->authors as $key => $authorData) {
+                    $authorList .= '<li> <b>' . $authorData['name'] . ' </b> <br>' . $authorData['affiliation'] . '</li>';
+                }
+                $author = '<ul>' . $authorList . '</ul>';
 
-            ->addColumn('amount', function ($payment) {
-                return '<span class="text-success">+ Rp ' . number_format($payment->paymentInvoice->payment_amount, 0, ',', '.') . '</span>';
+                return $author;
             })
-            ->addColumn('type', function ($payment) {
-                $payment->type = 'income';
-                return '<span class="badge badge-' . ($payment->type == 'income' ? 'success' : 'danger') . '">' . $payment->type . '</span>';
+             ->addColumn('submission', function ($submission) {
+                return '
+                        <div class="d-flex flex-column">
+                            <a href="#"
+                                class="text-gray-800 text-hover-primary"> Submission ID: ' . $submission->submission_id . '</a>
+                                <span class="text-gray-800 ">' . $submission->fullTitle . '</span>
+                        </div>
+                ';
             })
-            ->addColumn('payment_info', function ($payment) {
-                return '<ul>
-                            <li>
-                                <span class="fw-bold">Nama Pembayar:</span>
-                                <span>' . $payment->payment_account_name . '</span>
-                            </li>
-                            <li>
-                                <span class="fw-bold">Metode Pembayaran:</span>
-                                <span>' . ($payment->payment_method ?? '-') . '</span>
-                            </li>
-
-                            <li>
-                                <span class="fw-bold">Note:</span>
-                                <span>' . ($payment->payment_note ?? '-') . '</span>
-                            </li>
-                        </ul>';
+             ->addColumn('edition', function ($submission) {
+                return '
+                        <div class="d-flex flex-column">
+                            <span class="text-gray-800 mb-1">Vol. ' . $submission->issue->volume . ' No. ' . $submission->issue->number . ' (' . $submission->issue->year . '): ' . $submission->issue->title . '</span>
+                        </div>
+                ';
             })
-            ->addColumn('attachment', function ($payment) {
-                if ($payment->payment_file) {
-                    return '<a href="' . asset('storage/' . $payment->payment_file) . '" target="_blank">
-                        <i class="ki-duotone ki-file-added text-primary fs-3x" data-bs-toggle="tooltip" data-bs-placement="right" title="Lihat File">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                        </i>
-                    </a>';
+            ->addColumn('payment_info', function ($submission) {
+                $paymentInfo = '';
+                foreach ($submission->paymentInvoices as $paymentInvoice) {
+                    $paymentInfo .= '
+                        <div class="d-flex flex-column">
+                            <span class="text-gray-800 mb-1">INVOICE ' . $paymentInvoice->invoice_number . '/JRNL/UINSMDD/' . $paymentInvoice->created_at->format('Y') . '</span>
+                            <span>pembayaran: ' . $paymentInvoice->payment_percent . '% - Rp ' . number_format($paymentInvoice->payment_amount, 0, ',', '.') .  ($paymentInvoice->is_paid ? ' <span class="badge badge-light-success">Sudah Dibayar</span>' : ' <span class="badge badge-light-warning">Belum Dibayar</span>') . '</span>
+                        </div>
+                    ';
+                }
+                if ($paymentInfo == '') {
+                    $paymentInfo = '<span class="text-muted">Tidak ada informasi pembayaran</span>';
+                }
+                return $paymentInfo;
+            })
+            ->addColumn('loa', function ($submission) {
+                $authorId = $submission->authors[0]['id'] ?? null;
+                if(Storage::exists('arsip/loa/'. 'LoA-'  . $submission->submission_id  . '-' . $submission->id . '-' . $authorId . '.pdf')) {
+                    return '
+                        <span class="text-success">LoA Sudah Dikirim</span>
+                        ';
                 } else {
-                    return '<i class="ki-duotone ki-file-deleted text-danger fs-3x" data-bs-toggle="tooltip" data-bs-placement="right" title="File Tidak Ada">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>';
+                    return '<span class="text-muted">LoA Belum Terbit</span>';
                 }
             })
             ->with([
@@ -477,14 +486,23 @@ class FinanceController extends Controller
                 'total_balance' => $total_balance,
             ])
             ->rawColumns([
-                'invoice',
                 'journal',
-                'date',
-                'amount',
-                'type',
+                'author',
+                'submission',
+                'edition',
                 'payment_info',
-                'attachment'
+                'loa'
             ])
             ->make(true);
     }
+
+    public function reportExport(Request $request)
+    {
+        $journal_id = $request->journal_id;
+        $date_end = $request->date_end ?? now()->toDateString();
+        $date_start = $request->date_start ?? now()->subMonth()->toDateString();
+
+        return Excel::download(new FinanceReportExport($journal_id, $date_start, $date_end), 'laporan-keuangan-' . date('Y-m-d') . '.xlsx');
+    }
+
 }
