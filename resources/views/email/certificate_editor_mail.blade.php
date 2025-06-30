@@ -32,7 +32,8 @@
                                 style="font-size: 14px; font-weight: 500; margin:0 60px 30px 60px; font-family:Arial,Helvetica,sans-serif">
                                 <p
                                     style="color:#181C32; font-size: 16px; font-weight:700; line-height:1.2; margin-bottom:24px">
-                                    Dear Editor
+                                    Dear {{ $mailData['name'] }} <br>
+                                    {{ $mailData['affiliation'] }},
                                     <br>
                                     {{-- <span style="color:#3F4254; font-weight:200; font-size:14px;">
                                         {{ $mailData['affiliation'] }}
@@ -42,7 +43,7 @@
 
                                 <p style="margin-bottom:2px; color:#3F4254; line-height:1.6">
                                     Thank you for your valuable contribution to our journal. Your support and dedication
-                                    as a reviewer are greatly appreciated. We are grateful for your time and effort in
+                                    as a editor are greatly appreciated. We are grateful for your time and effort in
                                     helping us maintain the quality and integrity of our publication.
 
                                     <br>

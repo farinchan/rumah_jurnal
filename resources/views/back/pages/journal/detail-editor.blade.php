@@ -58,6 +58,14 @@
                                                     </i>
                                                     Kirim Email
                                                 </span>
+                                                <a href="{{ route('back.journal.editor.certificate.send-mail', [$journal->url_path, $issue->id, $editor->id]) }}"
+                                                    class="badge badge-light-success cursor-pointer my-1">
+                                                    <i class="ki-duotone ki-sms fs-5 text-success me-3">
+                                                        <span class="path1"></span>
+                                                        <span class="path2"></span>
+                                                    </i>
+                                                    Kirim Sertifikat
+                                                </a>
                                             </td>
                                             <td class="text-start">
                                                 {{ $editor->phone }}
@@ -105,6 +113,42 @@
                 </div>
             </div>
             <div class="col-xxl-4">
+                <div class="card card-xxl-stretch mb-5 mb-xxl-10">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3 class="text-gray-800">Sertifikat editor</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="fs-6 fw-semibold text-gray-600 pb-6 d-block">
+                            Sertifikat editor untuk edisi ini akan dibuat secara otomatis berdasarkan data editor yang
+                            telah ditambahkan. Sertifikat ini dapat diunduh dan dikirim melalui email kepada semua editor
+                            yang terdaftar.
+                        </p>
+                        <div class="btn-group w-100 mb-5">
+                            <a href="{{ route('back.journal.editor.certificate.download', [$journal->url_path, $issue->id]) }}"
+                                class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Lihat File Sertifikat ">
+                                <i class="ki-duotone ki-file-down fs-1">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                                Unduh
+                            </a>
+
+                            <a href="{{ route('back.journal.editor.certificate.send-mail', [$journal->url_path, $issue->id]) }}"
+                                class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Kirim Sertifikat ke semua editor via email">
+                                <i class="ki-duotone ki-file-added fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                                Kirim
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
                 <div class="card card-xxl-stretch mb-5 mb-xxl-10">
                     <div class="card-header">
                         <div class="card-title">
@@ -164,65 +208,7 @@
 
                     </div>
                 </div>
-                <div class="card card-xxl-stretch mb-5 mb-xxl-10">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <h3 class="text-gray-800">Sertifikat editor</h3>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="fs-5 fw-semibold text-gray-600 pb-6 d-block">
-                            Upload Sertifikat editor untuk edisi ini
-                        </span>
-                        <div class="d-flex align-self-center mb-3">
-                            <form
-                                action="{{ route('back.journal.editor.file-certificate.store', [$journal->url_path, $issue->id]) }}"
-                                method="POST" enctype="multipart/form-data" class="d-flex flex-grow-1">
-                                @csrf
-                                <div class="flex-grow-1 me-3">
-                                    <input type="file" class="form-control form-control-solid" name="file"
-                                        id="certificate_editor" accept=".pdf" />
-                                    <small class="form-text text-muted">
-                                        File harus dalam format PDF
-                                    </small>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-icon flex-shrink-0"
-                                    data-bs-toggle="tooltip" data-bs-placement="right"
-                                    title="Upload untuk menambah/mengubah Sertifikat">
-                                    <i class="ki-duotone ki-file-up fs-1">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                    </i>
-                                </button>
-                            </form>
-                        </div>
 
-                        @if ($file_certificate)
-                            <div class="btn-group w-100 mb-5">
-                                <a href="{{ Storage::url($file_certificate->file) }}" class="btn btn-light-primary"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat File Sertifikat ">
-                                    <i class="ki-duotone ki-eye fs-1">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                        <span class="path3"></span>
-                                    </i>
-                                    Lihat
-                                </a>
-
-                                <a href="{{ route('back.journal.editor.file-certificate.send-mail', [$journal->url_path, $issue->id]) }}"
-                                    class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Kirim Sertifikat ke semua editor via email">
-                                    <i class="ki-duotone ki-file-added fs-2">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                    </i>
-                                    Kirim
-                                </a>
-                            </div>
-                        @endif
-
-                    </div>
-                </div>
                 <div class="card card-xxl-stretch mb-5 mb-xxl-10">
                     <div class="card-header">
                         <div class="card-title">
