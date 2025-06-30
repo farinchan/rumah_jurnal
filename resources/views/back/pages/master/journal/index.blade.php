@@ -167,7 +167,8 @@
                         </div>
                         <!--end::Close-->
                     </div>
-                    <form method="post" action="{{ route('back.master.journal.update', $journal->id) }}" enctype="multipart/form-data">
+                    <form method="post" action="{{ route('back.master.journal.update', $journal->id) }}"
+                        enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="modal-body">
@@ -293,18 +294,13 @@
                             <div class="mb-5">
                                 <label class="form-label mb-3 required">Tanda Tangan Editor In Chief</label><br>
                                 <!--begin::Image input placeholder-->
-                                <style>
-                                    .image-input-placeholder {
-                                        background-image: url('@if ($journal->editor_chief_signature) {{ Storage::url($journal->editor_chief_signature) }} @else {{ asset('back/media/svg/files/blank-image.svg') }} @endif');
-                                        '
-
-                                    }
-                                </style>
-                                <div class="image-input image-input-empty image-input-outline image-input-placeholder mb-3 ms-5"
+                                <div class="image-input image-input-empty image-input-outline image-input-placeholder mb-3 ms-5" style="background-image: url('{{ $journal->getEditorChiefSignature() }}');"
                                     data-kt-image-input="true">
                                     <div class="image-input-wrapper w-150px h-150px"></div>
-                                    <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
-                                        data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Ubah Thumbnail">
+                                    <label
+                                        class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="change" data-bs-toggle="tooltip"
+                                        title="Ubah Thumbnail">
                                         <i class="ki-duotone ki-pencil fs-7">
                                             <span class="path1"></span>
                                             <span class="path2"></span>
@@ -312,15 +308,19 @@
                                         <input type="file" name="editor_chief_signature" accept=".png, .jpg, .jpeg" />
                                         <input type="hidden" name="avatar_remove" />
                                     </label>
-                                    <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
-                                        data-kt-image-input-action="cancel" data-bs-toggle="tooltip" title="Batalkan Thumbnail">
+                                    <span
+                                        class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="cancel" data-bs-toggle="tooltip"
+                                        title="Batalkan Thumbnail">
                                         <i class="ki-duotone ki-cross fs-2">
                                             <span class="path1"></span>
                                             <span class="path2"></span>
                                         </i>
                                     </span>
-                                    <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
-                                        data-kt-image-input-action="remove" data-bs-toggle="tooltip" title="Hapus Thumbnail">
+                                    <span
+                                        class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="remove" data-bs-toggle="tooltip"
+                                        title="Hapus Thumbnail">
                                         <i class="ki-duotone ki-cross fs-2">
                                             <span class="path1"></span>
                                             <span class="path2"></span>
