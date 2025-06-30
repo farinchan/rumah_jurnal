@@ -12,6 +12,11 @@ class Reviewer extends Model
     {
         return $this->belongsTo(Issue::class);
     }
+
+    public function submissionsReviewed()
+    {
+        return $this->hasMany(SubmissionReviewer::class, 'reviewer_id');
+    }
 }
 
 
