@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('event', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->string('title');
             $table->mediumText('content');
             $table->string('image')->nullable();
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->dateTime('start');
             $table->dateTime('end');
+            $table->integer('limit')->default(1);
             $table->string('meta_title')->nullable();
             $table->string('meta_description')->nullable();
             $table->string('meta_keywords')->nullable();

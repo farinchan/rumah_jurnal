@@ -1317,7 +1317,7 @@ class journalController extends Controller
 
             Alert::success('Success', 'email has been sent');
             return redirect()->back();
-        }else{
+        } else {
             $editors = Editor::where('issue_id', $issue_id)->get();
             if (!$editors) {
                 Alert::error('Error', 'Editor not found');
@@ -1677,7 +1677,8 @@ class journalController extends Controller
         return view('back.pages.journal.detail-reviewer', $data);
     }
 
-    public function reviewerCertificateDownload(Request $request, $journal_path, $issue_id, ?int $id = null){
+    public function reviewerCertificateDownload(Request $request, $journal_path, $issue_id, ?int $id = null)
+    {
         $journal = Journal::where('url_path', $journal_path)->first();
         if (!$journal) {
             return abort(404);
@@ -1797,15 +1798,13 @@ class journalController extends Controller
                 $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-reviewer', $data)->setPaper('A4', 'landscape');
                 $path = 'arsip/certificate/reviewer/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-reviewer-' . $reviewer->reviewer_id . '-' . $reviewer->id . '.pdf';
 
-                // Cek apakah file sudah ada di storage
+
                 if (Storage::exists('public/' . $path)) {
-                    // Jika ada, kembalikan file tersebut
-                    $files[] = storage_path('app/public/' . $path);
-                } else {
-                    // Jika tidak ada, simpan file baru
-                    Storage::disk('public')->put($path, $pdf->output());
-                    $files[] = storage_path('app/public/' . $path);
+                    // Jika maka hapus dari storage
+                    Storage::disk('public')->delete($path);
                 }
+                Storage::disk('public')->put($path, $pdf->output());
+                $files[] = storage_path('app/public/' . $path);
             }
 
             $zipFileName = 'CERTIFICATE-REVIEWER-' . $issue->journal->url_path . '-' . $issue->year . '-' . $issue->volume . '-' . $issue->number . '.zip';
@@ -1905,13 +1904,11 @@ class journalController extends Controller
             // Cek apakah file sudah ada di storage
             $path = 'arsip/certificate/reviewer/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-reviewer-' . $reviewer->reviewer_id . '-' . $reviewer->id . '.pdf';
             if (Storage::exists('public/' . $path)) {
-                // Jika ada, kembalikan file tersebut
-                $data['attachments'] = storage_path('app/public/' . $path);
-            } else {
-                // Jika tidak ada, simpan file baru
-                Storage::disk('public')->put($path, $pdf->output());
-                $data['attachments'] = storage_path('app/public/' . $path);
+                // Jika maka hapus dari storage
+                Storage::disk('public')->delete($path);
             }
+            Storage::disk('public')->put($path, $pdf->output());
+            $data['attachments'] = storage_path('app/public/' . $path);
 
             $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
             if ($mailEnvirontment == 'production') {
@@ -1978,13 +1975,11 @@ class journalController extends Controller
                 // Cek apakah file sudah ada di storage
                 $path = 'arsip/certificate/reviewer/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-reviewer-' . $reviewer->reviewer_id . '-' . $reviewer->id . '.pdf';
                 if (Storage::exists('public/' . $path)) {
-                    // Jika ada, kembalikan file tersebut
-                    $data['attachments'] = storage_path('app/public/' . $path);
-                } else {
-                    // Jika tidak ada, simpan file baru
-                    Storage::disk('public')->put($path, $pdf->output());
-                    $data['attachments'] = storage_path('app/public/' . $path);
+                    // Jika maka hapus dari storage
+                    Storage::disk('public')->delete($path);
                 }
+                Storage::disk('public')->put($path, $pdf->output());
+                $data['attachments'] = storage_path('app/public/' . $path);
 
                 $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
                 if ($mailEnvirontment == 'production') {

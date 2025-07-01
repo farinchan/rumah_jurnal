@@ -66,6 +66,14 @@
                                                     </i>
                                                     Kirim Sertifikat
                                                 </a>
+                                                <a href="{{ route('back.journal.editor.certificate.download', [$journal->url_path, $issue->id, $editor->id]) }}"
+                                                    class="badge badge-light-success cursor-pointer my-1">
+                                                    <i class="ki-duotone ki-sms fs-5 text-success me-3">
+                                                        <span class="path1"></span>
+                                                        <span class="path2"></span>
+                                                    </i>
+                                                    Download Sertifikat
+                                                </a>
                                             </td>
                                             <td class="text-start">
                                                 {{ $editor->phone }}
