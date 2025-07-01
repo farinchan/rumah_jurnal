@@ -6,10 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmailLog extends Model
 {
-    protected $fillable = [
-        'to',
-        'subject',
-        'body',
-        'status',
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
     ];
 }
