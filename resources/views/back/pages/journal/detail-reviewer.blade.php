@@ -62,7 +62,7 @@
                                                     </i>
                                                     Kirim Email
                                                 </span>
-                                                <a href="{{ route('back.journal.reviewer.certificate.download', [$journal->url_path, $issue->id, $reviewer->id]) }}"
+                                                <a href="{{ route('back.journal.reviewer.certificate.send-mail', [$journal->url_path, $issue->id, $reviewer->id]) }}"
                                                     class="badge badge-light-success cursor-pointer my-1">
                                                     <i class="ki-duotone ki-sms fs-5 text-success me-3">
                                                         <span class="path1"></span>
