@@ -106,4 +106,5 @@ return [
     'print_eticket' => 'Print E-Ticket',
     'phone_format' => 'Phone number must start with country code, e.g. +62 for Indonesia. Example: +6281234567890',
 
+
 ];

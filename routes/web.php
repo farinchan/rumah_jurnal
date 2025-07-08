@@ -23,6 +23,7 @@ use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
+use App\Http\Controllers\Front\AccountController;
 use App\Http\Controllers\Front\TeamController;
 
 Route::get('generate-storage', function (){
@@ -43,6 +44,13 @@ Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+Route::prefix('account')->name('account.')->group(function () {
+    Route::get('/profile', [AccountController::class, 'profile'])->name('profile');
+    Route::put('/profile/update', [AccountController::class, 'profileUpdate'])->name('profile.update');
+    Route::get('/profile/password', [AccountController::class, 'password'])->name('password');
+    Route::put('/profile/password/update', [AccountController::class, 'passwordUpdate'])->name('password.update');
+});
 
 Route::get('/welcome', [HomeController::class, 'welcomeSpeech'])->name('welcome.speech');
 

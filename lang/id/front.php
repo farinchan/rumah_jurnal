@@ -104,4 +104,6 @@ return [
     'registered' => 'Anda telah mendaftar untuk acara ini',
     'print_eticket' => 'Cetak E-Tiket',
     'phone_format' => 'Nomor telepon harus diawali dengan kode negara, misalnya +62 untuk Indonesia. Contoh: +6281234567890',
+
+    
 ];

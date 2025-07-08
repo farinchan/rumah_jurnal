@@ -16,4 +16,7 @@ return [
     'newsletter' => 'Berlangganan untuk menerima pembaruan jurnal dan berita',
 
     'team' => 'Tim',
+
+    'my_profile' => 'Profil Saya',
+    'profile' => 'Profil',
 ];

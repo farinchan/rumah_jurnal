@@ -182,7 +182,7 @@
                                     @if (app()->getLocale() == 'en') {{ asset('back/media/flags/united-states.svg') }}
                                     @else
                                         {{ asset('back/media/flags/indonesia.svg') }} @endif"
-                                        alt="Image" style="width: 30px;">
+                                        alt="Image" style="width: 35px;">
                                 </a>
                                 <ul>
                                     <li><a href="{{ route('locale.change', 'en') }}">English</a></li>
@@ -195,9 +195,18 @@
                     <div class="ltn__drop-menu user-menu">
                         <ul>
                             <li>
-                                <a href="#"><i class="icon-user"></i></a>
+                                <a href="#">
+                                    @if (auth()->check())
+                                        <img src="{{ auth()->user()->getPhoto() }}" alt="User Avatar"
+                                            style="width: 35px; height: 35px; ">
+                                    @else
+                                        <i class="icon-user"></i>
+                                    @endif
+                                </a>
                                 <ul>
                                     @auth
+                                        <li><a href="{{ route('account.profile') }}">{{ __('layout.my_profile') }}</a>
+                                        </li>
                                         <li><a href="{{ route('back.dashboard') }}">{{ __('layout.dashboard') }}</a></li>
                                         <li><a href="{{ route('logout') }}">{{ __('layout.logout') }}</a></li>
                                     @endauth
