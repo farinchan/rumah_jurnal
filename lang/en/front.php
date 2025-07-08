@@ -31,6 +31,7 @@ return [
     'name' => 'Full Name',
     'email_address' => 'Email Address',
     'phone_number' => 'Phone Number',
+    'wa_number' => 'WhatsApp Number',
     'office_address' => 'Office Address',
     'enter_your_name' => 'Enter Your Name',
     'enter_your_email' => 'Enter Your Email Address',
@@ -101,6 +102,8 @@ return [
     'no_reviewer' => 'No Reviewer Found',
 
     'register_now' => 'Register Now',
-    'registered' => 'Already registered',
+    'registered' => 'You have registered for this event',
+    'print_eticket' => 'Print E-Ticket',
+    'phone_format' => 'Phone number must start with country code, e.g. +62 for Indonesia. Example: +6281234567890',
 
 ];

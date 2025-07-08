@@ -50,6 +50,8 @@ Route::prefix('event')->name('event.')->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');
     Route::get('/{slug}', [EventController::class, 'show'])->name('show');
     Route::post('/{slug}/register', [EventController::class, 'register'])->name('register');
+
+    Route::get('/eticket/{uuid}', [EventController::class, 'eticket'])->name('eticket');
 });
 
 Route::prefix('announcement')->name('announcement.')->group(function () {
@@ -119,8 +121,19 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
         Route::prefix('detail')->name('detail.')->group(function () {
             Route::get('/{id}/overview', [BackEventController::class, 'overview'])->name('overview');
+
             Route::get('/{id}/participant', [BackEventController::class, 'participant'])->name('participant');
+            Route::post('/{id}/participant/store', [BackEventController::class, 'participantStore'])->name('participant.store');
+            Route::delete('/{id}/participant/{event_user_id}/delete', [BackEventController::class, 'participantDestroy'])->name('participant.destroy');
+            Route::get('/{id}/participant/export', [BackEventController::class, 'participantExport'])->name('participant.export');
+
             Route::get('/{id}/attendance', [BackEventController::class, 'attendance'])->name('attendance');
+            Route::post('/{id}/attendance/store', [BackEventController::class, 'attendanceStore'])->name('attendance.store');
+            Route::put('/{id}/attendance/{event_attendance_id}/update', [BackEventController::class, 'attendanceUpdate'])->name('attendance.update');
+            Route::get('/{id}/attendance/{event_attendance_id}', [BackEventController::class, 'attendanceDetail'])->name('attendance.detail');
+            Route::get('/{id}/attendance/{event_attendance_id}/datatable', [BackEventController::class, 'attendanceDetailDatatable'])->name('attendance.detail.datatable');
+            Route::post('/{id}/attendance/{event_attendance_id}/checkin/{event_user_id}', [BackEventController::class, 'attendanceDetailUserCheckin'])->name('attendance.detail.checkin');
+            Route::get('/{id}/attendance/{event_attendance_id}/export', [BackEventController::class, 'attendanceExport'])->name('attendance.export');
         });
 
     });

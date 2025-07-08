@@ -30,9 +30,9 @@ class EventAttendance extends Model
     {
         return $this->belongsTo(Event::class);
     }
-
-    public function user()
+    public function attendances()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(EventAttendanceUser::class, 'event_attendance_id');
     }
+
 }

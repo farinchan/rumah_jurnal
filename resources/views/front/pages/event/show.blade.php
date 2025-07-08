@@ -124,12 +124,20 @@
                                     opportunity to participate in this exciting event. Click the button below to register
                                     now and secure your spot. We look forward to seeing you there!
                                 </p>
+                                @if ($check_registered)
+                                    <p class="text-success">
+                                        <b>
+                                            <i class="fa fa-check-circle"></i>
+                                            {{ __('front.registered') }}
+                                        </b>
+                                    </p>
+                                @endif
                                 <div class=" ltn__menu-widget ltn__menu-widget-2 text-uppercase">
                                     <ul>
                                         <li>
                                             @if ($check_registered)
-                                                <a href="#">
-                                                    {{ __('front.registered') }}
+                                                <a href="{{ route('event.eticket', $eticket->id) }}" target="_blank">
+                                                    {{ __('front.print_eticket') }}
                                                     <span>
                                                         <i class="fas fa-arrow-right"></i>
                                                     </span>
@@ -137,7 +145,7 @@
                                             @else
                                                 <a href="#" data-toggle="modal"
                                                     data-target="{{ Auth::check() ? '#regisevent' : '#exampleModal' }}">
-                                                    {{ __('front.registered') }}
+                                                    {{ __('front.register_now') }}
                                                     <span>
                                                         <i class="fas fa-arrow-right"></i>
                                                     </span>
@@ -425,13 +433,16 @@
                                         </div>
 
                                         <div class="mb-4">
-                                            <label for="phone" class="form-label">{{ __('front.phone_number') }}<span
+                                            <label for="phone" class="form-label">{{ __('front.wa_number') }}<span
                                                     class="text-danger">*</span></label>
                                             <input class="form-control @error('phone') is-invalid @enderror"
                                                 type="text" name="phone"
                                                 placeholder="{{ __('front.enter_your_phone') }}"
                                                 value="{{ Auth::user()->phone ?? '' }}" style="margin-bottom: 0px;"
                                                 required>
+                                            <small class="text-muted">
+                                                {{ __('front.phone_format') }}
+                                            </small>
                                             @error('phone')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror

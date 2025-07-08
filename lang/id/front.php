@@ -31,6 +31,7 @@ return [
     'name' => 'Nama Lengkap',
     'email_address' => 'Alamat Email',
     'phone_number' => 'Nomor Telepon',
+    'wa_number' => 'Nomor WhatsApp',
     'office_address' => 'Alamat Kantor',
     'enter_your_name' => 'Masukkan Nama Anda',
     'enter_your_email' => 'Masukkan Alamat Email Anda',
@@ -100,5 +101,7 @@ return [
     'no_reviewer' => 'Reviewer Tidak Ada',
 
     'register_now' => 'Daftar Sekarang',
-    'registered' => 'Sudah terdaftar',
+    'registered' => 'Anda telah mendaftar untuk acara ini',
+    'print_eticket' => 'Cetak E-Tiket',
+    'phone_format' => 'Nomor telepon harus diawali dengan kode negara, misalnya +62 untuk Indonesia. Contoh: +6281234567890',
 ];

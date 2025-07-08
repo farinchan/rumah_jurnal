@@ -35,38 +35,27 @@
                     </div>
                     <div class="d-flex my-4">
 
-                        <a href="{{ route("back.event.edit", $event->id) }}" class="btn btn-sm btn-light-primary me-3">Edit</a>
-                        <a href="#" class="btn btn-sm btn-danger me-3" data-bs-toggle="modal" data-bs-target="#delete_agenda">Hapus</a>
+                        <a href="{{ route('back.event.edit', $event->id) }}"
+                            class="btn btn-sm btn-light-primary me-3">Edit</a>
+                        <a href="#" class="btn btn-sm btn-danger me-3" data-bs-toggle="modal"
+                            data-bs-target="#delete_agenda">Hapus</a>
 
                     </div>
                 </div>
                 <div class="d-flex flex-wrap flex-stack">
                     <div class="d-flex flex-column flex-grow-1 pe-8">
                         <div class="d-flex flex-wrap">
+
                             <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                                 <div class="d-flex align-items-center">
                                     <i class="ki-outline ki-arrow-up fs-3 text-success me-2"></i>
-                                    <div class="fs-2 fw-bold" data-kt-countup="true" data-kt-countup-value="4500"
-                                        data-kt-countup-prefix="$">0</div>
-                                </div>
-                                <div class="fw-semibold fs-6 text-gray-500">Earnings</div>
-                            </div>
-                            <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <i class="ki-outline ki-arrow-down fs-3 text-danger me-2"></i>
-                                    <div class="fs-2 fw-bold" data-kt-countup="true" data-kt-countup-value="80">0
+                                    <div class="fs-2 fw-bold" data-kt-countup="true" data-kt-countup-value="{{ $event->users->count() }}">
+                                        0
                                     </div>
                                 </div>
-                                <div class="fw-semibold fs-6 text-gray-500">Projects</div>
+                                <div class="fw-semibold fs-6 text-gray-500">Peserta</div>
                             </div>
-                            <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <i class="ki-outline ki-arrow-up fs-3 text-success me-2"></i>
-                                    <div class="fs-2 fw-bold" data-kt-countup="true" data-kt-countup-value="60"
-                                        data-kt-countup-prefix="%">0</div>
-                                </div>
-                                <div class="fw-semibold fs-6 text-gray-500">Success Rate</div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -82,7 +71,7 @@
                     href="{{ route('back.event.detail.participant', $event->id) }}">Peserta</a>
             </li>
             <li class="nav-item mt-2">
-                <a class="nav-link text-active-primary ms-0 me-10 py-5 {{ request()->routeIs('back.event.detail.attendance') ? 'active' : '' }}"
+                <a class="nav-link text-active-primary ms-0 me-10 py-5 {{ request()->routeIs('back.event.detail.attendance') || request()->routeIs('back.event.detail.attendance.*') ? 'active' : '' }}"
                     href="{{ route('back.event.detail.attendance', $event->id) }}">Kehadiran</a>
             </li>
 

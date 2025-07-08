@@ -1,5 +1,14 @@
 @extends('back.app')
 @section('content')
+    @php
+        $datetimeRange = explode(' - ', $event->datetime);
+        $startDate = isset($datetimeRange[0])
+            ? \Carbon\Carbon::parse(trim($datetimeRange[0]))->format('Y-m-d H:i')
+            : '';
+        $endDate = isset($datetimeRange[1])
+            ? \Carbon\Carbon::parse(trim($datetimeRange[1]))->format('Y-m-d H:i')
+            : $startDate;
+    @endphp
     <div id="kt_content_container" class=" container-xxl ">
 
         <form id="kt_ecommerce_add_category_form" class="form d-flex flex-column flex-lg-row"
@@ -18,23 +27,18 @@
                             .image-input-placeholder {
                                 background-image: url('{{ asset('back/media/svg/files/blank-image.svg') }}');
                             }
+
                             [data-bs-theme="dark"] .image-input-placeholder {
                                 background-image: url('{{ asset('back/media/svg/files/blank-image-dark.svg') }}');
                             }
                         </style>
-                        <div class="image-input image-input-outline mb-3"
-                            data-kt-image-input="true"
-                            @if($event->thumbnail)
-                                style="background-image: url('{{ asset('storage/'.$event->thumbnail) }}');"
+                        <div class="image-input image-input-outline mb-3" data-kt-image-input="true"
+                            @if ($event->thumbnail) style="background-image: url('{{ asset('storage/' . $event->thumbnail) }}');"
                             @else
-                                style=""
-                            @endif
-                        >
+                                style="" @endif>
                             <div class="image-input-wrapper w-150px h-150px"
-                                @if($event->thumbnail)
-                                    style="background-image: url('{{ asset('storage/'.$event->thumbnail) }}');"
-                                @endif
-                            ></div>
+                                @if ($event->thumbnail) style="background-image: url('{{ asset('storage/' . $event->thumbnail) }}');" @endif>
+                            </div>
                             <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
                                 data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Ubah Thumbnail">
                                 <i class="ki-duotone ki-pencil fs-7">
@@ -105,10 +109,14 @@
                                     data-hide-search="true" data-placeholder="Pilih jenis event" required>
                                     <option></option>
                                     <option value="Rapat" {{ $event->type == 'Rapat' ? 'selected' : '' }}>Rapat</option>
-                                    <option value="Seminar" {{ $event->type == 'Seminar' ? 'selected' : '' }}>Seminar</option>
-                                    <option value="Workshop" {{ $event->type == 'Workshop' ? 'selected' : '' }}>Workshop</option>
-                                    <option value="Pelatihan" {{ $event->type == 'Pelatihan' ? 'selected' : '' }}>Pelatihan</option>
-                                    <option value="Lainnya" {{ $event->type == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                                    <option value="Seminar" {{ $event->type == 'Seminar' ? 'selected' : '' }}>Seminar
+                                    </option>
+                                    <option value="Workshop" {{ $event->type == 'Workshop' ? 'selected' : '' }}>Workshop
+                                    </option>
+                                    <option value="Pelatihan" {{ $event->type == 'Pelatihan' ? 'selected' : '' }}>Pelatihan
+                                    </option>
+                                    <option value="Lainnya" {{ $event->type == 'Lainnya' ? 'selected' : '' }}>Lainnya
+                                    </option>
                                 </select>
                                 @error('type')
                                     <div class="text-danger fs-7">{{ $message }}</div>
@@ -119,8 +127,10 @@
                                 <select name="status" class="form-select mb-2" data-control="select2"
                                     data-hide-search="true" data-placeholder="Pilih status event" required>
                                     <option></option>
-                                    <option value="online" {{ $event->status == 'online' ? 'selected' : '' }}>Online</option>
-                                    <option value="offline" {{ $event->status == 'offline' ? 'selected' : '' }}>Offline</option>
+                                    <option value="online" {{ $event->status == 'online' ? 'selected' : '' }}>Online
+                                    </option>
+                                    <option value="offline" {{ $event->status == 'offline' ? 'selected' : '' }}>Offline
+                                    </option>
                                 </select>
                                 @error('status')
                                     <div class="text-danger fs-7">{{ $message }}</div>
@@ -159,8 +169,7 @@
                         <div class="mb-5 fv-row">
                             <label class="form-label">Batas Peserta</label>
                             <input type="number" name="limit" class="form-control mb-2"
-                                placeholder="Masukkan batas peserta event" value="{{ $event->limit }}"
-                                min="1" />
+                                placeholder="Masukkan batas peserta event" value="{{ $event->limit }}" min="1" />
                             @error('limit')
                                 <div class="text-danger fs-7">{{ $message }}</div>
                             @enderror
@@ -191,9 +200,10 @@
                         </div>
                         <div class="mb-10">
                             <label class="form-label ">File Lampiran</label>
-                            @if($event->attachment)
+                            @if ($event->attachment)
                                 <div class="mb-2">
-                                    <a href="{{ asset('storage/'.$event->attachment) }}" target="_blank">Lihat Lampiran Saat Ini</a>
+                                    <a href="{{ asset('storage/' . $event->attachment) }}" target="_blank">Lihat Lampiran
+                                        Saat Ini</a>
                                 </div>
                             @endif
                             <input type="file" name="attachment" class="form-control mb-2" accept=".pdf" />
@@ -235,8 +245,9 @@
     <script>
         $("#kt_daterangepicker_2").daterangepicker({
             timePicker: true,
-            startDate: moment("{{ \Carbon\Carbon::parse($event->datetime)->format('Y-m-d H:i') }}"),
-            endDate: moment("{{ \Carbon\Carbon::parse($event->datetime_end ?? $event->datetime)->format('Y-m-d H:i') }}"),
+
+            startDate: moment("{{ $startDate }}"),
+            endDate: moment("{{ $endDate }}"),
             locale: {
                 format: "DD MMMM YYYY HH:mm",
             }
@@ -247,14 +258,40 @@
                     ['bold', 'italic', 'underline', 'strike'],
                     ['blockquote', 'code-block'],
                     ['link', 'image', 'video', 'formula'],
-                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
-                    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
-                    [{ 'script': 'sub' }, { 'script': 'super' }],
-                    [{ 'indent': '-1' }, { 'indent': '+1' }],
-                    [{ 'direction': 'rtl' }],
-                    [{ 'color': [] }, { 'background': [] }],
-                    [{ 'font': [] }],
-                    [{ 'align': [] }],
+                    [{
+                        header: [1, 2, 3, 4, 5, 6, false]
+                    }],
+                    [{
+                        'list': 'ordered'
+                    }, {
+                        'list': 'bullet'
+                    }, {
+                        'list': 'check'
+                    }],
+                    [{
+                        'script': 'sub'
+                    }, {
+                        'script': 'super'
+                    }],
+                    [{
+                        'indent': '-1'
+                    }, {
+                        'indent': '+1'
+                    }],
+                    [{
+                        'direction': 'rtl'
+                    }],
+                    [{
+                        'color': []
+                    }, {
+                        'background': []
+                    }],
+                    [{
+                        'font': []
+                    }],
+                    [{
+                        'align': []
+                    }],
                     ['clean']
                 ]
             },

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EventAttendanceUser extends Model
 {
-    protected $table = 'event_users';
+    protected $table = 'event_attendance_users';
 
     protected $guarded = [
         'id',

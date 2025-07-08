@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\EventUser;
 use App\Models\SettingWebsite;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -52,7 +53,7 @@ class EventController extends Controller
             'meta' => [
                 'title' => $event->title . ' | ' . $setting_web->name,
                 'description' => strip_tags($event->content),
-                'keywords' => $setting_web->name . ', ' . $event->title .', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
+                'keywords' => $setting_web->name . ', ' . $event->title . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
                 'favicon' => $event->image ?? $setting_web->favicon
             ],
             'breadcrumbs' => [
@@ -72,6 +73,7 @@ class EventController extends Controller
             'setting_web' => $setting_web,
             'event_latest' => Event::latest()->take(6)->get(),
             'check_registered' => Auth::check() ? $event->users()->where('user_id', Auth::id())->exists() : false,
+            'eticket' => Auth::check() ? $event->users()->where('user_id', Auth::id())->first() : null,
 
             'event' => $event,
         ];
@@ -88,17 +90,25 @@ class EventController extends Controller
         }
 
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:20',
-        ],
-        [
-            'name.required' => 'Nama lengkap harus diisi.',
-            'email.required' => 'Email harus diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'phone.max' => 'Nomor telepon tidak boleh lebih dari 20 karakter.',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'phone' => [
+                    'nullable',
+                    'string',
+                    'max:20',
+                    'regex:/^\+[1-9][0-9]{0,18}$/'
+                ],
+            ],
+            [
+                'name.required' => 'Nama lengkap harus diisi.',
+                'email.required' => 'Email harus diisi.',
+                'email.email' => 'Format email tidak valid.',
+                'phone.max' => 'Nomor telepon tidak boleh lebih dari 20 karakter.',
+            ]
+        );
 
         if ($validator->fails()) {
             Alert::error('Registration Failed', 'Please check the form for errors.');
@@ -124,5 +134,18 @@ class EventController extends Controller
         }
         Alert::success('Registration Successful', 'You have successfully registered for the event ' . $event->name . ' Please check your email/WhatsApp for further information.');
         return redirect()->route('event.show', $event->slug)->with('success', 'You have successfully registered for the event ' . $event->name . '. Please check your email/WhatsApp for further information.');
+    }
+
+    public function eticket($uuid)
+    {
+        $eventUser = EventUser::with(['event', 'user'])->find($uuid);
+        if (!$eventUser) {
+            Alert::error('Error', 'Event user not found');
+            return redirect()->route('event.index');
+        }
+
+        // return response()->json($eventUser);
+
+        return view('front.pages.event.e_ticket', ['eventUser' => $eventUser]);
     }
 }

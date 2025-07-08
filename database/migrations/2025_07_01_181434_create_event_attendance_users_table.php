@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('event_attendance_users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_attendance_id')->constrained('event_attendances')->onDelete('cascade');
-            $table->foreignId('event_user_id')->constrained('event_users')->onDelete('cascade');
+            $table->foreignId('event_attendance_id')->constrained()->onDelete('cascade');
+            $table->uuid('event_user_id');
+            $table->foreign('event_user_id')->references('id')->on('event_users')->onDelete('cascade');
             $table->dateTime('attendance_datetime')->nullable();
             $table->text('notes')->nullable(); // Additional notes for attendance
             $table->string('ip_address')->nullable(); // IP address of the user when marking attendance

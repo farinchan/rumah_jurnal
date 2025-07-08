@@ -14,6 +14,10 @@ class EventUser extends Model
         'updated_at',
     ];
 
+    protected $casts = [
+        'id' => 'string',
+    ];
+
     public function event()
     {
         return $this->belongsTo(Event::class);
