@@ -4,10 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Journal extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+        ->logUnguarded()
+        ->logOnlyDirty()
+        ->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
+    }
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $casts = [
