@@ -56,7 +56,7 @@ class LoginController extends Controller
         $loginType = filter_var($request->input('login'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
         if (Auth::attempt([$loginType => $request->input('login'), 'password' => $request->input('password')])) {
-            return redirect()->route('back.dashboard');
+            return redirect()->intended(route('back.dashboard'));
         }
 
         Alert::error('Error', 'Email atau username dan password salah');

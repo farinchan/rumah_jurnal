@@ -22,7 +22,7 @@
                                 <thead class="border-gray-200 fs-5 fw-semibold bg-lighten">
                                     <tr>
                                         <th class="">No</th>
-                                        <th class="min-w-250px">editor</th>
+                                        <th class="min-w-300px">editor</th>
                                         <th class="min-w-150px text-start">Email</th>
                                         <th class="min-w-100px text-start">No. Telp</th>
                                         <th class="min-w-150px text-start">Rekening</th>
@@ -36,9 +36,18 @@
                                                 {{ $loop->iteration }}
                                             </td>
                                             <td>
+
                                                 <div class="d-flex flex-column">
-                                                    <a href="#" target="_blank"
-                                                        class="text-gray-800 text-hover-primary mb-1">{{ $editor->name }}</a>
+                                                    <div class="d-flex align-items-center">
+                                                        <a href="#" target="_blank"
+                                                            class="text-gray-800 text-hover-primary mb-1 me-2">{{ $editor->name }}
+                                                        </a>
+                                                        @if ($editor->number)
+                                                            <a href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Sertifikat Sudah Dikirim"><i
+                                                                    class="ki-outline ki-file-added fs-2 text-primary"></i></a>
+                                                        @endif
+                                                    </div>
+
                                                     <span>
                                                         {{ $editor->affiliation }}
                                                     </span>

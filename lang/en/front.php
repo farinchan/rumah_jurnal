@@ -28,6 +28,7 @@ return [
     'journal' => 'Journal',
     'payment' => 'Payment',
     'contact_us' => 'Contact Us',
+    'name' => 'Full Name',
     'email_address' => 'Email Address',
     'phone_number' => 'Phone Number',
     'office_address' => 'Office Address',
@@ -98,5 +99,8 @@ return [
     'team' => 'Team',
     'no_editor' => 'No Editor Found',
     'no_reviewer' => 'No Reviewer Found',
+
+    'register_now' => 'Register Now',
+    'registered' => 'Already registered',
 
 ];

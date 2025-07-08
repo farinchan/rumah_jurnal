@@ -220,7 +220,7 @@
     </div>
     @foreach ($issue->submissions as $submission)
         <div class="modal fade" tabindex="-1" id="modal_view_article_{{ $submission->submission_id }}">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-lg ">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3 class="modal-title">Submission ID {{ $submission->submission_id }}</h3>
@@ -265,109 +265,111 @@
                                     <div class="tab-pane fade show active"
                                         id="kt_tab_pane_1_submission_{{ $submission->id }}" role="tabpanel">
                             @endif
-                            <table class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
-                                <tr>
-                                    <td>Judul</td>
-                                    <td>:</td>
-                                    <td>
-                                        {{ $submission->fullTitle }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Penulis</td>
-                                    <td>:</td>
-                                    <td>
-                                        <ul>
-                                            @foreach ($submission->getAuthorsAttribute() as $author)
-                                                <li>
-                                                    <span class="text-gray-800 fw-bold">
-                                                        {{ $author['name'] }}
-                                                    </span>
-                                                    <br>
-                                                    {{ $author['affiliation'] }}
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Abstrak</td>
-                                    <td>:</td>
-                                    <td>
-                                        {!! $submission->abstract !!}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Keywords</td>
-                                    <td>:</td>
-                                    <td>
-                                        {{ $submission->keywords }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Published</td>
-                                    <td>:</td>
-                                    <td>
-                                        {{ $submission->datePublished }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Terakhir Diubah</td>
-                                    <td>:</td>
-                                    <td>
-                                        {{ $submission->lastModified }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Editor</td>
-                                    <td>:</td>
-                                    <td>
-                                        <select class="form-select" data-control="select2"
-                                            data-placeholder="Select an option"
-                                            data-dropdown-parent="#modal_view_article_{{ $submission->submission_id }}"
-                                            name="editor[]" data-allow-clear="true" multiple="multiple">
-                                            <option></option>
-                                            @foreach ($editors as $editor)
-                                                <option value="{{ $editor->id }}"
-                                                    {{ $submission->editors->contains($editor->id) ? 'selected' : '' }}>
-                                                    {{ $editor->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Reviewer</td>
-                                    <td>:</td>
-                                    <td>
-                                        <select class="form-select" data-control="select2"
-                                            data-placeholder="Select an option"
-                                            data-dropdown-parent="#modal_view_article_{{ $submission->submission_id }}"
-                                            name="reviewer[]" data-allow-clear="true" multiple="multiple">
-                                            <option></option>
-                                            @foreach ($reviewers as $reviewer)
-                                                <option value="{{ $reviewer->id }}"
-                                                    {{ $submission->reviewers->contains($reviewer->id) ? 'selected' : '' }}>
-                                                    {{ $reviewer->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Gratis Biaya</td>
-                                    <td>:</td>
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="1"
-                                                @if ($submission->free_charge) checked @endif id="free_charge"
-                                                name="free_charge" />
-                                            <label class="form-check-label" for="free_charge">
-                                                Ya, (Gratis Biaya publikasi)
-                                            </label>
-                                        </div>
+                            <div class="mh-550px scroll-y me-n7 pe-7" id="list_article">
+                                <table class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
+                                    <tr>
+                                        <td>Judul</td>
+                                        <td>:</td>
+                                        <td>
+                                            {{ $submission->fullTitle }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Penulis</td>
+                                        <td>:</td>
+                                        <td>
+                                            <ul>
+                                                @foreach ($submission->getAuthorsAttribute() as $author)
+                                                    <li>
+                                                        <span class="text-gray-800 fw-bold">
+                                                            {{ $author['name'] }}
+                                                        </span>
+                                                        <br>
+                                                        {{ $author['affiliation'] }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Abstrak</td>
+                                        <td>:</td>
+                                        <td>
+                                            {!! $submission->abstract !!}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Keywords</td>
+                                        <td>:</td>
+                                        <td>
+                                            {{ $submission->keywords }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Published</td>
+                                        <td>:</td>
+                                        <td>
+                                            {{ $submission->datePublished }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Terakhir Diubah</td>
+                                        <td>:</td>
+                                        <td>
+                                            {{ $submission->lastModified }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Editor</td>
+                                        <td>:</td>
+                                        <td>
+                                            <select class="form-select" data-control="select2"
+                                                data-placeholder="Select an option"
+                                                data-dropdown-parent="#modal_view_article_{{ $submission->submission_id }}"
+                                                name="editor[]" data-allow-clear="true" multiple="multiple">
+                                                <option></option>
+                                                @foreach ($editors as $editor)
+                                                    <option value="{{ $editor->id }}"
+                                                        {{ $submission->editors->contains($editor->id) ? 'selected' : '' }}>
+                                                        {{ $editor->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Reviewer</td>
+                                        <td>:</td>
+                                        <td>
+                                            <select class="form-select" data-control="select2"
+                                                data-placeholder="Select an option"
+                                                data-dropdown-parent="#modal_view_article_{{ $submission->submission_id }}"
+                                                name="reviewer[]" data-allow-clear="true" multiple="multiple">
+                                                <option></option>
+                                                @foreach ($reviewers as $reviewer)
+                                                    <option value="{{ $reviewer->id }}"
+                                                        {{ $submission->reviewers->contains($reviewer->id) ? 'selected' : '' }}>
+                                                        {{ $reviewer->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Gratis Biaya</td>
+                                        <td>:</td>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="1"
+                                                    @if ($submission->free_charge) checked @endif id="free_charge"
+                                                    name="free_charge" />
+                                                <label class="form-check-label" for="free_charge">
+                                                    Ya, (Gratis Biaya publikasi)
+                                                </label>
+                                            </div>
 
-                                    </td>
-                                </tr>
-                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
                             @if ($journal->author_fee != 0)
                         </div>
                         <div class="tab-pane fade" id="kt_tab_pane_2_submission_{{ $submission->id }}" role="tabpanel">
@@ -379,6 +381,12 @@
                                                 class="fw-bold text-center fs-6 text-gray-800 border-bottom-2 border-gray-200">
                                                 <th colspan="4">INVOICE
                                                     {{ $invoice->invoice_number }}/JRNL/UINSMDD/{{ $invoice->created_at->format('Y') }}
+                                                    <br>
+                                                    <span class="text-muted fs-7">
+                                                        ({{ $invoice->payment_percent }}%)
+                                                        - @money($invoice->payment_amount)
+
+                                                    </span>
                                                 </th>
                                             </tr>
                                             <tr class="fw-semibold fs-6 text-gray-800 border-bottom-2 border-gray-200">
@@ -610,34 +618,74 @@
                     @endif
                     <div class="mb-10">
                         <div class="mb-3">
+
                             <label class="d-flex align-items-center fs-5 fw-semibold">
                                 <span class="required">Letter of Acceptence (LOA)</span>
                             </label>
+                            @php
+                                $check_lunas =
+                                    $submission->paymentInvoices->where('is_paid', true)->sum('payment_percent') >= 100
+                                        ? true
+                                        : false;
+                            @endphp
                             <div class="fs-7 fw-semibold text-muted">
-                                LOA dapat dikirim/download saat tagihan articel sudah diselesaikan
+                                @if ($submission->free_charge)
+                                    LOA dapat dikirim/download tanpa tagihan
+                                @elseif ($check_lunas)
+                                    <span class="text-success">Tagihan sudah lunas, LOA dapat dikirim/download</span>
+                                @else
+                                    <span class="text-danger">Tagihan belum lunas, LOA tidak dapat dikirim/download</span>
+                                @endif
                             </div>
                         </div>
                         <div class="fv-row fv-plugins-icon-container">
-                            <div class="d-flex">
+
+                            @if ($submission->free_charge)
+                                <div class="d-flex">
 
 
-                                <a href="{{ route('back.journal.loa.mail-send', $submission->id) }}"
-                                    class="btn btn-light w-100 mx-3 btn-loading">
-                                    <i class="ki-duotone ki-send fs-2">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                    </i>
-                                    Kirim ke Author
-                                </a>
-                                <a href="{{ route('back.journal.loa.generate', $submission->id) }}"
-                                    class="btn btn-light w-100 mx-3 ">
-                                    <i class="ki-duotone ki-file-down fs-2">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                    </i>
-                                    Download
-                                </a>
-                            </div>
+                                    <a href="{{ route('back.journal.loa.mail-send', $submission->id) }}"
+                                        class="btn btn-light w-100 mx-3 btn-loading">
+                                        <i class="ki-duotone ki-send fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        Kirim ke Author
+                                    </a>
+                                    <a href="{{ route('back.journal.loa.generate', $submission->id) }}"
+                                        class="btn btn-light w-100 mx-3 ">
+                                        <i class="ki-duotone ki-file-down fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        Download
+                                    </a>
+                                </div>
+                            @else
+                                @if ($check_lunas)
+                                    <div class="d-flex">
+
+
+                                        <a href="{{ route('back.journal.loa.mail-send', $submission->id) }}"
+                                            class="btn btn-light w-100 mx-3 btn-loading">
+                                            <i class="ki-duotone ki-send fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            Kirim ke Author
+                                        </a>
+                                        <a href="{{ route('back.journal.loa.generate', $submission->id) }}"
+                                            class="btn btn-light w-100 mx-3 ">
+                                            <i class="ki-duotone ki-file-down fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            Download
+                                        </a>
+                                    </div>
+                                @endif
+                            @endif
+
                         </div>
                     </div>
                 </div>
@@ -707,12 +755,12 @@
                                             <div class="d-flex flex-column mw-200px">
                                                 <div class="d-flex align-items-center mb-2">
                                                     ${submission.status == 1 ? `
-                                                                        <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
-                                                                        ` : submission.status == 3 ? `
-                                                                        <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
-                                                                        ` : submission.status == 4 ? `
-                                                                        <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
-                                                                        ` :
+                                                                                        <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
+                                                                                        ` : submission.status == 3 ? `
+                                                                                        <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
+                                                                                        ` : submission.status == 4 ? `
+                                                                                        <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
+                                                                                        ` :
                                                     `<span class="badge badge-light-secondary fs-5 p-2">${submission.statusLabel}</span>`
                                                     }
                                                 </div>

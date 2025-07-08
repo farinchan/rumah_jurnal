@@ -49,6 +49,7 @@ Route::get('/welcome', [HomeController::class, 'welcomeSpeech'])->name('welcome.
 Route::prefix('event')->name('event.')->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');
     Route::get('/{slug}', [EventController::class, 'show'])->name('show');
+    Route::post('/{slug}/register', [EventController::class, 'register'])->name('register');
 });
 
 Route::prefix('announcement')->name('announcement.')->group(function () {
@@ -115,6 +116,13 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/edit/{id}', [BackEventController::class, 'edit'])->name('edit');
         Route::put('/edit/{id}', [BackEventController::class, 'update'])->name('update');
         Route::delete('/delete/{id}', [BackEventController::class, 'destroy'])->name('destroy');
+
+        Route::prefix('detail')->name('detail.')->group(function () {
+            Route::get('/{id}/overview', [BackEventController::class, 'overview'])->name('overview');
+            Route::get('/{id}/participant', [BackEventController::class, 'participant'])->name('participant');
+            Route::get('/{id}/attendance', [BackEventController::class, 'attendance'])->name('attendance');
+        });
+
     });
 
     Route::prefix('news')->name('news.')->group(function () {
@@ -191,6 +199,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/verification/datatable', [BackFinanceController::class, 'verificationDatatable'])->name('verification.datatable');
         Route::get('/verification/{id}/detail', [BackFinanceController::class, 'verificationDetail'])->name('verification.detail');
         Route::put('/verification/{id}/update', [BackFinanceController::class, 'verificationUpdate'])->name('verification.update');
+        Route::get('/verification/{id}/delete', [BackFinanceController::class, 'verificationDelete'])->name('verification.delete');
         Route::get('/confirm-payment/{id}/generate', [BackFinanceController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
         Route::get('/confirm-payment/{id}/mail-send', [BackFinanceController::class, 'confirmPaymentMailSend'])->name('confirm-payment.mail-send');
         Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');

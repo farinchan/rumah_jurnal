@@ -28,6 +28,7 @@ return [
     'journal' => 'Jurnal',
     'payment' => 'Pembayaran',
     'contact_us' => 'Hubungi Kami',
+    'name' => 'Nama Lengkap',
     'email_address' => 'Alamat Email',
     'phone_number' => 'Nomor Telepon',
     'office_address' => 'Alamat Kantor',
@@ -97,4 +98,7 @@ return [
     'team' => 'Tim',
     'no_editor' => 'Editor Tidak Ada',
     'no_reviewer' => 'Reviewer Tidak Ada',
+
+    'register_now' => 'Daftar Sekarang',
+    'registered' => 'Sudah terdaftar',
 ];

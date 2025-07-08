@@ -41,17 +41,26 @@ class EventController extends Controller
     {
         // dd($request->all());
         $validator = Validator::make($request->all(), [
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8192',
-            'file' => 'nullable|mimes:pdf|max:8192',
-            'title' => 'required',
-            'content' => 'required',
-            'start' => 'required',
-            'meta_keywords' => 'nullable',
+            'type' => 'required',
+            'status' => 'required',
+            'name' => 'required',
+            'datetime' => 'required',
+            'location' => 'nullable',
+            'limit' => 'nullable|integer',
+            'description' => 'nullable',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8192',
+            'attachment' => 'nullable|mimes:pdf|max:8192',
             'is_active' => 'required',
+            'meta_title' => 'nullable',
+            'meta_description' => 'nullable',
+            'meta_keywords' => 'nullable',
         ], [
             'required' => ':attribute harus diisi',
             'image' => 'File harus berupa gambar',
             'mimes' => 'File harus berupa gambar',
+            'max' => 'Ukuran file maksimal 8MB',
+            'integer' => ':attribute harus berupa angka',
+            'mimes' => 'File harus berupa PDF',
             'max' => 'Ukuran file maksimal 8MB',
         ]);
 
@@ -61,33 +70,36 @@ class EventController extends Controller
         }
 
         $slug = "";
-        if (Event::where('slug', Str::slug($request->title))->count() > 0) {
-            $slug = Str::slug($request->title) . '-' . rand(1000, 9999);
+        if (Event::where('slug', Str::slug($request->name))->count() > 0) {
+            $slug = Str::slug($request->name) . '-' . rand(1000, 9999);
         } else {
-            $slug = Str::slug($request->title);
+            $slug = Str::slug($request->name);
         }
 
 
         $event = new event();
-        $event->title = $request->title;
+        $event->type = $request->type;
+        $event->status = $request->status;
+        $event->name = $request->name;
         $event->slug = $slug;
-        $event->content = $request->content;
-        $event->start = $request->start;
-        $event->end = $request->end;
-        $event->meta_title = $request->title;
-        $event->meta_description = Str::limit(strip_tags($request->content), 150);
+        $event->datetime = $request->datetime;
+        $event->location = $request->location;
+        $event->limit = $request->limit;
+        $event->description = $request->description;
+        $event->meta_title = $request->name;
+        $event->meta_description = Str::limit(strip_tags($request->description), 150);
         $event->meta_keywords = implode(", ", array_column(json_decode($request->meta_keywords??"[]"), 'value'));
         $event->is_active = $request->is_active;
         $event->user_id = Auth::user()->id;
 
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $event->image =  $image->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $image->getClientOriginalExtension(), 'public');
+        if ($request->hasFile('thumbnail')) {
+            $image = $request->file('thumbnail');
+            $event->thumbnail =  $image->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $image->getClientOriginalExtension(), 'public');
         }
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $event->file =  $file->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $event->attachment =  $file->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
         }
 
         $event->save();
@@ -189,5 +201,17 @@ class EventController extends Controller
 
         Alert::success('Sukses', 'event berhasil dihapus');
         return redirect()->route('back.event.index');
+    }
+
+      public function overview($id)
+    {
+        $data = [
+            'title' => 'Overview event',
+            'menu' => 'event',
+            'sub_menu' => 'event',
+            'event' => Event::find($id)
+        ];
+
+        return view('back.pages.event.detail.overview', $data);
     }
 }
