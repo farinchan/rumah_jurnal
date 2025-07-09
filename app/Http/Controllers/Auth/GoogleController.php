@@ -38,7 +38,11 @@ class GoogleController extends Controller
 
             Auth::login($user);
 
-            return redirect('/dashboard');
+            // Jika user memiliki peran tertentu, redirect ke dashboard
+            if ($user->hasRole('super-admin|keuangan|editor|humas')) {
+                return redirect()->intended(route('back.dashboard'));
+            }
+            return redirect()->intended('/'); // Ganti dengan rute yang sesuai setelah login berhasil
 
         } catch (\Throwable $th) {
             // Tangani error, misalnya redirect ke halaman login dengan pesan error
