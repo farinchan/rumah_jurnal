@@ -26,7 +26,7 @@ use App\Http\Controllers\Back\SettingController as BackSettingController;
 use App\Http\Controllers\Front\AccountController;
 use App\Http\Controllers\Front\TeamController;
 
-Route::get('generate-storage', function (){
+Route::get('generate-storage', function () {
     \Illuminate\Support\Facades\Artisan::call('storage:link');
     echo 'ok';
 });
@@ -143,7 +143,6 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
             Route::post('/{id}/attendance/{event_attendance_id}/checkin/{event_user_id}', [BackEventController::class, 'attendanceDetailUserCheckin'])->name('attendance.detail.checkin');
             Route::get('/{id}/attendance/{event_attendance_id}/export', [BackEventController::class, 'attendanceExport'])->name('attendance.export');
         });
-
     });
 
     Route::prefix('news')->name('news.')->group(function () {
@@ -265,9 +264,19 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::put('/banner/{id}/update', [BackSettingController::class, 'bannerUpdate'])->name('banner-update');
     });
 
-      Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+    Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
         Route::get('/setting', [App\Http\Controllers\Back\WhatsappController::class, 'setting'])->name('setting');
-        Route::get('/message', [App\Http\Controllers\Back\WhatsappController::class, 'message'])->name('message');
+
+        Route::prefix('message')->name('message.')->group(function () {
+            Route::get('/', function () {
+                return redirect()->route('back.whatsapp.message.sendMessage');
+            })->name('index');
+            Route::get('/send-message', [App\Http\Controllers\Back\WhatsappController::class, 'sendMessage'])->name('sendMessage');
+            Route::get('/send-image', [App\Http\Controllers\Back\WhatsappController::class, 'sendImage'])->name('sendImage');
+            Route::post('/send-image-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendImageProcess'])->name('sendImageProcess');
+            Route::get('/send-bulk-message', [App\Http\Controllers\Back\WhatsappController::class, 'sendBulkMessage'])->name('sendBulkMessage');
+            Route::post('/send-bulk-message-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendBulkMessageProcess'])->name('sendBulkMessageProcess');
+        });
     });
 
     Route::prefix('email')->name('email.')->group(function () {

@@ -285,8 +285,8 @@
                         </a>
                     </div>
                     <div class="menu-item">
-                        <a class="menu-link @if (request()->routeIs('back.whatsapp.message')) active @endif"
-                            href="{{ route('back.whatsapp.message') }}">
+                        <a class="menu-link @if (request()->routeIs('back.whatsapp.message.*')) active @endif"
+                            href="{{ route('back.whatsapp.message.index') }}">
                             <span class="menu-bullet">
                                 <span class="bullet bullet-dot"></span>
                             </span>

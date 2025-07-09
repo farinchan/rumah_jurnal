@@ -130,7 +130,7 @@ class WhatsappController extends Controller
     {
         try {
             $response_wa = Http::post($this->url_wa  . "/send-message", [
-                'session' => $this->session_wa,
+                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
                 'to' => $request->phone,
                 'text' => $request->message
             ]);
@@ -181,7 +181,7 @@ class WhatsappController extends Controller
         // }
         try {
             $response_wa = Http::post($this->url_wa  . "/send-bulk-message", [
-                'session' => $this->session_wa,
+                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
                 'delay' => $request->delay,
                 'data' => $request->data
             ]);
@@ -215,10 +215,10 @@ class WhatsappController extends Controller
     {
         try {
             $response_wa = Http::post($this->url_wa  . "/send-image", [
-                'session' => $this->session_wa,
+                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
                 'to' => $request->phone,
                 'urlImage' => $request->image,
-                'text' => $request->caption
+                'caption' => $request->message
             ]);
 
             if ($response_wa->status() != 200) {
