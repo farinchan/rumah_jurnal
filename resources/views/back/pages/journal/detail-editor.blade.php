@@ -68,7 +68,7 @@
                                                     Kirim Email
                                                 </span>
                                                 <a href="{{ route('back.journal.editor.certificate.send-mail', [$journal->url_path, $issue->id, $editor->id]) }}"
-                                                    class="badge badge-light-success cursor-pointer my-1">
+                                                    class="badge badge-light-success cursor-pointer my-1 btn-loading">
                                                     <i class="ki-duotone ki-sms fs-5 text-success me-3">
                                                         <span class="path1"></span>
                                                         <span class="path2"></span>
@@ -76,7 +76,7 @@
                                                     Kirim Sertifikat
                                                 </a>
                                                 <a href="{{ route('back.journal.editor.certificate.download', [$journal->url_path, $issue->id, $editor->id]) }}"
-                                                    class="badge badge-light-success cursor-pointer my-1">
+                                                    class="badge badge-light-success cursor-pointer my-1 btn-loading">
                                                     <i class="ki-duotone ki-sms fs-5 text-success me-3">
                                                         <span class="path1"></span>
                                                         <span class="path2"></span>
@@ -144,7 +144,7 @@
                         </p>
                         <div class="btn-group w-100 mb-5">
                             <a href="{{ route('back.journal.editor.certificate.download', [$journal->url_path, $issue->id]) }}"
-                                class="btn btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                class="btn btn-light-primary " data-bs-toggle="tooltip" data-bs-placement="top"
                                 title="Lihat File Sertifikat ">
                                 <i class="ki-duotone ki-file-down fs-1">
                                     <span class="path1"></span>
@@ -154,7 +154,7 @@
                             </a>
 
                             <a href="{{ route('back.journal.editor.certificate.send-mail', [$journal->url_path, $issue->id]) }}"
-                                class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
                                 title="Kirim Sertifikat ke semua editor via email">
                                 <i class="ki-duotone ki-file-added fs-2">
                                     <span class="path1"></span>
@@ -212,7 +212,7 @@
                                 </a>
 
                                 <a href="{{ route('back.journal.editor.file-sk.send-mail', [$journal->url_path, $issue->id]) }}"
-                                    class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
                                     title="Kirim SK ke semua editor via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
@@ -272,7 +272,7 @@
                                 </a>
 
                                 <a href="{{ route('back.journal.editor.file-fee.send-mail', [$journal->url_path, $issue->id]) }}"
-                                    class="btn btn-light-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
                                     title="Kirim File Fee ke semua editor via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
