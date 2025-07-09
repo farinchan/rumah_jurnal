@@ -265,6 +265,11 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::put('/banner/{id}/update', [BackSettingController::class, 'bannerUpdate'])->name('banner-update');
     });
 
+      Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+        Route::get('/setting', [App\Http\Controllers\Back\WhatsappController::class, 'setting'])->name('setting');
+        Route::get('/message', [App\Http\Controllers\Back\WhatsappController::class, 'message'])->name('message');
+    });
+
     Route::prefix('email')->name('email.')->group(function () {
         Route::post('/send-mail', [EmailController::class, 'sendEmail'])->name('send-mail');
     });
