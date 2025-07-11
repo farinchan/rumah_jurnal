@@ -226,7 +226,7 @@
                 class="menu-item menu-accordion @if (request()->routeIs('back.master.*')) here show @endif">
                 <span class="menu-link">
                     <span class="menu-icon">
-                        <i class="ki-duotone ki-setting-2 fs-2">
+                        <i class="ki-duotone ki-abstract-24 fs-2">
                             <span class="path1"></span>
                             <span class="path2"></span>
                         </i>
@@ -260,6 +260,37 @@
                                 <span class="bullet bullet-dot"></span>
                             </span>
                             <span class="menu-title">Rekening Pembayaran</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div data-kt-menu-trigger="click"
+                class="menu-item menu-accordion @if (request()->routeIs('back.whatsapp.*')) here show @endif">
+                <span class="menu-link">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-setting-4 fs-2"></i>
+                    </span>
+                    <span class="menu-title">Whatsapp API</span>
+                    <span class="menu-arrow"></span>
+                </span>
+                <div class="menu-sub menu-sub-accordion">
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.whatsapp.setting')) active @endif"
+                            href="{{ route('back.whatsapp.setting') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Pengaturan</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.whatsapp.message.*')) active @endif"
+                            href="{{ route('back.whatsapp.message.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Kirim Pesan</span>
                         </a>
                     </div>
                 </div>

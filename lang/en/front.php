@@ -28,8 +28,10 @@ return [
     'journal' => 'Journal',
     'payment' => 'Payment',
     'contact_us' => 'Contact Us',
+    'name' => 'Full Name',
     'email_address' => 'Email Address',
     'phone_number' => 'Phone Number',
+    'wa_number' => 'WhatsApp Number',
     'office_address' => 'Office Address',
     'enter_your_name' => 'Enter Your Name',
     'enter_your_email' => 'Enter Your Email Address',
@@ -98,5 +100,11 @@ return [
     'team' => 'Team',
     'no_editor' => 'No Editor Found',
     'no_reviewer' => 'No Reviewer Found',
+
+    'register_now' => 'Register Now',
+    'registered' => 'You have registered for this event',
+    'print_eticket' => 'Print E-Ticket',
+    'phone_format' => 'Phone number must start with country code, e.g. +62 for Indonesia. Example: +6281234567890',
+
 
 ];

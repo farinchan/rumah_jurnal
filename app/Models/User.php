@@ -19,6 +19,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'google_id',
         'photo',
         'name',
         'sinta_id',
@@ -28,7 +29,6 @@ class User extends Authenticatable
         'phone',
         'email',
         'password',
-
     ];
 
     /**
@@ -56,6 +56,9 @@ class User extends Authenticatable
 
     public function getPhoto()
     {
+        if ($this->photo && (str_starts_with($this->photo, 'http://') || str_starts_with($this->photo, 'https://'))) {
+            return $this->photo;
+        }
         return $this->photo ? asset('storage/' . $this->photo) : "https://ui-avatars.com/api/?background=15365F&color=C3A356&size=128&name=" . $this->name;
     }
 }

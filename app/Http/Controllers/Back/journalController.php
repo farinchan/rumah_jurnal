@@ -1076,6 +1076,323 @@ class journalController extends Controller
         return view('back.pages.journal.detail-editor', $data);
     }
 
+    public function editorCertificateDownload(Request $request, $journal_path, $issue_id, ?int $id = null)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        if ($id) {
+            $editor = Editor::where('issue_id', $issue_id)->find($id);
+            if (!$editor) {
+                Alert::error('Error', 'Editor not found');
+                return redirect()->back();
+            }
+
+            if (!$editor->number) {
+                // Generate number if not exists
+                $year = Carbon::now()->year;
+                $last = Editor::whereYear('created_at', $year)
+                    ->orderBy('number', 'desc')
+                    ->first();
+                $newNumber = $last ? $last->number + 1 : 1;
+
+                // Format jadi 4 digit
+                $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                $editor->number = $formattedNumber;
+                $editor->save();
+            }
+
+            $data = [
+                'number' =>  $editor->number ?? "0000",
+                'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
+                'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
+                    1 => 'I',
+                    2 => 'II',
+                    3 => 'III',
+                    4 => 'IV',
+                    5 => 'V',
+                    6 => 'VI',
+                    7 => 'VII',
+                    8 => 'VIII',
+                    9 => 'IX',
+                    10 => 'X',
+                    11 => 'XI',
+                    12 => 'XII'
+                ][(int)\Carbon\Carbon::now()->format('n')] : '',
+                'year' => \Carbon\Carbon::now()->format('Y'),
+                'name' => $editor->name,
+                'affiliation' => $editor->affiliation,
+                'journal' => $issue->journal->title,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            ];
+
+            $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-editor', $data)->setPaper('A4', 'landscape');
+            $path = 'arsip/certificate/editor/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-editor-' . $editor->editor_id . '-' . $editor->id . '.pdf';
+
+            return $pdf->stream();
+            // // Cek apakah file sudah ada di storage
+            if (Storage::exists('public/' . $path)) {
+                // Jika ada, kembalikan file tersebut
+                return response()->download(storage_path('app/public/' . $path));
+            } else {
+                // Jika tidak ada, simpan file baru
+                Storage::disk('public')->put($path, $pdf->output());
+                return response()->download(storage_path('app/public/' . $path));
+            }
+        } else {
+            $editors = Editor::where('issue_id', $issue_id)->get();
+            if (!$editors) {
+                Alert::error('Error', 'Editor not found');
+                return redirect()->back();
+            }
+            $files = [];
+            foreach ($editors as $editor) {
+                if (!$editor->number) {
+                    // Generate number if not exists
+                    $year = Carbon::now()->year;
+                    $last = Editor::whereYear('created_at', $year)
+                        ->orderBy('number', 'desc')
+                        ->first();
+                    $newNumber = $last ? $last->number + 1 : 1;
+
+                    // Format jadi 4 digit
+                    $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                    $editor->number = $formattedNumber;
+                    $editor->save();
+                }
+                $data = [
+                    'number' =>  $editor->number ?? "0000",
+                    'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
+                    'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
+                        1 => 'I',
+                        2 => 'II',
+                        3 => 'III',
+                        4 => 'IV',
+                        5 => 'V',
+                        6 => 'VI',
+                        7 => 'VII',
+                        8 => 'VIII',
+                        9 => 'IX',
+                        10 => 'X',
+                        11 => 'XI',
+                        12 => 'XII'
+                    ][(int)\Carbon\Carbon::now()->format('n')] : '',
+                    'year' => \Carbon\Carbon::now()->format('Y'),
+                    'name' => $editor->name,
+                    'affiliation' => $editor->affiliation,
+                    'journal' => $issue->journal->title,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                ];
+
+                $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-editor', $data)->setPaper('A4', 'landscape');
+                $path = 'arsip/certificate/editor/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-editor-' . $editor->editor_id . '-' . $editor->id . '.pdf';
+
+                // Cek apakah file sudah ada di storage
+                if (Storage::exists('public/' . $path)) {
+                    // Jika ada, kembalikan file tersebut
+                    $files[] = storage_path('app/public/' . $path);
+                } else {
+                    // Jika tidak ada, simpan file baru
+                    Storage::disk('public')->put($path, $pdf->output());
+                    $files[] = storage_path('app/public/' . $path);
+                }
+            }
+
+            $zipFileName = 'CERTIFICATE-EDITOR-' . $issue->journal->url_path . '-' . $issue->year . '-' . $issue->volume . '-' . $issue->number . '.zip';
+            $zip = new ZipArchive;
+
+            // Temporary path buat zip-nya
+            $zipPath = storage_path('app/temp/' . $zipFileName);
+
+            // Pastikan folder temp ada
+            if (!file_exists(storage_path('app/temp'))) {
+                mkdir(storage_path('app/temp'), 0777, true);
+            }
+
+            if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                foreach ($files as $file) {
+                    $filePath = $file;
+                    if (file_exists($filePath)) {
+                        // Add file ke zip (hanya nama file saja di dalam zip)
+                        $zip->addFile($filePath, basename($file));
+                    }
+                }
+                $zip->close();
+            } else {
+                Alert::error('Error', 'Failed to create zip file');
+                return redirect()->back()->with('error', 'Failed to create zip file');
+            }
+
+            return response()->download($zipPath)->deleteFileAfterSend(true);
+        }
+    }
+
+    public function editorCertificateSendmail(Request $request, $journal_path, $issue_id, ?int $id = null)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        if ($id) {
+            $editor = Editor::where('issue_id', $issue_id)->find($id);
+            if (!$editor) {
+                Alert::error('Error', 'Editor not found');
+                return redirect()->back();
+            }
+
+            if (!$editor->number) {
+                // Generate number if not exists
+                $year = Carbon::now()->year;
+                $last = Editor::whereYear('created_at', $year)
+                    ->orderBy('number', 'desc')
+                    ->first();
+                $newNumber = $last ? $last->number + 1 : 1;
+
+                // Format jadi 4 digit
+                $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                $editor->number = $formattedNumber;
+                $editor->save();
+            }
+
+            $data = [
+                'subject' => 'Certificate Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+                'number' =>  $editor->number ?? "0000",
+                'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
+                'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
+                    1 => 'I',
+                    2 => 'II',
+                    3 => 'III',
+                    4 => 'IV',
+                    5 => 'V',
+                    6 => 'VI',
+                    7 => 'VII',
+                    8 => 'VIII',
+                    9 => 'IX',
+                    10 => 'X',
+                    11 => 'XI',
+                    12 => 'XII'
+                ][(int)\Carbon\Carbon::now()->format('n')] : '',
+                'year' => \Carbon\Carbon::now()->format('Y'),
+                'name' => $editor->name,
+                'affiliation' => $editor->affiliation,
+                'journal' => $issue->journal->title,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'setting_web' => SettingWebsite::first(),
+                'email' => $editor->email,
+            ];
+
+            $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-editor', $data)->setPaper('A4', 'landscape');
+
+            // Cek apakah file sudah ada di storage
+            $path = 'arsip/certificate/editor/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-editor-' . $editor->editor_id . '-' . $editor->id . '.pdf';
+            if (Storage::exists('public/' . $path)) {
+                // Jika ada, kembalikan file tersebut
+                $data['attachments'] = storage_path('app/public/' . $path);
+            } else {
+                // Jika tidak ada, simpan file baru
+                Storage::disk('public')->put($path, $pdf->output());
+                $data['attachments'] = storage_path('app/public/' . $path);
+            }
+
+            $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+            if ($mailEnvirontment == 'production') {
+                Mail::to($data['email'])->send(new CertificateEditorMail($data));
+            } else {
+                // For testing purpose
+                Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new CertificateEditorMail($data));
+            }
+
+            Alert::success('Success', 'email has been sent');
+            return redirect()->back();
+        } else {
+            $editors = Editor::where('issue_id', $issue_id)->get();
+            if (!$editors) {
+                Alert::error('Error', 'Editor not found');
+                return redirect()->back();
+            }
+
+            foreach ($editors as $editor) {
+                if (!$editor->number) {
+                    // Generate number if not exists
+                    $year = Carbon::now()->year;
+                    $last = Editor::whereYear('created_at', $year)
+                        ->orderBy('number', 'desc')
+                        ->first();
+                    $newNumber = $last ? $last->number + 1 : 1;
+
+                    // Format jadi 4 digit
+                    $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                    $editor->number = $formattedNumber;
+                    $editor->save();
+                }
+                $data = [
+                    'subject' => 'Certificate Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+                    'number' =>  $editor->number ?? "0000",
+                    'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
+                    'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
+                        1 => 'I',
+                        2 => 'II',
+                        3 => 'III',
+                        4 => 'IV',
+                        5 => 'V',
+                        6 => 'VI',
+                        7 => 'VII',
+                        8 => 'VIII',
+                        9 => 'IX',
+                        10 => 'X',
+                        11 => 'XI',
+                        12 => 'XII'
+                    ][(int)\Carbon\Carbon::now()->format('n')] : '',
+                    'year' => \Carbon\Carbon::now()->format('Y'),
+                    'name' => $editor->name,
+                    'affiliation' => $editor->affiliation,
+                    'journal' => $issue->journal->title,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                    'setting_web' => SettingWebsite::first(),
+                    'email' => $editor->email,
+                ];
+
+                $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-editor', $data)->setPaper('A4', 'landscape');
+
+                // Cek apakah file sudah ada di storage
+                $path = 'arsip/certificate/editor/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-editor-' . $editor->editor_id . '-' . $editor->id . '.pdf';
+                if (Storage::exists('public/' . $path)) {
+                    // Jika ada, kembalikan file tersebut
+                    $data['attachments'] = storage_path('app/public/' . $path);
+                } else {
+                    // Jika tidak ada, simpan file baru
+                    Storage::disk('public')->put($path, $pdf->output());
+                    $data['attachments'] = storage_path('app/public/' . $path);
+                }
+
+                $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+                if ($mailEnvirontment == 'production') {
+                    Mail::to($data['email'])->send(new CertificateEditorMail($data));
+                } else {
+                    // For testing purpose
+                    Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new CertificateEditorMail($data));
+                }
+            }
+
+            Alert::success('Success', 'email has been sent');
+            return redirect()->back();
+        }
+    }
+
+
     public function editorFileSkStore(Request $request, $journal_path, $issue_id)
     {
         $validator = Validator::make($request->all(), [
@@ -1169,98 +1486,6 @@ class journalController extends Controller
         return redirect()->back();
     }
 
-    public function editorFileCertificateStore(Request $request, $journal_path, $issue_id)
-    {
-        $validator = Validator::make($request->all(), [
-            'file' => 'required|mimes:pdf|max:10240',
-        ], [
-            'file.required' => 'File harus diisi',
-            'file.mimes' => 'File harus berupa pdf',
-            'file.max' => 'File tidak boleh lebih dari 10 MB',
-        ]);
-
-        if ($validator->fails()) {
-            Alert::error('Error', $validator->errors()->all());
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
-
-        $issue = Issue::with('submissions')->find($issue_id);
-        if (!$issue) {
-            return abort(404);
-        }
-
-        $file = $request->file('file');
-        $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
-        EditorFileIssue::updateOrCreate(
-            ['issue_id' => $issue_id, 'file_type' => 'certificate'],
-            ['file' => $file->storeAs('editor_file/certificate', $filename, 'public')]
-        );
-
-        Alert::success('Success', 'File has been uploaded');
-        return redirect()->back();
-    }
-
-    public function editorFileCertificateSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
-    {
-
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
-
-        $issue = Issue::with('submissions')->find($issue_id);
-        if (!$issue) {
-            return abort(404);
-        }
-
-        $editor = Editor::where('issue_id', $issue_id)->get();
-        if (!$editor) {
-            Alert::error('Error', 'Editor not found');
-            return redirect()->back();
-        }
-
-        $file = EditorFileIssue::where('issue_id', $issue_id)->where('file_type', 'certificate')->first();
-        if (!$file) {
-            Alert::error('Error', 'File not found');
-            return redirect()->back();
-        }
-
-        $data = [
-            'subject' => 'Certificate Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
-            'journal' => $issue->journal->title,
-            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
-            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-            'attachments' => storage_path('app/public/' . $file->file),
-            'setting_web' => SettingWebsite::first(),
-        ];
-
-        $emailAddress = [];
-        if ($request->email) {
-            $emailAddress = $email;
-        } else {
-            foreach ($editor as $editors) {
-                if ($editors->email) {
-                    $emailAddress[] = $editors->email;
-                }
-            }
-        }
-
-        $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
-        if ($mailEnvirontment == 'production') {
-            Mail::to($emailAddress)->send(new CertificateEditorMail($data));
-        } else {
-            // For testing purpose
-            Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new CertificateEditorMail($data));
-        }
-
-        Alert::success('Success', 'email has been sent');
-        return redirect()->back();
-    }
 
     public function editorFileFeeStore(Request $request, $journal_path, $issue_id)
     {
@@ -1452,6 +1677,324 @@ class journalController extends Controller
         return view('back.pages.journal.detail-reviewer', $data);
     }
 
+    public function reviewerCertificateDownload(Request $request, $journal_path, $issue_id, ?int $id = null)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        if ($id) {
+            $reviewer = Reviewer::where('issue_id', $issue_id)->find($id);
+            if (!$reviewer) {
+                Alert::error('Error', 'Reviewer not found');
+                return redirect()->back();
+            }
+
+            if (!$reviewer->number) {
+                // Generate number if not exists
+                $year = Carbon::now()->year;
+                $last = Reviewer::whereYear('created_at', $year)
+                    ->orderBy('number', 'desc')
+                    ->first();
+                $newNumber = $last ? $last->number + 1 : 1;
+
+                // Format jadi 4 digit
+                $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                $reviewer->number = $formattedNumber;
+                $reviewer->save();
+            }
+
+            $data = [
+                'number' =>  $reviewer->number ?? "0000",
+                'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
+                'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
+                    1 => 'I',
+                    2 => 'II',
+                    3 => 'III',
+                    4 => 'IV',
+                    5 => 'V',
+                    6 => 'VI',
+                    7 => 'VII',
+                    8 => 'VIII',
+                    9 => 'IX',
+                    10 => 'X',
+                    11 => 'XI',
+                    12 => 'XII'
+                ][(int)\Carbon\Carbon::now()->format('n')] : '',
+                'year' => \Carbon\Carbon::now()->format('Y'),
+                'name' => $reviewer->name,
+                'affiliation' => $reviewer->affiliation,
+                'journal' => $issue->journal->title,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'manuscript_count' => $reviewer->submissionsReviewed->count(),
+                'chief_editor' => $issue->journal->editor_chief_name ?? 'Editor in Chief',
+                'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
+            ];
+
+            $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-reviewer', $data)->setPaper('A4', 'landscape');
+            $path = 'arsip/certificate/reviewer/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-reviewer-' . $reviewer->reviewer_id . '-' . $reviewer->id . '.pdf';
+
+            return $pdf->stream();
+            // // Cek apakah file sudah ada di storage
+            if (Storage::exists('public/' . $path)) {
+                // Jika ada, kembalikan file tersebut
+                return response()->download(storage_path('app/public/' . $path));
+            } else {
+                // Jika tidak ada, simpan file baru
+                Storage::disk('public')->put($path, $pdf->output());
+                return response()->download(storage_path('app/public/' . $path));
+            }
+        } else {
+            $reviewers = Reviewer::where('issue_id', $issue_id)->get();
+            if (!$reviewers) {
+                Alert::error('Error', 'Reviewer not found');
+                return redirect()->back();
+            }
+            $files = [];
+            foreach ($reviewers as $reviewer) {
+                if (!$reviewer->number) {
+                    // Generate number if not exists
+                    $year = Carbon::now()->year;
+                    $last = Reviewer::whereYear('created_at', $year)
+                        ->orderBy('number', 'desc')
+                        ->first();
+                    $newNumber = $last ? $last->number + 1 : 1;
+
+                    // Format jadi 4 digit
+                    $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                    $reviewer->number = $formattedNumber;
+                    $reviewer->save();
+                }
+                $data = [
+                    'number' =>  $reviewer->number ?? "0000",
+                    'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
+                    'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
+                        1 => 'I',
+                        2 => 'II',
+                        3 => 'III',
+                        4 => 'IV',
+                        5 => 'V',
+                        6 => 'VI',
+                        7 => 'VII',
+                        8 => 'VIII',
+                        9 => 'IX',
+                        10 => 'X',
+                        11 => 'XI',
+                        12 => 'XII'
+                    ][(int)\Carbon\Carbon::now()->format('n')] : '',
+                    'year' => \Carbon\Carbon::now()->format('Y'),
+                    'name' => $reviewer->name,
+                    'affiliation' => $reviewer->affiliation,
+                    'journal' => $issue->journal->title,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                ];
+
+                $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-reviewer', $data)->setPaper('A4', 'landscape');
+                $path = 'arsip/certificate/reviewer/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-reviewer-' . $reviewer->reviewer_id . '-' . $reviewer->id . '.pdf';
+
+
+                if (Storage::exists('public/' . $path)) {
+                    // Jika maka hapus dari storage
+                    Storage::disk('public')->delete($path);
+                }
+                Storage::disk('public')->put($path, $pdf->output());
+                $files[] = storage_path('app/public/' . $path);
+            }
+
+            $zipFileName = 'CERTIFICATE-REVIEWER-' . $issue->journal->url_path . '-' . $issue->year . '-' . $issue->volume . '-' . $issue->number . '.zip';
+            $zip = new ZipArchive;
+
+            // Temporary path buat zip-nya
+            $zipPath = storage_path('app/temp/' . $zipFileName);
+
+            // Pastikan folder temp ada
+            if (!file_exists(storage_path('app/temp'))) {
+                mkdir(storage_path('app/temp'), 0777, true);
+            }
+
+            if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                foreach ($files as $file) {
+                    $filePath = $file;
+                    if (file_exists($filePath)) {
+                        // Add file ke zip (hanya nama file saja di dalam zip)
+                        $zip->addFile($filePath, basename($file));
+                    }
+                }
+                $zip->close();
+            } else {
+                Alert::error('Error', 'Failed to create zip file');
+                return redirect()->back()->with('error', 'Failed to create zip file');
+            }
+
+            return response()->download($zipPath)->deleteFileAfterSend(true);
+        }
+    }
+
+    public function reviewerCertificateSendmail(Request $request, $journal_path, $issue_id, ?int $id = null)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        if ($id) {
+            $reviewer = Reviewer::where('issue_id', $issue_id)->find($id);
+            if (!$reviewer) {
+                Alert::error('Error', 'Reviewer not found');
+                return redirect()->back();
+            }
+
+            if (!$reviewer->number) {
+                // Generate number if not exists
+                $year = Carbon::now()->year;
+                $last = Reviewer::whereYear('created_at', $year)
+                    ->orderBy('number', 'desc')
+                    ->first();
+                $newNumber = $last ? $last->number + 1 : 1;
+
+                // Format jadi 4 digit
+                $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                $reviewer->number = $formattedNumber;
+                $reviewer->save();
+            }
+
+            $data = [
+                'subject' => 'Certificate Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+                'number' =>  $reviewer->number ?? "0000",
+                'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
+                'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
+                    1 => 'I',
+                    2 => 'II',
+                    3 => 'III',
+                    4 => 'IV',
+                    5 => 'V',
+                    6 => 'VI',
+                    7 => 'VII',
+                    8 => 'VIII',
+                    9 => 'IX',
+                    10 => 'X',
+                    11 => 'XI',
+                    12 => 'XII'
+                ][(int)\Carbon\Carbon::now()->format('n')] : '',
+                'year'  => \Carbon\Carbon::now()->format('Y'),
+                'name' => $reviewer->name,
+                'affiliation' => $reviewer->affiliation,
+                'journal' => $issue->journal->title,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'manuscript_count' => $reviewer->submissionsReviewed->count(),
+                'chief_editor' => $issue->journal->editor_chief_name ?? 'Editor in Chief',
+                'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
+                'email' => $reviewer->email,
+                'setting_web' => SettingWebsite::first(),
+            ];
+
+            $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-reviewer', $data)->setPaper('A4', 'landscape');
+
+            // Cek apakah file sudah ada di storage
+            $path = 'arsip/certificate/reviewer/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-reviewer-' . $reviewer->reviewer_id . '-' . $reviewer->id . '.pdf';
+            if (Storage::exists('public/' . $path)) {
+                // Jika maka hapus dari storage
+                Storage::disk('public')->delete($path);
+            }
+            Storage::disk('public')->put($path, $pdf->output());
+            $data['attachments'] = storage_path('app/public/' . $path);
+
+            $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+            if ($mailEnvirontment == 'production') {
+                Mail::to($data['email'])->send(new CertificateReviewerMail($data));
+            } else {
+                // For testing purpose
+                Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new CertificateReviewerMail($data));
+            }
+
+            Alert::success('Success', 'email has been sent');
+            return redirect()->back();
+        } else {
+            $reviewers = Reviewer::where('issue_id', $issue_id)->get();
+            if (!$reviewers) {
+                Alert::error('Error', 'Reviewer not found');
+                return redirect()->back();
+            }
+            foreach ($reviewers as $reviewer) {
+                if (!$reviewer->number) {
+                    // Generate number if not exists
+                    $year = Carbon::now()->year;
+                    $last = Reviewer::whereYear('created_at', $year)
+                        ->orderBy('number', 'desc')
+                        ->first();
+                    $newNumber = $last ? $last->number + 1 : 1;
+
+                    // Format jadi 4 digit
+                    $formattedNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                    $reviewer->number = $formattedNumber;
+                    $reviewer->save();
+                }
+                $data = [
+                    'subject' => 'Certificate Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+                    'number' =>  $reviewer->number ?? "0000",
+                    'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
+                    'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
+                        1 => 'I',
+                        2 => 'II',
+                        3 => 'III',
+                        4 => 'IV',
+                        5 => 'V',
+                        6 => 'VI',
+                        7 => 'VII',
+                        8 => 'VIII',
+                        9 => 'IX',
+                        10 => 'X',
+                        11 => 'XI',
+                        12 => 'XII'
+                    ][(int)\Carbon\Carbon::now()->format('n')] : '',
+                    'year' => \Carbon\Carbon::now()->format('Y'),
+                    'name' => $reviewer->name,
+                    'affiliation' => $reviewer->affiliation,
+                    'journal' => $issue->journal->title,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                    'manuscript_count' => $reviewer->submissionsReviewed->count(),
+                    'chief_editor' => $issue->journal->editor_chief_name ?? 'Editor in Chief',
+                    'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
+                    'email' => $reviewer->email,
+                    'setting_web' => SettingWebsite::first(),
+                ];
+
+                $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-reviewer', $data)->setPaper('A4', 'landscape');
+
+                // Cek apakah file sudah ada di storage
+                $path = 'arsip/certificate/reviewer/' . $issue->journal->url_path . '/' . $issue->year . '/' . $issue->volume . '-' . $issue->number . '/certificate-reviewer-' . $reviewer->reviewer_id . '-' . $reviewer->id . '.pdf';
+                if (Storage::exists('public/' . $path)) {
+                    // Jika maka hapus dari storage
+                    Storage::disk('public')->delete($path);
+                }
+                Storage::disk('public')->put($path, $pdf->output());
+                $data['attachments'] = storage_path('app/public/' . $path);
+
+                $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+                if ($mailEnvirontment == 'production') {
+                    Mail::to($data['email'])->send(new CertificateReviewerMail($data));
+                } else {
+                    // For testing purpose
+                    Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new CertificateReviewerMail($data));
+                }
+            }
+
+            Alert::success('Success', 'email has been sent');
+            return redirect()->back();
+        }
+    }
+
     public function reviewerFileSkStore(Request $request, $journal_path, $issue_id)
     {
         $validator = Validator::make($request->all(), [
@@ -1541,99 +2084,6 @@ class journalController extends Controller
             Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new SkReviewerMail($data));
         }
 
-
-        Alert::success('Success', 'email has been sent');
-        return redirect()->back();
-    }
-
-    public function reviewerFileCertificateStore(Request $request, $journal_path, $issue_id)
-    {
-        $validator = Validator::make($request->all(), [
-            'file' => 'required|mimes:pdf|max:10240',
-        ], [
-            'file.required' => 'File harus diisi',
-            'file.mimes' => 'File harus berupa pdf',
-            'file.max' => 'File tidak boleh lebih dari 10 MB',
-        ]);
-
-        if ($validator->fails()) {
-            Alert::error('Error', $validator->errors()->all());
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
-
-        $issue = Issue::with('submissions')->find($issue_id);
-        if (!$issue) {
-            return abort(404);
-        }
-
-        $file = $request->file('file');
-        $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
-        ReviewerFileIssue::updateOrCreate(
-            ['issue_id' => $issue_id, 'file_type' => 'certificate'],
-            ['file' => $file->storeAs('reviewer_file/certificate', $filename, 'public')]
-        );
-
-        Alert::success('Success', 'File has been uploaded');
-        return redirect()->back();
-    }
-
-    public function reviewerFileCertificateSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
-    {
-
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
-
-        $issue = Issue::with('submissions')->find($issue_id);
-        if (!$issue) {
-            return abort(404);
-        }
-
-        $reviwer = Reviewer::where('issue_id', $issue_id)->get();
-        if (!$reviwer) {
-            Alert::error('Error', 'Reviewer not found');
-            return redirect()->back();
-        }
-
-        $file = ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type', 'certificate')->first();
-        if (!$file) {
-            Alert::error('Error', 'File not found');
-            return redirect()->back();
-        }
-
-        $data = [
-            'subject' => 'Certificate Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
-            'journal' => $issue->journal->title,
-            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
-            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-            'attachments' => storage_path('app/public/' . $file->file),
-            'setting_web' => SettingWebsite::first(),
-        ];
-
-        $emailAddress = [];
-        if ($request->email) {
-            $emailAddress = $email;
-        } else {
-            foreach ($reviwer as $reviewer) {
-                if ($reviewer->email) {
-                    $emailAddress[] = $reviewer->email;
-                }
-            }
-        }
-
-        $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
-        if ($mailEnvirontment == 'production') {
-            Mail::to($emailAddress)->send(new CertificateReviewerMail($data));
-        } else {
-            // For testing purpose
-            Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new CertificateReviewerMail($data));
-        }
 
         Alert::success('Success', 'email has been sent');
         return redirect()->back();

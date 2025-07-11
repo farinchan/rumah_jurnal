@@ -80,6 +80,11 @@ class FinanceController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $payment_pending = $payment->where('payment_status', 'pending')->count();
+        $payment_accepted = $payment->where('payment_status', 'accepted')->count();
+        $payment_rejected = $payment->where('payment_status', 'rejected')->count();
+        $payment_total = $payment->count();
+
         // return response()->json([
         //     'data' => $payment,
         // ]);
@@ -139,6 +144,18 @@ class FinanceController extends Controller
                 return $status_temp;
             })
             ->addColumn('action', function ($payment) {
+                $deleteButton = '';
+                if(Auth()->user()->hasRole('super-admin')) {
+                    $deleteButton = '
+                        <a href="' . route("back.finance.verification.delete", $payment->id) . '" class="btn btn-sm btn-light-danger my-1">
+                            <i class="ki-duotone ki-trash fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                            Hapus
+                        </a>
+                    ';
+                }
                 if ($payment->payment_status == 'accepted') {
                     return '
                     <a href="' . route("back.finance.verification.detail", $payment->id) . '" class="btn btn-sm btn-light-primary my-1">
@@ -148,6 +165,7 @@ class FinanceController extends Controller
                             <span class="path3"></span>
                         </i> Detail
                     </a>
+                    ' . $deleteButton . '
                     <br>
                     <a href="' . route("back.finance.confirm-payment.generate", $payment->id) . '" class="btn btn-sm btn-light-info my-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Download Konfirmasi Pembayaran">
                         <i class="ki-duotone ki-file-down fs-2">
@@ -170,9 +188,17 @@ class FinanceController extends Controller
                             <span class="path2"></span>
                             <span class="path3"></span>
                         </i> Detail
-                    </a>';
+                    </a>
+                    ' . $deleteButton . '
+                    ';
                 }
             })
+            ->with([
+                'payment_pending' => $payment_pending,
+                'payment_accepted' => $payment_accepted,
+                'payment_rejected' => $payment_rejected,
+                'payment_total' => $payment_total,
+            ])
             ->rawColumns([
                 'payment',
                 'invoice',
@@ -284,6 +310,28 @@ class FinanceController extends Controller
 
         Alert::success('Berhasil', 'Pembayaran berhasil diperbarui dan email konfirmasi berhasil dikirim');
         return redirect()->route('back.finance.verification.index')->with('success', 'Pembayaran berhasil diperbarui');
+    }
+
+    public function verificationDelete(Request $request, $id)
+    {
+        $payment = Payment::findOrFail($id);
+        if (!$payment) {
+            Alert::error('Error', 'Payment not found');
+            return redirect()->back()->with('error', 'Payment not found');
+        }
+        if ($payment->paymentInvoice->is_paid) {
+            Alert::error('Error', 'Payment cannot be deleted because it has been paid');
+            return redirect()->back()->with('error', 'Payment cannot be deleted because it has been paid');
+        }
+        if ($payment->payment_file && Storage::exists($payment->payment_file)) {
+            try {
+                Storage::delete($payment->payment_file);
+            } catch (\Exception $e) {
+            }
+        }
+        $payment->delete();
+        Alert::success('Berhasil', 'Pembayaran berhasil dihapus');
+        return redirect()->route('back.finance.verification.index')->with('success', 'Pembayaran berhasil dihapus');
     }
 
     public function confirmPaymentGenerate(Request $request, $id)
@@ -439,7 +487,7 @@ class FinanceController extends Controller
 
                 return $author;
             })
-             ->addColumn('submission', function ($submission) {
+            ->addColumn('submission', function ($submission) {
                 return '
                         <div class="d-flex flex-column">
                             <a href="#"
@@ -448,7 +496,7 @@ class FinanceController extends Controller
                         </div>
                 ';
             })
-             ->addColumn('edition', function ($submission) {
+            ->addColumn('edition', function ($submission) {
                 return '
                         <div class="d-flex flex-column">
                             <span class="text-gray-800 mb-1">Vol. ' . $submission->issue->volume . ' No. ' . $submission->issue->number . ' (' . $submission->issue->year . '): ' . $submission->issue->title . '</span>
@@ -472,7 +520,7 @@ class FinanceController extends Controller
             })
             ->addColumn('loa', function ($submission) {
                 $authorId = $submission->authors[0]['id'] ?? null;
-                if(Storage::exists('arsip/loa/'. 'LoA-'  . $submission->submission_id  . '-' . $submission->id . '-' . $authorId . '.pdf')) {
+                if (Storage::exists('arsip/loa/' . 'LoA-'  . $submission->submission_id  . '-' . $submission->id . '-' . $authorId . '.pdf')) {
                     return '
                         <span class="text-success">LoA Sudah Dikirim</span>
                         ';
@@ -504,5 +552,4 @@ class FinanceController extends Controller
 
         return Excel::download(new FinanceReportExport($journal_id, $date_start, $date_end), 'laporan-keuangan-' . date('Y-m-d') . '.xlsx');
     }
-
 }

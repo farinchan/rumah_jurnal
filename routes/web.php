@@ -10,6 +10,7 @@ use App\Http\Controllers\Front\JournalController;
 use App\Http\Controllers\Front\PaymentController;
 use App\Http\Controllers\Front\ContactController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\AnnouncementController as BackAnnouncementController;
 use App\Http\Controllers\Back\EmailController;
@@ -22,9 +23,10 @@ use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
+use App\Http\Controllers\Front\AccountController;
 use App\Http\Controllers\Front\TeamController;
 
-Route::get('generate-storage', function (){
+Route::get('generate-storage', function () {
     \Illuminate\Support\Facades\Artisan::call('storage:link');
     echo 'ok';
 });
@@ -39,11 +41,25 @@ Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
+
+Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+Route::prefix('account')->name('account.')->group(function () {
+    Route::get('/profile', [AccountController::class, 'profile'])->name('profile');
+    Route::put('/profile/update', [AccountController::class, 'profileUpdate'])->name('profile.update');
+    Route::get('/profile/password', [AccountController::class, 'password'])->name('password');
+    Route::put('/profile/password/update', [AccountController::class, 'passwordUpdate'])->name('password.update');
+});
+
 Route::get('/welcome', [HomeController::class, 'welcomeSpeech'])->name('welcome.speech');
 
 Route::prefix('event')->name('event.')->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');
     Route::get('/{slug}', [EventController::class, 'show'])->name('show');
+    Route::post('/{slug}/register', [EventController::class, 'register'])->name('register');
+
+    Route::get('/eticket/{uuid}', [EventController::class, 'eticket'])->name('eticket');
 });
 
 Route::prefix('announcement')->name('announcement.')->group(function () {
@@ -110,6 +126,23 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/edit/{id}', [BackEventController::class, 'edit'])->name('edit');
         Route::put('/edit/{id}', [BackEventController::class, 'update'])->name('update');
         Route::delete('/delete/{id}', [BackEventController::class, 'destroy'])->name('destroy');
+
+        Route::prefix('detail')->name('detail.')->group(function () {
+            Route::get('/{id}/overview', [BackEventController::class, 'overview'])->name('overview');
+
+            Route::get('/{id}/participant', [BackEventController::class, 'participant'])->name('participant');
+            Route::post('/{id}/participant/store', [BackEventController::class, 'participantStore'])->name('participant.store');
+            Route::delete('/{id}/participant/{event_user_id}/delete', [BackEventController::class, 'participantDestroy'])->name('participant.destroy');
+            Route::get('/{id}/participant/export', [BackEventController::class, 'participantExport'])->name('participant.export');
+
+            Route::get('/{id}/attendance', [BackEventController::class, 'attendance'])->name('attendance');
+            Route::post('/{id}/attendance/store', [BackEventController::class, 'attendanceStore'])->name('attendance.store');
+            Route::put('/{id}/attendance/{event_attendance_id}/update', [BackEventController::class, 'attendanceUpdate'])->name('attendance.update');
+            Route::get('/{id}/attendance/{event_attendance_id}', [BackEventController::class, 'attendanceDetail'])->name('attendance.detail');
+            Route::get('/{id}/attendance/{event_attendance_id}/datatable', [BackEventController::class, 'attendanceDetailDatatable'])->name('attendance.detail.datatable');
+            Route::post('/{id}/attendance/{event_attendance_id}/checkin/{event_user_id}', [BackEventController::class, 'attendanceDetailUserCheckin'])->name('attendance.detail.checkin');
+            Route::get('/{id}/attendance/{event_attendance_id}/export', [BackEventController::class, 'attendanceExport'])->name('attendance.export');
+        });
     });
 
     Route::prefix('news')->name('news.')->group(function () {
@@ -158,20 +191,20 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
 
         Route::get('/{journal_path}/issue/{issue_id}/editor', [BackJournalController::class, 'editorIndex'])->name('editor.index');
+        Route::get('/{journal_path}/issue/{issue_id}/editor/certificate-download/{id?}', [BackJournalController::class, 'editorCertificateDownload'])->name('editor.certificate.download');
+        Route::get('/{journal_path}/issue/{issue_id}/editor/certificate-send-mail/{id?}', [BackJournalController::class, 'editorCertificateSendMail'])->name('editor.certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/editor/file-sk', [BackJournalController::class, 'editorFileSkStore'])->name('editor.file-sk.store');
         Route::get('/{journal_path}/issue/{issue_id}/editor/file-sk-send-mail/{email?}', [BackJournalController::class, 'editorFileSkSendMail'])->name('editor.file-sk.send-mail');
-        Route::post('/{journal_path}/issue/{issue_id}/editor/file-certificate', [BackJournalController::class, 'editorFileCertificateStore'])->name('editor.file-certificate.store');
-        Route::get('/{journal_path}/issue/{issue_id}/editor/file-certificate-send-mail/{email?}', [BackJournalController::class, 'editorFileCertificateSendMail'])->name('editor.file-certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/editor/file-fee', [BackJournalController::class, 'editorFileFeeStore'])->name('editor.file-fee.store');
         Route::get('/{journal_path}/issue/{issue_id}/editor/file-fee-send-mail/{email?}', [BackJournalController::class, 'editorFileFeeSendMail'])->name('editor.file-fee.send-mail');
         Route::put('/{journal_path}/issue/{issue_id}/editor/{id}/update', [BackJournalController::class, 'editorUpdate'])->name('editor.update');
         Route::delete('/{journal_path}/issue/{issue_id}/editor/{id}/delete', [BackJournalController::class, 'editorDestroy'])->name('editor.destroy');
 
         Route::get('/{journal_path}/issue/{issue_id}/reviewer', [BackJournalController::class, 'reviewerIndex'])->name('reviewer.index');
+        Route::get('/{journal_path}/issue/{issue_id}/reviewer/certificate-download/{id?}', [BackJournalController::class, 'reviewerCertificateDownload'])->name('reviewer.certificate.download');
+        Route::get('/{journal_path}/issue/{issue_id}/reviewer/certificate-send-mail/{id?}', [BackJournalController::class, 'reviewerCertificateSendMail'])->name('reviewer.certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-sk', [BackJournalController::class, 'reviewerFileSkStore'])->name('reviewer.file-sk.store');
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-sk-send-mail/{email?}', [BackJournalController::class, 'reviewerFileSkSendMail'])->name('reviewer.file-sk.send-mail');
-        Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-certificate', [BackJournalController::class, 'reviewerFileCertificateStore'])->name('reviewer.file-certificate.store');
-        Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-certificate-send-mail/{email?}', [BackJournalController::class, 'reviewerFileCertificateSendMail'])->name('reviewer.file-certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-fee', [BackJournalController::class, 'reviewerFileFeeStore'])->name('reviewer.file-fee.store');
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/file-fee-send-mail/{email?}', [BackJournalController::class, 'reviewerFileFeeSendMail'])->name('reviewer.file-fee.send-mail');
         Route::put('/{journal_path}/issue/{issue_id}/reviewer/{id}/update', [BackJournalController::class, 'reviewerUpdate'])->name('reviewer.update');
@@ -186,6 +219,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/verification/datatable', [BackFinanceController::class, 'verificationDatatable'])->name('verification.datatable');
         Route::get('/verification/{id}/detail', [BackFinanceController::class, 'verificationDetail'])->name('verification.detail');
         Route::put('/verification/{id}/update', [BackFinanceController::class, 'verificationUpdate'])->name('verification.update');
+        Route::get('/verification/{id}/delete', [BackFinanceController::class, 'verificationDelete'])->name('verification.delete');
         Route::get('/confirm-payment/{id}/generate', [BackFinanceController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
         Route::get('/confirm-payment/{id}/mail-send', [BackFinanceController::class, 'confirmPaymentMailSend'])->name('confirm-payment.mail-send');
         Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');
@@ -228,6 +262,21 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
         Route::get('/banner', [BackSettingController::class, 'banner'])->name('banner');
         Route::put('/banner/{id}/update', [BackSettingController::class, 'bannerUpdate'])->name('banner-update');
+    });
+
+    Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+        Route::get('/setting', [App\Http\Controllers\Back\WhatsappController::class, 'setting'])->name('setting');
+
+        Route::prefix('message')->name('message.')->group(function () {
+            Route::get('/', function () {
+                return redirect()->route('back.whatsapp.message.sendMessage');
+            })->name('index');
+            Route::get('/send-message', [App\Http\Controllers\Back\WhatsappController::class, 'sendMessage'])->name('sendMessage');
+            Route::get('/send-image', [App\Http\Controllers\Back\WhatsappController::class, 'sendImage'])->name('sendImage');
+            Route::post('/send-image-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendImageProcess'])->name('sendImageProcess');
+            Route::get('/send-bulk-message', [App\Http\Controllers\Back\WhatsappController::class, 'sendBulkMessage'])->name('sendBulkMessage');
+            Route::post('/send-bulk-message-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendBulkMessageProcess'])->name('sendBulkMessageProcess');
+        });
     });
 
     Route::prefix('email')->name('email.')->group(function () {

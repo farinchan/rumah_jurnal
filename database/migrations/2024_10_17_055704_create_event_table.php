@@ -13,14 +13,17 @@ return new class extends Migration
     {
         Schema::create('event', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->mediumText('content');
-            $table->string('image')->nullable();
-            $table->string('file')->nullable();
+            $table->string('type')->nullable();
+            $table->enum('status', ['online', 'offline'])->default('offline');
+            $table->string('name');
             $table->string('slug');
+            $table->string('datetime')->nullable();
+            $table->string('location')->nullable();
+            $table->integer('limit')->nullable();
+            $table->mediumText('description')->nullable();
+            $table->string('thumbnail')->nullable();
+            $table->string('attachment')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->dateTime('start');
-            $table->dateTime('end');
             $table->string('meta_title')->nullable();
             $table->string('meta_description')->nullable();
             $table->string('meta_keywords')->nullable();

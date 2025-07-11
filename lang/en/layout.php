@@ -16,4 +16,7 @@ return [
     'newsletter' => 'Subscribe for receive update journal and news',
 
     'team' => 'Team',
+
+    'my_profile' => 'My Profile',
+    'profile' => 'Profile',
 ];

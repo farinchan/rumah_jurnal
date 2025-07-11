@@ -22,19 +22,10 @@ class Event extends Model
     }
 
     protected $table = 'event';
-    protected $fillable = [
-        'title',
-        'content',
-        'image',
-        'file',
-        'slug',
-        'is_active',
-        'start',
-        'end',
-        'meta_title',
-        'meta_description',
-        'meta_keywords',
-        'user_id',
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
     ];
 
     public function user()
@@ -42,13 +33,19 @@ class Event extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getImage()
+    public function getThumbnail()
     {
-        return $this->image ? Storage::url($this->image) : asset('back/media/svg/files/blank-image.svg');
+        return $this->thumbnail ? Storage::url($this->thumbnail) : asset('back/media/svg/files/blank-image.svg');
     }
 
-    public function getFile()
+    public function getAttachment()
     {
-        return $this->file ? Storage::url($this->file) : null;
+        return $this->attachment ? Storage::url($this->file) : null;
     }
+
+    public function users()
+    {
+        return $this->hasMany(EventUser::class);
+    }
+
 }

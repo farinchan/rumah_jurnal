@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('email_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('to')->nullable();
+            $table->string('to');
             $table->string('subject')->nullable();
             $table->text('body')->nullable();
-            $table->string('status')->default('sent');
+            $table->boolean('success')->default(false);
+            $table->text('error_message')->nullable();
             $table->timestamps();
         });
     }
