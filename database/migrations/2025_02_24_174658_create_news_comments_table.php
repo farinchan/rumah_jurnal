@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email');
             $table->text('comment');
             $table->enum('status', ['approved', 'spam'])->default('approved');
-            $table->foreignId('parent_id')->nullable()->constrained('news_comments')->onDelete('cascade');
+        $table->foreignId('parent_id')->nullable()->contrained('news_comments')->onDelete('cascade');
             $table->foreignId('news_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->softDeletes();

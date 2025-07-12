@@ -505,4 +505,16 @@ class EventController extends Controller
             'attendance' => $attendanceUser
         ]);
     }
+
+    public function notification($id)
+    {
+        $data = [
+            'title' => 'Notifikasi event',
+            'menu' => 'event',
+            'sub_menu' => 'event',
+            'event' => Event::find($id),
+        ];
+
+        return view('back.pages.event.detail.notification', $data);
+    }
 }
