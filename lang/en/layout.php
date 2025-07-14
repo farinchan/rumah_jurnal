@@ -4,6 +4,7 @@ return [
 
     'home' => 'Home',
     'agenda' => 'Agenda',
+    'event' => 'Event',
     'announcement' => 'Announcement',
     'news' => 'News',
     'news_all' => 'All News',

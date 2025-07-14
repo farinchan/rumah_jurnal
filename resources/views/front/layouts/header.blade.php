@@ -91,7 +91,7 @@
                             <div class="ltn__main-menu">
                                 <ul>
                                     <li><a href="{{ route('home') }}">{{ __('layout.home') }}</a></li>
-                                    <li><a href="{{ route('event.index') }}">{{ __('layout.agenda') }}</a></li>
+                                    <li><a href="{{ route('event.index') }}">{{ __('layout.event') }}</a></li>
                                     <li><a
                                             href="{{ route('announcement.index') }}">{{ __('layout.announcement') }}</a>
                                     </li>
@@ -264,7 +264,7 @@
         <div class="ltn__utilize-menu">
             <ul>
                 <li><a href="{{ route('home') }}">{{ __('layout.home') }}</a></li>
-                <li><a href="{{ route('event.index') }}">{{ __('layout.agenda') }}</a></li>
+                <li><a href="{{ route('event.index') }}">{{ __('layout.event') }}</a></li>
                 <li><a href="{{ route('announcement.index') }}">{{ __('layout.announcement') }}</a></li>
 
                 <li><a href="#">{{ __('layout.team') }}</a>
@@ -300,12 +300,13 @@
             <ul>
                 <li>
                     @auth
-                        <a href="{{ route('back.dashboard') }}" title="My Account">
+                        <a href="{{ route('account.profile') }}" title="My Account">
                             <span class="utilize-btn-icon">
                                 <i class="far fa-user"></i>
                             </span>
-                            {{ __('layout.dashboard') }}
+                            {{ __('layout.my_profile') }}
                         </a>
+
                     @endauth
                     @guest
                         <a href="{{ route('login') }}" title="My Account">
@@ -316,6 +317,16 @@
                         </a>
                     @endguest
                 </li>
+                @role('super-admin|keuangan|editor|humas')
+                    <li>
+                        <a href="{{ route('back.dashboard') }}" title="My Account">
+                            <span class="utilize-btn-icon">
+                                <i class="fa fa-flag"></i>
+                            </span>
+                            {{ __('layout.dashboard') }}
+                        </a>
+                    </li>
+                @endrole
 
             </ul>
         </div>

@@ -70,7 +70,7 @@
                             <span class="path2"></span>
                         </i>
                     </span>
-                    <span class="menu-title">Agenda</span>
+                    <span class="menu-title">Event</span>
                 </a>
             </div>
             <div data-kt-menu-trigger="click"

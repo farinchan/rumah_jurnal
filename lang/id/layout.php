@@ -4,6 +4,7 @@ return [
 
     'home' => 'Beranda',
     'agenda' => 'Agenda',
+    'event' => 'Acara',
     'announcement' => 'Pengumuman',
     'news' => 'Berita',
     'news_all' => 'Semua Berita',

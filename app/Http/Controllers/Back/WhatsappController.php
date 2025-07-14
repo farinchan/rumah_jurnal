@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\back;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -67,6 +68,7 @@ class WhatsappController extends Controller
                     'link' => route('back.whatsapp.message.sendMessage')
                 ],
             ],
+            'users' => User::all(),
         ];
 
         return view('back.pages.whatsapp.message.send-message', $data);
@@ -89,6 +91,7 @@ class WhatsappController extends Controller
                     'link' => route('back.whatsapp.message.sendImage')
                 ],
             ],
+            'users' => User::all(),
 
         ];
 
@@ -114,6 +117,7 @@ class WhatsappController extends Controller
             ]
         );
         if ($validator->fails()) {
+            Alert::error('Validation Error', $validator->errors()->all());
             return redirect()->back()->withErrors($validator)->withInput()->with('error', $validator->errors()->first());
         }
 
@@ -121,15 +125,21 @@ class WhatsappController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $fileName = time() . '_' . Auth::id() . '.' . $image->getClientOriginalExtension();
-            $imagePath = $image->storeAs('upload', $fileName, 'public');
+            $path = $image->storeAs('upload', $fileName, 'public');
+            $imagePath = asset('storage/' . $path);
+        }
+
+        $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+        if ($mailEnvirontment == 'local') {
+
+            $imagePath = "https://upload.wikimedia.org/wikipedia/id/b/b0/Kamen_rider_eurodata.png";
         }
 
         try {
             $response = Http::post(env('WHATSAPP_API_URL')  . "/send-image", [
                 'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
-                'to' => $request->phone,
-                // 'urlImage' => Storage::url($imagePath),
-                'urlImage' => "https://upload.wikimedia.org/wikipedia/id/b/b0/Kamen_rider_eurodata.png",
+                'to' => whatsappNumber($request->phone),
+                'image' => $imagePath,
                 'caption' => $request->message
             ]);
 
@@ -177,6 +187,7 @@ class WhatsappController extends Controller
     public function sendBulkMessageProcess(Request $request)
     {
         // dd($request->all());
+
         $validator = Validator::make(
             $request->all(),
             [
@@ -194,7 +205,11 @@ class WhatsappController extends Controller
                 'message.required' => 'Message is required',
             ]
         );
-        // dd($request->all());
+
+
+
+
+
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput()->with('error', $validator->errors()->first());
         }
@@ -202,11 +217,76 @@ class WhatsappController extends Controller
         try {
             $data = [];
             foreach ($request->phones as $phone) {
-                $data[] = [
-                    'to' => $phone['phone'],
-                    'text' => $request->message,
-                ];
+                if ($phone == 'users') {
+                    $users = User::all();
+                    foreach ($users as $user) {
+                        if ($user->phone) {
+                            $data[] = [
+                                'to' => whatsappNumber($user->phone) ,
+                                'text' => $request->message,
+                            ];
+                        }
+                    }
+                    continue;
+                }
+                if ($phone == 'user_editors') {
+                    $user_editors = User::role('editor')->get();
+                    foreach ($user_editors as $user) {
+                        if ($user->phone) {
+                            $data[] = [
+                                'to' => whatsappNumber($user->phone),
+                                'text' => $request->message,
+                            ];
+                        }
+                    }
+                    continue;
+                }
+                if ($phone == 'user_finances') {
+                    $user_finances = User::role('keuangan')->get();
+                    foreach ($user_finances as $user) {
+                        if ($user->phone) {
+                            $data[] = [
+                                'to' => whatsappNumber($user->phone),
+                                'text' => $request->message,
+                            ];
+                        }
+                    }
+                    continue;
+                }
+                if ($phone == 'user_public_relations') {
+                    $user_public_relations = User::role('humas')->get();
+                    foreach ($user_public_relations as $user) {
+                        if ($user->phone) {
+                            $data[] = [
+                                'to' => whatsappNumber($user->phone),
+                                'text' => $request->message,
+                            ];
+                        }
+                    }
+                    continue;
+                }
+                if ($phone == 'user_super_admins') {
+                    $user_super_admins = User::role('super-admin')->get();
+                    foreach ($user_super_admins as $user) {
+                        if ($user->phone) {
+                            $data[] = [
+                                'to' => whatsappNumber($user->phone),
+                                'text' => $request->message,
+                            ];
+                        }
+                    }
+                    continue;
+                }
+                if ($phone['phone']) {
+                    $data[] = [
+                        'to' => whatsappNumber($phone['phone']),
+                        'text' => $request->message,
+                    ];
+                    continue;
+                }
             }
+
+            // dd($data);
 
             $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
                 'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable

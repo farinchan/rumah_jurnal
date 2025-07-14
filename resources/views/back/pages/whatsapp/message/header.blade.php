@@ -4,8 +4,7 @@
                   <div class="d-flex flex-column align-items-start justift-content-center flex-equal me-5">
                       <h1 class="fw-bold fs-4 fs-lg-1 text-gray-800 mb-5 mb-lg-10">Kirim Pesan</h1>
                      <p class="fw-semibold fs-6 fs-lg-5 text-gray-600 mb-5 mb-lg-10">
-                          Kirim pesan Whatsapp dengan mudah dan cepat melalui sistem ini. Pilih metode pengiriman yang
-                          sesuai dengan kebutuhan Anda.
+                          Kirim pesan Whatsapp dengan mudah dan cepat. Pilih pengguna, masukkan pesan, dan kirim dengan satu klik tombol. Anda juga dapat mengirim gambar sebagai bagian dari pesan Anda. 
                       </p>
 
                   </div>
