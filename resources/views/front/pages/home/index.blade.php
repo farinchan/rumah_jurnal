@@ -1,17 +1,17 @@
 @extends('front.app')
 
 @section('seo')
-    <title>{{ $meta["description"] }}</title>
-    <meta name="description" content="{{ $meta["description"] }}">
-    <meta name="keywords" content="{{ $meta["keywords"] }}">
+    <title>{{ $meta['description'] }}</title>
+    <meta name="description" content="{{ $meta['description'] }}">
+    <meta name="keywords" content="{{ $meta['keywords'] }}">
     <meta name="author" content="UIN Sjech M.Djamil Djambek Bukittinggi">
 
-    <meta property="og:title" content="{{ $meta["title"] }}">
-    <meta property="og:description" content="{{ $meta["description"] }}">
+    <meta property="og:title" content="{{ $meta['title'] }}">
+    <meta property="og:description" content="{{ $meta['description'] }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ route('home') }}">
     <link rel="canonical" href="{{ route('home') }}">
-    <meta property="og:image" content="{{ Storage::url($meta["favicon"]) }}">
+    <meta property="og:image" content="{{ Storage::url($meta['favicon']) }}">
 @endsection
 
 @section('styles')
@@ -146,7 +146,7 @@
                         <div class="about-author-info d-flex mt-50">
                             <div class="author-name-designation  align-self-center mr-30">
                                 <!-- <h4 class="mb-0">Jerry Henson</h4>
-                                                        <small>/ Shop Director</small> -->
+                                                                <small>/ Shop Director</small> -->
                                 <div class="btn-wrapper mt-0">
                                     <a class="btn theme-btn-2 btn-effect-1"
                                         href="about.html">{{ __('front.read_more') }}</a>
@@ -235,23 +235,41 @@
 
                     <div class="row mt-5">
                         @foreach ($list_event as $event)
+                            @php
+                                [$before, $after] = explode(' - ', $event->datetime);
+                                $date_before = \Carbon\Carbon::parse($before)->toDateTimeString();
+                                $date_after = \Carbon\Carbon::parse($after)->toDateTimeString();
+                                // dd($date_before, $date_after);
+                            @endphp
                             <div class="col-md-6">
                                 <div class="latest-events">
                                     <div class="latest-event-item">
                                         <div class="events-date  relative-position text-center">
                                             <div class="gradient-bdr"></div>
                                             <span
-                                                class="event-date bold-font">{{ Carbon\Carbon::parse($event->start)->format('d') }}</span>
-                                            {{ Carbon\Carbon::parse($event->start)->format('M Y') }}
+                                                class="event-date bold-font">{{ Carbon\Carbon::parse($before)->format('d') }}</span>
+                                            {{ Carbon\Carbon::parse($before)->format('M Y') }}
                                         </div>
                                         <div class="event-text">
                                             <h3 class="latest-title bold-font">
                                                 <a style="color: #333;" href="{{ route('event.show', $event->slug) }}"
                                                     onmouseover="this.style.color='#08652F'"
                                                     onmouseout="this.style.color='#333'">
-                                                    {{ $event->title }}
+                                                    {{ $event->name }}
                                                 </a>
                                             </h3>
+                                        </div>
+                                        <div class="ltn__blog-meta">
+                                            <ul>
+                                                <li class="ltn__blog-author">
+                                                    <a href="#"><i
+                                                            class="fa fa-info-circle"></i>{{ $event->type }}</a>
+                                                </li>
+                                                <li class="ltn__blog-author">
+                                                    <a href="#"><i class="fa fa-bullhorn"></i>
+                                                        {{ $event->status }}</a>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -357,7 +375,10 @@
             <div class="row ">
 
                 <div class="col-md-5 mb-3">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d320.84241104217386!2d100.39786475676972!3d-0.3219989136461684!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd539e261f53f89%3A0xedfc275ef4afd8d0!2sRumah%20Jurnal%20UIN%20Bukittinggi!5e0!3m2!1sid!2sid!4v1741270898403!5m2!1sid!2sid" width="100%" height="100%" frameborder="0" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d320.84241104217386!2d100.39786475676972!3d-0.3219989136461684!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd539e261f53f89%3A0xedfc275ef4afd8d0!2sRumah%20Jurnal%20UIN%20Bukittinggi!5e0!3m2!1sid!2sid!4v1741270898403!5m2!1sid!2sid"
+                        width="100%" height="100%" frameborder="0" allowfullscreen="" aria-hidden="false"
+                        tabindex="0"></iframe>
 
                 </div>
                 <div class="col-md-7">
@@ -368,7 +389,9 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="input-item input-item-name ltn__custom-icon">
-                                        <input type="text" name="name" placeholder="{{ __('front.enter_your_name') }}" value="{{ old('name') }}" required>
+                                        <input type="text" name="name"
+                                            placeholder="{{ __('front.enter_your_name') }}" value="{{ old('name') }}"
+                                            required>
                                         @error('name')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -376,7 +399,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-item input-item-email ltn__custom-icon">
-                                        <input type="email" name="email" placeholder="{{ __('front.enter_your_email') }}" value="{{ old('email') }}" required>
+                                        <input type="email" name="email"
+                                            placeholder="{{ __('front.enter_your_email') }}" value="{{ old('email') }}"
+                                            required>
                                         @error('email')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -384,7 +409,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-item input-item-phone ltn__custom-icon">
-                                        <input type="text" name="phone" placeholder="{{ __('front.enter_your_phone') }}" value="{{ old('phone') }}" required>
+                                        <input type="text" name="phone"
+                                            placeholder="{{ __('front.enter_your_phone') }}" value="{{ old('phone') }}"
+                                            required>
                                         @error('phone')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -392,7 +419,9 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="input-item  ltn__custom-icon">
-                                        <input type="text" name="subject" placeholder="{{ __('front.enter_subject') }}" value="{{ old('subject') }}" required>
+                                        <input type="text" name="subject"
+                                            placeholder="{{ __('front.enter_subject') }}" value="{{ old('subject') }}"
+                                            required>
                                         @error('subject')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -406,8 +435,8 @@
                                 @enderror
                             </div>
                             <p><label class="input-info-save mb-0"><input type="checkbox" name="agree">
-                                {{ __('front.message_checkbox') }}
-                            </label></p>
+                                    {{ __('front.message_checkbox') }}
+                                </label></p>
                             <div class="btn-wrapper mt-0">
                                 <button class="btn theme-btn-1 btn-effect-1 text-uppercase" type="submit">
                                     {{ __('front.send_message') }}
@@ -423,16 +452,16 @@
 @endsection
 
 @section('scripts')
-<script>
-    $.ajax({
-        url: "{{ route('visit.ajax') }}",
-        type: "GET",
-        success: function(response) {
-            console.log(response);
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
-</script>
+    <script>
+        $.ajax({
+            url: "{{ route('visit.ajax') }}",
+            type: "GET",
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    </script>
 @endsection
