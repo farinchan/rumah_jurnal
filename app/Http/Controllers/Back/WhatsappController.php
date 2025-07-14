@@ -125,15 +125,21 @@ class WhatsappController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $fileName = time() . '_' . Auth::id() . '.' . $image->getClientOriginalExtension();
-            $imagePath = $image->storeAs('upload', $fileName, 'public');
+            $path = $image->storeAs('upload', $fileName, 'public');
+            $imagePath = asset('storage/' . $path);
+        }
+
+        $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+        if ($mailEnvirontment == 'local') {
+
+            $imagePath = "https://upload.wikimedia.org/wikipedia/id/b/b0/Kamen_rider_eurodata.png";
         }
 
         try {
             $response = Http::post(env('WHATSAPP_API_URL')  . "/send-image", [
                 'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
                 'to' => whatsappNumber($request->phone),
-                // 'urlImage' => Storage::url($imagePath),
-                'urlImage' => "https://upload.wikimedia.org/wikipedia/id/b/b0/Kamen_rider_eurodata.png",
+                'image' => $imagePath,
                 'caption' => $request->message
             ]);
 
