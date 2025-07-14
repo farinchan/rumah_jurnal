@@ -65,7 +65,7 @@
                 @empty
                     <div class="col-lg-12">
                         <div class="alert alert-warning text-center">
-                            <strong>Tidak Ada Pengumuman</strong>
+                            <strong>Tidak Ada Event</strong>
                         </div>
                     </div>
                 @endforelse

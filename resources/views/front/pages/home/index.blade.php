@@ -228,7 +228,7 @@
             <div class="row p-3">
                 <div class=" col-md-8">
                     <h2 style="font-size: 24px; font-weight: bold; color: #333; position: relative; display: inline-block;">
-                        {{ __('front.agenda') }}
+                        {{ __('layout.event') }}
                         <span
                             style="display: block; width: 50px; height: 3px; background-color: #08652F; position: absolute; bottom: -15px; left: 0;"></span>
                     </h2>
@@ -236,9 +236,11 @@
                     <div class="row mt-5">
                         @foreach ($list_event as $event)
                             @php
-                                [$before, $after] = explode(' - ', $event->datetime);
-                                $date_before = \Carbon\Carbon::parse($before)->toDateTimeString();
-                                $date_after = \Carbon\Carbon::parse($after)->toDateTimeString();
+                                $dates = explode(' - ', $event->datetime);
+                                $before = $dates[0] ?? null;
+                                $after = $dates[1] ?? null;
+                                $date_before = $before ? \Carbon\Carbon::parse($before)->toDateTimeString() : null;
+                                $date_after = $after ? \Carbon\Carbon::parse($after)->toDateTimeString() : null;
                                 // dd($date_before, $date_after);
                             @endphp
                             <div class="col-md-6">

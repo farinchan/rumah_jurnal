@@ -10,9 +10,16 @@
                             <h3>Reviewer</h3>
                         </div>
                         <div class="card-toolbar">
-                            <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal" id="btn_add_reviewer"
+                            <a href="#" class="btn btn-sm btn-primary my-1 me-3" data-bs-toggle="modal" id="btn_add_reviewer"
                                 data-bs-target="#modal_select_article">
                                 <i class="ki-duotone ki-plus fs-2"></i> Tambah Reviewer
+                            </a>
+                            <a href="{{ route('back.journal.reviewer.export', [$journal->url_path, $issue->id]) }}"
+                                class="btn btn-sm btn-secondary my-1">
+                                <i class="ki-duotone ki-file-up fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i> Export Excel
                             </a>
                         </div>
                     </div>
@@ -43,7 +50,8 @@
                                                             class="text-gray-800 text-hover-primary mb-1 me-2">{{ $reviewer->name }}
                                                         </a>
                                                         @if ($reviewer->number)
-                                                            <a href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Sertifikat Sudah Dikirim"><i
+                                                            <a href="#" data-bs-toggle="tooltip"
+                                                                data-bs-placement="top" title="Sertifikat Sudah Dikirim"><i
                                                                     class="ki-outline ki-file-added fs-2 text-primary"></i></a>
                                                         @endif
                                                     </div>
@@ -51,7 +59,7 @@
                                                         {{ $reviewer->affiliation }}
                                                     </span>
                                                     <span class="">
-                                                       NIK. {{ $reviewer->nik?? '-' }}
+                                                        NIK. {{ $reviewer->nik ?? '-' }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -90,11 +98,10 @@
                                                 {{ $reviewer->phone }}
                                             </td>
                                             <td class="text-start">
-                                              <span class="fw-bold">{{ $reviewer->account_bank }}</span><br>
-                                              @if ($reviewer->account_number)
-
-                                              No. Rek: {{ $reviewer->account_number  }}
-                                              @endif
+                                                <span class="fw-bold">{{ $reviewer->account_bank }}</span><br>
+                                                @if ($reviewer->account_number)
+                                                    No. Rek: {{ $reviewer->account_number }}
+                                                @endif
                                             </td>
                                             <td class="text-start">
                                                 @if ($reviewer->npwp)
@@ -165,8 +172,8 @@
                             </a>
 
                             <a href="{{ route('back.journal.reviewer.certificate.send-mail', [$journal->url_path, $issue->id]) }}"
-                                class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="Kirim Sertifikat ke semua editor via email">
+                                class="btn btn-light-success btn-loading" data-bs-toggle="tooltip"
+                                data-bs-placement="top" title="Kirim Sertifikat ke semua editor via email">
                                 <i class="ki-duotone ki-file-added fs-2">
                                     <span class="path1"></span>
                                     <span class="path2"></span>
@@ -223,8 +230,8 @@
                                 </a>
 
                                 <a href="{{ route('back.journal.reviewer.file-sk.send-mail', [$journal->url_path, $issue->id]) }}"
-                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Kirim SK ke semua reviewer via email">
+                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" title="Kirim SK ke semua reviewer via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
@@ -282,8 +289,8 @@
                                 </a>
 
                                 <a href="{{ route('back.journal.reviewer.file-fee.send-mail', [$journal->url_path, $issue->id]) }}"
-                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Kirim File Fee ke semua reviewer via email">
+                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" title="Kirim File Fee ke semua reviewer via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
@@ -362,7 +369,9 @@
                             <!--end::Close-->
                         </div>
                     </div>
-                    <form action="{{ route('back.journal.reviewer.update', [$journal->url_path, $issue->id, $reviewer->id]) }}" method="post">
+                    <form
+                        action="{{ route('back.journal.reviewer.update', [$journal->url_path, $issue->id, $reviewer->id]) }}"
+                        method="post">
                         @csrf
                         @method('PUT')
                         <div class="modal-body">
@@ -407,7 +416,8 @@
                                     <td>:</td>
                                     <td>
                                         <input type="text" class="form-control" name="nik"
-                                            value="{{ $reviewer->nik }}" placeholder="Nomor Induk Kependudukan"  required />
+                                            value="{{ $reviewer->nik }}" placeholder="Nomor Induk Kependudukan"
+                                            required />
                                     </td>
                                 </tr>
                                 <tr>
@@ -525,11 +535,11 @@
                                             @endforeach
                                         </select>
                                         <input type="text" class="form-control mt-2" placeholder="No. Rekening"
-                                            name="account_number" value="{{ $reviewer->account_number }}" required/>
+                                            name="account_number" value="{{ $reviewer->account_number }}" required />
 
                                     </td>
                                 </tr>
-                                 <tr>
+                                <tr>
                                     <td class="">NPWP</td>
                                     <td>:</td>
                                     <td>
