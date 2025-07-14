@@ -204,6 +204,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::delete('/{journal_path}/issue/{issue_id}/editor/{id}/delete', [BackJournalController::class, 'editorDestroy'])->name('editor.destroy');
 
         Route::get('/{journal_path}/issue/{issue_id}/reviewer', [BackJournalController::class, 'reviewerIndex'])->name('reviewer.index');
+        Route::get('/{journal_path}/issue/{issue_id}/reviewer/export', [BackJournalController::class, 'reviewerExport'])->name('reviewer.export');
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/certificate-download/{id?}', [BackJournalController::class, 'reviewerCertificateDownload'])->name('reviewer.certificate.download');
         Route::get('/{journal_path}/issue/{issue_id}/reviewer/certificate-send-mail/{id?}', [BackJournalController::class, 'reviewerCertificateSendMail'])->name('reviewer.certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/reviewer/file-sk', [BackJournalController::class, 'reviewerFileSkStore'])->name('reviewer.file-sk.store');
