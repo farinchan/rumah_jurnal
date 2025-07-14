@@ -62,16 +62,38 @@
                             </div>
                             <div class="fw-semibold fs-6 text-gray-500">Reviewer</div>
                         </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-4 fw-bold" data-kt-countup="true"
+                                    data-kt-countup-value="{{ $issue->submissions->flatMap->paymentInvoices->where('is_paid', true)->sum('payment_amount') }}"
+                                    data-kt-countup-prefix="Rp. " data-kt-countup-decimal-separator=","
+                                    data-kt-countup-thousand-separator=".">
+                                    0
+                                </div>
+                            </div>
+                            <div class="fw-semibold fs-6 text-gray-500">Dana pembayaran Accepted</div>
+                        </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-4 fw-bold" data-kt-countup="true"
+                                    data-kt-countup-value="{{ $issue->submissions->flatMap->paymentInvoices->where('is_paid', false)->sum('payment_amount') }}"
+                                    data-kt-countup-prefix="Rp. " data-kt-countup-decimal-separator="."
+                                    data-kt-countup-thousand-separator=".">
+                                    0
+                                </div>
+                            </div>
+                            <div class="fw-semibold fs-6 text-gray-500">Dana pembayaran Pending</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="separator"></div>
         <ul class="nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-5 fw-bold">
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a class="nav-link text-active-primary py-5 me-6 @if (request()->routeIs('back.journal.dashboard.index', [$journal->url_path, $issue->id])) active @endif"
                     href="{{ route('back.journal.dashboard.index', [$journal->url_path, $issue->id]) }}">Dashboard</a>
-            </li>
+            </li> --}}
             <li class="nav-item">
                 <a class="nav-link text-active-primary py-5 me-6 @if (request()->routeIs('back.journal.article.index', [$journal->url_path, $issue->id])) active @endif"
                     href="{{ route('back.journal.article.index', [$journal->url_path, $issue->id]) }}">Artikel</a>
