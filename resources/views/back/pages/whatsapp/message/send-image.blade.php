@@ -31,7 +31,7 @@
                     <div class="tab-pane fade show active" id="kt_tab_pane_7" role="tabpanel">
                         <div class="row">
                             <div class="col-md-4">
-                                <img src="{{ asset('img_ext/wa_massage.png') }}" style="width: 100%" alt="" />
+                                <img src="{{ asset('ext_images/wa_massage.png') }}" style="width: 100%" alt="" />
                             </div>
                             <div class="col-md-8">
                                 <form id="kt_modal_create_discipline_rule_form" class="form" method="POST"
@@ -76,7 +76,7 @@
 
                     <div class="row">
                         <div class="col-md-4">
-                            <img src="{{ asset('img_ext/wa_massage.png') }}" style="width: 100%" alt="" />
+                            <img src="{{ asset('ext_images/wa_massage.png') }}" style="width: 100%" alt="" />
                         </div>
                         <div class="col-md-8">
                             <form id="kt_modal_create_discipline_rule_form" class="form" method="POST"
