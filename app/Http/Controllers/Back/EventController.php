@@ -545,8 +545,16 @@ class EventController extends Controller
             $filePath = Storage::url('event/attachments/' . $fileName);
         }
 
-        $fileName = "Kamen_rider_eurodata.png";
-        $filePath = "https://upload.wikimedia.org/wikipedia/id/b/b0/Kamen_rider_eurodata.png";
+        $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
+        if ($mailEnvirontment == 'production') {
+            
+        } else {
+            // For testing purpose
+            $fileName = "Kamen_rider_eurodata.png";
+            $filePath = "https://upload.wikimedia.org/wikipedia/id/b/b0/Kamen_rider_eurodata.png";
+        }
+
+
 
 
         $data = [];
