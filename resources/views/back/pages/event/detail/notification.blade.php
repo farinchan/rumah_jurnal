@@ -32,8 +32,8 @@
                                 <img src="{{ asset('ext_images/wa_massage.png') }}" style="width: 100%" alt="" />
                             </div>
                             <div class="col-md-8">
-                                <form id="kt_modal_create_discipline_rule_form" class="form" method="POST"
-                                    action="{{ route('back.whatsapp.message.sendBulkMessageProcess') }}">
+                                <form id="kt_modal_create_discipline_rule_form" class="form" method="POST" enctype="multipart/form-data"
+                                    action="{{ route('back.event.detail.notification.whatsapp', $event->id ) }}">
                                     @csrf
                                     <div class="fv-row mb-10">
                                         <label class="required fw-bold fs-6 mb-2">Delay (milisecond)</label>
@@ -44,59 +44,28 @@
                                             <code>2000</code> untuk 2 detik.</small>
                                     </div>
                                     <div class="fv-row mb-10">
-                                        <!--begin::Repeater-->
-                                        <div id="phone_list">
-                                            <!--begin::Form group-->
-                                            <div class="form-group">
-                                                <div data-repeater-list="phones">
-                                                    <div data-repeater-item>
-                                                        <div class="form-group row mb-5">
-                                                            <div class="col-md-9">
-                                                                <label class="form-label">Kepada (No Whatsapp)</label>
-                                                                <input type="number"
-                                                                    class="form-control form-control-solid mb-2 mb-md-0"
-                                                                    placeholder="628xxxxxxxxxx" name="phone" required />
-                                                                <small class="text-muted">Pastikan nomor whatsapp benar,
-                                                                    nomor
-                                                                    diawali dengan kode
-                                                                    negara tanpa tanda <code>+</code> atau <code>0</code>,
-                                                                    dengan
-                                                                    contoh
-                                                                    <code>6281234567890</code></small>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <a href="javascript:;" data-repeater-delete
-                                                                    class="btn btn-sm btn-light-danger mt-3 mt-md-8">
-                                                                    <i class="ki-duotone ki-trash fs-5"><span
-                                                                            class="path1"></span><span
-                                                                            class="path2"></span><span
-                                                                            class="path3"></span><span
-                                                                            class="path4"></span><span
-                                                                            class="path5"></span></i>
-                                                                    Delete
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!--end::Form group-->
-
-                                            <!--begin::Form group-->
-                                            <div class="form-group mt-5">
-                                                <a href="javascript:;" data-repeater-create class="btn btn-light-primary">
-                                                    <i class="ki-duotone ki-plus fs-3"></i>
-                                                    Add
-                                                </a>
-                                            </div>
-                                            <!--end::Form group-->
-                                        </div>
-                                        <!--end::Repeater-->
+                                        <label class="required fw-bold fs-6 mb-2">Peserta</label>
+                                        <select class="form-select form-select-solid form-select-lg fw-bold"
+                                            data-control="select2" data-placeholder="Pilih Peserta" data-hide-search="true"
+                                            name="user" required>
+                                            <option></option>
+                                            <option value="all">Seluruh Peserta</option>
+                                            <option value="100_percent" disabled>Peserta Dengan
+                                                kehadiran 100%</option>
+                                        </select>
                                     </div>
 
                                     <div class="fv-row mb-10">
                                         <label class="required fw-bold fs-6 mb-2">Pesan</label>
                                         <textarea class="form-control form-control-solid form-control-lg fw-bold" name="message" rows="10" placeholder=""></textarea>
+                                    </div>
+
+                                     <div class="fv-row mb-10">
+                                        <label class=" fw-bold fs-6 mb-2">Lampiran</label>
+                                        <input type="file" class="form-control form-control-solid form-control-lg fw-bold"
+                                            name="attachment" accept=".jpg,.jpeg,.png,.pdf,.docx,.xlsx" />
+                                        <small class="text-muted">Format file yang didukung: JPG, JPEG, PNG, PDF, DOCX, XLSX.
+                                            Ukuran maksimal: 8MB.</small>
                                     </div>
 
                                     <div class="d-flex justify-content-end">

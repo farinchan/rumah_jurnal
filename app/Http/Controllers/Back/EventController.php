@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -516,5 +517,75 @@ class EventController extends Controller
         ];
 
         return view('back.pages.event.detail.notification', $data);
+    }
+
+    public function notificationWhatsapp(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'user' => 'required',
+            'message' => 'required',
+            'attachment' => 'nullable|mimes:jpg,jpeg,png,pdf,docx,xlsx|max:8192',
+        ], [
+            'required' => ':attribute harus diisi',
+            'mimes' => 'File harus berupa gambar atau dokumen',
+            'max' => 'Ukuran file maksimal 8MB',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $fileName = null;
+        $filePath = null;
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $fileName = 'lampiran_' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('event/attachments', $fileName, 'public');
+            $filePath = Storage::url('event/attachments/' . $fileName);
+        }
+
+        $fileName = "Kamen_rider_eurodata.png";
+        $filePath = "https://upload.wikimedia.org/wikipedia/id/b/b0/Kamen_rider_eurodata.png";
+
+
+        $data = [];
+        if ($request->user == 'all') {
+            $user = EventUser::where('event_id', $id)->with(['user'])->get();
+            if ($user->isEmpty()) {
+                Alert::error('Error', 'Tidak ada peserta yang ditemukan untuk notifikasi ini');
+                return redirect()->back();
+            }
+            foreach ($user as $u) {
+                if ($request->hasFile('attachment')) {
+                    $data[] = [
+                        'to' => whatsappNumber($u->user->phone),
+                        'caption' => $request->message,
+                        'urlDocument' => $filePath,
+                        'fileName' => $fileName,
+                    ];
+                } else {
+                    $data[] = [
+                        'to' => whatsappNumber($u->phone),
+                        'text' => $request->message,
+
+                    ];
+                }
+            }
+        }
+
+        $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+            'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
+            'delay' => $request->delay,
+            'data' => $data
+        ]);
+
+        if ($response->status() != 200) {
+            Alert::error('Error', 'Failed to send bulk message: ' . $response->json()['message'] ?? 'Unknown error');
+            return redirect()->back()->with('error', 'Failed to send bulk message: ' . $response->json()['message'] ?? 'Unknown error');
+        }
+
+        Alert::success('Sukses', 'Notifikasi berhasil dikirim');
+        return redirect()->back()->with('success', 'Notifikasi berhasil dikirim');
     }
 }

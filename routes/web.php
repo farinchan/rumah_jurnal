@@ -144,7 +144,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
             Route::get('/{id}/attendance/{event_attendance_id}/export', [BackEventController::class, 'attendanceExport'])->name('attendance.export');
 
             Route::get('/{id}/notification', [BackEventController::class, 'notification'])->name('notification');
-            Route::post('/{id}/notification/send', [BackEventController::class, 'notificationSend'])->name('notification.send');
+            Route::post('/{id}/notification/whatsapp', [BackEventController::class, 'notificationWhatsapp'])->name('notification.whatsapp');
         });
     });
 
