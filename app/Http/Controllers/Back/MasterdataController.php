@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Back;
 use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Models\PaymentAccount;
+use App\Models\Reviewer;
+use App\Models\ReviewerData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -93,17 +95,20 @@ class MasterdataController extends Controller
 
     public function paymentAccountUpdate(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'payment_accounts' => 'array',
-            'payment_accounts.*.account_name' => 'required|string|max:255',
-            'payment_accounts.*.account_number' => 'required|string|max:255',
-            'payment_accounts.*.bank' => 'required|string|max:255',
-        ],
-        [
-            'payment_accounts.*.account_name.required' => 'Nama pemilik rekening tidak boleh kosong',
-            'payment_accounts.*.account_number.required' => 'Nomor rekening tidak boleh kosong',
-            'payment_accounts.*.bank.required' => 'Nama bank tidak boleh kosong',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'payment_accounts' => 'array',
+                'payment_accounts.*.account_name' => 'required|string|max:255',
+                'payment_accounts.*.account_number' => 'required|string|max:255',
+                'payment_accounts.*.bank' => 'required|string|max:255',
+            ],
+            [
+                'payment_accounts.*.account_name.required' => 'Nama pemilik rekening tidak boleh kosong',
+                'payment_accounts.*.account_number.required' => 'Nomor rekening tidak boleh kosong',
+                'payment_accounts.*.bank.required' => 'Nama bank tidak boleh kosong',
+            ]
+        );
 
         if ($validator->fails()) {
             Alert::error('Gagal', $validator->errors()->all());
@@ -112,7 +117,7 @@ class MasterdataController extends Controller
 
 
 
-        if($request->delete_account) {
+        if ($request->delete_account) {
             $account_delete = json_decode($request->delete_account, true);
             foreach ($account_delete as $accountId) {
                 $account = PaymentAccount::find($accountId);
@@ -151,6 +156,73 @@ class MasterdataController extends Controller
         }
 
         Alert::success('Berhasil', 'Data berhasil diubah');
+        return redirect()->back();
+    }
+
+    public function reviewerIndex()
+    {
+        $data = [
+            'title' => 'Reviewer',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Reviewer',
+                    'link' => route('back.master.reviewer.index')
+                ]
+            ],
+            'reviewers' => Reviewer::with(['data'])
+                ->get()
+                ->unique('reviewer_id')
+                ->map(function ($reviewer) {
+                    $reviewer->journal = Reviewer::where('reviewer_id', $reviewer->reviewer_id)
+                        ->with('issue.journal')
+                        ->get()
+                        ->map(function ($item) {
+                            $journal_data = $item->issue->journal;
+                            return (object) [
+                                'id' => $journal_data->id,
+                                'name' => $journal_data->name,
+                                'title' => $journal_data->title,
+                                'url_path' => $journal_data->url_path,
+                            ];
+                        });
+                    return $reviewer;
+                }),
+        ];
+        // return response()->json($data);
+        return view('back.pages.master.reviewer.index', $data);
+    }
+
+    public function reviewerUpdate(Request $request, $id)
+    {
+        $reviewer = Reviewer::where('reviewer_id', $id)->first();
+        if (!$reviewer) {
+            Alert::error('Gagal', 'Reviewer tidak ditemukan');
+            return redirect()->back();
+        }
+
+        $validator = Validator::make($request->all(), [
+            'nik' => 'required|string|max:255',
+            'account_bank' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:255',
+            'npwp' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Gagal', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        ReviewerData::updateOrCreate(
+            ['reviewer_id' => $reviewer->reviewer_id],
+            [
+                'nik' => $request->nik,
+                'account_bank' => $request->account_bank,
+                'account_number' => $request->account_number,
+                'npwp' => $request->npwp,
+            ]
+        );
+
+        Alert::success('Success', 'Reviewer has been updated');
         return redirect()->back();
     }
 }

@@ -254,6 +254,15 @@
                         </a>
                     </div>
                     <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.master.reviewer.*')) active @endif"
+                            href="{{ route('back.master.reviewer.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Reviewer</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
                         <a class="menu-link @if (request()->routeIs('back.master.payment-account.index')) active @endif"
                             href="{{ route('back.master.payment-account.index') }}">
                             <span class="menu-bullet">

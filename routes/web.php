@@ -248,6 +248,16 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
             Route::delete('/delete/{id}', [BackUserController::class, 'destroy'])->name('destroy');
         });
 
+        Route::prefix('reviewer')->name('reviewer.')->group(function () {
+            Route::get('/', [BackMasterDataController::class, 'reviewerIndex'])->name('index');
+            Route::put('/edit/{reviewer_id}', [BackMasterDataController::class, 'reviewerUpdate'])->name('update');
+        });
+
+        Route::prefix('editor')->name('editor.')->group(function () {
+            Route::get('/', [BackMasterDataController::class, 'editorIndex'])->name('index');
+            Route::put('/edit/{id}', [BackMasterDataController::class, 'editorUpdate'])->name('update');
+        });
+
         Route::prefix('payment-account')->name('payment-account.')->group(function () {
             Route::get('/', [BackMasterDataController::class, 'paymentAccount'])->name('index');
             Route::put('/update', [BackMasterDataController::class, 'paymentAccountUpdate'])->name('update');

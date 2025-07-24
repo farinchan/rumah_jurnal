@@ -136,7 +136,7 @@
                                     </td>
 
                                     <td>
-                                        @foreach ($user->getPermissionNames() ?? [] as $permission) 
+                                        @foreach ($user->getPermissionNames() ?? [] as $permission)
                                                 <span class="badge badge-light-success">{{ $permission }}</span>
 
                                         @endforeach

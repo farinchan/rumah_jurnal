@@ -20,6 +20,7 @@ use App\Models\Journal;
 use App\Models\PaymentAccount;
 use App\Models\PaymentInvoice;
 use App\Models\Reviewer;
+use App\Models\ReviewerData;
 use App\Models\ReviewerFileIssue;
 use App\Models\SettingWebsite;
 use App\Models\Submission;
@@ -1668,13 +1669,14 @@ class journalController extends Controller
             'journal_path' => $journal_path,
             'journal' => $journal,
             'issue' => $issue,
+            'reviewers' => Reviewer::where('issue_id', $issue_id)->with('data')->get(),
             'file_sk' => ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type', 'sk')->first(),
             'file_certificate' => ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type', 'certificate')->first(),
             'file_fee' => ReviewerFileIssue::where('issue_id', $issue_id)->where('file_type', 'fee')->first(),
             'setting_web' => SettingWebsite::first(),
             // 'submissions' => $issue->submissions->pluck('submission_id'),
         ];
-        // return response()->json($data);
+        // return response()->json($data['reviewers']);
         return view('back.pages.journal.detail-reviewer', $data);
     }
 
@@ -2234,12 +2236,16 @@ class journalController extends Controller
             return redirect()->back();
         }
 
-        $reviewer->update([
-            'nik' => request()->nik,
-            'account_bank' => request()->account_bank,
-            'account_number' => request()->account_number,
-            'npwp' => request()->npwp,
-        ]);
+        ReviewerData::updateOrCreate(
+            ['reviewer_id' => $reviewer->reviewer_id],
+            [
+                'nik' => request()->nik,
+                'account_bank' => request()->account_bank,
+                'account_number' => request()->account_number,
+                'npwp' => request()->npwp,
+            ]
+        );
+
         Alert::success('Success', 'Reviewer has been updated');
         return redirect()->back();
     }

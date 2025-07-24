@@ -10,8 +10,8 @@
                             <h3>Reviewer</h3>
                         </div>
                         <div class="card-toolbar">
-                            <a href="#" class="btn btn-sm btn-primary my-1 me-3" data-bs-toggle="modal" id="btn_add_reviewer"
-                                data-bs-target="#modal_select_article">
+                            <a href="#" class="btn btn-sm btn-primary my-1 me-3" data-bs-toggle="modal"
+                                id="btn_add_reviewer" data-bs-target="#modal_select_article">
                                 <i class="ki-duotone ki-plus fs-2"></i> Tambah Reviewer
                             </a>
                             <a href="{{ route('back.journal.reviewer.export', [$journal->url_path, $issue->id]) }}"
@@ -38,7 +38,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="fw-6 fw-semibold text-gray-600">
-                                    @forelse ($issue->reviewers as $reviewer)
+                                    @forelse ($reviewers as $reviewer)
                                         <tr>
                                             <td>
                                                 {{ $loop->iteration }}
@@ -98,14 +98,14 @@
                                                 {{ $reviewer->phone }}
                                             </td>
                                             <td class="text-start">
-                                                <span class="fw-bold">{{ $reviewer->account_bank }}</span><br>
-                                                @if ($reviewer->account_number)
-                                                    No. Rek: {{ $reviewer->account_number }}
+                                                <span class="fw-bold">{{ $reviewer->data?->account_bank }}</span><br>
+                                                @if ($reviewer->data?->account_number)
+                                                    No. Rek: {{ $reviewer->data?->account_number }}
                                                 @endif
                                             </td>
                                             <td class="text-start">
-                                                @if ($reviewer->npwp)
-                                                    <span class="fw-bold">{{ $reviewer->npwp }}</span>
+                                                @if ($reviewer->data?->npwp)
+                                                    <span class="fw-bold">{{ $reviewer->data?->npwp }}</span>
                                                 @else
                                                     <span class="text-muted">Tidak ada NPWP</span>
                                                 @endif
@@ -344,7 +344,7 @@
             </div>
         </div>
     </div>
-    @foreach ($issue->reviewers as $reviewer)
+    @foreach ($reviewers as $reviewer)
         <div class="modal fade" tabindex="-1" id="modal_view_article_{{ $reviewer->reviewer_id }}">
             <div class="modal-dialog mw-650px">
                 <div class="modal-content">
@@ -416,7 +416,7 @@
                                     <td>:</td>
                                     <td>
                                         <input type="text" class="form-control" name="nik"
-                                            value="{{ $reviewer->nik }}" placeholder="Nomor Induk Kependudukan"
+                                            value="{{ $reviewer->data?->nik }}" placeholder="Nomor Induk Kependudukan"
                                             required />
                                     </td>
                                 </tr>
@@ -530,12 +530,12 @@
                                             @endphp
                                             @foreach ($banks as $bank)
                                                 <option value="{{ $bank }}"
-                                                    {{ isset($reviewer->account_bank) && $reviewer->account_bank == $bank ? 'selected' : '' }}>
+                                                    {{ isset($reviewer->data?->account_bank) && $reviewer->data?->account_bank == $bank ? 'selected' : '' }}>
                                                     {{ $bank }}</option>
                                             @endforeach
                                         </select>
                                         <input type="text" class="form-control mt-2" placeholder="No. Rekening"
-                                            name="account_number" value="{{ $reviewer->account_number }}" required />
+                                            name="account_number" value="{{ $reviewer->data?->account_number }}" required />
 
                                     </td>
                                 </tr>
@@ -544,7 +544,7 @@
                                     <td>:</td>
                                     <td>
                                         <input type="text" class="form-control" name="npwp"
-                                            value="{{ $reviewer->npwp }}" placeholder="Nomor Pokok Wajib Pajak" />
+                                            value="{{ $reviewer->data?->npwp }}" placeholder="Nomor Pokok Wajib Pajak" />
                                     </td>
                                 </tr>
                             </table>
@@ -671,7 +671,7 @@
 @endsection
 @section('scripts')
     <script>
-        let reviewer = @json($issue->reviewers->pluck('reviewer_id'));
+        let reviewer = @json($reviewers->pluck('reviewer_id'));
         let data = [];
         $(document).ready(function() {
             $('#btn_add_reviewer').on('click', function() {
@@ -738,7 +738,19 @@
                         });
                     },
                     error: function(xhr) {
-                        alert('Terjadi kesalahan');
+                        console.log(xhr.responseJSON);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Terjadi kesalahan saat memuat data reviewer',
+                        });
+                        $('#list_article').html(`
+                            <div class="alert alert-danger mt-5 text-center">
+                                <strong>Gagal memuat data reviewer!</strong> <br>
+                                ${xhr.responseJSON.error || 'Silakan coba lagi nanti.'}
+                            </div>
+                        `);
+
                     }
                 });
             });
@@ -795,7 +807,7 @@
     </script>
     <script src="{{ asset('back/plugins/custom/ckeditor/ckeditor-classic.bundle.js') }}"></script>
 
-    @foreach ($issue->reviewers as $reviewer)
+    @foreach ($reviewers as $reviewer)
         <script>
             ClassicEditor
                 .create(document.querySelector('#kt_docs_ckeditor_classic_' + {{ $reviewer->id }}))
