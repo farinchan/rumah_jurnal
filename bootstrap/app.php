@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
          $middleware->alias([
             'TrustProxies' => \App\Http\Middleware\TrustProxies::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            '/login',
+            '/register',
+            '/back/menu/profil/upload'
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

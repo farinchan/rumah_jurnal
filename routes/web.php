@@ -20,6 +20,7 @@ use App\Http\Controllers\Back\WelcomeSpeechController as BackWelcomeSpeechContro
 use App\Http\Controllers\Back\journalController as BackJournalController;
 use App\Http\Controllers\Back\FinanceController as BackFinanceController;
 use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
+use App\Http\Controllers\Back\MenuProfilController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
@@ -169,6 +170,20 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/', [BackWelcomeSpeechController::class, 'index'])->name('index');
         Route::put('/edit', [BackWelcomeSpeechController::class, 'update'])->name('update');
     });
+
+    Route::prefix('menu')->name('menu.')->group(function () {
+
+
+            Route::prefix('profil')->name('profil.')->group(function () {
+                Route::get('/', [MenuProfilController::class, 'index'])->name('index');
+                Route::post('/create', [MenuProfilController::class, 'store'])->name('store');
+                Route::get('/edit/{id}', [MenuProfilController::class, 'edit'])->name('edit');
+                Route::put('/edit/{id}', [MenuProfilController::class, 'update'])->name('update');
+                Route::delete('/delete/{id}', [MenuProfilController::class, 'destroy'])->name('destroy');
+
+                Route::post('/upload', [MenuProfilController::class, 'upload'])->name('upload');
+            });
+        });
 
     Route::prefix('journal')->name('journal.')->group(function () {
         Route::get('/{journal_path}', [BackJournalController::class, 'index'])->name('index');

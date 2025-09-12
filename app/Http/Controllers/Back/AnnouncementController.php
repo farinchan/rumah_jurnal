@@ -147,7 +147,7 @@ class AnnouncementController extends Controller
         $announcement->title = $request->title;
         $announcement->slug = Str::slug($request->title);
         $announcement->content = $request->content;
-        $announcement->teacher_id = Auth::user()->id;
+        $announcement->user_id = Auth::user()->id;
         $announcement->meta_title = $request->title;
         $announcement->meta_description = Str::limit(strip_tags($request->content), 250);
         $announcement->meta_keywords = $request->meta_keywords;
