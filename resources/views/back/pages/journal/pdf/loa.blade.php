@@ -43,18 +43,18 @@
             correspondence author, was accepted for publication in {{ $journal }}.
         </p>
 
-        <p style="margin-top: 30px;">Your article will be published in Edition {{ $edition }}.</p>
+        <p style="margin-top: 10px;">Your article will be published in Edition {{ $edition }}.</p>
 
-        <p style="margin-top: 20px;">Thank you for making Journal {{ $journal }} a vehicle for your
+        <p style="margin-top: 10px;">Thank you for making Journal {{ $journal }} a vehicle for your
             research interests.</p>
     </div>
 
     <img style="position: absolute; bottom: 190; left: 40;  width: 120px;" src="{{ $journal_thumbnail }}" alt="">
 
     <div class="signature" style="position: absolute; bottom: 190; left: 295; ">
-        <p style="margin-bottom: -5px" >Bukittinggi, {{ $date }}</p>
+        <p style="margin-bottom: -10px" >Bukittinggi, {{ $date }}</p>
         <p>Editor in Chief,</p>
-        <img style="height: 110px;  margin: -20px 0px -20px -50px"src="{{ $chief_editor_signature }}" alt="">
+        <img style="height: 110px;"src="{{ $chief_editor_signature }}" alt="">
         <p style=""><strong>{{ $chief_editor }}</strong></p>
     </div>
 </body>

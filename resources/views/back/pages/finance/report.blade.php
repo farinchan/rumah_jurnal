@@ -34,7 +34,7 @@
             </div>
             <div class="card-body pt-0">
                 <div class="row mb-10">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <label class="form-label fs-6 fw-bold">Jurnal</label>
                         <select class="form-select form-select-solid" data-control="select2"
@@ -58,13 +58,21 @@
                         </select>
 
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+                        <label class="form-label fs-6 fw-bold">Issue</label>
+                        <select class="form-select form-select-solid" data-control="select2"
+                            data-placeholder="Select an option" name="issue_id" id="issue_id">
+                            <option value="" selected>Semua Issue</option>
+
+                        </select>
+                    </div>
+                    <div class="col-md-6">
                         <label class="form-label fs-6 fw-bold">Dari Tanggal</label>
                         <input type="date" name="date_start" class="form-control form-control-solid"
                             placeholder="Date Start" id="date_start"
                             value="{{ \Carbon\Carbon::createFromDate(now()->year, 1, 1)->format('Y-m-d') }}" />
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label fs-6 fw-bold">Sampai Tanggal</label>
                         <input type="date" name="date_end" class="form-control form-control-solid" placeholder="Date End"
                             id="date_end"
