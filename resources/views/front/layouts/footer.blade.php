@@ -1,9 +1,10 @@
 @php
     $journals = \App\Models\Journal::all();
 
-    $journal_chunks = $journals->split(2);
+    $journal_chunks = $journals->split(3);
     $part1 = $journal_chunks->get(0) ?? collect();
     $part2 = $journal_chunks->get(1) ?? collect();
+    $part3 = $journal_chunks->get(2) ?? collect();
 @endphp
 <!-- BRAND LOGO AREA START -->
 {{-- <div class="ltn__brand-logo-area ltn__brand-logo-1 before-bg-bottom">
@@ -138,7 +139,7 @@
                             <ul>
                                 @foreach ($part1 as $journal)
                                     <li><a href="{{ route('journal.detail', $journal->url_path) }}">
-                                            {{ $journal->title }}
+                                            {{ $journal->name }}
                                         </a></li>
                                 @endforeach
                             </ul>
@@ -147,18 +148,33 @@
                 </div>
                 <div class="col-xl-2 col-md-6 col-sm-6 col-12">
                     <div class="footer-widget footer-menu-widget clearfix">
+                        <h4 class="footer-title">&nbsp;</h4>
                         <div class="footer-menu">
                             <ul>
                                 @foreach ($part2 as $journal)
                                     <li><a href="{{ route('journal.detail', $journal->url_path) }}">
-                                            {{ $journal->title }}
+                                            {{ $journal->name }}
                                         </a></li>
                                 @endforeach
                             </ul>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6 col-sm-12 col-12">
+                <div class="col-xl-2 col-md-6 col-sm-6 col-12">
+                    <div class="footer-widget footer-menu-widget clearfix">
+                         <h4 class="footer-title">&nbsp;</h4>
+                        <div class="footer-menu">
+                            <ul>
+                                @foreach ($part3 as $journal)
+                                    <li><a href="{{ route('journal.detail', $journal->url_path) }}">
+                                            {{ $journal->name }}
+                                        </a></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {{-- <div class="col-xl-3 col-md-6 col-sm-12 col-12">
                     <div class="footer-widget footer-newsletter-widget">
                         <h4 class="footer-title">Newsletter</h4>
                         <p>
@@ -174,7 +190,7 @@
                             </form>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

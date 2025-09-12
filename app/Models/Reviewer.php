@@ -28,6 +28,11 @@ class Reviewer extends Model
     {
         return $this->hasMany(SubmissionReviewer::class, 'reviewer_id');
     }
+
+    public function  data()
+    {
+        return $this->hasOne(ReviewerData::class, 'reviewer_id', 'reviewer_id');
+    }
 }
 
 

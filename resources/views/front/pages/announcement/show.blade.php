@@ -23,8 +23,9 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="ltn__page-details-inner ltn__portfolio-details-inner">
-                        <h2 class="ltn__blog-title">Business contents insurance is a type of
-                            business insurance that can protect</h2>
+                        <h2 class="ltn__blog-title">
+                            {{ $announcement->title }}  
+                        </h2>
                         <div class="ltn__blog-meta">
                             <ul>
                                 <li class="ltn__blog-author">
