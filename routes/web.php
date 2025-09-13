@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Front\AnnouncementController;
+use App\Http\Controllers\Front\MenuProfilController;
 use App\Http\Controllers\Front\EventController;
 use App\Http\Controllers\Front\NewsController;
 use App\Http\Controllers\Front\JournalController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Back\WelcomeSpeechController as BackWelcomeSpeechContro
 use App\Http\Controllers\Back\journalController as BackJournalController;
 use App\Http\Controllers\Back\FinanceController as BackFinanceController;
 use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
+use App\Http\Controllers\Back\MenuProfilController as BackMenuProfilController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
@@ -65,6 +67,11 @@ Route::prefix('event')->name('event.')->group(function () {
 Route::prefix('announcement')->name('announcement.')->group(function () {
     Route::get('/', [AnnouncementController::class, 'index'])->name('index');
     Route::get('/{slug}', [AnnouncementController::class, 'show'])->name('show');
+});
+
+Route::prefix('profil')->name('profil.')->group(function () {
+    // Route::get('/', [MenuProfilController::class, 'index'])->name('index');
+    Route::get('/{slug}', [MenuProfilController::class, 'show'])->name('show');
 });
 
 Route::prefix('team')->name('team.')->group(function () {
@@ -169,6 +176,20 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/', [BackWelcomeSpeechController::class, 'index'])->name('index');
         Route::put('/edit', [BackWelcomeSpeechController::class, 'update'])->name('update');
     });
+
+    Route::prefix('menu')->name('menu.')->group(function () {
+
+
+            Route::prefix('profil')->name('profil.')->group(function () {
+                Route::get('/', [BackMenuProfilController::class, 'index'])->name('index');
+                Route::post('/create', [BackMenuProfilController::class, 'store'])->name('store');
+                Route::get('/edit/{id}', [BackMenuProfilController::class, 'edit'])->name('edit');
+                Route::put('/edit/{id}', [BackMenuProfilController::class, 'update'])->name('update');
+                Route::delete('/delete/{id}', [BackMenuProfilController::class, 'destroy'])->name('destroy');
+
+                Route::post('/upload', [BackMenuProfilController::class, 'upload'])->name('upload');
+            });
+        });
 
     Route::prefix('journal')->name('journal.')->group(function () {
         Route::get('/{journal_path}', [BackJournalController::class, 'index'])->name('index');

@@ -8,8 +8,8 @@
     <meta property="og:title" content="{{ $meta['title'] }}">
     <meta property="og:description" content="{{ $meta['description'] }}">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ route('announcement.show', $announcement->slug) }}">
-    <link rel="canonical" href="{{ route('announcement.show', $announcement->slug) }}">
+    <meta property="og:url" content="{{ route('profil.show', $menu_profil->slug) }}">
+    <link rel="canonical" href="{{ route('profil.show', $menu_profil->slug) }}">
     <meta property="og:image" content="{{ Storage::url($meta['favicon']) }}">
 @endsection
 @section('styles')
@@ -234,38 +234,20 @@
                 <div class="col-lg-12">
                     <div class="ltn__page-details-inner ltn__portfolio-details-inner">
                         <h2 class="ltn__blog-title">
-                            {{ $announcement->title }}
+                            {{ $menu_profil->name }}
                         </h2>
-                        <div class="ltn__blog-meta">
-                            <ul>
-                                <li class="ltn__blog-author">
-                                    <a href="#"><img src="{{ $announcement->user?->getPhoto() ?? '' }}"
-                                            alt="#">By:
-                                        {{ $announcement->user?->name ?? '' }}</a>
-                                </li>
-                                <li class="ltn__blog-date">
-                                    <i class="far fa-calendar-alt"></i>
-                                    {{ Carbon\Carbon::parse($announcement->created_at)->format('d M Y') }}
-                                </li>
-                            </ul>
-                        </div>
                         <div id="content-wrapper">
                             <div id="content">
-                                {!! $announcement->content !!}
+                                {!! $menu_profil->content !!}
                             </div>
                         </div>
-                        @if ($announcement->file)
-                            <object data="{{ Storage::url($announcement->file) }}" type="application/pdf" width="100%"
-                                height="800px">
-                                <embed src="{{ Storage::url($announcement->file) }}" type="application/pdf" />
-                            </object>
-                        @endif
 
                     </div>
                 </div>
 
             </div>
-             <hr>
+
+            <hr>
 
             <div class="ltn__social-media text-right ">
                 <h4>
@@ -278,7 +260,7 @@
                             target="_blank"><i class="fab fa-twitter"></i></a></li>
                     <li><a href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode(Request::fullUrl()) }}"
                             title="Linkedin" target="_blank"><i class="fab fa-linkedin"></i></a></li>
-
+                    
                     <li>
                         <a href="https://wa.me/?text={{ urlencode(Request::fullUrl()) }}" title="WhatsApp" target="_blank">
                             <i class="fab fa-whatsapp"></i>
@@ -287,6 +269,7 @@
                 </ul>
             </div>
         </div>
+
     </div>
     <!-- PAGE DETAILS AREA END -->
 @endsection

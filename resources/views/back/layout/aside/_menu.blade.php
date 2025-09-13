@@ -125,6 +125,18 @@
                     <span class="menu-title">Tentang kami</span>
                 </a>
             </div>
+
+            <div class= "menu-item">
+                <a class="menu-link @if (request()->routeIs('back.menu.profil.*')) active @endif"
+                    href="{{ route('back.menu.profil.index') }}">
+                    <span class="menu-icon">
+                        <i class="ki-duotone ki-burger-menu-5 fs-2"></i>
+                    </span>
+                    <span class="menu-title">Menu Profil</span>
+                </a>
+            </div>
+
+
         @endrole
 
         @role('editor|super-admin')
