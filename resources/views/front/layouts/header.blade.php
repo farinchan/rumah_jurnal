@@ -91,9 +91,17 @@
                             <div class="ltn__main-menu">
                                 <ul>
                                     <li><a href="{{ route('home') }}">{{ __('layout.home') }}</a></li>
-                                    <li><a href="{{ route('event.index') }}">{{ __('layout.event') }}</a></li>
-                                    <li><a
-                                            href="{{ route('announcement.index') }}">{{ __('layout.announcement') }}</a>
+                                    {{-- <li><a href="{{ route('event.index') }}">{{ __('layout.event') }}</a></li>
+                                    <li><a href="{{ route('announcement.index') }}">{{ __('layout.announcement') }}</a></li> --}}
+                                    <li class="menu-icon"><a href="#">{{ __('layout.profile') }}</a>
+                                        <ul>
+                                            @php
+                                                $menu_profiles = \App\Models\MenuProfil::all();
+                                            @endphp
+                                            @foreach ($menu_profiles as $profile)
+                                                <li><a href="{{ route('profil.show', $profile->slug) }}">{{ $profile->name }}</a></li>
+                                            @endforeach
+                                        </ul>
                                     </li>
                                     <li class="menu-icon"><a href="#">{{ __('layout.team') }}</a>
                                         <ul>
@@ -264,8 +272,8 @@
         <div class="ltn__utilize-menu">
             <ul>
                 <li><a href="{{ route('home') }}">{{ __('layout.home') }}</a></li>
-                <li><a href="{{ route('event.index') }}">{{ __('layout.event') }}</a></li>
-                <li><a href="{{ route('announcement.index') }}">{{ __('layout.announcement') }}</a></li>
+                {{-- <li><a href="{{ route('event.index') }}">{{ __('layout.event') }}</a></li>
+                <li><a href="{{ route('announcement.index') }}">{{ __('layout.announcement') }}</a></li> --}}
 
                 <li><a href="#">{{ __('layout.team') }}</a>
                     <ul class="sub-menu">

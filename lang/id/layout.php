@@ -5,6 +5,7 @@ return [
     'home' => 'Beranda',
     'agenda' => 'Agenda',
     'event' => 'Acara',
+    'profile' => 'Profil',
     'announcement' => 'Pengumuman',
     'news' => 'Berita',
     'news_all' => 'Semua Berita',
