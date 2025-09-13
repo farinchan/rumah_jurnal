@@ -80,7 +80,7 @@
                     <div class="site-logo-wrap">
                         <div class="site-logo">
                             <a href="{{ route('home') }}"><img src="{{ $setting_web?->getLogo() ?? '' }}" alt="Logo"
-                                    style="height: 80px;"></a>
+                                    style="height: 70px;"></a>
                             </a>
                         </div>
                     </div>
