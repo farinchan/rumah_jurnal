@@ -641,17 +641,31 @@ class FinanceController extends Controller
     public function cashflowIndex(Request $request)
     {
         $id = $request->id;
-        $finance_year_now = $id ? FinanceYear::findOrFail($id) : FinanceYear::latest()->first();
-        $finance_now = Finance::where('date', '>=', $finance_year_now ? $finance_year_now->start_date : now()->startOfYear()->toDateString());
+        if ($id) {
+            $finance_year_now = FinanceYear::findOrFail($id);
+            $start_date = $finance_year_now->start_date;
+            $end_date = $finance_year_now->end_date ?? now()->addDay()->toDateString();
+        } else {
+            $finance_year_now = FinanceYear::latest()->first();
+            $start_date = $finance_year_now ? $finance_year_now->start_date : now()->startOfYear()->toDateString();
+            $end_date = $finance_year_now && $finance_year_now->end_date ? $finance_year_now->end_date : now()->addDay()->toDateString();
+        }
+
+        $finance_now = Finance::where('date', '>=', $start_date)
+            ->where('date', '<=', $end_date);
+
         $outcome = (clone $finance_now)->where('type', 'expense')->sum('amount');
         $income_temp = (clone $finance_now)->where('type', 'income')->sum('amount');
+
         $payment = Payment::with(['paymentInvoice'])
-            ->where('created_at', '>=', $finance_year_now ? $finance_year_now->start_date : now()->startOfYear()->toDateString())
+            ->where('created_at', '>=', $start_date)
+            ->where('created_at', '<=', $end_date)
             ->where('payment_status', 'accepted')
             ->get()
             ->map(function ($item) {
-                return $item->paymentInvoice->payment_amount ?? 0;
+            return $item->paymentInvoice->payment_amount ?? 0;
             })->sum();
+
         $income = $income_temp + $payment;
         $balance = $income - $outcome;
         $data = [
