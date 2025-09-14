@@ -963,7 +963,7 @@ class FinanceController extends Controller
         $date_end = $request->date_end ?? now()->toDateString();
         $date_start = $request->date_start ?? now()->subMonth()->toDateString();
 
-        return Excel::download(new CashflowExport($date_start, $date_end, $type), 'laporan_keuangan_' . now()->format('Y_m_d') . '.xlsx');
+        return Excel::download(new CashflowExport($date_start, $date_end, $type), 'cashflow_' . now()->format('Y_m_d') . '.xlsx');
     }
 
     public function CashflowStore(Request $request)
