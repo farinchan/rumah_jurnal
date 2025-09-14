@@ -15,12 +15,20 @@ class TrustProxies
      */
     protected $proxies = '*'; // Atau bisa pakai IP Cloudflare kalau ingin spesifik
 
+    // Pastikan header X-Forwarded-* dibaca semua
+    protected $headers =
+    Request::HEADER_X_FORWARDED_FOR |
+        Request::HEADER_X_FORWARDED_HOST |
+        Request::HEADER_X_FORWARDED_PORT |
+        Request::HEADER_X_FORWARDED_PROTO |
+        Request::HEADER_X_FORWARDED_AWS_ELB;
+
     /**
      * Header yang digunakan untuk mengambil IP.
      *
      * @var int
      */
-    protected $headers = Request::HEADER_X_FORWARDED_FOR;
+
 
     public function handle($request, Closure $next)
     {

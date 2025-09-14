@@ -621,7 +621,7 @@ class EventController extends Controller
                     <div class="d-flex flex-column">
                         <a href="#"
                             class="text-gray-800 text-hover-primary mb-1">' . $userAttendance->user->user->name . '</a>
-                        <span>' . $userAttendance->user->user->email . '</span>
+                        <span>' . $userAttendance->user->email . '</span>
                     </div>
                 ';
             })
@@ -629,10 +629,10 @@ class EventController extends Controller
                 return $userAttendance->user->name;
             })
             ->addColumn('email', function ($userAttendance) {
-                return $userAttendance->user->user->email;
+                return $userAttendance->user->email;
             })
             ->addColumn('phone', function ($userAttendance) {
-                return $userAttendance->user->user->phone ?? '-';
+                return $userAttendance->user->phone ?? '-';
             })
             ->addColumn('attendance', function ($userAttendance) {
                 if ($userAttendance->attendance) {
