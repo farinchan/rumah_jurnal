@@ -154,6 +154,10 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
             Route::post('/{id}/participant/store', [BackEventController::class, 'participantStore'])->name('participant.store');
             Route::delete('/{id}/participant/{event_user_id}/delete', [BackEventController::class, 'participantDestroy'])->name('participant.destroy');
             Route::get('/{id}/participant/export', [BackEventController::class, 'participantExport'])->name('participant.export');
+            Route::get('/{id}/participant/import-reviewer', [BackEventController::class, 'participantImportReviewerModal'])->name('participant.import-reviewer.modal');
+            Route::post('/{id}/participant/import-reviewer', [BackEventController::class, 'participantImportReviewer'])->name('participant.import-reviewer');
+            Route::get('/{id}/participant/import-editor', [BackEventController::class, 'participantImportEditorModal'])->name('participant.import-editor.modal');
+            Route::post('/{id}/participant/import-editor', [BackEventController::class, 'participantImportEditor'])->name('participant.import-editor');
 
             Route::get('/{id}/attendance', [BackEventController::class, 'attendance'])->name('attendance');
             Route::post('/{id}/attendance/store', [BackEventController::class, 'attendanceStore'])->name('attendance.store');
