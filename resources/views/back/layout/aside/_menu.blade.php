@@ -288,6 +288,15 @@
                         </a>
                     </div>
                     <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.master.editor.*')) active @endif"
+                            href="{{ route('back.master.editor.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Editor</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
                         <a class="menu-link @if (request()->routeIs('back.master.reviewer.*')) active @endif"
                             href="{{ route('back.master.reviewer.index') }}">
                             <span class="menu-bullet">

@@ -44,4 +44,9 @@ class Editor extends Model
             'journal_id'      // foreign key di Issue → issue.journal_id
         );
     }
+
+    public function data()
+    {
+        return $this->hasOne(EditorData::class, 'editor_id', 'editor_id');
+    }
 }
