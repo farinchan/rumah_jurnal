@@ -115,6 +115,9 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
         Route::get('/news', [BackDashboardController::class, 'news'])->name('news');
         Route::get('/news-stat', [BackDashboardController::class, 'stat'])->name('news.stat');
+
+        Route::get('/cashflow', [BackDashboardController::class, 'cashflow'])->name('cashflow');
+        Route::get('/cashflow-stat', [BackDashboardController::class, 'cashflowStat'])->name('cashflow.stat');
     });
 
     Route::prefix('announcement')->name('announcement.')->group(function () {
