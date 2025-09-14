@@ -37,7 +37,7 @@ class EmailController extends Controller
             EmailLog::create([
                 'to' => $request->email,
                 'subject' => $request->subject,
-                'body' => $request->body,   
+                'body' => $request->body,
                 'status' => 'sent',
             ]);
 
@@ -63,6 +63,62 @@ class EmailController extends Controller
 
 
         Alert::success('Success', 'Email has been sent');
+        return redirect()->back();
+    }
+
+    public function sendEmailMultiple(Request $request)
+    {
+        // dd($request->all());
+        $validator = Validator::make($request->all(), [
+            'emails' => 'required|array',
+            'emails.*' => 'required|email',
+            'subject' => 'required',
+            'body' => 'required',
+            'attachment' => 'nullable|mimes:pdf,pptx,docx,doc|max:10240',
+        ], [
+            'emails.required' => 'Email harus diisi',
+            'emails.array' => 'Email harus berupa array',
+            'emails.*.email' => 'Email tidak valid',
+            'subject.required' => 'Subject harus diisi',
+            'body.required' => 'body harus diisi',
+            'attachment.mimes' => 'File harus berupa pdf, pptx, docx, doc',
+            'attachment.max' => 'File tidak boleh lebih dari 10 MB',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            EmailLog::create([
+                'to' => implode(',', $request->emails),
+                'subject' => $request->subject,
+                'body' => $request->body,
+                'status' => 'sent',
+            ]);
+
+            Mail::send([], [], function ($message) use ($request) {
+                $message->to($request->emails)
+                    ->subject($request->subject)
+                    ->html($request->body); // Set the body as HTML content
+
+                if ($request->hasFile('attachment')) {
+                    $file = $request->file('attachment');
+                    $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+                    $file->storeAs('mail-attachments', $filename, 'public');
+                    $message->attach(storage_path('app/public/mail-attachments/' .  $filename ), [
+                        'as' => $filename,
+                        'mime' => $file->getClientMimeType(),
+                    ]);
+                }
+            });
+
+        } catch (\Throwable $th) {
+            // Alert::error('Error', 'Gagal mengirim email: ' . $th->getMessage());
+            // return redirect()->back()->withInput();
+        }
+        Alert::success('Success', 'Email has been sent to all recipients');
         return redirect()->back();
     }
 }

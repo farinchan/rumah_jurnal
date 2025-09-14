@@ -444,6 +444,7 @@ class FinanceController extends Controller
         $journal_id = $request->journal_id;
         $date_end = $request->date_end ?? now()->toDateString();
         $date_start = $request->date_start ?? now()->subMonth()->toDateString();
+        $issue_id = $request->issue_id;
 
 
         $submission = Submission::with(['paymentInvoices.submission.issue.journal'])
@@ -451,6 +452,9 @@ class FinanceController extends Controller
                 return $query->whereHas('issue.journal', function ($q) use ($journal_id) {
                     $q->where('id', $journal_id);
                 });
+            })
+            ->when($issue_id, function ($query) use ($issue_id) {
+                return $query->where('issue_id', $issue_id);
             })
             ->when($date_start, function ($query) use ($date_start) {
                 return $query->whereHas('paymentInvoices', function ($q) use ($date_start) {
@@ -555,10 +559,11 @@ class FinanceController extends Controller
     public function reportExport(Request $request)
     {
         $journal_id = $request->journal_id;
+        $issue_id = $request->issue_id;
         $date_end = $request->date_end ?? now()->toDateString();
         $date_start = $request->date_start ?? now()->subMonth()->toDateString();
 
-        return Excel::download(new FinanceReportExport($journal_id, $date_start, $date_end), 'laporan-keuangan-' . date('Y-m-d') . '.xlsx');
+        return Excel::download(new FinanceReportExport($journal_id, $issue_id, $date_start, $date_end), 'laporan-journal-' . date('Y-m-d') . '.xlsx');
     }
 
     public function cashflowYearStore(Request $request)
@@ -958,7 +963,7 @@ class FinanceController extends Controller
         $date_end = $request->date_end ?? now()->toDateString();
         $date_start = $request->date_start ?? now()->subMonth()->toDateString();
 
-        return Excel::download(new CashflowExport($date_start, $date_end, $type), 'laporan_keuangan_' . now()->format('Y_m_d') . '.xlsx');
+        return Excel::download(new CashflowExport($date_start, $date_end, $type), 'cashflow_' . now()->format('Y_m_d') . '.xlsx');
     }
 
     public function CashflowStore(Request $request)

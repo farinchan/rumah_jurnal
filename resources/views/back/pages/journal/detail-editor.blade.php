@@ -24,7 +24,7 @@
                                         <th class="">No</th>
                                         <th class="min-w-300px">editor</th>
                                         <th class="min-w-150px text-start">Email</th>
-                                        <th class="min-w-100px text-start">No. Telp</th>
+                                        <th class="min-w-100px text-start">No.Telp</th>
                                         <th class="min-w-150px text-start">Rekening</th>
                                         <th class="min-w-150px text-center">Action</th>
                                     </tr>
@@ -43,7 +43,8 @@
                                                             class="text-gray-800 text-hover-primary mb-1 me-2">{{ $editor->name }}
                                                         </a>
                                                         @if ($editor->number)
-                                                            <a href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Sertifikat Sudah Dikirim"><i
+                                                            <a href="#" data-bs-toggle="tooltip"
+                                                                data-bs-placement="top" title="Sertifikat Sudah Dikirim"><i
                                                                     class="ki-outline ki-file-added fs-2 text-primary"></i></a>
                                                         @endif
                                                     </div>
@@ -86,6 +87,15 @@
                                             </td>
                                             <td class="text-start">
                                                 {{ $editor->phone }}
+                                                <span class="badge badge-light-warning cursor-pointer my-1"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modal_send_whatsapp_{{ $editor->editor_id }}">
+                                                    <i class="ki-duotone ki-sms fs-5 text-warning me-3">
+                                                        <span class="path1"></span>
+                                                        <span class="path2"></span>
+                                                    </i>
+                                                    Kirim WhatsApp
+                                                </span>
                                             </td>
                                             <td class="text-start">
                                                 <span class="fw-bold">{{ $editor->account_bank }}</span><br>
@@ -133,6 +143,39 @@
                 <div class="card card-xxl-stretch mb-5 mb-xxl-10">
                     <div class="card-header">
                         <div class="card-title">
+                            <h3 class="text-gray-800">Kirim Whatsapp/Email</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="fs-6 fw-semibold text-gray-600 pb-6 d-block">
+                            Kirim pesan WhatsApp atau Email ke semua editor yang terdaftar pada edisi ini. Pesan dapat
+                            disertai dengan lampiran file.
+                        </p>
+                        <button class="btn btn-light-success w-100 mb-5 " data-bs-toggle="modal" data-bs-placement="top"
+                            title="Buat dan Kirim pesan Whatsapp " data-bs-target="#modal_send_whatsapp_multiple">
+                            <i class="ki-duotone ki-whatsapp fs-1">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                            Kirim Whatsapp
+                        </button>
+                        <button class="btn btn-light-info w-100 mb-5 " data-bs-toggle="modal" data-bs-placement="top"
+                            title="Buat dan Kirim Email " data-bs-target="#modal_send_email_multiple">
+                            <i class="ki-duotone ki-subtitle fs-1">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                                <span class="path4"></span>
+                                <span class="path5"></span>
+                            </i>
+                            Kirim Email
+                        </button>
+
+                    </div>
+                </div>
+                <div class="card card-xxl-stretch mb-5 mb-xxl-10">
+                    <div class="card-header">
+                        <div class="card-title">
                             <h3 class="text-gray-800">Sertifikat editor</h3>
                         </div>
                     </div>
@@ -154,8 +197,8 @@
                             </a>
 
                             <a href="{{ route('back.journal.editor.certificate.send-mail', [$journal->url_path, $issue->id]) }}"
-                                class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="Kirim Sertifikat ke semua editor via email">
+                                class="btn btn-light-success btn-loading" data-bs-toggle="tooltip"
+                                data-bs-placement="top" title="Kirim Sertifikat ke semua editor via email">
                                 <i class="ki-duotone ki-file-added fs-2">
                                     <span class="path1"></span>
                                     <span class="path2"></span>
@@ -212,8 +255,8 @@
                                 </a>
 
                                 <a href="{{ route('back.journal.editor.file-sk.send-mail', [$journal->url_path, $issue->id]) }}"
-                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Kirim SK ke semua editor via email">
+                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" title="Kirim SK ke semua editor via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
@@ -272,8 +315,8 @@
                                 </a>
 
                                 <a href="{{ route('back.journal.editor.file-fee.send-mail', [$journal->url_path, $issue->id]) }}"
-                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Kirim File Fee ke semua editor via email">
+                                    class="btn btn-light-success btn-loading" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" title="Kirim File Fee ke semua editor via email">
                                     <i class="ki-duotone ki-file-added fs-2">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
@@ -633,7 +676,167 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" tabindex="-1" id="modal_send_whatsapp_{{ $editor->editor_id }}">
+            <div class="modal-dialog mw-650px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Kirim WhatsApp</h3>
+                        <!--begin::Close-->
+                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal"
+                            aria-label="Close">
+                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span
+                                    class="path2"></span></i>
+                        </div>
+                        <!--end::Close-->
+                    </div>
+                    <form action="{{ route('back.whatsapp.message.sendMultipleMessageProcess') }}" method="POST"
+                        enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-5">
+                                <label class="form-label">Kepada (Nomor WhatsApp)</label>
+                                <input type="text" class="form-control form-control-solid"
+                                    placeholder="Nomor WhatsApp" name="phones[]" value="{{ $editor->phone }}"
+                                    readonly />
+                            </div>
+                            <div class="mb-5">
+                                <label class="form-label">Message</label>
+                                <textarea class="form-control form-control-solid" rows="5" placeholder="message" name="message">Yth. *{{ $editor->name }}* _({{ $editor->affiliation }})_
+
+                                </textarea>
+                            </div>
+                            <div class="mb-5">
+                                <label class="form-label">Lampiran</label>
+                                <input type="file" class="form-control form-control-solid" name="document"
+                                    id="document{{ $editor->id }}"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.jpg,.jpeg,.png" />
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Kirim</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     @endforeach
+
+    <div class="modal fade" tabindex="-1" id="modal_send_email_multiple">
+        <div class="modal-dialog mw-650px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Kirim email ke semua editor</h3>
+                    <!--begin::Close-->
+                    <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal"
+                        aria-label="Close">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                    <!--end::Close-->
+                </div>
+                <form action="{{ route('back.email.send-multi-mail') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-5">
+                            @foreach ($issue->editors as $editor)
+                                <input type="hidden" name="emails[]" value="{{ $editor->email }}" readonly />
+                            @endforeach
+                        </div>
+                        <div class="mb-5">
+                            <label class="form-label">Subjek</label>
+                            <input type="text" class="form-control form-control-solid" placeholder="Subjek Email"
+                                name="subject" value="" />
+                        </div>
+                        <div class="mb-5">
+                            <label class="form-label">Body</label>
+                            <textarea class="form-control form-control-solid" rows="5" placeholder="Body"
+                                id="kt_docs_ckeditor_classic_multiple" name="body">
+                                    <p>
+                                        <b>Yth. Editor {{ $journal->title }}</b>
+                                    </p>
+                                    <br>
+                                    <hr>
+                                        <table border="0" cellpadding="5" cellspacing="0">
+                                            <tr>
+                                                <td colspan="3">
+                                                    <b>{{ $setting_web->name }}</b>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Alamat</td>
+                                                <td>:</td>
+                                                <td>{{ $setting_web->address }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Email</td>
+                                                <td>:</td>
+                                                <td>{{ $setting_web->email }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Website</td>
+                                                <td>:</td>
+                                                <td>{{ request()->getSchemeAndHttpHost() }}</td>
+                                            </tr>
+                                        </table>
+                                </textarea>
+                        </div>
+                        <div class="mb-5">
+                            <label class="form-label">Lampiran</label>
+                            <input type="file" class="form-control form-control-solid" name="attachment"
+                                id="attachment" accept=".pdf" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Kirim</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="modal_send_whatsapp_multiple">
+        <div class="modal-dialog mw-650px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Kirim WhatsApp ke semua editor</h3>
+                    <!--begin::Close-->
+                    <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal"
+                        aria-label="Close">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                    <!--end::Close-->
+                </div>
+                <form action="{{ route('back.whatsapp.message.sendMultipleMessageProcess') }}" method="POST"
+                    enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-5">
+                            @foreach ($issue->editors as $editor)
+                                <input type="hidden" name="phones[]" value="{{ $editor->phone }}" readonly />
+                            @endforeach
+                        </div>
+                        <div class="mb-5">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control form-control-solid" rows="5" placeholder="Message" name="message">*Yth. Editor {{ $journal->title }}*
+                            </textarea>
+                        </div>
+                        <div class="mb-5">
+                            <label class="form-label">Lampiran</label>
+                            <input type="file" class="form-control form-control-solid" name="document"
+                                id="document_multiple"
+                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.jpg,.jpeg,.png" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Kirim</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('scripts')
     <script>
@@ -773,4 +976,16 @@
                 });
         </script>
     @endforeach
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#kt_docs_ckeditor_classic_multiple'), {
+                toolbar: ['bold', 'italic', 'link', 'undo', 'redo']
+            })
+            .then(editor => {
+                console.log(editor);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    </script>
 @endsection

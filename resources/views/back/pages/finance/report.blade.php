@@ -5,13 +5,12 @@
         <div class="card card-flush">
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <div class="card-title">
-                    Laporan Keuangan
+                    Laporan Jurnal
                 </div>
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
                     <div class="btn-group">
 
-                        <a href="#" id="export_excel"
-                            class="btn btn-light-primary" id="export_excel">
+                        <a href="#" id="export_excel" class="btn btn-light-primary" id="export_excel">
                             <i class="ki-duotone ki-file-down fs-2">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
@@ -59,10 +58,10 @@
 
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fs-6 fw-bold">Issue</label>
+                        <label class="form-label fs-6 fw-bold">Edisi</label>
                         <select class="form-select form-select-solid" data-control="select2"
                             data-placeholder="Select an option" name="issue_id" id="issue_id">
-                            <option value="" selected>Semua Issue</option>
+                            <option value="" selected>Semua</option>
 
                         </select>
                     </div>
@@ -80,32 +79,12 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-12">
                         <div class="card mb-5">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
                                     <span class="fs-5 fw-bold text-gray-700 me-3 fs-3">Total Income:</span>
                                     <span class="fs-5 fw-bold text-success fs-2" id="total_income">Rp 0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card mb-5">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="fs-5 fw-bold text-gray-700 me-3 fs-3">Total Expense:</span>
-                                    <span class="fs-5 fw-bold text-danger fs-2" id="total_expense">Rp 0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <div class="d-flex  align-items-center">
-                                    <span class="fs-5 fw-bold text-gray-700 me-3 fs-3">Balance:</span>
-                                    <span class="fs-5 fw-bold fs-2  text-danger " id="balance">Rp 0</span>
                                 </div>
                             </div>
                         </div>
@@ -135,6 +114,29 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+            $('#journal_id').on('change', function() {
+                if ($('#journal_id').val()) {
+                    $.ajax({
+                        url: '/api/v1/data/issue/' + $('#journal_id').val(),
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            console.log(data);
+                            $('#issue_id').empty();
+                            $('#issue_id').append('<option value="" selected>Semua</option>');
+                            $.each(data.data, function(key, value) {
+                                $('#issue_id').append('<option value="' + value.id + '"> Vol. ' + value.volume +
+                                    ' No. ' + value.number + ' (' + value.year + '): ' + value.title + '</option>');
+                            });
+                        }
+                    });
+                } else {
+                    $('#issue_id').empty();
+                    $('#issue_id').append('<option value="" selected>Semua</option>');
+                }
+            });
+
+
             var table = $('#table_finance').DataTable({
                 processing: true,
                 serverSide: true,
@@ -142,6 +144,7 @@
                     url: "{{ route('back.finance.report.datatable') }}",
                     data: function(d) {
                         d.journal_id = $('#journal_id').val();
+                        d.issue_id = $('#issue_id').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
                     }
@@ -207,6 +210,10 @@
                 table.ajax.reload();
             });
 
+            $('#issue_id').on('change', function() {
+                table.ajax.reload();
+            });
+
             $('#date_start').on('change', function() {
                 table.ajax.reload();
             });
@@ -219,6 +226,7 @@
                 e.preventDefault();
                 let url = "{{ route('back.finance.report.export') }}";
                 url += '?journal_id=' + encodeURIComponent($('#journal_id').val());
+                url += '&issue_id=' + encodeURIComponent($('#issue_id').val());
                 url += '&date_start=' + encodeURIComponent($('#date_start').val());
                 url += '&date_end=' + encodeURIComponent($('#date_end').val());
                 window.location.href = url;

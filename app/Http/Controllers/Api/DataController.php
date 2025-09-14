@@ -116,4 +116,18 @@ class DataController extends Controller
             return response()->json(['status' => false, 'message' => 'Data not found'], 404);
         }
     }
+
+    public function dataIssue(Request $request, $journal_id)
+    {
+        $journal = Journal::find($journal_id);
+        if (!$journal) {
+            return response()->json(['status' => false, 'message' => 'Journal not found'], 404);
+        }
+        $issues = $journal->issues()->orderBy('year', 'desc')->orderBy('volume', 'desc')->orderBy('number', 'desc')->get();
+        if ($issues->isNotEmpty()) {
+            return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $issues], 200);
+        } else {
+            return response()->json(['status' => false, 'message' => 'Data not found'], 404);
+        }
+    }
 }

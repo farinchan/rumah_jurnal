@@ -19,12 +19,14 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 class FinanceReportExport implements FromCollection, WithHeadings, WithStyles, WithEvents, WithCustomStartCell
 {
     protected $journal_id;
+    protected $issue_id;
     protected $date_start;
     protected $date_end;
 
-    public function __construct($journal_id, $date_start, $date_end)
+    public function __construct($journal_id, $issue_id, $date_start, $date_end)
     {
         $this->journal_id = $journal_id;
+        $this->issue_id = $issue_id;
         $this->date_start = $date_start;
         $this->date_end = $date_end;
     }
@@ -32,6 +34,7 @@ class FinanceReportExport implements FromCollection, WithHeadings, WithStyles, W
     public function collection()
     {
         $journal_id = $this->journal_id;
+        $issue_id = $this->issue_id;
         $date_start = $this->date_start;
         $date_end = $this->date_end;
 
@@ -40,6 +43,9 @@ class FinanceReportExport implements FromCollection, WithHeadings, WithStyles, W
                 return $query->whereHas('issue.journal', function ($q) use ($journal_id) {
                     $q->where('id', $journal_id);
                 });
+            })
+            ->when($issue_id, function ($query) use ($issue_id) {
+                return $query->where('issue_id', $issue_id);
             })
             ->when($date_start, function ($query) use ($date_start) {
                 return $query->whereHas('paymentInvoices', function ($q) use ($date_start) {
@@ -108,7 +114,7 @@ class FinanceReportExport implements FromCollection, WithHeadings, WithStyles, W
 
                 // Menambahkan judul di baris 1
                 $sheet->mergeCells('A1:G1');
-                $sheet->setCellValue('A1', 'Laporan Keuangan ' . Carbon::parse($this->date_start)->format('d M Y') . ' - ' . Carbon::parse($this->date_end)->format('d M Y'));
+                $sheet->setCellValue('A1', 'Laporan Jurnal ' . Carbon::parse($this->date_start)->format('d M Y') . ' - ' . Carbon::parse($this->date_end)->format('d M Y'));
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 

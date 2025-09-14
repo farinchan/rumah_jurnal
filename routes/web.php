@@ -115,6 +115,9 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
         Route::get('/news', [BackDashboardController::class, 'news'])->name('news');
         Route::get('/news-stat', [BackDashboardController::class, 'stat'])->name('news.stat');
+
+        Route::get('/cashflow', [BackDashboardController::class, 'cashflow'])->name('cashflow');
+        Route::get('/cashflow-stat', [BackDashboardController::class, 'cashflowStat'])->name('cashflow.stat');
     });
 
     Route::prefix('announcement')->name('announcement.')->group(function () {
@@ -322,10 +325,13 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
             Route::post('/send-image-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendImageProcess'])->name('sendImageProcess');
             Route::get('/send-bulk-message', [App\Http\Controllers\Back\WhatsappController::class, 'sendBulkMessage'])->name('sendBulkMessage');
             Route::post('/send-bulk-message-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendBulkMessageProcess'])->name('sendBulkMessageProcess');
+
+            Route::post('/send-multi-message-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendMultipleMessageProcess'])->name('sendMultipleMessageProcess');
         });
     });
 
     Route::prefix('email')->name('email.')->group(function () {
         Route::post('/send-mail', [EmailController::class, 'sendEmail'])->name('send-mail');
+        Route::post('/send-multi-mail', [EmailController::class, 'sendEmailMultiple'])->name('send-multi-mail');
     });
 });
