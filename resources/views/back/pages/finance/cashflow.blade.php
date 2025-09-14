@@ -110,17 +110,13 @@
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h3 class="modal-title">Edit Tahun Keuangan</h3>
+                                                        <h3 class="modal-title">Edit Buku Keuangan</h3>
 
                                                         <!--begin::Close-->
                                                         <div class="btn btn-icon btn-sm btn-active-light-primary ms-2"
                                                             data-bs-dismiss="modal" aria-label="Close">
                                                             <i class="ki-duotone ki-cross fs-1"><span
                                                                     class="path1"></span><span class="path2"></span></i>
-                                                            <span class="btn btn-icon btn-sm btn-active-light-primary ms-2"
-                                                                data-bs-dismiss="modal" aria-label="Close"></span>
-                                                            <span class="btn btn-icon btn-sm btn-active-light-primary ms-2"
-                                                                data-bs-dismiss="modal" aria-label="Close"></span>
                                                         </div>
                                                         <!--end::Close-->
                                                     </div>
@@ -150,16 +146,6 @@
                                                                     <small class="text-danger">{{ $message }}</small>
                                                                 @enderror
                                                             </div>
-                                                            {{-- <div class="mb-5">
-                                                            <label class="form-label required">Tanggal Selesai</label>
-                                                            <input type="date" class="form-control"
-                                                                placeholder="Tanggal Selesai" name="end_date"
-                                                                value="{{ $finance_year ? $finance_year->end_date : old('end_date') }}"
-                                                                required />
-                                                            @error('end_date')
-                                                                <small class="text-danger">{{ $message }}</small>
-                                                            @enderror
-                                                        </div> --}}
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-light"
@@ -269,11 +255,11 @@
                                             <span class="path1"></span>
                                             <span class="path2"></span>
                                         </i>
-                                        <div class="fs-4 fw-bold" data-kt-countup="true">
+                                        <div class="fs-4 fw-bold" id="total_income_all">
                                             {{ $finance_year ? 'Rp ' . number_format($total_outcome_now, 0, ',', '.') : 'Rp 0' }}
                                         </div>
                                     </div>
-                                    <div class="fw-semibold fs-6 text-gray-500">Total Expense</div>
+                                    <div class="fw-semibold fs-6 text-gray-500">Total Outcome</div>
                                 </div>
                                 <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                                     <div class="d-flex align-items-center">
@@ -334,8 +320,7 @@
                             oninput="
                                 if (this.value < this.min) this.value = this.min;
                                 if (this.value > this.max) this.value = this.max;
-                            "
-                        />
+                            " />
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fs-6 fw-bold">Sampai Tanggal</label>
@@ -347,8 +332,7 @@
                             oninput="
                                 if (this.value < this.min) this.value = this.min;
                                 if (this.value > this.max) this.value = this.max;
-                            "
-                        />
+                            " />
                     </div>
                 </div>
                 <div class="row">
@@ -447,7 +431,8 @@
                         <div class="mb-5">
                             <label class="form-label required">Tanggal</label>
                             <input type="datetime-local" class="form-control" placeholder="Tanggal transaksi keuangan"
-                                name="date" value="{{ old('date') }}" min="{{ $finance_year ? \Carbon\Carbon::parse($finance_year->start_date)->format('Y-m-d') . 'T00:00' : \Carbon\Carbon::now()->format('Y-m-d') . 'T00:00' }}"
+                                name="date" value="{{ old('date') }}"
+                                min="{{ $finance_year ? \Carbon\Carbon::parse($finance_year->start_date)->format('Y-m-d') . 'T00:00' : \Carbon\Carbon::now()->format('Y-m-d') . 'T00:00' }}"
                                 required />
                             @error('date')
                                 <small class="text-danger">{{ $message }}</small>
@@ -591,27 +576,11 @@
             });
         });
 
-        // function formatRupiah(element) {
-        //     let angka = element.value.replace(/\D/g, '');
-        //     let formatted = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        //     element.value = formatted;
-        //     document.getElementById('rupiah_value').value = angka;
-        // }
-
-        // var today = new Date();
-        // var dd = today.getDate();
-        // var mm = today.getMonth() + 1; //January is 0!
-        // var yyyy = today.getFullYear();
-
-        // if (dd < 10) {
-        //     dd = '0' + dd;
-        // }
-
-        // if (mm < 10) {
-        //     mm = '0' + mm;
-        // }
-
-        // today = yyyy + '-' + mm + '-' + dd;
-        // document.getElementById("datefield").setAttribute("max", today);
+        function formatRupiah(element) {
+            let angka = element.value.replace(/\D/g, '');
+            let formatted = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            element.value = formatted;
+            document.getElementById('rupiah_value').value = angka;
+        }
     </script>
 @endsection
