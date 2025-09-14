@@ -133,7 +133,7 @@ class DashboardController extends Controller
                 // Get current finance year
                 $financeYear = FinanceYear::latest()->first();
                 $startDate = $financeYear ? $financeYear->start_date : now()->startOfYear()->toDateString();
-                $endDate = $financeYear && $financeYear->end_date ? $financeYear->end_date : now()->toDateString();
+                $endDate = $financeYear && $financeYear->end_date ? $financeYear->end_date : now()->addDay()->toDateString();
 
                 // Monthly cashflow data
                 $monthlyData = Finance::select(
@@ -203,7 +203,7 @@ class DashboardController extends Controller
                 } else {
                     $financeYears = $financeYears->map(function ($year) {
                         $startDate = $year->start_date;
-                        $endDate = $year->end_date ?? now()->toDateString();
+                        $endDate = $year->end_date ?? now()->addDay()->toDateString();
 
                         // Calculate income for this finance year
                         $income = Finance::where('type', 'income')

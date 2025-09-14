@@ -182,20 +182,6 @@
                     <div class="card-body pt-0">
                         <div class="row g-5">
                             <div class="col-xxl-3 col-md-6">
-                                <a href="{{ route('back.finance.cashflow.index') }}" class="card bg-light-primary hoverable card-xl-stretch mb-xl-8">
-                                    <div class="card-body">
-                                        <i class="ki-duotone ki-chart-simple fs-2x text-primary">
-                                            <span class="path1"></span>
-                                            <span class="path2"></span>
-                                            <span class="path3"></span>
-                                            <span class="path4"></span>
-                                        </i>
-                                        <div class="text-gray-900 fw-bold fs-6 mt-5">Kelola Cashflow</div>
-                                        <div class="text-gray-500 fw-semibold fs-7">Lihat detail transaksi</div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-xxl-3 col-md-6">
                                 <a href="{{ route('back.finance.verification.index') }}" class="card bg-light-warning hoverable card-xl-stretch mb-xl-8">
                                     <div class="card-body">
                                         <i class="ki-duotone ki-verification fs-2x text-warning">
@@ -214,8 +200,22 @@
                                             <span class="path1"></span>
                                             <span class="path2"></span>
                                         </i>
-                                        <div class="text-gray-900 fw-bold fs-6 mt-5">Laporan Keuangan</div>
-                                        <div class="text-gray-500 fw-semibold fs-7">Generate laporan detail</div>
+                                        <div class="text-gray-900 fw-bold fs-6 mt-5">Laporan Jurnal</div>
+                                        <div class="text-gray-500 fw-semibold fs-7">Detail Laporan Jurnal</div>
+                                    </div>
+                                </a>
+                            </div>
+                             <div class="col-xxl-3 col-md-6">
+                                <a href="{{ route('back.finance.cashflow.index') }}" class="card bg-light-primary hoverable card-xl-stretch mb-xl-8">
+                                    <div class="card-body">
+                                        <i class="ki-duotone ki-chart-simple fs-2x text-primary">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                        </i>
+                                        <div class="text-gray-900 fw-bold fs-6 mt-5">Kelola Cashflow</div>
+                                        <div class="text-gray-500 fw-semibold fs-7">Lihat detail transaksi</div>
                                     </div>
                                 </a>
                             </div>
