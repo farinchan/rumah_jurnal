@@ -36,13 +36,15 @@
                         </span>
                         <span class="menu-title">Berita</span>
                     </a>
-                    <a class="menu-link @if (request()->routeIs('back.dashboard.cashflow')) active @endif"
-                        href="{{ route('back.dashboard.cashflow') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Cashflow</span>
-                    </a>
+                    @role('super-admin|keuangan')
+                        <a class="menu-link @if (request()->routeIs('back.dashboard.cashflow')) active @endif"
+                            href="{{ route('back.dashboard.cashflow') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Cashflow</span>
+                        </a>
+                    @endrole
                 </div>
             </div>
         </div>
