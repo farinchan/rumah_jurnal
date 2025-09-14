@@ -25,8 +25,8 @@ class ReviewerData extends Model
         'updated_at',
     ];
 
-    // public function reviewer()
-    // {
-    //     return $this->belongsTo(Reviewer::class, 'reviewer_id', 'reviewer_id');
-    // }
+    public function reviewer()
+    {
+        return $this->belongsTo(Reviewer::class, 'reviewer_id', 'reviewer_id');
+    }
 }

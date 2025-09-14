@@ -24,4 +24,9 @@ class EditorData extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function editor()
+    {
+        return $this->belongsTo(Editor::class, 'editor_id', 'editor_id');
+    }
 }
