@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class ReviewerData extends Model
+class EditorData extends Model
 {
-    use  LogsActivity;
+     use  LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -17,7 +17,7 @@ class ReviewerData extends Model
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}");
     }
-    protected $table = 'reviewer_data';
+    protected $table = 'editor_data';
 
     protected $guarded = [
         'id',
@@ -25,8 +25,8 @@ class ReviewerData extends Model
         'updated_at',
     ];
 
-    public function reviewer()
+    public function editor()
     {
-        return $this->belongsTo(Reviewer::class, 'reviewer_id', 'reviewer_id');
+        return $this->belongsTo(Editor::class, 'editor_id', 'editor_id');
     }
 }

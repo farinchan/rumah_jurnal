@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
+use App\Models\Editor;
+use App\Models\EditorData;
 use App\Models\Journal;
 use App\Models\PaymentAccount;
 use App\Models\Reviewer;
@@ -223,6 +225,73 @@ class MasterdataController extends Controller
         );
 
         Alert::success('Success', 'Reviewer has been updated');
+        return redirect()->back();
+    }
+
+    public function editorIndex()
+    {
+        $data = [
+            'title' => 'Editor',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Editor',
+                    'link' => route('back.master.editor.index')
+                ]
+            ],
+            'editors' => Editor::with(['data'])
+                ->get()
+                ->unique('editor_id')
+                ->map(function ($editor) {
+                    $editor->journal = Editor::where('editor_id', $editor->editor_id)
+                        ->with('issue.journal')
+                        ->get()
+                        ->map(function ($item) {
+                            $journal_data = $item->issue->journal;
+                            return (object) [
+                                'id' => $journal_data->id,
+                                'name' => $journal_data->name,
+                                'title' => $journal_data->title,
+                                'url_path' => $journal_data->url_path,
+                            ];
+                        });
+                    return $editor;
+                }),
+        ];
+
+        return view('back.pages.master.editor.index', $data);
+    }
+
+    public function editorUpdate(Request $request, $id)
+    {
+        $editor = Editor::where('editor_id', $id)->first();
+        if (!$editor) {
+            Alert::error('Gagal', 'Editor tidak ditemukan');
+            return redirect()->back();
+        }
+
+        $validator = Validator::make($request->all(), [
+            'nik' => 'required|string|max:255',
+            'account_bank' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:255',
+            'npwp' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Gagal', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        EditorData::updateOrCreate(
+            ['editor_id' => $editor->editor_id],
+            [
+                'nik' => $request->nik,
+                'account_bank' => $request->account_bank,
+                'account_number' => $request->account_number,
+                'npwp' => $request->npwp,
+            ]
+        );
+
+        Alert::success('Success', 'Editor has been updated');
         return redirect()->back();
     }
 }

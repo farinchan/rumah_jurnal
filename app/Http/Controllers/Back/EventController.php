@@ -7,6 +7,9 @@ use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\EventAttendanceUser;
 use App\Models\EventUser;
+use App\Models\Reviewer;
+use App\Models\Editor;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -271,6 +274,195 @@ class EventController extends Controller
             Alert::error('Error', 'Peserta tidak ditemukan');
         }
 
+        return redirect()->back();
+    }
+
+    public function participantImportReviewerModal($id)
+    {
+        $reviewers = Reviewer::with(['data'])
+            ->get()
+            ->unique('reviewer_id')
+            ->map(function ($reviewer) {
+                $reviewer->journal = Reviewer::where('reviewer_id', $reviewer->reviewer_id)
+                    ->with('issue.journal')
+                    ->get()
+                    ->map(function ($item) {
+                        $journal_data = $item->issue->journal;
+                        return (object) [
+                            'id' => $journal_data->id,
+                            'name' => $journal_data->name,
+                            'title' => $journal_data->title,
+                            'url_path' => $journal_data->url_path,
+                        ];
+                    });
+                return $reviewer;
+            });
+
+        return response()->json([
+            'reviewers' => $reviewers->map(function ($reviewer) {
+                $journals = $reviewer->journal->pluck('title')->implode(', ');
+                return [
+                    'id' => $reviewer->id,
+                    'reviewer_id' => $reviewer->reviewer_id,
+                    'name' => $reviewer->name,
+                    'email' => $reviewer->email,
+                    'phone' => $reviewer->phone,
+                    'affiliation' => $reviewer->affiliation,
+                    'journals' => $journals ?: 'Tidak ada journal',
+                ];
+            })
+        ]);
+    }
+
+    public function participantImportReviewer(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'reviewer_ids' => 'required|array',
+            'reviewer_ids.*' => 'exists:reviewers,id'
+        ], [
+            'required' => 'Pilih minimal satu reviewer',
+            'array' => 'Data reviewer tidak valid',
+            'exists' => 'Reviewer tidak ditemukan'
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $importedCount = 0;
+        $skippedCount = 0;
+
+        foreach ($request->reviewer_ids as $reviewerId) {
+            $reviewer = Reviewer::find($reviewerId);
+
+            if (!$reviewer) {
+                continue;
+            }
+
+            // Check if reviewer already exists as participant
+            $existingParticipant = EventUser::where('event_id', $id)
+                ->where('email', $reviewer->email)
+                ->first();
+
+            if ($existingParticipant) {
+                $skippedCount++;
+                continue;
+            }
+
+            // Create new event participant from reviewer
+            $eventUser = new EventUser();
+            $eventUser->event_id = $id;
+            $eventUser->name = $reviewer->name;
+            $eventUser->email = $reviewer->email;
+            $eventUser->phone = $reviewer->phone;
+            $eventUser->save();
+
+            $importedCount++;
+        }
+
+        $message = "Import selesai. {$importedCount} reviewer berhasil diimport";
+        if ($skippedCount > 0) {
+            $message .= ", {$skippedCount} reviewer dilewati (sudah terdaftar)";
+        }
+
+        Alert::success('Sukses', $message);
+        return redirect()->back();
+    }
+
+    public function participantImportEditorModal($id)
+    {
+        try {
+            // Log untuk debugging
+            Log::info('participantImportEditorModal called with id: ' . $id);
+
+            // Get unique editors - simple version first
+            $editors = Editor::select('id', 'editor_id', 'name', 'email', 'phone', 'affiliation')
+                ->get()
+                ->unique('editor_id')
+                ->values();
+
+            Log::info('Found editors count: ' . $editors->count());
+
+            $result = [
+                'editors' => $editors->map(function ($editor) {
+                    return [
+                        'id' => $editor->id,
+                        'editor_id' => $editor->editor_id,
+                        'name' => $editor->name ?? 'Unknown Editor',
+                        'email' => $editor->email ?? 'No Email',
+                        'phone' => $editor->phone ?? '-',
+                        'affiliation' => $editor->affiliation ?? '-',
+                        'journals' => 'Loading...', // Temporary
+                    ];
+                })
+            ];
+
+            Log::info('Returning data: ', $result);
+            return response()->json($result);
+
+        } catch (\Exception $e) {
+            Log::error('Error in participantImportEditorModal: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to load editors: ' . $e->getMessage(),
+                'editors' => []
+            ]);
+        }
+    }
+
+    public function participantImportEditor(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'editor_ids' => 'required|array',
+            'editor_ids.*' => 'exists:editors,id'
+        ], [
+            'required' => 'Pilih minimal satu editor',
+            'array' => 'Data editor tidak valid',
+            'exists' => 'Editor tidak ditemukan'
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $importedCount = 0;
+        $skippedCount = 0;
+
+        foreach ($request->editor_ids as $editorId) {
+            $editor = Editor::find($editorId);
+
+            if (!$editor) {
+                continue;
+            }
+
+            // Check if editor already exists as participant
+            $existingParticipant = EventUser::where('event_id', $id)
+                ->where('email', $editor->email)
+                ->first();
+
+            if ($existingParticipant) {
+                $skippedCount++;
+                continue;
+            }
+
+            // Create new event participant from editor
+            $eventUser = new EventUser();
+            $eventUser->event_id = $id;
+            $eventUser->name = $editor->name;
+            $eventUser->email = $editor->email;
+            $eventUser->phone = $editor->phone;
+            $eventUser->save();
+
+            $importedCount++;
+        }
+
+        $message = "Import selesai. {$importedCount} editor berhasil diimport";
+        if ($skippedCount > 0) {
+            $message .= ", {$skippedCount} editor dilewati (sudah terdaftar)";
+        }
+
+        Alert::success('Sukses', $message);
         return redirect()->back();
     }
 

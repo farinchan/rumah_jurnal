@@ -29,7 +29,7 @@ class LoginController extends Controller
                 ],
                 [
                     'name' => __('front.login'),
-                    'link' => route('contact.index')
+                    'link' => route('login')
                 ]
             ],
             'setting_web' => SettingWebsite::first()

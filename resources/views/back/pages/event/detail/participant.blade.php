@@ -30,6 +30,16 @@
                         <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#kt_modal_add_user">
                             <i class="ki-duotone ki-plus fs-2"></i>Tambah Peserta</button>
 
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_import_reviewer">
+                                <i class="ki-duotone ki-file-down fs-2"></i>Import Reviewer</button>
+
+                            <button class="btn btn-secondary" data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_import_editor">
+                                <i class="ki-duotone ki-file-down fs-2"></i>Import Editor</button>
+                        </div>
+
                         <div class="modal fade" tabindex="-1" id="kt_modal_add_user">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -77,21 +87,204 @@
                             </div>
                         </div>
 
-                        <div class="btn-group">
+                        <!-- Modal Import Reviewer -->
+                        <div class="modal fade" tabindex="-1" id="kt_modal_import_reviewer">
+                            <div class="modal-dialog mw-1000px">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title">Import Reviewer ke Peserta Event</h3>
+                                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2"
+                                            data-bs-dismiss="modal" aria-label="Close">
+                                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span
+                                                    class="path2"></span></i>
+                                        </div>
+                                    </div>
 
-                            {{-- <a href="#" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#import">
-                                <i class="ki-duotone ki-file-down fs-2">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                                Import</a> --}}
-                            <a class="btn btn-secondary" href="#">
+                                    <form action="{{ route('back.event.detail.participant.import-reviewer', $event->id) }}"
+                                        method="POST" id="import_reviewer_form">
+                                        @csrf
+                                        <div class="modal-body">
+                                            <div class="mb-10">
+                                                <div class="d-flex justify-content-between align-items-center mb-5">
+                                                    <label class="form-label">Pilih Reviewer yang akan diimport:</label>
+                                                    <div class="form-check form-check-custom form-check-solid">
+                                                        <input class="form-check-input" type="checkbox"
+                                                            id="select_all_reviewers" />
+                                                        <label class="form-check-label" for="select_all_reviewers">
+                                                            <strong>Pilih Semua</strong>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="alert alert-info d-flex align-items-center p-5 mb-5">
+                                                    <i class="ki-duotone ki-information-2 fs-1 text-info me-3">
+                                                        <span class="path1"></span>
+                                                        <span class="path2"></span>
+                                                        <span class="path3"></span>
+                                                    </i>
+                                                    <div class="d-flex flex-column">
+                                                        <h5 class="mb-1">Informasi Import</h5>
+                                                        <span>Data reviewer yang sudah terdaftar sebagai peserta akan
+                                                            dilewati untuk menghindari duplikasi.</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card card-bordered">
+                                                    <div class="card-body p-0"
+                                                        style="max-height: 400px; overflow-y: auto;">
+                                                        <div class="table-responsive">
+                                                            <table
+                                                                class="table table-striped table-row-bordered gy-5 gs-7">
+                                                                <thead class="sticky-top bg-light">
+                                                                    <tr class="fw-bold fs-6 text-gray-800">
+                                                                        <th class="w-25px">
+                                                                            <div
+                                                                                class="form-check form-check-sm form-check-custom form-check-solid">
+                                                                                <input class="form-check-input"
+                                                                                    type="checkbox"
+                                                                                    id="check_all_header" />
+                                                                            </div>
+                                                                        </th>
+                                                                        <th>Nama</th>
+                                                                        <th>Email</th>
+                                                                        <th>Afiliasi</th>
+                                                                        <th>No. Telepon</th>
+                                                                        <th>Journal yang Dikelola</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="reviewer_list">
+                                                                    <tr>
+                                                                        <td colspan="6" class="text-center">
+                                                                            <div class="spinner-border spinner-border-sm"
+                                                                                role="status">
+                                                                                <span
+                                                                                    class="visually-hidden">Loading...</span>
+                                                                            </div>
+                                                                            Loading reviewers...
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light"
+                                                data-bs-dismiss="modal">Tutup</button>
+                                            <button type="submit" class="btn btn-success" id="submit_import">
+                                                <i class="ki-duotone ki-file-down fs-2"></i>Import Reviewer
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Import Editor -->
+                        <div class="modal fade" tabindex="-1" id="kt_modal_import_editor">
+                            <div class="modal-dialog mw-1000px">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title">Import Editor ke Peserta Event</h3>
+                                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2"
+                                            data-bs-dismiss="modal" aria-label="Close">
+                                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span
+                                                    class="path2"></span></i>
+                                        </div>
+                                    </div>
+
+                                    <form action="{{ route('back.event.detail.participant.import-editor', $event->id) }}"
+                                        method="POST" id="import_editor_form">
+                                        @csrf
+                                        <div class="modal-body">
+                                            <div class="mb-10">
+                                                <div class="d-flex justify-content-between align-items-center mb-5">
+                                                    <label class="form-label">Pilih Editor yang akan diimport:</label>
+                                                    <div class="form-check form-check-custom form-check-solid">
+                                                        <input class="form-check-input" type="checkbox"
+                                                            id="select_all_editors" />
+                                                        <label class="form-check-label" for="select_all_editors">
+                                                            <strong>Pilih Semua</strong>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="alert alert-info d-flex align-items-center p-5 mb-5">
+                                                    <i class="ki-duotone ki-information-2 fs-1 text-info me-3">
+                                                        <span class="path1"></span>
+                                                        <span class="path2"></span>
+                                                        <span class="path3"></span>
+                                                    </i>
+                                                    <div class="d-flex flex-column">
+                                                        <h5 class="mb-1">Informasi Import</h5>
+                                                        <span>Data editor yang sudah terdaftar sebagai peserta akan dilewati
+                                                            untuk menghindari duplikasi.</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card card-bordered">
+                                                    <div class="card-body p-0"
+                                                        style="max-height: 400px; overflow-y: auto;">
+                                                        <div class="table-responsive">
+                                                            <table
+                                                                class="table table-striped table-row-bordered gy-5 gs-7">
+                                                                <thead class="sticky-top bg-light">
+                                                                    <tr class="fw-bold fs-6 text-gray-800">
+                                                                        <th class="w-25px">
+                                                                            <div
+                                                                                class="form-check form-check-sm form-check-custom form-check-solid">
+                                                                                <input class="form-check-input"
+                                                                                    type="checkbox"
+                                                                                    id="check_all_editors_header" />
+                                                                            </div>
+                                                                        </th>
+                                                                        <th>Nama</th>
+                                                                        <th>Email</th>
+                                                                        <th>Afiliasi</th>
+                                                                        <th>No. Telepon</th>
+                                                                        <th>Journal yang Dikelola</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="editor_list">
+                                                                    <tr>
+                                                                        <td colspan="6" class="text-center">
+                                                                            <div class="spinner-border spinner-border-sm"
+                                                                                role="status">
+                                                                                <span
+                                                                                    class="visually-hidden">Loading...</span>
+                                                                            </div>
+                                                                            Loading editors...
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light"
+                                                data-bs-dismiss="modal">Tutup</button>
+                                            <button type="submit" class="btn btn-warning" id="submit_import_editor">
+                                                <i class="ki-duotone ki-file-down fs-2"></i>Import Editor
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            {{-- <a class="btn btn-secondary" href="#">
                                 <i class="ki-duotone ki-file-up fs-2">
                                     <span class="path1"></span>
                                     <span class="path2"></span>
                                 </i>
                                 Export
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                     <div class="d-flex justify-content-end align-items-center d-none" {{-- data-kt-user-table-toolbar="selected" --}}>
@@ -235,4 +428,281 @@
 
 @section('scripts')
     <script src="{{ asset('back/js/custom/apps/user-management/users/list/table.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load reviewers when modal is shown
+            $('#kt_modal_import_reviewer').on('show.bs.modal', function() {
+                loadReviewers();
+            });
+
+            // Load editors when modal is shown
+            $('#kt_modal_import_editor').on('show.bs.modal', function() {
+                loadEditors();
+            });
+
+            // Function to load reviewers
+            function loadReviewers() {
+                fetch('{{ route('back.event.detail.participant.import-reviewer.modal', $event->id) }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        let reviewerList = '';
+
+                        if (data.reviewers && data.reviewers.length > 0) {
+                            data.reviewers.forEach(reviewer => {
+                                reviewerList += `
+                                    <tr>
+                                        <td>
+                                            <div class="form-check form-check-sm form-check-custom form-check-solid">
+                                                <input class="form-check-input reviewer-checkbox" type="checkbox"
+                                                       name="reviewer_ids[]" value="${reviewer.id}" />
+                                            </div>
+                                        </td>
+                                        <td class="fw-bold">${reviewer.name || '-'}</td>
+                                        <td>${reviewer.email || '-'}</td>
+                                        <td>${reviewer.affiliation || '-'}</td>
+                                        <td>${reviewer.phone || '-'}</td>
+                                        <td><small class="text-muted">${reviewer.journals || 'Tidak ada journal'}</small></td>
+                                    </tr>
+                                `;
+                            });
+                        } else {
+                            reviewerList = `
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        Tidak ada data reviewer
+                                    </td>
+                                </tr>
+                            `;
+                        }
+
+                        document.getElementById('reviewer_list').innerHTML = reviewerList;
+
+                        // Reset checkboxes
+                        document.getElementById('select_all_reviewers').checked = false;
+                        document.getElementById('check_all_header').checked = false;
+
+                        // Setup checkbox functionality
+                        setupCheckboxes();
+                    })
+                    .catch(error => {
+                        console.error('Error loading reviewers:', error);
+                        document.getElementById('reviewer_list').innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center text-danger">
+                                    Error loading reviewers
+                                </td>
+                            </tr>
+                        `;
+                    });
+            }
+
+            // Function to load editors
+            function loadEditors() {
+                console.log('Starting to load editors...');
+                fetch('{{ route('back.event.detail.participant.import-editor.modal', $event->id) }}')
+                    .then(response => {
+                        console.log('Response received:', response);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Editor data received:', data);
+                        let editorList = '';
+
+                        if (data.error) {
+                            console.error('Server error:', data.error);
+                            editorList = `
+                                <tr>
+                                    <td colspan="6" class="text-center text-danger">
+                                        Error: ${data.error}
+                                    </td>
+                                </tr>
+                            `;
+                        } else if (data.editors && data.editors.length > 0) {
+                            console.log('Processing', data.editors.length, 'editors');
+                            data.editors.forEach(editor => {
+                                editorList += `
+                                    <tr>
+                                        <td>
+                                            <div class="form-check form-check-sm form-check-custom form-check-solid">
+                                                <input class="form-check-input editor-checkbox" type="checkbox"
+                                                       name="editor_ids[]" value="${editor.id}" />
+                                            </div>
+                                        </td>
+                                        <td class="fw-bold">${editor.name || '-'}</td>
+                                        <td>${editor.email || '-'}</td>
+                                        <td>${editor.affiliation || '-'}</td>
+                                        <td>${editor.phone || '-'}</td>
+                                        <td><small class="text-muted">${editor.journals || 'Tidak ada journal'}</small></td>
+                                    </tr>
+                                `;
+                            });
+                        } else {
+                            console.log('No editors found');
+                            editorList = `
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        Tidak ada data editor
+                                    </td>
+                                </tr>
+                            `;
+                        }
+
+                        document.getElementById('editor_list').innerHTML = editorList;
+
+                        // Reset checkboxes
+                        document.getElementById('select_all_editors').checked = false;
+                        document.getElementById('check_all_editors_header').checked = false;
+
+                        // Setup checkbox functionality
+                        setupEditorCheckboxes();
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        document.getElementById('editor_list').innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center text-danger">
+                                    Error loading data: ${error.message}
+                                </td>
+                            </tr>
+                        `;
+                    });
+            }
+
+            // Function to setup checkboxes
+            function setupCheckboxes() {
+                const selectAllMain = document.getElementById('select_all_reviewers');
+                const selectAllHeader = document.getElementById('check_all_header');
+                const reviewerCheckboxes = document.querySelectorAll('.reviewer-checkbox');
+
+                // Main select all functionality
+                selectAllMain.addEventListener('change', function() {
+                    reviewerCheckboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    selectAllHeader.checked = this.checked;
+                    updateSubmitButton();
+                });
+
+                // Header select all functionality
+                selectAllHeader.addEventListener('change', function() {
+                    reviewerCheckboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    selectAllMain.checked = this.checked;
+                    updateSubmitButton();
+                });
+
+                // Individual checkbox functionality
+                reviewerCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const checkedCount = document.querySelectorAll('.reviewer-checkbox:checked')
+                            .length;
+                        const totalCount = reviewerCheckboxes.length;
+
+                        selectAllMain.checked = checkedCount === totalCount;
+                        selectAllHeader.checked = checkedCount === totalCount;
+                        updateSubmitButton();
+                    });
+                });
+
+                // Initial state
+                updateSubmitButton();
+            }
+
+            // Function to setup editor checkboxes
+            function setupEditorCheckboxes() {
+                const selectAllMain = document.getElementById('select_all_editors');
+                const selectAllHeader = document.getElementById('check_all_editors_header');
+                const editorCheckboxes = document.querySelectorAll('.editor-checkbox');
+
+                // Main select all functionality
+                selectAllMain.addEventListener('change', function() {
+                    editorCheckboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    selectAllHeader.checked = this.checked;
+                    updateEditorSubmitButton();
+                });
+
+                // Header select all functionality
+                selectAllHeader.addEventListener('change', function() {
+                    editorCheckboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    selectAllMain.checked = this.checked;
+                    updateEditorSubmitButton();
+                });
+
+                // Individual checkbox functionality
+                editorCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const checkedCount = document.querySelectorAll('.editor-checkbox:checked')
+                            .length;
+                        const totalCount = editorCheckboxes.length;
+
+                        selectAllMain.checked = checkedCount === totalCount;
+                        selectAllHeader.checked = checkedCount === totalCount;
+                        updateEditorSubmitButton();
+                    });
+                });
+
+                // Initial state
+                updateEditorSubmitButton();
+            }
+
+            // Function to update submit button state
+            function updateSubmitButton() {
+                const checkedCount = document.querySelectorAll('.reviewer-checkbox:checked').length;
+                const submitButton = document.getElementById('submit_import');
+
+                if (checkedCount > 0) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML =
+                        `<i class="ki-duotone ki-file-down fs-2"></i>Import ${checkedCount} Reviewer`;
+                } else {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = `<i class="ki-duotone ki-file-down fs-2"></i>Import Reviewer`;
+                }
+            }
+
+            // Function to update editor submit button state
+            function updateEditorSubmitButton() {
+                const checkedCount = document.querySelectorAll('.editor-checkbox:checked').length;
+                const submitButton = document.getElementById('submit_import_editor');
+
+                if (checkedCount > 0) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML =
+                        `<i class="ki-duotone ki-file-down fs-2"></i>Import ${checkedCount} Editor`;
+                } else {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = `<i class="ki-duotone ki-file-down fs-2"></i>Import Editor`;
+                }
+            }
+
+            // Form submission validation
+            document.getElementById('import_reviewer_form').addEventListener('submit', function(e) {
+                const checkedCount = document.querySelectorAll('.reviewer-checkbox:checked').length;
+                if (checkedCount === 0) {
+                    e.preventDefault();
+                    alert('Pilih minimal satu reviewer untuk diimport!');
+                    return false;
+                }
+            });
+
+            // Form submission validation for editor
+            document.getElementById('import_editor_form').addEventListener('submit', function(e) {
+                const checkedCount = document.querySelectorAll('.editor-checkbox:checked').length;
+                if (checkedCount === 0) {
+                    e.preventDefault();
+                    alert('Pilih minimal satu editor untuk diimport!');
+                    return false;
+                }
+            });
+        });
+    </script>
 @endsection

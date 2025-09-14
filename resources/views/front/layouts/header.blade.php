@@ -99,7 +99,9 @@
                                                 $menu_profiles = \App\Models\MenuProfil::all();
                                             @endphp
                                             @foreach ($menu_profiles as $profile)
-                                                <li><a href="{{ route('profil.show', $profile->slug) }}">{{ $profile->name }}</a></li>
+                                                <li><a
+                                                        href="{{ route('profil.show', $profile->slug) }}">{{ $profile->name }}</a>
+                                                </li>
                                             @endforeach
                                         </ul>
                                     </li>
@@ -221,7 +223,8 @@
                                         <li><a href="{{ route('logout') }}">{{ __('layout.logout') }}</a></li>
                                     @endauth
                                     @guest
-                                        <li><a href="{{ route('login') }}">{{ __('layout.login') }}</a></li>
+                                        <li><a href="{{ route('login') }}">{{ __('auth.login') }}</a></li>
+                                        <li><a href="{{ route('register') }}">{{ __('auth.register') }}</a></li>
                                     @endguest
                                 </ul>
                             </li>
@@ -275,6 +278,16 @@
                 {{-- <li><a href="{{ route('event.index') }}">{{ __('layout.event') }}</a></li>
                 <li><a href="{{ route('announcement.index') }}">{{ __('layout.announcement') }}</a></li> --}}
 
+                <li ><a href="#">{{ __('layout.profile') }}</a>
+                    <ul class="sub-menu">
+                        @php
+                            $menu_profiles = \App\Models\MenuProfil::all();
+                        @endphp
+                        @foreach ($menu_profiles as $profile)
+                            <li><a href="{{ route('profil.show', $profile->slug) }}">{{ $profile->name }}</a></li>
+                        @endforeach
+                    </ul>
+                </li>
                 <li><a href="#">{{ __('layout.team') }}</a>
                     <ul class="sub-menu">
                         <li><a href="{{ route('team.editor') }}">Editor</a></li>
@@ -322,6 +335,14 @@
                                 <i class="far fa-user"></i>
                             </span>
                             {{ __('layout.login') }}
+                        </a>
+                        <br>
+                        <br>
+                        <a href="{{ route('register') }}" title="Register">
+                            <span class="utilize-btn-icon">
+                                <i class="far fa-user"></i>
+                            </span>
+                            {{ __('auth.register') }}
                         </a>
                     @endguest
                 </li>
