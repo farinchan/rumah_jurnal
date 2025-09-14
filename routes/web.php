@@ -247,9 +247,20 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/verification/{id}/delete', [BackFinanceController::class, 'verificationDelete'])->name('verification.delete');
         Route::get('/confirm-payment/{id}/generate', [BackFinanceController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
         Route::get('/confirm-payment/{id}/mail-send', [BackFinanceController::class, 'confirmPaymentMailSend'])->name('confirm-payment.mail-send');
+
         Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');
         Route::get('/report/datatable', [BackFinanceController::class, 'reportDatatable'])->name('report.datatable');
         Route::get('/report/export', [BackFinanceController::class, 'reportExport'])->name('report.export');
+
+        Route::post('cashflow-year/store', [BackFinanceController::class, 'cashflowYearStore'])->name('cashflow-year.store');
+        Route::put('cashflow-year/edit', [BackFinanceController::class, 'cashflowYearEdit'])->name('cashflow-year.edit');
+
+        Route::get('/cashflow', [BackFinanceController::class, 'cashflowIndex'])->name('cashflow.index');
+        Route::get('/cashflow/datatable', [BackFinanceController::class, 'cashflowDatatables'])->name('cashflow.datatable');
+        Route::get('/cashflow/export', [BackFinanceController::class, 'cashflowExport'])->name('cashflow.export');
+        Route::post('/cashflow/store', [BackFinanceController::class, 'cashflowStore'])->name('cashflow.store');
+        Route::put('/cashflow/{id}/update', [BackFinanceController::class, 'cashflowUpdate'])->name('cashflow.update');
+        Route::get('/cashflow/{id}/delete', [BackFinanceController::class, 'cashflowDestroy'])->name('cashflow.destroy');
     });
 
     Route::prefix('master')->name('master.')->group(function () {

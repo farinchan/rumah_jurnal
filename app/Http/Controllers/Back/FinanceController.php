@@ -2,23 +2,31 @@
 
 namespace App\Http\Controllers\Back;
 
+use App\Exports\CashflowExport;
 use App\Exports\FinanceReportExport;
 use App\Http\Controllers\Controller;
 use App\Mail\ConfirmPaymentMail;
+use App\Models\Finance;
+use App\Models\FinanceYear;
 use App\Models\Issue;
 use App\Models\Journal;
 use App\Models\Payment;
 use App\Models\PaymentInvoice;
 use App\Models\SettingWebsite;
 use App\Models\Submission;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert;
+use Yajra\DataTables\Facades\DataTables;
+use illuminate\Support\Str;
+
 
 class FinanceController extends Controller
 {
@@ -145,7 +153,7 @@ class FinanceController extends Controller
             })
             ->addColumn('action', function ($payment) {
                 $deleteButton = '';
-                if(Auth()->user()->hasRole('super-admin')) {
+                if (Auth()->user()->hasRole('super-admin')) {
                     $deleteButton = '
                         <a href="' . route("back.finance.verification.delete", $payment->id) . '" class="btn btn-sm btn-light-danger my-1">
                             <i class="ki-duotone ki-trash fs-2">
@@ -415,14 +423,14 @@ class FinanceController extends Controller
     public function reportIndex()
     {
         $data = [
-            'title' => 'Laporan Keuangan',
+            'title' => 'Laporan Jurnal',
             'breadcrumbs' => [
                 [
                     'name' => 'Dashboard',
                     'link' => route('back.dashboard')
                 ],
                 [
-                    'name' => 'Finance',
+                    'name' => 'Jurnal',
                     'link' => route('back.finance.report.index')
                 ]
             ],
@@ -551,5 +559,500 @@ class FinanceController extends Controller
         $date_start = $request->date_start ?? now()->subMonth()->toDateString();
 
         return Excel::download(new FinanceReportExport($journal_id, $date_start, $date_end), 'laporan-keuangan-' . date('Y-m-d') . '.xlsx');
+    }
+
+    public function cashflowYearStore(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|string|max:255|unique:finance_years,name',
+                'start_date' => 'required|date',
+            ],
+            [
+                'name.required' => 'Nama Tahun Keuangan harus diisi',
+                'name.string' => 'Nama Tahun Keuangan harus berupa teks',
+                'name.max' => 'Nama Tahun Keuangan maksimal 255 karakter',
+                'name.unique' => 'Nama Tahun Keuangan sudah ada',
+                'start_date.required' => 'Tanggal Mulai harus diisi',
+                'start_date.date' => 'Tanggal Mulai tidak valid',
+            ]
+        );
+        if ($validator->fails()) {
+            Alert::error('Gagal', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        FinanceYear::latest()->first()?->update([
+            'end_date' => Carbon::parse($request->start_date)->subDay()->toDateString(),
+            'is_active' => 0,
+        ]);
+        FinanceYear::create([
+            'name' => $request->name,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'created_by' => Auth::user()->name,
+        ]);
+
+        Alert::success('Berhasil', 'Tahun Keuangan berhasil ditambahkan');
+        return redirect()->back()->with('success', 'Tahun Keuangan berhasil ditambahkan');
+    }
+
+    public function cashflowYearEdit(Request $request)
+    {
+        $finance_year = FinanceYear::latest()->first();
+        if (!$finance_year) {
+            Alert::error('Gagal', 'Tahun Keuangan tidak ditemukan');
+            return redirect()->back()->with('error', 'Tahun Keuangan tidak ditemukan');
+        }
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|string|max:255|unique:finance_years,name,' . $finance_year->id,
+                'start_date' => 'required|date',
+            ],
+            [
+                'name.required' => 'Nama Tahun Keuangan harus diisi',
+                'name.string' => 'Nama Tahun Keuangan harus berupa teks',
+                'name.max' => 'Nama Tahun Keuangan maksimal 255 karakter',
+                'name.unique' => 'Nama Tahun Keuangan sudah ada',
+                'start_date.required' => 'Tanggal Mulai harus diisi',
+                'start_date.date' => 'Tanggal Mulai tidak valid',
+            ]
+        );
+        if ($validator->fails()) {
+            Alert::error('Gagal', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            $finance_year->update([
+                'name' => $request->name,
+                'start_date' => $request->start_date,
+                'updated_by' => Auth::user()->name,
+            ]);
+            Alert::success('Berhasil', 'Tahun Keuangan berhasil diperbarui');
+            return redirect()->back()->with('success', 'Tahun Keuangan berhasil diperbarui');
+        } catch (\Exception $e) {
+            Alert::error('Gagal', 'Tahun Keuangan gagal diperbarui');
+            return redirect()->back()->with('error', 'Tahun Keuangan gagal diperbarui');
+        }
+    }
+
+    public function cashflowIndex(Request $request)
+    {
+        $id = $request->id;
+        $finance_year_now = $id ? FinanceYear::findOrFail($id) : FinanceYear::latest()->first();
+        $finance_now = Finance::where('date', '>=', $finance_year_now ? $finance_year_now->start_date : now()->startOfYear()->toDateString());
+        $outcome = (clone $finance_now)->where('type', 'expense')->sum('amount');
+        $income_temp = (clone $finance_now)->where('type', 'income')->sum('amount');
+        $payment = Payment::with(['paymentInvoice'])
+            ->where('created_at', '>=', $finance_year_now ? $finance_year_now->start_date : now()->startOfYear()->toDateString())
+            ->where('payment_status', 'accepted')
+            ->get()
+            ->map(function ($item) {
+                return $item->paymentInvoice->payment_amount ?? 0;
+            })->sum();
+        $income = $income_temp + $payment;
+        $balance = $income - $outcome;
+        $data = [
+            'title' => 'Laporan Keuangan',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Keuangan',
+                    'link' => route('back.finance.cashflow.index')
+                ]
+            ],
+            'finance_year' => $finance_year_now,
+            'list_finance_year' => FinanceYear::latest()->get(),
+            'total_outcome_now' => $outcome,
+            'total_income_now' => $income,
+            'total_balance_now' => $balance,
+
+        ];
+        // return response()->json($data);
+        return view('back.pages.finance.cashflow', $data);
+    }
+
+    public function cashflowDatatables(Request $request)
+    {
+        $type = $request->type ?? "all";
+        $date_end = $request->date_end ?? now()->toDateString();
+        $date_start = $request->date_start ?? now()->subMonth()->toDateString();
+
+        $finance = Finance::where('date', '>=', $date_start)
+            ->where('date', '<=', $date_end)
+            ->get()
+            ->map(function ($item) {
+                return (object)[
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'description' => $item->description,
+                    'type' => $item->type,
+                    'amount' => $item->amount,
+                    'date' => $item->date,
+                    'payment_method' => $item->payment_method,
+                    'payment_reference' => $item->payment_reference,
+                    'payment_note' => $item->payment_note,
+                    'attachment' => $item->attachment,
+                    'editable' => true,
+                    'created_at' => $item->created_at,
+                    'created_by' => $item->created_by,
+                    'updated_at' => $item->updated_at,
+                    'updated_by' => $item->updated_by,
+                ];
+            })->collect();
+
+        $billing = Payment::with(['paymentInvoice'])
+            ->whereBetween('created_at', [$date_start, $date_end])
+            ->where('payment_status', 'accepted')
+            ->get()
+            ->map(function ($item) {
+                return (object)[
+                    'id' => null,
+                    'name' => 'Pembayaran Invoice ' . ($item->paymentInvoice->invoice_number ?? 'Unknown Invoice')  . "/JRNL/UINSMDD/" . ($item->paymentInvoice->created_at ? $item->paymentInvoice->created_at->format('Y') : '-'),
+                    'description' => 'Pembayaran Invoice ' . ($item->paymentInvoice->invoice_number ?? 'Unknown Invoice') . "/JRNL/UINSMDD/" . ($item->paymentInvoice->created_at ? $item->paymentInvoice->created_at->format('Y') : '-') . ' Yang Telah Dibayarkan Oleh ' . ($item->name ?? 'Unknown Payer'),
+                    'type' => 'income',
+                    'amount' => $item->paymentInvoice->payment_amount ?? 0,
+                    'date' => $item->payment_timestamp,
+                    'payment_method' => ($item->payment_method ?? "-") . ' a/n ' . ($item->payment_account_name ?? "-"),
+                    'payment_reference' => "-",
+                    'payment_note' => $item->payment_note,
+                    'attachment' => $item->payment_file,
+                    'editable' => false,
+                    'created_at' => $item->created_at,
+                    'created_by' => $item->created_by ?? '-',
+                    'updated_at' => $item->updated_at,
+                    'updated_by' => $item->updated_by ?? '-',
+                ];
+            })->collect();
+
+
+        $data = $finance->merge($billing)->when($type != 'all', function ($query) use ($type) {
+            return $query->where('type', $type);
+        })->sortByDesc('date')->values();
+
+        $total_income = $data->where('type', 'income')->sum('amount');
+        $total_expense = $data->where('type', 'expense')->sum('amount');
+        $total_balance = $total_income - $total_expense;
+
+        return datatables()->of($data)
+            ->addColumn('transaction', function ($row) {
+                return '<div class="d-flex flex-column">
+                            <a href="#"
+                            class="text-gray-800 text-hover-primary mb-1">' . $row->name . '</a>
+                            <span class="text-muted">' . $row->description . '</span>
+                        </div>';
+            })
+            ->addColumn('date', function ($row) {
+                return '<span class="fw-bold">' . Carbon::parse($row->date)->format('d M Y') . '</span>';
+            })
+            ->addColumn('amount', function ($row) {
+                if ($row->type == 'income') {
+                    return '<span class="text-success">+' . number_format($row->amount, 0, ',', '.') . '</span>';
+                } else {
+                    return '<span class="text-danger">-' . number_format($row->amount, 0, ',', '.') . '</span>';
+                }
+            })
+            ->addColumn('type', function ($row) {
+                return '<span class="badge badge-' . ($row->type == 'income' ? 'success' : 'danger') . '">' . $row->type . '</span>';
+            })
+            ->addColumn('payment_info', function ($row) {
+                return '<ul>
+                            <li>
+                                <span class="fw-bold">Metode Pembayaran:</span>
+                                <span>' . ($row->payment_method ?? '-') . '</span>
+                            </li>
+                            <li>
+                                <span class="fw-bold">No Ref:</span>
+                                <span>' . ($row->payment_reference ?? '-') . '</span>
+                            </li>
+                            <li>
+                                <span class="fw-bold">Note:</span>
+                                <span>' . ($row->payment_note ?? '-') . '</span>
+                            </li>
+                        </ul>';
+            })
+            ->addColumn('attachment', function ($row) {
+                if ($row->attachment) {
+                    return '<a href="' . asset('storage/' . $row->attachment) . '" target="_blank">
+                        <i class="ki-duotone ki-file-added text-primary fs-3x" data-bs-toggle="tooltip" data-bs-placement="right" title="Lihat File">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                    </a>';
+                } else {
+                    return '<i class="ki-duotone ki-file-deleted text-danger fs-3x" data-bs-toggle="tooltip" data-bs-placement="right" title="File Tidak Ada">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>';
+                }
+            })
+            ->addColumn('log', function ($row) {
+                return '<ul>
+                    <li>
+                        <span class="fw-bold">Created At:</span>
+                        <span>' . Carbon::parse($row->created_at)->format('d M Y H:i') . '</span>
+                    </li>
+                    <li>
+                        <span class="fw-bold">Created By:</span>
+                        <span>' . ($row->created_by ? (User::find($row->created_by)->name ?? "-") : '-') . '</span>
+                    </li>
+
+                    <br>
+
+                    <li>
+                        <span class="fw-bold">Update At:</span>
+                        <span>' . Carbon::parse($row->updated_at)->format('d M Y H:i')  . '</span>
+                    </li>
+                    <li>
+                        <span class="fw-bold">Update By:</span>
+                        <span>' . ($row->updated_by ? (User::find($row->updated_by)->name ?? "-") : '-') . '</span>
+                    </li>
+                </ul>';
+            })
+            ->addColumn('action', function ($row) {
+                if ($row->editable) {
+                    return ' <div class="d-flex justify-content-end">
+                        <a href="#" class="btn btn-icon btn-light-warning me-3" data-bs-toggle="modal" data-bs-target="#edit_' . $row->id . '"><i class="fa-solid fa-pen-to-square fs-4"></i></a>
+                        <a href="#" class="btn btn-icon btn-light-danger" data-bs-toggle="modal" data-bs-target="#delete_' . $row->id . '"><i class="fa-solid fa-trash fs-4"></i></a>
+                    </div>
+                    <!-- Modal Edit -->
+                    <div class="modal fade" tabindex="-1" id="edit_' . $row->id . '" aria-labelledby="editLabel_' . $row->id . '" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editLabel_' . $row->id . '">Edit Transaksi</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="' . route('back.finance.cashflow.update', $row->id) . '" method="POST" enctype="multipart/form-data">
+                                    ' . csrf_field() . '
+                                    ' . method_field('PUT') . '
+                                    <div class="modal-body">
+                                        <div class="mb-5">
+                                            <label for="name_' . $row->id . '" class="form-label required">Nama Transaksi</label>
+                                            <input type="text" class="form-control" id="name_' . $row->id . '" name="name" value="' . $row->name . '" required>
+                                        </div>
+                                        <div class="mb-5">
+                                            <label for="description_' . $row->id . '" class="form-label">Deskripsi</label>
+                                            <textarea class="form-control" id="description_' . $row->id . '" name="description">' . $row->description . '</textarea>
+                                        </div>
+                                        <div class="mb-5">
+                                            <label for="amount_' . $row->id . '" class="form-label required">Jumlah</label>
+                                            <div class="input-group mb-5">
+                                                <span class="input-group-text">Rp</span>
+                                                <input type="number" class="form-control" id="amount_' . $row->id . '" name="amount" value="' . $row->amount . '" required>
+                                            </div>
+                                        </div>
+                                        <div class="mb-5">
+                                            <label for="date_' . $row->id . '" class="form-label required">Tanggal</label>
+                                            <input type="date" class="form-control" id="date_' . $row->id . '" name="date" value="' . Carbon::parse($row->date)->format('Y-m-d') . '" required>
+                                        </div>
+                                        <div class="mb-5">
+                                            <label for="type_' . $row->id . '" class="form-label required">Type</label>
+                                            <select class="form-select" id="type_' . $row->id . '" name="type" required>
+                                                <option value="income" ' . ($row->type == 'income' ? 'selected' : '') . '>Income</option>
+                                                <option value="expense" ' . ($row->type == 'expense' ? 'selected' : '') . '>Expense</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-5">
+                                            <div class="row mb-5">
+                                                <div class="col">
+                                                    <label for="payment_method_' . $row->id . '" class="form-label">Metode Pembayaran</label>
+                                                    <input type="text" class="form-control" id="payment_method_' . $row->id . '" name="payment_method" value="' . $row->payment_method . '">
+                                                </div>
+                                                <div class="col">
+                                                    <label for="payment_reference_' . $row->id . '" class="form-label">No Referensi</label>
+                                                    <input type="text" class="form-control" id="payment_reference_' . $row->id . '" name="payment_reference" value="' . $row->payment_reference . '">
+                                                </div>
+                                            </div>
+                                            <div class="mb-5">
+                                                <label for="payment_note_' . $row->id . '" class="form-label">Note</label>
+                                                <textarea class="form-control" id="payment_note_' . $row->id . '" name="payment_note">' . $row->payment_note . '</textarea>
+                                            </div>
+                                            <div class="mb-5">
+                                                <label for="attachment_' . $row->id . '" class="form-label">Lampiran</label>
+                                                <input type="file" class="form-control" id="attachment_' . $row->id . '" name="attachment" accept=".jpg,.jpeg,.png,.pdf">
+                                                <div class="mt-2">
+                                                    File saat ini:
+                                                    <a href="' . ($row->attachment ? asset('storage/' . $row->attachment) : '#') . '" target="_blank">
+                                                        ' . ($row->attachment ? basename($row->attachment) : 'Tidak ada file yang diunggah') . '
+                                                    </a>
+                                                </div>
+                                                <small class="form-text text-muted">Format: jpg, jpeg, png, pdf. Maksimal 10MB.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Batal
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal Delete -->
+                    <div class="modal fade" tabindex="-1" id="delete_' . $row->id . '" aria-labelledby="deleteLabel_' . $row->id . '" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title" id="deleteLabel_' . $row->id . '">Hapus Transaksi</h3>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body mb-5">
+                                    <p>Apakah Anda yakin ingin menghapus transaksi ini?</p>
+                                    <p class="text-danger">
+                                        <strong>Peringatan: </strong> Seluruh data yang terkait dengan transaksi ini
+                                        akan dihapus dan tidak dapat dikembalikan.
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                                    <form action="' . route('back.finance.cashflow.destroy', $row->id) . '" method="POST" style="display:inline;">
+                                        ' . csrf_field() . '
+                                        ' . method_field('DELETE') . '
+                                        <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ';
+                } else {
+                    return '<div class="d-flex justify-content-end">
+                        <span class="badge badge-secondary">Tidak Dapat Diedit</span>
+                    </div>';
+                }
+            })
+            ->with([
+                'total_income' => $total_income,
+                'total_expense' => $total_expense,
+                'total_balance' => $total_balance,
+            ])
+            ->rawColumns(['transaction', 'date', 'amount', 'type', 'payment_info', 'attachment', 'log', 'action'])
+            ->make(true);
+    }
+
+    public function cashFlowExport(Request $request)
+    {
+        $type = $request->type;
+        $date_end = $request->date_end ?? now()->toDateString();
+        $date_start = $request->date_start ?? now()->subMonth()->toDateString();
+
+        return Excel::download(new CashflowExport($date_start, $date_end, $type), 'laporan_keuangan_' . now()->format('Y_m_d') . '.xlsx');
+    }
+
+    public function CashflowStore(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
+            'type' => 'required|in:income,expense',
+            'amount' => 'required|numeric|min:0',
+            'date' => 'required|date',
+            'payment_method' => 'nullable|string|max:255',
+            'payment_reference' => 'nullable|string|max:255',
+            'payment_note' => 'nullable|string|max:1000',
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', 'Validation failed: ' . implode(', ', $validator->errors()->all()));
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $finance = new Finance();
+        $finance->name = $request->name;
+        $finance->description = $request->description;
+        $finance->type = $request->type;
+        $finance->amount = $request->amount;
+        $finance->date = Carbon::parse($request->date);
+        $finance->payment_method = $request->payment_method;
+        $finance->payment_reference = $request->payment_reference;
+        $finance->payment_note = $request->payment_note;
+        if ($request->hasFile('attachment')) {
+            $attachment = $request->file('attachment');
+            $filename = Str::slug($request->name) . '_' . time() . '.' . $attachment->getClientOriginalExtension();
+            $path = $attachment->storeAs('attachments/finances', $filename, 'public');
+            $finance->attachment = $path;
+        }
+        $finance->created_by = Auth::user()->id;
+        $finance->save();
+
+        Alert::success('Success', 'Finance record created successfully.');
+        return redirect()->back();
+    }
+
+    public function cashflowDestroy(Request $request)
+    {
+        $finance = Finance::find($request->id);
+        if (!$finance) {
+            Alert::error('Error', 'Finance record not found.');
+            return redirect()->back();
+        }
+
+        // Hapus file lampiran jika ada
+        if ($finance->attachment) {
+            Storage::disk('public')->delete($finance->attachment);
+        }
+        $finance->delete();
+
+        Alert::success('Success', 'Finance record deleted successfully.');
+        return redirect()->back();
+    }
+
+    public function cashflowUpdate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
+            'type' => 'required|in:income,expense',
+            'amount' => 'required|numeric|min:0',
+            'date' => 'required|date',
+            'payment_method' => 'nullable|string|max:255',
+            'payment_reference' => 'nullable|string|max:255',
+            'payment_note' => 'nullable|string|max:1000',
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', 'Validation failed: ' . implode(', ', $validator->errors()->all()));
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $finance = Finance::findOrFail($request->id);
+        if (!$finance) {
+            Alert::error('Error', 'Finance record not found.');
+            return redirect()->back();
+        }
+
+        $finance->name = $request->name;
+        $finance->description = $request->description;
+        $finance->type = $request->type;
+        $finance->amount = $request->amount;
+        $finance->date = Carbon::parse($request->date);
+        $finance->payment_method = $request->payment_method;
+        $finance->payment_reference = $request->payment_reference;
+        $finance->payment_note = $request->payment_note;
+
+        if ($request->hasFile('attachment')) {
+            if ($finance->attachment) {
+                Storage::disk('public')->delete($finance->attachment);
+            }
+            $attachment = $request->file('attachment');
+            $filename = Str::slug($request->name) . '_' . time() . '.' . $attachment->getClientOriginalExtension();
+            $path = $attachment->storeAs('attachments/finances', $filename, 'public');
+            $finance->attachment = $path;
+        }
+        $finance->updated_by = Auth::user()->id;
+        $finance->save();
+
+        Alert::success('Success', 'Finance record updated successfully.');
+        return redirect()->back();
     }
 }
