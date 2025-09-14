@@ -27,8 +27,56 @@
                     <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base">
 
 
-                        {{-- <a href="{{ route('back.master.user.create') }}" class="btn btn-primary me-3">
-                            <i class="ki-duotone ki-plus fs-2"></i>Tambah Pengguna</a> --}}
+                        <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#kt_modal_add_user">
+                            <i class="ki-duotone ki-plus fs-2"></i>Tambah Peserta</button>
+
+                        <div class="modal fade" tabindex="-1" id="kt_modal_add_user">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title">Tambah Peserta</h3>
+
+                                        <!--begin::Close-->
+                                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2"
+                                            data-bs-dismiss="modal" aria-label="Close">
+                                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span
+                                                    class="path2"></span></i>
+                                        </div>
+                                        <!--end::Close-->
+                                    </div>
+
+                                    <form action="{{ route('back.event.detail.participant.store', $event->id) }}"
+                                        method="POST">
+                                        @csrf
+                                        <div class="modal-body">
+                                            <div class="mb-10">
+                                                <label for="email" class="form-label">Nama Peserta</label>
+                                                <input type="text" class="form-control form-control-solid" name="name"
+                                                    placeholder="Masukkan nama peserta" required />
+                                            </div>
+
+                                            <div class="mb-10">
+                                                <label for="email" class="form-label">Email Peserta</label>
+                                                <input type="email" class="form-control form-control-solid" name="email"
+                                                    placeholder="Masukkan email peserta" required />
+                                            </div>
+                                            <div class="mb-10">
+                                                <label for="phone" class="form-label">No. Telepon Peserta</label>
+                                                <input type="text" class="form-control form-control-solid" name="phone"
+                                                    placeholder="Masukkan no. telepon peserta" required />
+
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light"
+                                                data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="btn-group">
 
                             {{-- <a href="#" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#import">
@@ -85,10 +133,18 @@
                                 <td class="d-flex align-items-center">
                                     <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
                                         <a href="#">
-                                            <div class="symbol-label">
-                                                <img src="{{ $user->user->getPhoto() }}" alt="{{ $user->name }}"
-                                                    width="50px" />
-                                            </div>
+                                            @if ($user->user_id)
+                                                <div class="symbol-label">
+                                                    <img src="{{ $user->user->getPhoto() }}" alt="{{ $user->name }}"
+                                                        width="50px" />
+                                                </div>
+                                            @else
+                                                <div class="symbol-label"
+                                                    style="background-color: #{{ substr(md5($user->email), 0, 6) }};">
+                                                    <span
+                                                        class="font-size-h5 font-weight-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                                </div>
+                                            @endif
                                         </a>
                                     </div>
                                     <div class="d-flex flex-column">
@@ -112,9 +168,9 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <a href="{{ route("event.eticket", $user->id) }}" target="_blank"
-                                         class="btn btn-icon btn-light-info btn-sm me-1"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="E-Ticket">
+                                    <a href="{{ route('event.eticket', $user->id) }}" target="_blank"
+                                        class="btn btn-icon btn-light-info btn-sm me-1" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" title="E-Ticket">
                                         <i class="ki-duotone ki-tablet-book fs-2">
                                             <span class="path1"></span>
                                             <span class="path2"></span>
@@ -123,8 +179,8 @@
                                     </a>
                                     <a href="#" class="btn btn-icon btn-light-danger btn-sm me-1"
                                         data-bs-toggle="modal" data-bs-target="#kt_modal_delete_user{{ $user->id }}">
-                                        <i class="ki-duotone ki-trash fs-2" data-bs-toggle="tooltip" data-bs-placement="top"
-                                            title="Hapus peserta">
+                                        <i class="ki-duotone ki-trash fs-2" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="Hapus peserta">
                                             <span class="path1"></span>
                                             <span class="path2"></span>
                                         </i>
@@ -146,7 +202,8 @@
                         <h2 class="fw-bold">Hapus Pengguna</h2>
                         <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal"
                             aria-label="Close">
-                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span
+                                    class="path2"></span></i>
                         </div>
                     </div>
                     <form class="form" method="POST"

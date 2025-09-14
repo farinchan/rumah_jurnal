@@ -127,14 +127,19 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'file' => 'nullable|mimes:pdf|max:8192',
-            'title' => 'required',
-            'content' => 'required',
-            'start' => 'required',
-            'end' => 'nullable',
-            'meta_keywords' => 'nullable',
+            'type' => 'required',
+            'status' => 'required',
+            'name' => 'required',
+            'datetime' => 'required',
+            'location' => 'nullable',
+            'limit' => 'nullable|integer',
+            'description' => 'nullable',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8192',
+            'attachment' => 'nullable|mimes:pdf|max:8192',
             'is_active' => 'required',
+            'meta_title' => 'nullable',
+            'meta_description' => 'nullable',
+            'meta_keywords' => 'nullable',
         ], [
             'required' => ':attribute harus diisi',
             'image' => 'File harus berupa gambar',
@@ -147,24 +152,21 @@ class EventController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $slug = "";
-        if (Event::where('slug', Str::slug($request->title))->where('id', '!=', $id)->count() > 0) {
-            $slug = Str::slug($request->title) . '-' . rand(1000, 9999);
-        } else {
-            $slug = Str::slug($request->title);
-        }
 
         $event = Event::find($id);
-        $event->title = $request->title;
-        $event->slug = $slug;
-        $event->content = $request->content;
-        $event->start = $request->start;
-        $event->end = $request->end;
-        $event->meta_title = $request->title;
-        $event->meta_description = Str::limit(strip_tags($request->content), 150);
+        $event->type = $request->type;
+        $event->status = $request->status;
+        $event->name = $request->name;
+        $event->datetime = $request->datetime;
+        $event->location = $request->location;
+        $event->limit = $request->limit;
+        $event->description = $request->description;
+        $event->meta_title = $request->name;
+        $event->meta_description = Str::limit(strip_tags($request->description), 150);
         $event->meta_keywords = implode(", ", array_column(json_decode($request->meta_keywords ?? "[]"), 'value'));
         $event->is_active = $request->is_active;
         $event->user_id = Auth::user()->id;
+
 
         if ($request->hasFile('image')) {
             if ($event->image) {
@@ -185,7 +187,7 @@ class EventController extends Controller
         $event->save();
 
         Alert::success('Sukses', 'event berhasil di update');
-        return redirect()->route('back.event.index');
+        return redirect()->route('back.event.detail.overview', $id);
     }
 
     public function destroy($id)
@@ -256,7 +258,7 @@ class EventController extends Controller
         $eventUser->save();
 
         Alert::success('Sukses', 'Peserta berhasil ditambahkan');
-        return redirect()->route('back.event.participant', ['id' => $id]);
+        return redirect()->back();
     }
 
     public function participantDestroy($id, $eventUserId)
