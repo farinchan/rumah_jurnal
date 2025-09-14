@@ -54,7 +54,7 @@
                                 <button class="theme-btn-1 btn btn-block" type="submit">{{ __('front.sign_in') }}</button>
                             </div>
                             <div class="go-to-btn mt-20">
-                                <a href="#"><small>{{ __('front.forgot_password') }}</small></a>
+                                <a href="{{ route('password.request') }}"><small>{{ __('front.forgot_password') }}</small></a>
                             </div>
                         </form>
 

@@ -24,4 +24,16 @@ return [
     'create_account' => 'Create Account',
     'create_account_subtitle' => 'Join with',
 
+    // Forgot Password
+    'forgot_password' => 'Forgot Password',
+    'forgot_password_subtitle' => 'Enter your email to receive a password reset link',
+    'email_address' => 'Email Address',
+    'send_reset_link' => 'Send Reset Link',
+    'remember_password' => 'Remember your password?',
+    'reset_password' => 'Reset Password',
+    'reset_password_subtitle' => 'Enter a new password for your account',
+    'new_password' => 'New Password',
+    'confirm_new_password' => 'Confirm New Password',
+    'reset_password_button' => 'Reset Password',
+
 ];
