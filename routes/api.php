@@ -34,6 +34,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('/data/journal', [App\Http\Controllers\Api\DataController::class, 'dataJournal'])->name('data.journal');
     Route::get('/data/journal/{context_id}', [App\Http\Controllers\Api\DataController::class, 'dataJournalContext'])->name('data.journal.context');
 
+    Route::get('/data/issue/{journal_id}', [App\Http\Controllers\Api\DataController::class, 'dataIssue'])->name('data.issue');
+
 });
 
 
