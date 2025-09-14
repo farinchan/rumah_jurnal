@@ -75,12 +75,12 @@
 
                 <div class="col-lg-6">
                     <div class="account-create text-center pt-50">
-                        <h4>DON'T HAVE AN ACCOUNT?</h4>
+                        <h4>{{ __('auth.dont_have_account') }}</h4>
                         <p>
-                            Temukan berbagai jurnal ilmiah, ikuti event menarik, dan jadilah bagian dari komunitas peneliti yang inspiratif bersama kami.
+                            {{ __('auth.create_account_info') }}
                         </p>
                         <div class="btn-wrapper">
-                            <a href="register.html" class="theme-btn-1 btn black-btn">CREATE ACCOUNT</a>
+                            <a href="{{ route('register') }}" class="theme-btn-1 btn black-btn">{{ __('auth.create_account') }}</a>
                         </div>
                     </div>
                 </div>
