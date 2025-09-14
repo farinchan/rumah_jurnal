@@ -186,7 +186,7 @@ class WhatsappController extends Controller
 
     public function sendBulkMessageProcess(Request $request)
     {
-        // dd($request->all());
+        dd($request->all());
 
         $validator = Validator::make(
             $request->all(),
@@ -206,10 +206,6 @@ class WhatsappController extends Controller
             ]
         );
 
-
-
-
-
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput()->with('error', $validator->errors()->first());
         }
@@ -222,7 +218,7 @@ class WhatsappController extends Controller
                     foreach ($users as $user) {
                         if ($user->phone) {
                             $data[] = [
-                                'to' => whatsappNumber($user->phone) ,
+                                'to' => whatsappNumber($user->phone),
                                 'text' => $request->message,
                             ];
                         }
@@ -308,5 +304,84 @@ class WhatsappController extends Controller
         }
 
         return redirect()->back()->with('success', 'Bulk message sent successfully');
+    }
+
+    public function sendMultipleMessageProcess(Request $request)
+    {
+        // dd($request->all());
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'delay' => 'nullable|integer|min:1000',
+                'phones' => 'required|array',
+                'message' => 'required|string',
+                'document' => 'nullable|mimes:pdf,pptx,docx,doc,jpg,png|max:10240',
+            ],
+            [
+
+                'delay.integer' => 'Delay must be an integer',
+                'delay.min' => 'Delay must be at least 1000 milliseconds',
+                'phone.required' => 'Phone numbers are required',
+                'phone.array' => 'Phone numbers must be an array',
+                'phone.*.required' => 'Each phone number is required',
+                'message.required' => 'Message is required',
+                'document.mimes' => 'File must be a pdf, pptx, docx, doc, jpg, png',
+                'document.max' => 'File may not be greater than 10MB',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput()->with('error', $validator->errors()->first());
+        }
+
+        $documentPath = null;
+        $mailEnvironment = env('MAIL_ENVIRONMENT', 'local');
+        if ($request->hasFile('document')) {
+            $document = $request->file('document');
+            $fileName = time() . '_' . Auth::id() . '.' . $document->getClientOriginalExtension();
+            $path = $document->storeAs('whatsapp_upload', $fileName, 'public');
+            $documentPath = url('storage/' . $path);
+            if ($mailEnvironment == 'local') {
+                $documentPath = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+            }
+        }
+
+        try {
+            $data = [];
+            foreach ($request->phones as $phone) {
+                if ($request->hasFile('document')) {
+                    $data[] = [
+                        'to' => whatsappNumber($phone),
+                        'text' => $request->message,
+                        'media' => $documentPath,
+                        'filename' => $document ? $document->getClientOriginalName() : null,
+                    ];
+                } else {
+                    $data[] = [
+                        'to' => whatsappNumber($phone),
+                        'text' => $request->message,
+                    ];
+                }
+                continue;
+            }
+
+            $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
+                'delay' => $request->delay ?? 1000,
+                'data' => $data
+            ]);
+
+            if ($response->status() != 200) {
+                Alert::error('Error', 'Failed to send multiple message: ' . $response->json()['message'] ?? 'Unknown error');
+                return redirect()->back()->with('error', 'Failed to send multiple message: ' . $response->json()['message'] ?? 'Unknown error');
+            }
+
+            Alert::success('Success', 'Multiple message has been sent successfully');
+            return redirect()->back()->with('success', 'Multiple message has been sent successfully');
+        } catch (\Throwable $th) {
+            // If there is an error, you can redirect back with an error message
+            Alert::error('An error occurred: ' . $th->getMessage());
+            return redirect()->back()->with('error', 'An error occurred: ' . $th->getMessage());
+        }
     }
 }
