@@ -110,11 +110,7 @@
                                                 <a href="#" target="_blank"
                                                     class="text-gray-800 text-hover-primary mb-1 me-2">{{ $reviewer->name }}
                                                 </a>
-                                                @if ($reviewer->number)
-                                                    <a href="#" data-bs-toggle="tooltip" data-bs-placement="top"
-                                                        title="Sertifikat Sudah Dikirim"><i
-                                                            class="ki-outline ki-file-added fs-2 text-primary"></i></a>
-                                                @endif
+
                                             </div>
                                             <span>
                                                 {{ $reviewer->affiliation }}

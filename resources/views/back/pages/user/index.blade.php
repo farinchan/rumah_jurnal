@@ -93,6 +93,8 @@
                                 <th class="min-w-125px">phone</th>
                                 <th class="min-w-125px">Role</th>
                                 <th class="min-w-125px">Journal Permission</th>
+                                <th class="min-w-50px">Editor ID</th>
+                                <th class="min-w-50px">Reviewer ID</th>
                                 <th class="text-end min-w-100px">Actions</th>
                             </tr>
                         </thead>
@@ -140,6 +142,12 @@
                                                 <span class="badge badge-light-success">{{ $permission }}</span>
 
                                         @endforeach
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold"></span>{{ $user->editor_id ?? '-' }}
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold"></span>{{ $user->reviewer_id ?? '-' }}
                                     </td>
 
                                     <td class="text-end">

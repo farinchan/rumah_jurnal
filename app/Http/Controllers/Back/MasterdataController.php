@@ -232,9 +232,12 @@ class MasterdataController extends Controller
     public function reviewerSyncToUser()
     {
         $reviewer_exists = [];
+        $total_data_synced = 0;
+        $total_data_error = 0;
         $reviewers = Reviewer::with('data')->get()->unique('reviewer_id');
         foreach ($reviewers as $reviewer) {
-            $user = User::where('reviewer_id', $reviewer->reviewer_id)->first();
+            try {
+                 $user = User::where('reviewer_id', $reviewer->reviewer_id)->first();
             if ($user) {
                 $reviewer_exists[] = $reviewer->name . ' (' . $reviewer->reviewer_id . ')';
             } else {
@@ -246,11 +249,17 @@ class MasterdataController extends Controller
                 $user->reviewer_id = $reviewer->reviewer_id;
                 $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate one
                 $user->save();
+                $total_data_synced++;
             }
+            } catch (\Throwable $th) {
+                $total_data_error++;
+                continue;
+            }
+
         }
 
         if (count($reviewer_exists) > 0) {
-            Alert::info('Info', 'Beberapa reviewer sudah memiliki akun user: ' . implode(', ', $reviewer_exists));
+            Alert::info('Info', 'Total user baru yang disinkronisasi: ' . $total_data_synced . '. total data yang sudah memiliki akun user: ' . count($reviewer_exists) . '. total data error: ' . $total_data_error);
         } else {
             Alert::success('Success', 'Semua reviewer berhasil disinkronisasi ke user');
         }
@@ -327,9 +336,12 @@ class MasterdataController extends Controller
     public function editorSyncToUser()
     {
         $editor_exists = [];
+        $total_data_synced = 0;
+        $total_data_error = 0;
         $editors = Editor::with('data')->get()->unique('editor_id');
         foreach ($editors as $editor) {
-            $user = User::where('editor_id', $editor->editor_id)->first();
+            try {
+                  $user = User::where('editor_id', $editor->editor_id)->first();
             if ($user) {
                 $editor_exists[] = $editor->name . ' (' . $editor->editor_id . ')';
             } else {
@@ -341,11 +353,17 @@ class MasterdataController extends Controller
                 $user->editor_id = $editor->editor_id;
                 $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate one
                 $user->save();
+                $total_data_synced++;
             }
+            } catch (\Throwable $th) {
+                $total_data_error++;
+                continue;
+            }
+
         }
 
         if (count($editor_exists) > 0) {
-            Alert::info('Info', 'Beberapa editor sudah memiliki akun user: ' . implode(', ', $editor_exists));
+            Alert::info('Info', 'Total user baru yang disinkronisasi: ' . $total_data_synced . '. total data yang sudah memiliki akun user: ' . count($editor_exists) . '. total data error: ' . $total_data_error);
         } else {
             Alert::success('Success', 'Semua editor berhasil disinkronisasi ke user');
         }
