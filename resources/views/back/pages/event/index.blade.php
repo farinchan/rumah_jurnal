@@ -17,7 +17,7 @@
                 <div class="card-toolbar">
                     <a href="{{ route('back.event.create') }}" class="btn btn-primary">
                         <i class="ki-duotone ki-plus fs-2"></i>
-                        Buat agenda
+                        Buat Event
                     </a>
                 </div>
             </div>
@@ -35,6 +35,7 @@
                             <th class="min-w-250px">Event</th>
                             <th class="min-w-100px">Tipe</th>
                             <th class="min-w-50px">Status Event</th>
+                            <th class="min-w-50px">Akses</th>
                             <th class="min-w-50px">Aktif?</th>
                             <th class="min-w-150px">Dibuat Oleh</th>
                             <th class="text-end min-w-70px">Actions</th>
@@ -81,6 +82,9 @@
                                 </td>
                                 <td>
                                     {{ $event->status }}
+                                </td>
+                                <td>
+                                    {{ $event->access }}
                                 </td>
                                 <td>
                                     @if ($date_before > now() && $date_after < now())

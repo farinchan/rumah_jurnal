@@ -16,7 +16,7 @@
 12. Product Details Page
 13. Isotope Gallery Active  ( Gallery / Portfolio )
 14. LightCase jQuery Active
-15. Slider One Active 
+15. Slider One Active
 16. Product Slider One
 17. Tab Product Slider One
 18. Blog Slider One
@@ -24,10 +24,10 @@
 20. Testimonial Slider - 2
 21. Testimonial Slider - 3
 22. Category Slider
-23. Image Slide  - 1 (Screenshot) 
+23. Image Slide  - 1 (Screenshot)
 24. Image Slide - 2
 25. Image Slide - 3
-26. Image Slide - 4 
+26. Image Slide - 4
 27. Brand Logo
 28. Blog Gallery (Blog Page )
 29. Countdown
@@ -49,7 +49,7 @@
   "use strict";
 
     jQuery(document).ready(function(){
-      
+
         /* --------------------------------------------------------
             1. Variables
         --------------------------------------------------------- */
@@ -60,7 +60,7 @@
             2. Mobile Menu
         --------------------------------------------------------- */
          /* ---------------------------------
-            Utilize Function 
+            Utilize Function
         ----------------------------------- */
         (function () {
             var $ltn__utilizeToggle = $('.ltn__utilize-toggle'),
@@ -127,7 +127,7 @@
                 $(this).addClass('column-'+ulChildren)
             }
         });
-        
+
 
         /* Remove Attribute( href ) from sub-menu title in mega-menu */
         /*
@@ -138,7 +138,7 @@
         /* Mega Munu  */
         /* $(".mega-menu").parent().css({"position": "inherit"}); */
         $(".mega-menu").parent().addClass("mega-menu-parent");
-        
+
 
         /* Add space for Elementor Menu Anchor link */
         $( window ).on( 'elementor/frontend/init', function() {
@@ -153,7 +153,7 @@
 
         $('.ltn__category-menu-title').on('click', function(){
             $('.ltn__category-menu-toggle').slideToggle(500);
-        });	
+        });
 
         /* Category Menu More Item show */
         $('.ltn__category-menu-more-item-parent').on('click', function(){
@@ -255,7 +255,7 @@
         --------------------------------------------------------- */
         $('select').niceSelect();
 
-        
+
         /* --------------------------------------------------------
             11. Default active and hover item active
         --------------------------------------------------------- */
@@ -308,7 +308,7 @@
                 }
             ]
         });
-                        
+
         /* --------------------------------------------------------
             13. Isotope Gallery Active  ( Gallery / Portfolio )
         -------------------------------------------------------- */
@@ -348,7 +348,7 @@
         });
 
         /* --------------------------------------------------------
-            15. Slider One Active 
+            15. Slider One Active
         --------------------------------------------------------- */
         $('.ltn__slide-one-active').slick({
             autoplay: false,
@@ -361,6 +361,7 @@
             speed: 300,
             slidesToShow: 1,
             slidesToScroll: 1,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
             nextArrow: '<a class="slick-next"><i class="fas fa-arrow-right" alt="Arrow Icon"></i></a>',
             responsive: [
@@ -389,6 +390,7 @@
             speed: 300,
             slidesToShow: 1,
             slidesToScroll: 1,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
             nextArrow: '<a class="slick-next"><i class="fas fa-arrow-right" alt="Arrow Icon"></i></a>',
             responsive: [
@@ -404,7 +406,7 @@
             new WOW().init();
         });
 
-        
+
         /*----------------------
             Slider 11 active
         -----------------------*/
@@ -424,6 +426,7 @@
             autoplay: false,
             autoplaySpeed: 10000,
             speed: 500,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             asNavFor: '.ltn__slider-11-img-slide-arrow-active',
             slidesToShow: 1,
             slidesToScroll: 1,
@@ -475,6 +478,7 @@
             initialSlide: 2,
             centerMode: false,
             centerPadding: '0px',
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             asNavFor: '.ltn__slider-11-active',
             dots: false, /* image slide dots */
             arrows: false, /* image slide arrow */
@@ -522,6 +526,7 @@
             dots: false,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 3,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -560,6 +565,7 @@
             dots: true,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 3,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -602,6 +608,7 @@
             dots: true,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 4,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -646,6 +653,7 @@
             dots: true,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 4,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -718,6 +726,7 @@
             dots: false,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 4,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -759,6 +768,7 @@
             dots: false,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 3,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -800,6 +810,7 @@
             dots: true,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 1,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -814,6 +825,7 @@
             dots: false,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 4,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -863,6 +875,7 @@
             dots: true,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 1,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -965,6 +978,7 @@
             dots: true,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 1,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -1005,6 +1019,7 @@
             dots: false,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 3,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -1053,6 +1068,7 @@
             dots: false,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 3,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -1112,6 +1128,7 @@
             dots: false,
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 3,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -1156,7 +1173,7 @@
                 }
             ]
         });
-        
+
         /* --------------------------------------------------------
             21. Testimonial Slider - 6
         --------------------------------------------------------- */
@@ -1167,6 +1184,7 @@
             centerPadding: '80px',
             infinite: true,
             speed: 300,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 2,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -1271,7 +1289,7 @@
 
 
         /* --------------------------------------------------------
-            23. Image Slide  - 1 (Screenshot) 
+            23. Image Slide  - 1 (Screenshot)
         --------------------------------------------------------- */
         $('.ltn__image-slider-1-active').slick({
             arrows: true,
@@ -1407,7 +1425,7 @@
 
 
         /* --------------------------------------------------------
-            26. Image Slide - 4 
+            26. Image Slide - 4
         --------------------------------------------------------- */
         $('.ltn__image-slider-4-active').slick({
             rtl: false,
@@ -1671,7 +1689,7 @@
         --------------------------------------------------------- */
         if($('.ltn__blog-gallery-active').length){
             $('.ltn__blog-gallery-active').slick({
-                rtl: false,
+                rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
                 arrows: true,
                 dots: false,
                 infinite: true,
@@ -1712,9 +1730,9 @@
           delay: 10,
           time: 2000
         });
-        $('.counter').addClass('animated fadeInDownBig');  
+        $('.counter').addClass('animated fadeInDownBig');
         $('h3').addClass('animated fadeIn');
-        
+
 
         /* --------------------------------------------------------
             31. Instagram Feed
@@ -1796,7 +1814,7 @@
             }
         });
         $( ".amount" ).val( "$" + $( ".slider-range" ).slider( "values", 0 ) +
-        " - $" + $( ".slider-range" ).slider( "values", 1 ) ); 
+        " - $" + $( ".slider-range" ).slider( "values", 1 ) );
 
 
         /* --------------------------------------------------------
@@ -1809,11 +1827,11 @@
             var oldValue = $button.parent().find("input").val();
             if ($button.text() == "+") {
                 var newVal = parseFloat(oldValue) + 1;
-            } 
+            }
             else {
                 if (oldValue > 0) {
                     var newVal = parseFloat(oldValue) - 1;
-                } 
+                }
                 else {
                     newVal = 0;
                 }
@@ -1836,8 +1854,8 @@
 	    /* --------------------------------------------------------
             35. Parallax active ( About Section  )
         -------------------------------------------------------- */
-        /* 
-        > 1 page e 2 ta call korle 1 ta kaj kore 
+        /*
+        > 1 page e 2 ta call korle 1 ta kaj kore
         */
         if($('.ltn__parallax-effect-active').length){
             var scene = $('.ltn__parallax-effect-active').get(0);
@@ -1856,6 +1874,7 @@
             arrows: true,
             fade: true,
             speed: 1500,
+            rtl: $('body').hasClass('rtl') || $('html').attr('dir') === 'rtl',
             slidesToShow: 1,
             slidesToScroll: 1,
             prevArrow: '<a class="slick-prev"><i class="fas fa-arrow-left" alt="Arrow Icon"></i></a>',
@@ -1978,9 +1997,9 @@
             return percentage / 100 * 360
             }
         });
-          
 
-        
+
+
 
     });
 
@@ -1988,14 +2007,14 @@
     /* --------------------------------------------------------
         36. Header menu sticky
     -------------------------------------------------------- */
-    $(window).on('scroll',function() {    
+    $(window).on('scroll',function() {
         var scroll = $(window).scrollTop();
         if (scroll < 445) {
             $(".ltn__header-sticky").removeClass("sticky-active");
         } else {
             $(".ltn__header-sticky").addClass("sticky-active");
         }
-    }); 
+    });
 
 
     $(window).on('load',function(){
@@ -2012,5 +2031,5 @@
     });
 
 
-  
+
 })(jQuery);

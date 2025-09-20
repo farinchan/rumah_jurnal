@@ -29,4 +29,9 @@ class EditorData extends Model
     {
         return $this->belongsTo(Editor::class, 'editor_id', 'editor_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'editor_id', 'editor_id');
+    }
 }

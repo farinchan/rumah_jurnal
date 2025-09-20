@@ -28,11 +28,11 @@ class HomeController extends Controller
                 'keywords' => $setting_web->name . ', Journal, Research, OJS System, Open Journal System, Research Journal, Academic Journal, Publication',
                 'favicon' => $setting_web->favicon
             ],
-            'list_news' => News::latest()->where('status', 'published')->limit(5)->get(),
+            'list_news' => News::latest()->where('status', 'published')->limit(10)->get(),
             'list_journal' => Journal::all(),
             'welcome_speech' => WelcomeSpeech::first(),
-            'list_announcement' => Announcement::latest()->where('is_active', true)->limit(5)->get(),
-            'list_event' => Event::latest()->where('is_active', true)->limit(5)->get(),
+            'list_announcement' => Announcement::latest()->where('is_active', true)->limit(8)->get(),
+            'list_event' => Event::latest()->where('is_active', true)->where('access', 'terbuka')->limit(8)->get(),
         ];
         return view('front.pages.home.index', $data);
     }

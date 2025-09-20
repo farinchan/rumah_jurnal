@@ -54,6 +54,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+
     public function getPhoto()
     {
         if ($this->photo && (str_starts_with($this->photo, 'http://') || str_starts_with($this->photo, 'https://'))) {

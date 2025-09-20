@@ -68,7 +68,7 @@
                         <select name="is_active" class="form-select mb-2" data-control="select2" data-hide-search="true"
                             data-placeholder="Select an option" id="kt_ecommerce_add_category_status_select" required>
                             <option></option>
-                            <option value="1"  selected>Aktif</option>
+                            <option value="1" selected>Aktif</option>
                             <option value="0">Tidak Aktif</option>
                         </select>
                         @error('is_active')
@@ -123,10 +123,28 @@
                                 @enderror
                             </div>
                         </div>
+
+                        <div class="mb-5 fv-row">
+                            <label class="required form-label">Akses event</label>
+                            <select name="access" class="form-select mb-2" data-control="select2" data-hide-search="true"
+                                data-placeholder="Pilih akses event" required>
+                                <option></option>
+                                <option value="terbuka" {{ old('access') == 'terbuka' ? 'selected' : '' }}>Terbuka
+                                </option>
+                                <option value="tertutup" {{ old('access') == 'tertutup' ? 'selected' : '' }}>Tertutup
+                                </option>
+                            </select>
+                            @error('access')
+                                <div class="text-danger fs-7">{{ $message }}</div>
+                            @enderror
+                            <div class="text-muted fs-7">
+                                Akses event, terbuka untuk umum atau tertutup (hanya untuk undangan, tidak ditampilkan di halaman depan)
+                            </div>
+                        </div>
                         <div class="mb-5 fv-row">
                             <label class="required form-label">Nama event</label>
-                            <input type="text" name="name" class="form-control mb-2" placeholder="Masukkan nama event"
-                                value="{{ old('name') }}" required />
+                            <input type="text" name="name" class="form-control mb-2"
+                                placeholder="Masukkan nama event" value="{{ old('name') }}" required />
                             @error('name')
                                 <div class="text-danger fs-7">{{ $message }}</div>
                             @enderror
@@ -143,7 +161,7 @@
 
                         </div>
 
-                         <div class="mb-5 fv-row">
+                        <div class="mb-5 fv-row">
                             <label class="form-label">Lokasi / Link Meeting</label>
                             <input type="text" name="location" class="form-control mb-2"
                                 placeholder="Masukkan lokasi event atau link meeting" value="{{ old('location') }}" />

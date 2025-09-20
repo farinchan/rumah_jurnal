@@ -59,7 +59,7 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name
 
 Route::prefix('account')->name('account.')->group(function () {
     Route::get('/profile', [AccountController::class, 'profile'])->name('profile');
-    Route::put('/profile/update', [AccountController::class, 'profileUpdate'])->name('profile.update');
+    Route::put('/profile/update', [AccountController::class, 'updateProfile'])->name('profile.update');
     Route::get('/profile/password', [AccountController::class, 'password'])->name('password');
     Route::put('/profile/password/update', [AccountController::class, 'passwordUpdate'])->name('password.update');
 });
@@ -72,6 +72,9 @@ Route::prefix('event')->name('event.')->group(function () {
     Route::post('/{slug}/register', [EventController::class, 'register'])->name('register');
 
     Route::get('/eticket/{uuid}', [EventController::class, 'eticket'])->name('eticket');
+
+    Route::get('/presence/{code}', [EventController::class, 'presence'])->name('presence')->middleware('auth');
+    Route::post('/presence/{code}/store', [EventController::class, 'presenceStore'])->name('presence.store')->middleware('auth');
 });
 
 Route::prefix('announcement')->name('announcement.')->group(function () {
@@ -300,11 +303,13 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::prefix('reviewer')->name('reviewer.')->group(function () {
             Route::get('/', [BackMasterDataController::class, 'reviewerIndex'])->name('index');
             Route::put('/edit/{reviewer_id}', [BackMasterDataController::class, 'reviewerUpdate'])->name('update');
+            Route::post('/sync-to-user', [BackMasterDataController::class, 'reviewerSyncToUser'])->name('sync-to-user');
         });
 
         Route::prefix('editor')->name('editor.')->group(function () {
             Route::get('/', [BackMasterDataController::class, 'editorIndex'])->name('index');
             Route::put('/edit/{id}', [BackMasterDataController::class, 'editorUpdate'])->name('update');
+            Route::post('/sync-to-user', [BackMasterDataController::class, 'editorSyncToUser'])->name('sync-to-user');
         });
 
         Route::prefix('payment-account')->name('payment-account.')->group(function () {

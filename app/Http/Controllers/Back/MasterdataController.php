@@ -9,6 +9,7 @@ use App\Models\Journal;
 use App\Models\PaymentAccount;
 use App\Models\Reviewer;
 use App\Models\ReviewerData;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -228,6 +229,43 @@ class MasterdataController extends Controller
         return redirect()->back();
     }
 
+    public function reviewerSyncToUser()
+    {
+        $reviewer_exists = [];
+        $total_data_synced = 0;
+        $total_data_error = 0;
+        $reviewers = Reviewer::with('data')->get()->unique('reviewer_id');
+        foreach ($reviewers as $reviewer) {
+            try {
+                 $user = User::where('reviewer_id', $reviewer->reviewer_id)->first();
+            if ($user) {
+                $reviewer_exists[] = $reviewer->name . ' (' . $reviewer->reviewer_id . ')';
+            } else {
+                // Create new user
+                $user = new User();
+                $user->name = $reviewer->name;
+                $user->email = $reviewer->email;
+                $user->phone = $reviewer->phone;
+                $user->reviewer_id = $reviewer->reviewer_id;
+                $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate one
+                $user->save();
+                $total_data_synced++;
+            }
+            } catch (\Throwable $th) {
+                $total_data_error++;
+                continue;
+            }
+
+        }
+
+        if (count($reviewer_exists) > 0) {
+            Alert::info('Info', 'Total user baru yang disinkronisasi: ' . $total_data_synced . '. total data yang sudah memiliki akun user: ' . count($reviewer_exists) . '. total data error: ' . $total_data_error);
+        } else {
+            Alert::success('Success', 'Semua reviewer berhasil disinkronisasi ke user');
+        }
+        return redirect()->back();
+    }
+
     public function editorIndex()
     {
         $data = [
@@ -292,6 +330,43 @@ class MasterdataController extends Controller
         );
 
         Alert::success('Success', 'Editor has been updated');
+        return redirect()->back();
+    }
+
+    public function editorSyncToUser()
+    {
+        $editor_exists = [];
+        $total_data_synced = 0;
+        $total_data_error = 0;
+        $editors = Editor::with('data')->get()->unique('editor_id');
+        foreach ($editors as $editor) {
+            try {
+                  $user = User::where('editor_id', $editor->editor_id)->first();
+            if ($user) {
+                $editor_exists[] = $editor->name . ' (' . $editor->editor_id . ')';
+            } else {
+                // Create new user
+                $user = new User();
+                $user->name = $editor->name;
+                $user->email = $editor->email;
+                $user->phone = $editor->phone;
+                $user->editor_id = $editor->editor_id;
+                $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate one
+                $user->save();
+                $total_data_synced++;
+            }
+            } catch (\Throwable $th) {
+                $total_data_error++;
+                continue;
+            }
+
+        }
+
+        if (count($editor_exists) > 0) {
+            Alert::info('Info', 'Total user baru yang disinkronisasi: ' . $total_data_synced . '. total data yang sudah memiliki akun user: ' . count($editor_exists) . '. total data error: ' . $total_data_error);
+        } else {
+            Alert::success('Success', 'Semua editor berhasil disinkronisasi ke user');
+        }
         return redirect()->back();
     }
 }

@@ -29,14 +29,12 @@
                                 <div class="separator border-gray-200"></div>
                                 <div class="px-7 py-5" data-kt-user-table-filter="form">
                                     <div class="mb-5">
-                                        <label class="form-label fs-6 fw-semibold">Role</label>
+                                        <label class="form-label fs-6 fw-semibold">Jurnal yang dikelola</label>
                                         <select class="form-select form-select-solid fw-bold" data-kt-select2="true"
                                             data-placeholder="Select option" data-allow-clear="true"
                                             data-kt-user-table-filter="role" data-hide-search="true">
                                             <option></option>
-                                            <option value="super-admin">super-admin</option>
-                                            <option value="keuangan">keuangan</option>
-                                            <option value="editor">editor</option>
+
                                         </select>
                                     </div>
                                     <div class="d-flex justify-content-end">
@@ -48,6 +46,16 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <form action="{{ route('back.master.editor.sync-to-user') }}" method="post" class="me-3">
+                                @csrf
+                                <button type="submit" class="btn btn-light-success me-3">
+                                    <i class="ki-duotone ki-arrows-circle fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>Sinkron ke User
+                                </button>
+                            </form>
                         </div>
                         <div class="d-flex justify-content-end align-items-center d-none">
                             <div class="fw-bold me-5">
@@ -91,11 +99,7 @@
                                                 <a href="#" target="_blank"
                                                     class="text-gray-800 text-hover-primary mb-1 me-2">{{ $editor->name }}
                                                 </a>
-                                                @if ($editor->number)
-                                                    <a href="#" data-bs-toggle="tooltip" data-bs-placement="top"
-                                                        title="Sertifikat Sudah Dikirim"><i
-                                                            class="ki-outline ki-file-added fs-2 text-primary"></i></a>
-                                                @endif
+                                               
                                             </div>
                                             <span>
                                                 {{ $editor->affiliation }}
@@ -192,9 +196,7 @@
                             <!--end::Close-->
                         </div>
                     </div>
-                    <form
-                        action="{{ route('back.master.editor.update', [$editor->editor_id]) }}"
-                        method="post">
+                    <form action="{{ route('back.master.editor.update', [$editor->editor_id]) }}" method="post">
                         @csrf
                         @method('PUT')
                         <div class="modal-body">
@@ -358,7 +360,8 @@
                                             @endforeach
                                         </select>
                                         <input type="text" class="form-control mt-2" placeholder="No. Rekening"
-                                            name="account_number" value="{{ $editor->data?->account_number }}" required />
+                                            name="account_number" value="{{ $editor->data?->account_number }}"
+                                            required />
 
                                     </td>
                                 </tr>

@@ -49,4 +49,9 @@ class Editor extends Model
     {
         return $this->hasOne(EditorData::class, 'editor_id', 'editor_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'editor_id', 'editor_id');
+    }
 }

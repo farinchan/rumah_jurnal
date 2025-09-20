@@ -1,5 +1,6 @@
 <!doctype html>
-<html class="no-js" lang="zxx">
+<html class="no-js" lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
 @php
     $setting_web = \App\Models\SettingWebsite::first();
@@ -26,10 +27,18 @@
     <link rel="stylesheet" href="{{ asset('front/css/style.css') }}">
     <!-- Responsive css -->
     <link rel="stylesheet" href="{{ asset('front/css/responsive.css') }}">
+    @if (app()->getLocale() === 'ar' && file_exists(public_path('front/css/rtl.css')))
+        <link rel="stylesheet" href="{{ asset('front/css/rtl.css') }}">
+    @endif
     @yield('styles')
+    <style>
+        .swal2-select {
+            display: none !important;
+        }
+    </style>
 </head>
 
-<body>
+<body class="{{ app()->getLocale() === 'ar' ? 'rtl' : '' }}">
     <!--[if lte IE 9]>
         <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
     <![endif]-->

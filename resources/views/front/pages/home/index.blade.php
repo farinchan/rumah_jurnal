@@ -258,6 +258,9 @@
                                                     onmouseover="this.style.color='#08652F'"
                                                     onmouseout="this.style.color='#333'">
                                                     {{ $event->name }}
+                                                    @if ($date_after && \Carbon\Carbon::parse($date_after)->isPast())
+                                                        <span class="badge badge-danger ml-2" style="font-size: 12px;">End</span>
+                                                    @endif
                                                 </a>
                                             </h3>
                                         </div>

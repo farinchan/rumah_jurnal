@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('type')->nullable();
             $table->enum('status', ['online', 'offline'])->default('offline');
+            $table->enum('access', ['terbuka', 'tertutup'])->default('terbuka');
             $table->string('name');
             $table->string('slug');
             $table->string('datetime')->nullable();

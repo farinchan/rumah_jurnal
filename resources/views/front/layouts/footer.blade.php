@@ -1,10 +1,9 @@
 @php
     $journals = \App\Models\Journal::all();
 
-    $journal_chunks = $journals->split(3);
+    $journal_chunks = $journals->split(2);
     $part1 = $journal_chunks->get(0) ?? collect();
     $part2 = $journal_chunks->get(1) ?? collect();
-    $part3 = $journal_chunks->get(2) ?? collect();
 @endphp
 <!-- BRAND LOGO AREA START -->
 {{-- <div class="ltn__brand-logo-area ltn__brand-logo-1 before-bg-bottom">
@@ -128,6 +127,24 @@
                                 <li><a href="{{ route("journal.index") }}">{{ __('layout.journal') }}</a></li>
                                 <li><a href="#">{{ __('layout.payment') }}</a></li>
                                 <li><a href="{{ route("contact.index") }}">{{ __('layout.contact') }}</a></li>
+                                <li><a href="https://proceedings.uinbukittinggi.ac.id/ ">Proceeding</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-xl-2 col-md-6 col-sm-6 col-12">
+
+                    <div class="footer-widget footer-menu-widget clearfix">
+                        <h4 class="footer-title">External Link</h4>
+                        <div class="footer-menu">
+                            <ul>
+                                <li><a href="https://uinbukittinggi.ac.id/">UIN Bukittinggi</a></li>
+                                <li><a href="https://ftik.uinbukittinggi.ac.id/">FTIK UIN Bukittinggi</a></li>
+                                <li><a href="https://fsyar.uinbukittinggi.ac.id/">FSYAR UIN Bukittinggi</a></li>
+                                <li><a href="https://febi.uinbukittinggi.ac.id/">FEBI UIN Bukittinggi </a></li>
+                                <li><a href="https://fuad.uinbukittinggi.ac.id/">FUAD UIN Bukittinggi </a></li>
+                                <li><a href="https://pasca.uinbukittinggi.ac.id/">Pasca UIN Bukittinggi </a></li>
                             </ul>
                         </div>
                     </div>
@@ -160,7 +177,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-2 col-md-6 col-sm-6 col-12">
+                {{-- <div class="col-xl-2 col-md-6 col-sm-6 col-12">
                     <div class="footer-widget footer-menu-widget clearfix">
                          <h4 class="footer-title">&nbsp;</h4>
                         <div class="footer-menu">
@@ -173,7 +190,7 @@
                             </ul>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 {{-- <div class="col-xl-3 col-md-6 col-sm-12 col-12">
                     <div class="footer-widget footer-newsletter-widget">
                         <h4 class="footer-title">Newsletter</h4>

@@ -53,7 +53,7 @@
                     <div class="d-flex">
                         <input id="kt_share_earn_link_input" type="text"
                             class="form-control form-control-solid me-3 flex-grow-1"
-                            value="https://keenthemes.com/?ref=keenthemes_user" readonly />
+                            value="{{ route('event.presence', $attendance->code) }}" readonly />
 
                         <button id="kt_share_earn_link_copy_button" class="btn btn-light fw-bold flex-shrink-0"
                             data-clipboard-target="#kt_share_earn_link_input">Copy Link</button>

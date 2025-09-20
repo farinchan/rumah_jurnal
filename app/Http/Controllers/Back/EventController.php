@@ -9,6 +9,7 @@ use App\Models\EventAttendanceUser;
 use App\Models\EventUser;
 use App\Models\Reviewer;
 use App\Models\Editor;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -279,39 +280,52 @@ class EventController extends Controller
 
     public function participantImportReviewerModal($id)
     {
-        $reviewers = Reviewer::with(['data'])
-            ->get()
-            ->unique('reviewer_id')
-            ->map(function ($reviewer) {
-                $reviewer->journal = Reviewer::where('reviewer_id', $reviewer->reviewer_id)
-                    ->with('issue.journal')
-                    ->get()
-                    ->map(function ($item) {
-                        $journal_data = $item->issue->journal;
-                        return (object) [
-                            'id' => $journal_data->id,
-                            'name' => $journal_data->name,
-                            'title' => $journal_data->title,
-                            'url_path' => $journal_data->url_path,
-                        ];
-                    });
-                return $reviewer;
-            });
+        try {
+            // Log untuk debugging
+            Log::info('participantImportReviewerModal called with id: ' . $id);
 
-        return response()->json([
-            'reviewers' => $reviewers->map(function ($reviewer) {
-                $journals = $reviewer->journal->pluck('title')->implode(', ');
-                return [
-                    'id' => $reviewer->id,
-                    'reviewer_id' => $reviewer->reviewer_id,
-                    'name' => $reviewer->name,
-                    'email' => $reviewer->email,
-                    'phone' => $reviewer->phone,
-                    'affiliation' => $reviewer->affiliation,
-                    'journals' => $journals ?: 'Tidak ada journal',
-                ];
-            })
-        ]);
+            // Get unique reviewers - simple version first
+            $reviewers = Reviewer::select('id', 'reviewer_id', 'name', 'email', 'phone', 'affiliation')
+                ->orderByDesc('id')
+                ->get()
+                ->unique('reviewer_id')
+                ->values();
+
+            Log::info('Found reviewers count: ' . $reviewers->count());
+
+            $result = [
+                'reviewers' => $reviewers->map(function ($reviewer) {
+                    return [
+                        'id' => $reviewer->id,
+                        'reviewer_id' => $reviewer->reviewer_id,
+                        'name' => $reviewer->name ?? 'Unknown Reviewer',
+                        'email' => $reviewer->email ?? 'No Email',
+                        'phone' => $reviewer->phone ?? '-',
+                        'affiliation' => $reviewer->affiliation ?? '-',
+                        'journals' =>  $reviewer->journal = Reviewer::where('reviewer_id', $reviewer->reviewer_id)->with('issue.journal')
+                            ->get()
+                            ->map(function ($item) {
+                                $journal_data = $item->issue->journal;
+                                return (object) [
+                                    'id' => $journal_data->id,
+                                    'name' => $journal_data->name,
+                                    'title' => $journal_data->title,
+                                    'url_path' => $journal_data->url_path,
+                                ];
+                            })->unique('id')->values(),
+                    ];
+                })
+            ];
+
+            Log::info('Returning reviewer data: ', $result);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            Log::error('Error in participantImportReviewerModal: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to load reviewers: ' . $e->getMessage(),
+                'reviewers' => []
+            ]);
+        }
     }
 
     public function participantImportReviewer(Request $request, $id)
@@ -334,7 +348,7 @@ class EventController extends Controller
         $skippedCount = 0;
 
         foreach ($request->reviewer_ids as $reviewerId) {
-            $reviewer = Reviewer::find($reviewerId);
+            $reviewer = Reviewer::orderByDesc('id')->where('id', $reviewerId)->first();
 
             if (!$reviewer) {
                 continue;
@@ -353,6 +367,7 @@ class EventController extends Controller
             // Create new event participant from reviewer
             $eventUser = new EventUser();
             $eventUser->event_id = $id;
+            $eventUser->user_id = User::where('reviewer_id', $reviewer->reviewer_id)->value('id') ?? null;
             $eventUser->name = $reviewer->name;
             $eventUser->email = $reviewer->email;
             $eventUser->phone = $reviewer->phone;
@@ -378,6 +393,7 @@ class EventController extends Controller
 
             // Get unique editors - simple version first
             $editors = Editor::select('id', 'editor_id', 'name', 'email', 'phone', 'affiliation')
+                ->orderByDesc('id')
                 ->get()
                 ->unique('editor_id')
                 ->values();
@@ -393,14 +409,23 @@ class EventController extends Controller
                         'email' => $editor->email ?? 'No Email',
                         'phone' => $editor->phone ?? '-',
                         'affiliation' => $editor->affiliation ?? '-',
-                        'journals' => 'Loading...', // Temporary
+                        'journals' => $editor->journal = Editor::where('editor_id', $editor->editor_id)->with('issue.journal')
+                            ->get()
+                            ->map(function ($item) {
+                                $journal_data = $item->issue->journal;
+                                return (object) [
+                                    'id' => $journal_data->id,
+                                    'name' => $journal_data->name,
+                                    'title' => $journal_data->title,
+                                    'url_path' => $journal_data->url_path,
+                                ];
+                            })->unique('id')->values(),
                     ];
                 })
             ];
 
             Log::info('Returning data: ', $result);
             return response()->json($result);
-
         } catch (\Exception $e) {
             Log::error('Error in participantImportEditorModal: ' . $e->getMessage());
             return response()->json([
@@ -430,7 +455,7 @@ class EventController extends Controller
         $skippedCount = 0;
 
         foreach ($request->editor_ids as $editorId) {
-            $editor = Editor::find($editorId);
+            $editor = Editor::orderByDesc('id')->where('id', $editorId)->first();
 
             if (!$editor) {
                 continue;
@@ -448,6 +473,7 @@ class EventController extends Controller
 
             // Create new event participant from editor
             $eventUser = new EventUser();
+            $eventUser->user_id = User::where('editor_id', $editor->editor_id)->value('id') ?? null;
             $eventUser->event_id = $id;
             $eventUser->name = $editor->name;
             $eventUser->email = $editor->email;
@@ -499,6 +525,7 @@ class EventController extends Controller
         }
 
         $attendance = new EventAttendance();
+        $attendance->code = strtoupper(Str::random(10)) . '-' . $id;
         $attendance->event_id = $id;
         $attendance->name = $request->name;
         $attendance->description = $request->description;
