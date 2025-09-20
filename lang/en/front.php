@@ -102,6 +102,7 @@ return [
     'no_reviewer' => 'No Reviewer Found',
 
     'register_now' => 'Register Now',
+    'registration_closed' => 'Registration Closed',
     'registered' => 'You have registered for this event',
     'print_eticket' => 'Print E-Ticket',
     'phone_format' => 'Phone number must start with country code, e.g. +62 for Indonesia. Example: +6281234567890',

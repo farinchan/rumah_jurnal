@@ -143,13 +143,33 @@
                                                     </span>
                                                 </a>
                                             @else
-                                                <a href="#" data-toggle="modal"
-                                                    data-target="{{ Auth::check() ? '#regisevent' : '#exampleModal' }}">
-                                                    {{ __('front.register_now') }}
-                                                    <span>
-                                                        <i class="fas fa-arrow-right"></i>
+                                                @php
+                                                    $dates = explode(' - ', $event->datetime);
+                                                    $before = $dates[0] ?? null;
+                                                    $after = $dates[1] ?? null;
+                                                    $date_before = $before
+                                                        ? \Carbon\Carbon::parse($before)->toDateTimeString()
+                                                        : null;
+                                                    $date_after = $after
+                                                        ? \Carbon\Carbon::parse($after)->toDateTimeString()
+                                                        : null;
+                                                    // dd($date_before, $date_after);
+                                                @endphp
+
+                                                @if ($date_before && \Carbon\Carbon::now()->lt(\Carbon\Carbon::parse($date_before)))
+                                                    <span class="text-danger" style="float:none" >
+                                                        <i class="fa fa-exclamation-triangle"></i>
+                                                        {{ __('front.registration_closed') }}
                                                     </span>
-                                                </a>
+                                                @else
+                                                    <a href="#" data-toggle="modal"
+                                                        data-target="{{ Auth::check() ? '#regisevent' : '#exampleModal' }}">
+                                                        {{ __('front.register_now') }}
+                                                        <span>
+                                                            <i class="fas fa-arrow-right"></i>
+                                                        </span>
+                                                    </a>
+                                                @endif
                                             @endif
 
                                         </li>
@@ -172,8 +192,8 @@
                                                 title="Twitter" target="_blank"><i class="fab fa-twitter"></i></a></li>
                                         <li><a href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode(Request::fullUrl()) }}"
                                                 title="Linkedin" target="_blank"><i class="fab fa-linkedin"></i></a></li>
-                                        <li><a href="https://www.youtube.com" title="Youtube" target="_blank"><i
-                                                    class="fab fa-youtube"></i></a></li>
+                                        <li><a href="https://wa.me/?text={{ urlencode(Request::fullUrl()) }}"
+                                                title="WhatsApp" target="_blank"><i class="fab fa-whatsapp"></i></a></li>
                                     </ul>
                                 </div>
                             </div>

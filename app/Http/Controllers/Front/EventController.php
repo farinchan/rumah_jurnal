@@ -40,7 +40,7 @@ class EventController extends Controller
             ],
             'setting_web' => $setting_web,
 
-            'list_event' => Event::latest()->paginate(10),
+            'list_event' => Event::latest()->where('is_active', true)->where('access', 'terbuka')->paginate(10),
         ];
 
         return view('front.pages.event.index', $data);
@@ -89,6 +89,29 @@ class EventController extends Controller
 
         if (!$event) {
             return redirect()->back()->with('error', 'Event not found');
+        }
+
+        if (!Auth::check()) {
+            Alert::warning('Login Required', 'Please login to register for this event.');
+            return redirect()->route('login');
+        }
+
+        if ($event->is_active == false) {
+            Alert::error('Error', 'Event is not active');
+            return redirect()->route('event.show', $event->slug);
+        }
+
+        if ($event->access == 'tertutup') {
+            Alert::error('Error', 'Event is closed');
+            return redirect()->route('event.show', $event->slug);
+        }
+
+        if ($event->limit) {
+            $count_registered = $event->users()->count();
+            if ($count_registered >= $event->limit) {
+                Alert::error('Error', 'Event registration is full');
+                return redirect()->route('event.show', $event->slug);
+            }
         }
 
 

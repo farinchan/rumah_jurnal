@@ -138,6 +138,23 @@
                             </div>
                         </div>
                         <div class="mb-5 fv-row">
+                                <label class="required form-label">Akses event</label>
+                                <select name="access" class="form-select mb-2" data-control="select2"
+                                    data-hide-search="true" data-placeholder="Pilih akses event" required>
+                                    <option></option>
+                                    <option value="terbuka" {{ $event->access == 'terbuka' ? 'selected' : '' }}>Terbuka</option>
+                                    <option value="tertutup" {{ $event->access == 'tertutup' ? 'selected' : '' }}>Tertutup</option>
+                                </select>
+                                @error('access')
+                                    <div class="text-danger fs-7">{{ $message }}</div>
+                                @enderror
+                                <div class="text-muted fs-7">
+                                    Akses event, terbuka untuk umum atau tertutup (hanya untuk undangan, tidak ditampilkan di
+                                    halaman depan)
+                                </div>
+
+                        </div>
+                        <div class="mb-5 fv-row">
                             <label class="required form-label">Nama event</label>
                             <input type="text" name="name" class="form-control mb-2" placeholder="Masukkan nama event"
                                 value="{{ $event->name }}" required />
