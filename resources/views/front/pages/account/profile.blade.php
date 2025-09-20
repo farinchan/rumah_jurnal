@@ -129,6 +129,7 @@
                                                         </div>
                                                     </div>
                                                 @empty
+                                                    <p>You have not registered for any events yet.</p>
                                                 @endforelse
                                             </div>
                                         </div>
@@ -140,38 +141,62 @@
                                                     here.
                                                 </p>
                                                 <div class="ltn__form-box">
-                                                    <form action="#">
+                                                    <form action="{{ route('account.profile.update') }}" method="POST" enctype="multipart/form-data">
+                                                        @csrf
+                                                        @method('PUT')
                                                         <fieldset class="mb-30">
                                                             <legend>Biodata</legend>
                                                             <div class="row x">
                                                                 <div class="col-md-12">
                                                                     <label>Name</label>
                                                                     <input type="text" name="name" placeholder="Name"
-                                                                        value="{{ $me->name }}">
+                                                                        value="{{ old('name', $me->name) }}" required>
+                                                                    @error('name')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
                                                                 </div>
                                                                 <div class="col-md-12">
                                                                     <label>Gender</label>
                                                                     <div class="input-item">
-                                                                        <select name="gender" class="nice-select">
+                                                                        <select name="gender" class="nice-select" required>
                                                                             <option value="laki-laki"
-                                                                                {{ $me->gender == 'laki-laki' ? 'selected' : '' }}>
+                                                                                {{ old('gender', $me->gender) == 'laki-laki' ? 'selected' : '' }}>
                                                                                 Laki-laki</option>
                                                                             <option value="perempuan"
-                                                                                {{ $me->gender == 'perempuan' ? 'selected' : '' }}>
+                                                                                {{ old('gender', $me->gender) == 'perempuan' ? 'selected' : '' }}>
                                                                                 Perempuan</option>
                                                                         </select>
                                                                     </div>
+                                                                    @error('gender')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
                                                                 </div>
 
                                                                 <div class="col-md-6">
                                                                     <label>Email</label>
                                                                     <input type="email" name="email"
-                                                                        placeholder="Email" value="{{ $me->email }}">
+                                                                        placeholder="Email" value="{{ old('email', $me->email) }}" required>
+                                                                    @error('email')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <label>Phone</label>
                                                                     <input type="text" name="phone"
-                                                                        placeholder="Phone" value="{{ $me->phone }}">
+                                                                        placeholder="Phone" value="{{ old('phone', $me->phone) }}">
+                                                                    @error('phone')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
+                                                                </div>
+                                                                <div class="col-md-12">
+                                                                    <label>Photo Profile</label>
+                                                                    <input type="file" name="photo" accept="image/*">
+                                                                    @error('photo')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
+                                                                    @if($me->photo)
+                                                                        <small class="text-muted d-block mt-2">Current photo: {{ basename($me->photo) }}</small>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </fieldset>
@@ -181,12 +206,23 @@
                                                                 <div class="col-md-12">
                                                                     <label>Current password (leave blank to leave
                                                                         unchanged):</label>
-                                                                    <input type="password" name="ltn__name">
+                                                                    <input type="password" name="current_password">
+                                                                    @error('current_password')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
+
                                                                     <label>New password (leave blank to leave
                                                                         unchanged):</label>
-                                                                    <input type="password" name="ltn__lastname">
+                                                                    <input type="password" name="new_password">
+                                                                    @error('new_password')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
+
                                                                     <label>Confirm new password:</label>
-                                                                    <input type="password" name="ltn__lastname">
+                                                                    <input type="password" name="new_password_confirmation">
+                                                                    @error('new_password_confirmation')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
                                                                 </div>
                                                             </div>
                                                         </fieldset>
