@@ -6,12 +6,13 @@
 @endphp
 
 <!-- SLIDER AREA START (slider-3) -->
-<div class="ltn__slider-area ltn__slider-3  section-bg-1">
-    <div class="ltn__slide-one-active slick-slide-arrow-1 slick-slide-dots-1">
+<div class="ltn__slider-area ltn__slider-3 section-bg-1">
+    <div class="ltn__slide-one-active slick-slide-arrow-1 slick-slide-dots-1" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"
+         data-rtl="{{ app()->getLocale() === 'ar' ? 'true' : 'false' }}">
         <!-- ltn__slide-item -->
         @if ($banner1)
             <div class="ltn__slide-item ltn__slide-item-2 ltn__slide-item-3-normal ltn__slide-item-3 bg-image"
-                data-bg="{{ $banner1->getImage() }}">
+                data-bg="{{ $banner1->getImage() }}" style="background-image: url('{{ $banner1->getImage() }}');">
                 <div class="ltn__slide-item-inner">
                     <div class="container">
                         <div class="row">
@@ -62,8 +63,8 @@
         <!-- ltn__slide-item -->
         @if ($banner2)
             <div class="ltn__slide-item ltn__slide-item-2 ltn__slide-item-3-normal ltn__slide-item-3 bg-image"
-                data-bg="{{ $banner2->getImage() }}">
-                <div class="ltn__slide-item-inner  text-right">
+                data-bg="{{ $banner2->getImage() }}" style="background-image: url('{{ $banner2->getImage() }}');">
+                <div class="ltn__slide-item-inner text-right">
                     <div class="container">
                         <div class="row">
                             <div class="col-lg-12 align-self-center">
@@ -113,7 +114,7 @@
 
         @if ($banner3)
             <div class="ltn__slide-item ltn__slide-item-2 ltn__slide-item-3-normal ltn__slide-item-3 bg-image"
-                data-bg="{{ $banner3->getImage() }}">
+                data-bg="{{ $banner3->getImage() }}" style="background-image: url('{{ $banner3->getImage() }}');">
                 <div class="ltn__slide-item-inner">
                     <div class="container">
                         <div class="row">
