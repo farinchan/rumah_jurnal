@@ -400,7 +400,6 @@ class EventController extends Controller
 
             Log::info('Returning data: ', $result);
             return response()->json($result);
-
         } catch (\Exception $e) {
             Log::error('Error in participantImportEditorModal: ' . $e->getMessage());
             return response()->json([
@@ -499,6 +498,7 @@ class EventController extends Controller
         }
 
         $attendance = new EventAttendance();
+        $attendance->code = strtoupper(Str::random(10)) . '-' . $id;
         $attendance->event_id = $id;
         $attendance->name = $request->name;
         $attendance->description = $request->description;

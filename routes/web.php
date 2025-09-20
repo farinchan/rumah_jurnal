@@ -72,6 +72,9 @@ Route::prefix('event')->name('event.')->group(function () {
     Route::post('/{slug}/register', [EventController::class, 'register'])->name('register');
 
     Route::get('/eticket/{uuid}', [EventController::class, 'eticket'])->name('eticket');
+
+    Route::get('/presence/{code}', [EventController::class, 'presence'])->name('presence');
+    Route::post('/presence/{code}/store', [EventController::class, 'presenceStore'])->name('presence.store');
 });
 
 Route::prefix('announcement')->name('announcement.')->group(function () {
