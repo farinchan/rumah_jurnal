@@ -190,12 +190,14 @@
                                 <a href="#">
                                     <img src="
                                     @if (app()->getLocale() == 'en') {{ asset('back/media/flags/united-states.svg') }}
+                                    @elseif(app()->getLocale() == 'ar') {{ asset('back/media/flags/saudi-arabia.svg') }}
                                     @else
                                         {{ asset('back/media/flags/indonesia.svg') }} @endif"
                                         alt="Image" style="width: 35px;">
                                 </a>
                                 <ul>
                                     <li><a href="{{ route('locale.change', 'en') }}">English</a></li>
+                                    <li><a href="{{ route('locale.change', 'ar') }}">العربية</a></li>
                                     <li><a href="{{ route('locale.change', 'id') }}">Indonesia</a></li>
                                 </ul>
                             </li>
