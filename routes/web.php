@@ -73,8 +73,8 @@ Route::prefix('event')->name('event.')->group(function () {
 
     Route::get('/eticket/{uuid}', [EventController::class, 'eticket'])->name('eticket');
 
-    Route::get('/presence/{code}', [EventController::class, 'presence'])->name('presence');
-    Route::post('/presence/{code}/store', [EventController::class, 'presenceStore'])->name('presence.store');
+    Route::get('/presence/{code}', [EventController::class, 'presence'])->name('presence')->middleware('auth');
+    Route::post('/presence/{code}/store', [EventController::class, 'presenceStore'])->name('presence.store')->middleware('auth');
 });
 
 Route::prefix('announcement')->name('announcement.')->group(function () {
