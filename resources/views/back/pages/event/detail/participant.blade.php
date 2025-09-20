@@ -427,13 +427,14 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('back/js/custom/apps/user-management/users/list/table.js') }}"></script>
+    {{-- <script src="{{ asset('back/js/custom/apps/user-management/users/list/table.js') }}"></script> --}}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Load reviewers when modal is shown
             $('#kt_modal_import_reviewer').on('show.bs.modal', function() {
                 loadReviewers();
+
             });
 
             // Load editors when modal is shown
@@ -443,12 +444,30 @@
 
             // Function to load reviewers
             function loadReviewers() {
+                console.log('Starting to load reviewers...');
                 fetch('{{ route('back.event.detail.participant.import-reviewer.modal', $event->id) }}')
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('Response received:', response);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('Reviewer data received:', data);
                         let reviewerList = '';
 
-                        if (data.reviewers && data.reviewers.length > 0) {
+                        if (data.error) {
+                            console.error('Server error:', data.error);
+                            reviewerList = `
+                                <tr>
+                                    <td colspan="6" class="text-center text-danger">
+                                        Error: ${data.error}
+                                    </td>
+                                </tr>
+                            `;
+                        } else if (data.reviewers && data.reviewers.length > 0) {
+                            console.log('Processing', data.reviewers.length, 'reviewers');
                             data.reviewers.forEach(reviewer => {
                                 reviewerList += `
                                     <tr>
@@ -462,11 +481,14 @@
                                         <td>${reviewer.email || '-'}</td>
                                         <td>${reviewer.affiliation || '-'}</td>
                                         <td>${reviewer.phone || '-'}</td>
-                                        <td><small class="text-muted">${reviewer.journals || 'Tidak ada journal'}</small></td>
+                                        <td><small class="text-muted"> <ul>
+                                            ${reviewer.journals.map(journal => `<li>${journal.title}</li>`).join('') || '<li>Tidak ada journal</li>'}
+                                            </ul></small></td>
                                     </tr>
                                 `;
                             });
                         } else {
+                            console.log('No reviewers found');
                             reviewerList = `
                                 <tr>
                                     <td colspan="6" class="text-center text-muted">
@@ -486,11 +508,11 @@
                         setupCheckboxes();
                     })
                     .catch(error => {
-                        console.error('Error loading reviewers:', error);
+                        console.error('Fetch error:', error);
                         document.getElementById('reviewer_list').innerHTML = `
                             <tr>
                                 <td colspan="6" class="text-center text-danger">
-                                    Error loading reviewers
+                                    Error loading data: ${error.message}
                                 </td>
                             </tr>
                         `;
@@ -536,7 +558,9 @@
                                         <td>${editor.email || '-'}</td>
                                         <td>${editor.affiliation || '-'}</td>
                                         <td>${editor.phone || '-'}</td>
-                                        <td><small class="text-muted">${editor.journals || 'Tidak ada journal'}</small></td>
+                                        <td><small class="text-muted"> <ul>
+                                            ${editor.journals.map(journal => `<li>${journal.title}</li>`).join('') || '<li>Tidak ada journal</li>'}
+                                            </ul></small></td>
                                     </tr>
                                 `;
                             });
