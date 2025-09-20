@@ -29,4 +29,9 @@ class ReviewerData extends Model
     {
         return $this->belongsTo(Reviewer::class, 'reviewer_id', 'reviewer_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'reviewer_id', 'reviewer_id');
+    }
 }

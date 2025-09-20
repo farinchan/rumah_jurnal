@@ -33,6 +33,11 @@ class Reviewer extends Model
     {
         return $this->hasOne(ReviewerData::class, 'reviewer_id', 'reviewer_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'reviewer_id', 'reviewer_id');
+    }
 }
 
 

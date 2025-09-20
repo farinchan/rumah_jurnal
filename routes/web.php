@@ -300,11 +300,13 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::prefix('reviewer')->name('reviewer.')->group(function () {
             Route::get('/', [BackMasterDataController::class, 'reviewerIndex'])->name('index');
             Route::put('/edit/{reviewer_id}', [BackMasterDataController::class, 'reviewerUpdate'])->name('update');
+            Route::post('/sync-to-user', [BackMasterDataController::class, 'reviewerSyncToUser'])->name('sync-to-user');
         });
 
         Route::prefix('editor')->name('editor.')->group(function () {
             Route::get('/', [BackMasterDataController::class, 'editorIndex'])->name('index');
             Route::put('/edit/{id}', [BackMasterDataController::class, 'editorUpdate'])->name('update');
+            Route::post('/sync-to-user', [BackMasterDataController::class, 'editorSyncToUser'])->name('sync-to-user');
         });
 
         Route::prefix('payment-account')->name('payment-account.')->group(function () {
