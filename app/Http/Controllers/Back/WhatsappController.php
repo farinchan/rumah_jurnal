@@ -226,8 +226,20 @@ class WhatsappController extends Controller
                     continue;
                 }
                 if ($phone == 'user_editors') {
-                    $user_editors = User::role('editor')->get();
+                    $user_editors = User::where("editor_id", '!=', null)->get();
                     foreach ($user_editors as $user) {
+                        if ($user->phone) {
+                            $data[] = [
+                                'to' => whatsappNumber($user->phone),
+                                'text' => $request->message,
+                            ];
+                        }
+                    }
+                    continue;
+                }
+                if ($phone == 'user_reviewers') {
+                    $user_reviewers = User::where("reviewer_id", '!=', null)->get();
+                    foreach ($user_reviewers as $user) {
                         if ($user->phone) {
                             $data[] = [
                                 'to' => whatsappNumber($user->phone),
