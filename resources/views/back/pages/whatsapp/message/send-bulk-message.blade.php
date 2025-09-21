@@ -52,6 +52,7 @@
                                             <option></option>
                                             <option value="users">Semua Pengguna</option>
                                             <option value="user_editors">Editor</option>
+                                            <option value="user_reviewers">Reviewer</option>
                                             <option value="user_finances">Keuangan</option>
                                             <option value="user_public_relations">Humas</option>
                                             <option value="user_super_admins">Super Admin</option>

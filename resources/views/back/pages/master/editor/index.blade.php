@@ -47,6 +47,13 @@
                                 </div>
                             </div>
 
+                            <a href="{{ route('back.master.editor.export') }}" class="btn btn-light-primary me-3">
+                                <i class="ki-duotone ki-file-excel fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                </i>Export Excel
+                            </a>
                             <form action="{{ route('back.master.editor.sync-to-user') }}" method="post" class="me-3">
                                 @csrf
                                 <button type="submit" class="btn btn-light-success me-3">
@@ -99,7 +106,7 @@
                                                 <a href="#" target="_blank"
                                                     class="text-gray-800 text-hover-primary mb-1 me-2">{{ $editor->name }}
                                                 </a>
-                                               
+
                                             </div>
                                             <span>
                                                 {{ $editor->affiliation }}
