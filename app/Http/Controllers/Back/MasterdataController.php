@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Back;
 
+use App\Exports\EditorAllExport;
+use App\Exports\ReviewerAllExport;
 use App\Http\Controllers\Controller;
 use App\Models\Editor;
 use App\Models\EditorData;
@@ -14,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MasterdataController extends Controller
 {
@@ -173,6 +176,7 @@ class MasterdataController extends Controller
                 ]
             ],
             'reviewers' => Reviewer::with(['data'])
+                ->latest()
                 ->get()
                 ->unique('reviewer_id')
                 ->map(function ($reviewer) {
@@ -193,6 +197,11 @@ class MasterdataController extends Controller
         ];
         // return response()->json($data);
         return view('back.pages.master.reviewer.index', $data);
+    }
+
+    public function reviewerExport()
+    {
+       return Excel::download(new ReviewerAllExport, 'reviewers.xlsx');
     }
 
     public function reviewerUpdate(Request $request, $id)
@@ -277,6 +286,7 @@ class MasterdataController extends Controller
                 ]
             ],
             'editors' => Editor::with(['data'])
+                ->latest()
                 ->get()
                 ->unique('editor_id')
                 ->map(function ($editor) {
@@ -297,6 +307,11 @@ class MasterdataController extends Controller
         ];
 
         return view('back.pages.master.editor.index', $data);
+    }
+
+    public function editorExport()
+    {
+       return Excel::download(new EditorAllExport, 'editors.xlsx');
     }
 
     public function editorUpdate(Request $request, $id)

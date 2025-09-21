@@ -46,6 +46,15 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <a href="{{ route('back.master.reviewer.export') }}" class="btn btn-light-primary me-3">
+                                <i class="ki-duotone ki-file-excel fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                </i>Export Excel
+                            </a>
+
                             <form action="{{ route('back.master.reviewer.sync-to-user') }}" method="post" class="me-3">
                                 @csrf
                                 <button type="submit" class="btn btn-light-success me-3">
