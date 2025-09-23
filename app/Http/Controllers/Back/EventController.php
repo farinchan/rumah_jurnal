@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Back;
 
+use App\Exports\EventAttendanceUserExport;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventAttendance;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 class EventController extends Controller
 {
@@ -694,6 +695,14 @@ class EventController extends Controller
             })
             ->rawColumns(['user', 'attendance', 'action'])
             ->make(true);
+    }
+
+    public function attendanceExport($id, $attendanceId)
+    {
+        return Excel::download(
+            new EventAttendanceUserExport($id, $attendanceId),
+            'kehadiran-event.xlsx'
+        );
     }
 
     public function attendanceDetailUserCheckin(Request $request, $id, $attendanceId, $eventUserId)
