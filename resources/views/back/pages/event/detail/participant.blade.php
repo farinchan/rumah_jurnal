@@ -427,7 +427,7 @@
 @endsection
 
 @section('scripts')
-    {{-- <script src="{{ asset('back/js/custom/apps/user-management/users/list/table.js') }}"></script> --}}
+    <script src="{{ asset('back/js/custom/apps/user-management/users/list/table.js') }}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
