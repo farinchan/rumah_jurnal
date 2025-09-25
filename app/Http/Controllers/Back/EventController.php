@@ -103,7 +103,7 @@ class EventController extends Controller
 
         if ($request->hasFile('thumbnail')) {
             $image = $request->file('thumbnail');
-            $event->thumbnail =  $image->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $image->getClientOriginalExtension(), 'public');
+            $event->thumbnail =  $image->storeAs('event', date('YmdHis') . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension(), 'public');
         }
 
         if ($request->hasFile('attachment')) {
@@ -131,6 +131,7 @@ class EventController extends Controller
 
     public function update(Request $request, $id)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'type' => 'required',
             'status' => 'required',
@@ -173,20 +174,20 @@ class EventController extends Controller
         $event->user_id = Auth::user()->id;
 
 
-        if ($request->hasFile('image')) {
-            if ($event->image) {
-                Storage::delete('public/' . $event->image);
+        if ($request->hasFile('thumbnail')) {
+            if ($event->thumbnail) {
+                Storage::delete('public/' . $event->thumbnail);
             }
-            $image = $request->file('image');
-            $event->image = $image->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $image->getClientOriginalExtension(), 'public');
+            $image = $request->file('thumbnail');
+            $event->thumbnail = $image->storeAs('event', date('YmdHis') . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension(), 'public');
         }
 
-        if ($request->hasFile('file')) {
-            if ($event->file) {
-                Storage::delete('public/' . $event->file);
+        if ($request->hasFile('attachment')) {
+            if ($event->attachment) {
+                Storage::delete('public/' . $event->attachment);
             }
-            $file = $request->file('file');
-            $event->file = $file->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
+            $file = $request->file('attachment');
+            $event->attachment = $file->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
         }
 
         $event->save();
