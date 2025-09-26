@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\Listeners\LogSentEmail;
 use App\Models\EventUser;
 use App\Models\Payment;
+use App\Models\PaymentInvoice;
 use App\Observers\EventUserObserver;
+use App\Observers\PaymentInvoiceObserver;
 use App\Observers\PaymentObserver;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Blade;
@@ -38,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Payment::observe(PaymentObserver::class);
         EventUser::observe(EventUserObserver::class);
+        PaymentInvoice::observe(PaymentInvoiceObserver::class);
 
         if (app()->environment('production')) {
             URL::forceScheme('https');
