@@ -287,7 +287,8 @@ class EventController extends Controller
             Log::info('participantImportReviewerModal called with id: ' . $id);
 
             // Get unique reviewers - simple version first
-            $reviewers = Reviewer::select('id', 'reviewer_id', 'name', 'email', 'phone', 'affiliation')
+            $reviewers = Reviewer::with(["user"])
+                ->select('id', 'reviewer_id', 'name', 'email', 'phone', 'affiliation')
                 ->orderByDesc('id')
                 ->get()
                 ->unique('reviewer_id')
@@ -301,8 +302,8 @@ class EventController extends Controller
                         'id' => $reviewer->id,
                         'reviewer_id' => $reviewer->reviewer_id,
                         'name' => $reviewer->name ?? 'Unknown Reviewer',
-                        'email' => $reviewer->email ?? 'No Email',
-                        'phone' => $reviewer->phone ?? '-',
+                        'email' => $reviewer->user->email ?? $reviewer->email ?? 'No Email',
+                        'phone' => $reviewer->user->phone ?? $reviewer->phone ?? '-',
                         'affiliation' => $reviewer->affiliation ?? '-',
                         'journals' =>  $reviewer->journal = Reviewer::where('reviewer_id', $reviewer->reviewer_id)->with('issue.journal')
                             ->get()
@@ -350,7 +351,7 @@ class EventController extends Controller
         $skippedCount = 0;
 
         foreach ($request->reviewer_ids as $reviewerId) {
-            $reviewer = Reviewer::orderByDesc('id')->where('id', $reviewerId)->first();
+            $reviewer = Reviewer::with(['user'])->orderByDesc('id')->where('id', $reviewerId)->first();
 
             if (!$reviewer) {
                 continue;
@@ -371,8 +372,8 @@ class EventController extends Controller
             $eventUser->event_id = $id;
             $eventUser->user_id = User::where('reviewer_id', $reviewer->reviewer_id)->value('id') ?? null;
             $eventUser->name = $reviewer->name;
-            $eventUser->email = $reviewer->email;
-            $eventUser->phone = $reviewer->phone;
+            $eventUser->email = $reviewer->user->email ?? $reviewer->email;
+            $eventUser->phone = $reviewer->user->phone ?? $reviewer->phone;
             $eventUser->save();
 
             $importedCount++;
@@ -394,7 +395,8 @@ class EventController extends Controller
             Log::info('participantImportEditorModal called with id: ' . $id);
 
             // Get unique editors - simple version first
-            $editors = Editor::select('id', 'editor_id', 'name', 'email', 'phone', 'affiliation')
+            $editors = Editor::with('user')
+                ->select('id', 'editor_id', 'name', 'email', 'phone', 'affiliation')
                 ->orderByDesc('id')
                 ->get()
                 ->unique('editor_id')
@@ -408,8 +410,8 @@ class EventController extends Controller
                         'id' => $editor->id,
                         'editor_id' => $editor->editor_id,
                         'name' => $editor->name ?? 'Unknown Editor',
-                        'email' => $editor->email ?? 'No Email',
-                        'phone' => $editor->phone ?? '-',
+                        'email' => $editor->user->email ?? $editor->email ?? 'No Email',
+                        'phone' => $editor->user->phone ?? $editor->phone ?? '-',
                         'affiliation' => $editor->affiliation ?? '-',
                         'journals' => $editor->journal = Editor::where('editor_id', $editor->editor_id)->with('issue.journal')
                             ->get()
@@ -457,7 +459,7 @@ class EventController extends Controller
         $skippedCount = 0;
 
         foreach ($request->editor_ids as $editorId) {
-            $editor = Editor::orderByDesc('id')->where('id', $editorId)->first();
+            $editor = Editor::with('user')->orderByDesc('id')->where('id', $editorId)->first();
 
             if (!$editor) {
                 continue;
@@ -478,8 +480,8 @@ class EventController extends Controller
             $eventUser->user_id = User::where('editor_id', $editor->editor_id)->value('id') ?? null;
             $eventUser->event_id = $id;
             $eventUser->name = $editor->name;
-            $eventUser->email = $editor->email;
-            $eventUser->phone = $editor->phone;
+            $eventUser->email = $editor->user->email ?? $editor->email ?? 'No Email';
+            $eventUser->phone = $editor->user->phone ?? $editor->phone ?? '-';
             $eventUser->save();
 
             $importedCount++;
