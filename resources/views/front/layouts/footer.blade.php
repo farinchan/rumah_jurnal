@@ -223,9 +223,9 @@
                 <div class="col-md-6 col-12 align-self-center">
                     <div class="ltn__copyright-menu text-right">
                         <ul>
-                            <li><a href="#">Support</a></li>
-                            <li><a href="#">Terms & Conditions</a></li>
-                            <li><a href="#">Privacy & Policy</a></li>
+                            <li><a href="{{ route('contact.index') }}">Support</a></li>
+                            <li><a href="{{ route('terms.service') }}">Syarat & Ketentuan</a></li>
+                            <li><a href="{{ route('privacy.policy') }}">Kebijakan Privasi</a></li>
                         </ul>
                     </div>
                 </div>

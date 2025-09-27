@@ -121,6 +121,19 @@
                                 </div>
                             </div>
 
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label class="mb-0 input-info-save">
+                                        <input type="checkbox" name="agree_terms" required>
+                                        Saya setuju dengan <a href="{{ route('terms.service') }}" target="_blank">Syarat dan Ketentuan</a>
+                                        serta <a href="{{ route('privacy.policy') }}" target="_blank">Kebijakan Privasi</a>
+                                    </label>
+                                    @error('agree_terms')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
+
                             <div class="btn-wrapper mt-0">
                                 <button class="theme-btn-1 btn btn-block" type="submit">{{ __('auth.create_account') }}</button>
                             </div>
@@ -137,6 +150,9 @@
                                     style="background: #ea4335; color: #fff;">
                                     <i class="fab fa-google"></i> Register with Google
                                 </a>
+                                <small class="text-muted text-center d-block mt-2">
+                                    Dengan menggunakan login Google, Anda menyetujui <a href="{{ route('privacy.policy') }}" target="_blank">Kebijakan Privasi</a> kami.
+                                </small>
                             </div>
                         </div>
                     </div>
