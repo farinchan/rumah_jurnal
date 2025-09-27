@@ -50,6 +50,7 @@ class RegisterController extends Controller
             'sinta_id' => 'nullable|string|max:255',
             'scopus_id' => 'nullable|string|max:255',
             'google_scholar' => 'nullable|string|max:255',
+            'agree_terms' => 'required|accepted',
         ], [
             'name.required' => 'Nama lengkap tidak boleh kosong',
             'username.unique' => 'Username sudah digunakan',
@@ -59,6 +60,8 @@ class RegisterController extends Controller
             'password.required' => 'Password tidak boleh kosong',
             'password.min' => 'Password minimal 6 karakter',
             'password.confirmed' => 'Konfirmasi password tidak cocok',
+            'agree_terms.required' => 'Anda harus menyetujui Syarat dan Ketentuan serta Kebijakan Privasi',
+            'agree_terms.accepted' => 'Anda harus menyetujui Syarat dan Ketentuan serta Kebijakan Privasi',
         ]);
 
         if ($validator->fails()) {

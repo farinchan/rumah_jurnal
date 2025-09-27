@@ -63,4 +63,58 @@ class HomeController extends Controller
             return response()->json(['status' => 'error', 'message' => $th->getMessage()], 500);
         }
     }
+
+    public function privacyPolicy()
+    {
+        $setting_web = SettingWebsite::first();
+
+        $data = [
+            'title' => 'Kebijakan Privasi',
+            'meta' => [
+                'title' => 'Kebijakan Privasi | ' . $setting_web->name,
+                'description' => 'Kebijakan Privasi ' . $setting_web->name . ' - Perlindungan data dan privasi pengguna dalam sistem jurnal online.',
+                'keywords' => $setting_web->name . ', Kebijakan Privasi, Privacy Policy, Data Protection, Journal, Research, OJS System',
+                'favicon' => $setting_web->favicon
+            ],
+            'breadcrumbs' => [
+                [
+                    'name' => 'Beranda',
+                    'link' => route('home')
+                ],
+                [
+                    'name' => 'Kebijakan Privasi',
+                    'link' => route('privacy.policy')
+                ]
+            ],
+            'setting_web' => $setting_web,
+        ];
+        return view('front.pages.home.privacy_policy', $data);
+    }
+
+    public function termsOfService()
+    {
+        $setting_web = SettingWebsite::first();
+
+        $data = [
+            'title' => 'Syarat dan Ketentuan',
+            'meta' => [
+                'title' => 'Syarat dan Ketentuan | ' . $setting_web->name,
+                'description' => 'Syarat dan Ketentuan penggunaan layanan ' . $setting_web->name . ' - Aturan dan regulasi sistem jurnal online.',
+                'keywords' => $setting_web->name . ', Syarat dan Ketentuan, Terms of Service, Journal Rules, OJS System, Academic Journal',
+                'favicon' => $setting_web->favicon
+            ],
+            'breadcrumbs' => [
+                [
+                    'name' => 'Beranda',
+                    'link' => route('home')
+                ],
+                [
+                    'name' => 'Syarat dan Ketentuan',
+                    'link' => route('terms.service')
+                ]
+            ],
+            'setting_web' => $setting_web,
+        ];
+        return view('front.pages.home.terms_of_service', $data);
+    }
 }

@@ -65,6 +65,9 @@
                                     style="background: #ea4335; color: #fff;">
                                     <i class="fab fa-google"></i> Login with Google
                                 </a>
+                                <small class="text-muted text-center d-block mt-2">
+                                    Dengan menggunakan login Google, Anda menyetujui <a href="{{ route('privacy.policy') }}" target="_blank">Kebijakan Privasi</a> kami.
+                                </small>
                             </div>
                         </div>
 
