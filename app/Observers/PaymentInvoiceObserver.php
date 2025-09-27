@@ -56,6 +56,10 @@ class PaymentInvoiceObserver
                             "Bank: " . ($paymentAccount->bank ?? '-') . "\n" .
                             "Nomor Rekening: " . ($paymentAccount->account_number ?? '-') . "\n" .
                             "Atas Nama: " . ($paymentAccount->account_name ?? '-') . "\n\n" .
+
+                            "berikut kami lampirkan file invoice kepada anda, jika file tidak terkirim anda dapat mengunduhnya melalui tautan berikut:\n" .
+                            asset('storage/arsip/invoice/' . $paymentInvoice->created_at->format('Y') . '/' . $paymentInvoice->invoice_number . '/invoice-' . $paymentInvoice->submission->submission_id .  '-' . $paymentInvoice->submission->authors[0]['id'] . '.pdf') . "\n\n" .
+
                             "batas waktu pembayaran anda adalah " . \Carbon\Carbon::parse($paymentInvoice->payment_due_date)->translatedFormat('d F Y') . ". Setelah melakukan pembayaran, silakan unggah bukti pembayaran melalui tautan berikut:\n" .
                             route('payment.pay', [ $paymentInvoice->submission->issue->journal->url_path, $paymentInvoice->submission->submission_id]) . "\n\n" .
                             "Terima kasih atas perhatian dan kerjasama Anda " .
