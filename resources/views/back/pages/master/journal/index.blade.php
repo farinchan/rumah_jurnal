@@ -233,7 +233,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
                                                 value="Sinta 1" id="sinta_1"
@@ -280,6 +280,64 @@
                                                 @if (in_array('Sinta 6', $journal->indexing ?? [])) checked @endif />
                                             <label class="form-check-label" for="sinta_6">
                                                 Sinta 6
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="DOAJ" id="doaj"
+                                                @if (in_array('DOAJ', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="doaj">
+                                                DOAJ
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="Moraref" id="moraref"
+                                                @if (in_array('Moraref', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="moraref">
+                                                Moraref
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="Copernicus" id="copernicus"
+                                                @if (in_array('Copernicus', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="copernicus">
+                                                Copernicus
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="Garuda" id="garuda"
+                                                @if (in_array('Garuda', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="garuda">
+                                                Garuda
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="Crossref" id="crossref"
+                                                @if (in_array('Crossref', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="crossref">
+                                                Crossref
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="Scholar" id="scholar"
+                                                @if (in_array('Scholar', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="scholar">
+                                                Scholar
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="WOS" id="wos"
+                                                @if (in_array('WOS', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="wos">
+                                                WOS
                                             </label>
                                         </div>
                                     </div>
