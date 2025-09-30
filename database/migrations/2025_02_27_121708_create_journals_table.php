@@ -30,6 +30,8 @@ return new class extends Migration
             $table->dateTime('last_sync');
             $table->string('editor_chief_name')->nullable();
             $table->string('editor_chief_signature')->nullable();
+            $table->string('subject')->nullable();
+            $table->string('faculty')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
