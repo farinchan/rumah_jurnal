@@ -57,6 +57,7 @@ class DataController extends Controller
                 "Crossref" => ['icon' => url('/icons/crossref.png'), 'label' => 'CROSSREF'],
                 "Copernicus" => ['icon' => url('/icons/copernicus.png'), 'label' => 'COPERNICUS'],
                 "WOS" => ['icon' => url('/icons/wos.png'), 'label' => 'WOS'],
+                "EBSCO" => ['icon' => url('/icons/ebsco.png'), 'label' => 'EBSCO'],
             ];
 
             if (is_array($journal->indexing)) {

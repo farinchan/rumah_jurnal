@@ -340,6 +340,14 @@
                                                 WOS
                                             </label>
                                         </div>
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="EBSCO" id="ebsco"
+                                                @if (in_array('EBSCO', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="ebsco">
+                                                EBSCO
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
