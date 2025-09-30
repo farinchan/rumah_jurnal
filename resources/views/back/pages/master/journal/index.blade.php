@@ -340,6 +340,71 @@
                                                 WOS
                                             </label>
                                         </div>
+                                        <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
+                                            <input class="form-check-input" type="checkbox" name="akreditasi[]"
+                                                value="EBSCO" id="ebsco"
+                                                @if (in_array('EBSCO', $journal->indexing ?? [])) checked @endif />
+                                            <label class="form-check-label" for="ebsco">
+                                                EBSCO
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-5">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Faculty</label>
+                                        <select name="faculty" class="form-control">
+                                            <option value="">-- Pilih Fakultas --</option>
+                                            <option value="pascasarjana" @if ($journal->faculty == 'pasca') selected @endif>Pascasarjana</option>
+                                            <option value="syariah" @if ($journal->faculty == 'fsyar') selected @endif>Syariah</option>
+                                            <option value="ftik" @if ($journal->faculty == 'ftik') selected @endif>Tarbiyah dan Ilmu Keguruan</option>
+                                            <option value="febi" @if ($journal->faculty == 'febi') selected @endif>Ekonomi dan Bisnis Islam</option>
+                                            <option value="fuad" @if ($journal->faculty == 'fuad') selected @endif>Ushuluddin Adab dan Dakwah</option>
+                                        </select>
+                                    </div>
+                                     <div class="col-md-6">
+                                        <label class="form-label">Program Studi</label>
+                                        <select name="subject" class="form-control">
+                                            <option value="">-- Pilih Prodi --</option>
+                                            <option value="101" @if ($journal->subject == '101') selected @endif>Hukum Islam - S2</option>
+                                            <option value="102" @if ($journal->subject == '102') selected @endif>Manajemen Pendidikan Islam - S2</option>
+                                            <option value="103" @if ($journal->subject == '103') selected @endif>Ilmu Syariah - S3</option>
+                                            <option value="11" @if ($journal->subject == '11') selected @endif>Hukum Keluarga Islam (Ahwal Syakhshiyyah) - S1</option>
+                                            <option value="12" @if ($journal->subject == '12') selected @endif>Hukum Ekonomi Syariah (Muamalah) - S1</option>
+                                            <option value="13" @if ($journal->subject == '13') selected @endif>Hukum Tatanegara (siyasah) - S1</option>
+                                            <option value="14" @if ($journal->subject == '14') selected @endif>Hukum Pidana Islam (Jinayah) - S1</option>
+                                            <option value="201" @if ($journal->subject == '201') selected @endif>Pendidikan Agama Islam - S2</option>
+                                            <option value="202" @if ($journal->subject == '202') selected @endif>Tadris Bahasa Inggris - S2</option>
+                                            <option value="21" @if ($journal->subject == '21') selected @endif>Pendidikan Agama Islam - S1</option>
+                                            <option value="211" @if ($journal->subject == '211') selected @endif>Pendidikan Profesi Guru (PPG) - PROFESI</option>
+                                            <option value="22" @if ($journal->subject == '22') selected @endif>Pendidikan Bahasa Arab - S1</option>
+                                            <option value="23" @if ($journal->subject == '23') selected @endif>Pendidikan Bahasa Inggris - S1</option>
+                                            <option value="24" @if ($journal->subject == '24') selected @endif>Pendidikan Matematika - S1</option>
+                                            <option value="25" @if ($journal->subject == '25') selected @endif>Pendidikan Teknik Informatika Dan Komputer - S1</option>
+                                            <option value="26" @if ($journal->subject == '26') selected @endif>Bimbingan dan Konseling - S1</option>
+                                            <option value="27" @if ($journal->subject == '27') selected @endif>Matematika - S1</option>
+                                            <option value="28" @if ($journal->subject == '28') selected @endif>Statistika - S1</option>
+                                            <option value="29" @if ($journal->subject == '29') selected @endif>Informatika - S1</option>
+                                            <option value="301" @if ($journal->subject == '301') selected @endif>Ekonomi Syariah - S2</option>
+                                            <option value="31" @if ($journal->subject == '31') selected @endif>Perbankan Syariah D3 - D3</option>
+                                            <option value="32" @if ($journal->subject == '32') selected @endif>Ekonomi Islam - S1</option>
+                                            <option value="321" @if ($journal->subject == '321') selected @endif>Pendidikan Agama Islam - S3</option>
+                                            <option value="33" @if ($journal->subject == '33') selected @endif>Perbankan Syariah - S1</option>
+                                            <option value="34" @if ($journal->subject == '34') selected @endif>Akuntansi Syariah - S1</option>
+                                            <option value="35" @if ($journal->subject == '35') selected @endif>Pariwisata Syariah - S1</option>
+                                            <option value="36" @if ($journal->subject == '36') selected @endif>Manajemen Haji dan Umrah - S1</option>
+                                            <option value="37" @if ($journal->subject == '37') selected @endif>Manajemen Bisnis Syariah - S1</option>
+                                            <option value="38" @if ($journal->subject == '38') selected @endif>Bisnis Digital - S1</option>
+                                            <option value="401" @if ($journal->subject == '401') selected @endif>Aqidah dan Filsafat Islam - S2</option>
+                                            <option value="41" @if ($journal->subject == '41') selected @endif>Ilmu Al Qur'an dan Tafsir - S1</option>
+                                            <option value="42" @if ($journal->subject == '42') selected @endif>Ilmu Hadis - S1</option>
+                                            <option value="43" @if ($journal->subject == '43') selected @endif>Komunikasi dan Penyiaran Islam - S1</option>
+                                            <option value="44" @if ($journal->subject == '44') selected @endif>Sejarah Peradaban Islam - S1</option>
+                                            <option value="45" @if ($journal->subject == '45') selected @endif>Aqidah dan Filsafat Islam - S1</option>
+                                            <option value="46" @if ($journal->subject == '46') selected @endif>Sosiologi Agama - S1</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>

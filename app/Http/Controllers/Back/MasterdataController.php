@@ -61,6 +61,8 @@ class MasterdataController extends Controller
         $journal->name = $request->name;
         $journal->author_fee = $request->author_fee;
         $journal->indexing = $request->akreditasi;
+        $journal->subject = $request->subject;
+        $journal->faculty = $request->faculty;
         $journal->editor_chief_name = $request->editor_chief_name;
         if ($request->hasFile('editor_chief_signature')) {
             $file = $request->file('editor_chief_signature');
