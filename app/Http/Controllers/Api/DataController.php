@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Journal;
+use App\Models\News;
 use App\Models\SettingBanner;
 use App\Models\SettingWebsite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DataController extends Controller
 {
@@ -127,6 +129,35 @@ class DataController extends Controller
         $issues = $journal->issues()->orderBy('year', 'desc')->orderBy('volume', 'desc')->orderBy('number', 'desc')->get();
         if ($issues->isNotEmpty()) {
             return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $issues], 200);
+        } else {
+            return response()->json(['status' => false, 'message' => 'Data not found'], 404);
+        }
+    }
+
+    public function dataNews(Request $request)
+    {
+        $news = News::with(['category', 'user'])
+            ->latest()
+            ->take(6)
+            ->get()
+            ->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'slug' => $item->slug,
+                'image' => $item->getThumbnail(),
+                'excerpt' => Str::limit(strip_tags($item->content), 100, '...'),
+                'category' => $item->category ? $item->category->name : null,
+                'comment_count' => $item->comments()->count(),
+                'viewers_count' => $item->viewers()->count(),
+                'author' => $item->user ? $item->user->name : 'Unknown',
+                'created_at' => $item->created_at ? $item->created_at->format('d M Y') : null,
+                'url' => route('news.detail', $item->slug),
+            ];
+            });
+
+        if ($news->isNotEmpty()) {
+            return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $news], 200);
         } else {
             return response()->json(['status' => false, 'message' => 'Data not found'], 404);
         }
