@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
+            $table->integer('distribution_percentage')->default(80)->comment('persentase yang didapatkan untuk rumah jurnal');
             $table->boolean('is_active')->default(true);
+            $table->string('created_by')->nullable();
             $table->timestamps();
         });
     }
