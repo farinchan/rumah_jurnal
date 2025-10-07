@@ -573,6 +573,7 @@ class FinanceController extends Controller
             [
                 'name' => 'required|string|max:255|unique:finance_years,name',
                 'start_date' => 'required|date',
+                'distribution_percentage' => 'required|integer|min:0|max:100',
             ],
             [
                 'name.required' => 'Nama Tahun Keuangan harus diisi',
@@ -581,6 +582,10 @@ class FinanceController extends Controller
                 'name.unique' => 'Nama Tahun Keuangan sudah ada',
                 'start_date.required' => 'Tanggal Mulai harus diisi',
                 'start_date.date' => 'Tanggal Mulai tidak valid',
+                'distribution_percentage.required' => 'Persentase Distribusi harus diisi',
+                'distribution_percentage.integer' => 'Persentase Distribusi harus berupa angka',
+                'distribution_percentage.min' => 'Persentase Distribusi minimal 0',
+                'distribution_percentage.max' => 'Persentase Distribusi maksimal 100',
             ]
         );
         if ($validator->fails()) {
@@ -614,6 +619,7 @@ class FinanceController extends Controller
             [
                 'name' => 'required|string|max:255|unique:finance_years,name,' . $finance_year->id,
                 'start_date' => 'required|date',
+                'distribution_percentage' => 'required|integer|min:0|max:100',
             ],
             [
                 'name.required' => 'Nama Tahun Keuangan harus diisi',
@@ -622,6 +628,10 @@ class FinanceController extends Controller
                 'name.unique' => 'Nama Tahun Keuangan sudah ada',
                 'start_date.required' => 'Tanggal Mulai harus diisi',
                 'start_date.date' => 'Tanggal Mulai tidak valid',
+                'distribution_percentage.required' => 'Persentase Distribusi harus diisi',
+                'distribution_percentage.integer' => 'Persentase Distribusi harus berupa angka',
+                'distribution_percentage.min' => 'Persentase Distribusi minimal 0',
+                'distribution_percentage.max' => 'Persentase Distribusi maksimal 100',
             ]
         );
         if ($validator->fails()) {
@@ -633,7 +643,7 @@ class FinanceController extends Controller
             $finance_year->update([
                 'name' => $request->name,
                 'start_date' => $request->start_date,
-                'updated_by' => Auth::user()->name,
+                'distribution_percentage' => $request->distribution_percentage,
             ]);
             Alert::success('Berhasil', 'Tahun Keuangan berhasil diperbarui');
             return redirect()->back()->with('success', 'Tahun Keuangan berhasil diperbarui');
@@ -690,6 +700,8 @@ class FinanceController extends Controller
             'total_outcome_now' => $outcome,
             'total_income_now' => $income,
             'total_balance_now' => $balance,
+            'total_distribution' => $finance_year_now ? ($balance * ($finance_year_now->distribution_percentage / 100)) : 0,
+            'total_distributtion_other' => $finance_year_now ? ($balance * ((100 - $finance_year_now->distribution_percentage) / 100)) : 0,
 
         ];
         // return response()->json($data);

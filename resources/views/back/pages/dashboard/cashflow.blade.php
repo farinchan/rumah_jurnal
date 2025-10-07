@@ -84,6 +84,56 @@
             </div>
         </div>
 
+        <!-- Distribution Cards -->
+        <div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
+            <div class="col-xl-6">
+                <div class="card card-flush bgi-no-repeat bgi-size-contain bgi-position-x-end h-xl-100"
+                    style="background-color: #009EF7;background-image:url('/metronic8/demo1/assets/media/patterns/vector-4.png')">
+                    <div class="card-header pt-5">
+                        <div class="card-title d-flex flex-column">
+                            <span class="fs-2hx fw-bold text-white me-2 lh-1" id="distribution_rumah_jurnal_card">Rp 0</span>
+                            <span class="text-white opacity-75 pt-1 fw-semibold fs-6">Distribusi ke Rumah Jurnal</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex align-items-end pt-0">
+                        <div class="d-flex align-items-center flex-column mt-3 w-100">
+                            <div class="d-flex justify-content-between w-100 mt-auto mb-2">
+                                <span class="fw-bolder fs-6 text-white opacity-75">Persentase</span>
+                                <span class="fw-bold fs-6 text-white" id="distribution_percentage_card">80%</span>
+                            </div>
+                            <div class="h-8px mx-3 w-100 bg-white bg-opacity-50 rounded">
+                                <div class="bg-white rounded h-8px" role="progressbar" id="distribution_progress_bar" style="width: 80%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card card-flush bgi-no-repeat bgi-size-contain bgi-position-x-end h-xl-100"
+                    style="background-color: #FF8C00;background-image:url('/metronic8/demo1/assets/media/patterns/vector-5.png')">
+                    <div class="card-header pt-5">
+                        <div class="card-title d-flex flex-column">
+                            <span class="fs-2hx fw-bold text-white me-2 lh-1" id="distribution_blu_card">Rp 0</span>
+                            <span class="text-white opacity-75 pt-1 fw-semibold fs-6">Distribusi ke BLU UIN Bukittinggi</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex align-items-end pt-0">
+                        <div class="d-flex align-items-center flex-column mt-3 w-100">
+                            <div class="d-flex justify-content-between w-100 mt-auto mb-2">
+                                <span class="fw-bolder fs-6 text-white opacity-75">Persentase</span>
+                                <span class="fw-bold fs-6 text-white" id="distribution_blu_percentage_card">20%</span>
+                            </div>
+                            <div class="h-8px mx-3 w-100 bg-white bg-opacity-50 rounded">
+                                <div class="bg-white rounded h-8px" role="progressbar" id="distribution_blu_progress_bar" style="width: 20%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Charts Row -->
         <div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
             <div class="col-xl-8">
@@ -112,6 +162,23 @@
                 <div class="card card-flush h-lg-100">
                     <div class="card-header pt-5">
                         <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bold text-gray-900">Distribusi Pendapatan</span>
+                            <span class="text-gray-500 mt-1 fw-semibold fs-6">Rumah Jurnal vs BLU UIN</span>
+                        </h3>
+                    </div>
+                    <div class="card-body pt-0 px-0">
+                        <div id="distribution_chart" class="px-5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Type and Finance Year Overview -->
+        <div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
+            <div class="col-xl-6">
+                <div class="card card-flush h-lg-100">
+                    <div class="card-header pt-5">
+                        <h3 class="card-title align-items-start flex-column">
                             <span class="card-label fw-bold text-gray-900">Distribusi Tipe Transaksi</span>
                             <span class="text-gray-500 mt-1 fw-semibold fs-6">Pemasukan vs Pengeluaran</span>
                         </h3>
@@ -121,10 +188,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Finance Year Overview and Recent Transactions -->
-        <div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
             <div class="col-xl-6">
                 <div class="card card-flush h-lg-100">
                     <div class="card-header pt-5">
@@ -141,7 +204,11 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-6">
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
+            <div class="col-xl-12">
                 <div class="card card-flush h-lg-100">
                     <div class="card-header pt-5">
                         <h3 class="card-title align-items-start flex-column">
@@ -318,6 +385,7 @@
                     updateSummaryCards(response.summary);
                     updateCashflowChart(response.monthly_cashflow || []);
                     updateTransactionTypeChart(response.transaction_types || []);
+                    updateDistributionChart(response.summary);
                     updateFinanceYearChart(response.finance_years || []);
                     updateRecentTransactionsTable(response.recent_transactions || []);
                 } else {
@@ -334,7 +402,10 @@
                     finance_income: 0,
                     payment_income: 0,
                     transaction_count: 0,
-                    monthly_transactions: 0
+                    monthly_transactions: 0,
+                    distribution_percentage: 80,
+                    distribution_rumah_jurnal: 0,
+                    distribution_blu: 0
                 });
             }
         });
@@ -351,6 +422,16 @@
         $('#total_balance_card').text(formatRupiah(summary.total_balance));
         $('#manual_income').text(formatRupiah(summary.finance_income));
         $('#payment_income').text(formatRupiah(summary.payment_income));
+
+        // Update distribution cards
+        $('#distribution_rumah_jurnal_card').text(formatRupiah(summary.distribution_rumah_jurnal));
+        $('#distribution_blu_card').text(formatRupiah(summary.distribution_blu));
+        $('#distribution_percentage_card').text((summary.distribution_percentage || 80) + '%');
+        $('#distribution_blu_percentage_card').text((100 - (summary.distribution_percentage || 80)) + '%');
+
+        // Update progress bars
+        $('#distribution_progress_bar').css('width', (summary.distribution_percentage || 80) + '%');
+        $('#distribution_blu_progress_bar').css('width', (100 - (summary.distribution_percentage || 80)) + '%');
 
         // Update transaction count
         $('#transaction_count').text((summary.transaction_count || 0).toLocaleString('id-ID'));
@@ -473,6 +554,61 @@
         }
     });
 
+    var distributionChart = new ApexCharts(document.querySelector("#distribution_chart"), {
+        series: [],
+        chart: {
+            width: 380,
+            type: 'donut',
+        },
+        labels: ['Rumah Jurnal', 'BLU UIN Bukittinggi'],
+        colors: ['#009ef7', '#FF8C00'],
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }],
+        legend: {
+            position: 'bottom'
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val, opts) {
+                return val.toFixed(1) + '%';
+            }
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%',
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Total Distribusi',
+                            formatter: function (w) {
+                                const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                return 'Rp ' + parseInt(total || 0).toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return 'Rp ' + parseInt(val || 0).toLocaleString('id-ID');
+                }
+            }
+        }
+    });
+
     var financeYearChart = new ApexCharts(document.querySelector("#finance_year_chart"), {
         series: [{
             name: 'Income',
@@ -546,6 +682,7 @@
     // Render charts
     cashflowChart.render();
     transactionTypeChart.render();
+    distributionChart.render();
     financeYearChart.render();
 
     function updateCashflowChart(data) {
@@ -590,6 +727,23 @@
         transactionTypeChart.updateOptions({
             labels: labels
         });
+    }
+
+    function updateDistributionChart(summary) {
+        if (!summary) {
+            distributionChart.updateSeries([]);
+            return;
+        }
+
+        const rumahJurnalAmount = parseInt(summary.distribution_rumah_jurnal || 0);
+        const bluAmount = parseInt(summary.distribution_blu || 0);
+
+        if (rumahJurnalAmount === 0 && bluAmount === 0) {
+            distributionChart.updateSeries([]);
+            return;
+        }
+
+        distributionChart.updateSeries([rumahJurnalAmount, bluAmount]);
     }
 
     function updateFinanceYearChart(data) {
