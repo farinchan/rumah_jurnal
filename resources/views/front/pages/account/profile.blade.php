@@ -128,7 +128,7 @@
                                                                         <li>
                                                                             <a href="{{ Storage::url($event->event->material) }}"
                                                                                 target="_blank">
-                                                                                Download MaterI/Notulen
+                                                                                Download Materi/Notulen
 
                                                                             </a>
                                                                         </li>
