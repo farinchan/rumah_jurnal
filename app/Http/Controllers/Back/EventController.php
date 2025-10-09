@@ -11,6 +11,7 @@ use App\Models\EventUser;
 use App\Models\Reviewer;
 use App\Models\Editor;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -63,14 +64,26 @@ class EventController extends Controller
             'meta_title' => 'nullable',
             'meta_description' => 'nullable',
             'meta_keywords' => 'nullable',
+            'material' => 'nullable|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,txt,zip,rar|max:102400',
         ], [
-            'required' => ':attribute harus diisi',
-            'image' => 'File harus berupa gambar',
-            'mimes' => 'File harus berupa gambar',
-            'max' => 'Ukuran file maksimal 8MB',
-            'integer' => ':attribute harus berupa angka',
-            'mimes' => 'File harus berupa PDF',
-            'max' => 'Ukuran file maksimal 8MB',
+            'type.required' => 'Tipe event harus diisi',
+            'status.required' => 'Status event harus diisi',
+            'name.required' => 'Nama event harus diisi',
+            'datetime.required' => 'Tanggal dan waktu event harus diisi',
+            'location.required' => 'Lokasi event harus diisi',
+            'limit.integer' => 'Limit peserta harus berupa angka',
+            'description.required' => 'Deskripsi event harus diisi',
+            'thumbnail.image' => 'File thumbnail harus berupa gambar',
+            'thumbnail.mimes' => 'File thumbnail harus berupa: jpeg, png, jpg, gif, svg',
+            'thumbnail.max' => 'Ukuran file thumbnail maksimal 8MB',
+            'attachment.mimes' => 'File lampiran harus berupa: pdf',
+            'attachment.max' => 'Ukuran file lampiran maksimal 8MB',
+            'is_active.required' => 'Status aktif event harus diisi',
+            'meta_title.required' => 'Meta title harus diisi',
+            'meta_description.required' => 'Meta description harus diisi',
+            'meta_keywords.required' => 'Meta keywords harus diisi',
+            'material.mimes' => 'File materi harus berupa: pdf, doc, docx, ppt, pptx, xls, xlsx, txt, zip, rar',
+            'material.max' => 'Ukuran file materi maksimal 100MB',
         ]);
 
         if ($validator->fails()) {
@@ -111,6 +124,11 @@ class EventController extends Controller
             $event->attachment =  $file->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
         }
 
+        if ($request->hasFile('material')) {
+            $file = $request->file('material');
+            $event->material =  $file->storeAs('event', 'm-' . date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
+        }
+
         $event->save();
 
         Alert::success('Sukses', 'event berhasil ditambahkan');
@@ -146,11 +164,26 @@ class EventController extends Controller
             'meta_title' => 'nullable',
             'meta_description' => 'nullable',
             'meta_keywords' => 'nullable',
+            'material' => 'nullable|mimes:pdf,doc,docx,ppt,pptx,xls,txt,xlsx,zip,rar|max:102400',
         ], [
-            'required' => ':attribute harus diisi',
-            'image' => 'File harus berupa gambar',
-            'mimes' => 'File harus berupa gambar',
-            'max' => 'Ukuran file maksimal 2MB',
+            'type.required' => 'Tipe event harus diisi',
+            'status.required' => 'Status event harus diisi',
+            'name.required' => 'Nama event harus diisi',
+            'datetime.required' => 'Tanggal dan waktu event harus diisi',
+            'location.required' => 'Lokasi event harus diisi',
+            'limit.integer' => 'Limit peserta harus berupa angka',
+            'description.required' => 'Deskripsi event harus diisi',
+            'thumbnail.image' => 'File thumbnail harus berupa gambar',
+            'thumbnail.mimes' => 'File thumbnail harus berupa: jpeg, png, jpg, gif, svg',
+            'thumbnail.max' => 'Ukuran file thumbnail maksimal 8MB',
+            'attachment.mimes' => 'File lampiran harus berupa: pdf',
+            'attachment.max' => 'Ukuran file lampiran maksimal 8MB',
+            'is_active.required' => 'Status aktif event harus diisi',
+            'meta_title.required' => 'Meta title harus diisi',
+            'meta_description.required' => 'Meta description harus diisi',
+            'meta_keywords.required' => 'Meta keywords harus diisi',
+            'material.mimes' => 'File materi harus berupa: pdf, doc, docx, ppt, pptx, xls, xlsx, txt, zip, rar',
+            'material.max' => 'Ukuran file materi maksimal 100MB',
         ]);
 
         if ($validator->fails()) {
@@ -188,6 +221,14 @@ class EventController extends Controller
             }
             $file = $request->file('attachment');
             $event->attachment = $file->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
+        }
+
+        if ($request->hasFile('material')) {
+            if ($event->material) {
+                Storage::delete('public/' . $event->material);
+            }
+            $file = $request->file('material');
+            $event->material = $file->storeAs('event', 'm-' . date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
         }
 
         $event->save();

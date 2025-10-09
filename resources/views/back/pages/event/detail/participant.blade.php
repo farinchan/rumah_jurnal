@@ -312,7 +312,7 @@
                             <th class="min-w-125px">Email Terdaftar</th>
                             <th class="min-w-125px">No.telp Terdaftar</th>
                             <th class="min-w-125px">Tanggal Mendaftar</th>
-                            <th class="text-end min-w-100px">Actions</th>
+                            <th class="text-end min-w-150px">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="text-gray-600 fw-semibold">
@@ -369,6 +369,14 @@
                                             <span class="path2"></span>
                                         </i>
 
+                                    </a>
+                                    <a href="{{ route('event.certificate', $user->id) }}"
+                                        target="_blank" class="btn btn-icon btn-light-success btn-sm me-1"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Sertifikat">
+                                        <i class="ki-duotone ki-document fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
                                     </a>
                                     <a href="#" class="btn btn-icon btn-light-danger btn-sm me-1"
                                         data-bs-toggle="modal" data-bs-target="#kt_modal_delete_user{{ $user->id }}">

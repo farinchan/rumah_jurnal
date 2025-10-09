@@ -28,6 +28,12 @@
                     </div>
                 </div>
                 <div class="row mb-7">
+                    <label class="col-lg-4 fw-semibold text-muted">Akses Event</label>
+                    <div class="col-lg-8">
+                        <span class="fw-bold fs-6 text-gray-800">{{ $event->access }}</span>
+                    </div>
+                </div>
+                <div class="row mb-7">
                     <label class="col-lg-4 fw-semibold text-muted">Nama</label>
                     <div class="col-lg-8">
                         <span class="fw-bold fs-6 text-gray-800">{{ $event->name }}</span>
@@ -61,6 +67,18 @@
                             </a>
                         @else
                             <span class="fw-bold fs-6 text-gray-800">Tidak ada lampiran</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="row mb-7">
+                    <label class="col-lg-4 fw-semibold text-muted">Materi/Notulen</label>
+                    <div class="col-lg-8">
+                        @if ($event->material)
+                            <a href="{{ asset('storage/' . $event->material) }}" class="btn btn-sm btn-light-primary">
+                                <i class="fa fa-file"></i> Download Materi/Notulen
+                            </a>
+                        @else
+                            <span class="fw-bold fs-6 text-gray-800">Tidak ada materi/notulen</span>
                         @endif
                     </div>
                 </div>
