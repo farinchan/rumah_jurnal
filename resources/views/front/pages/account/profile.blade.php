@@ -119,11 +119,20 @@
                                                                         </a>
                                                                     </li>
                                                                     <li>
-                                                                        <a href="#" target="_blank">
+                                                                        <a href="{{ route('event.certificate', $event->id) }}" target="_blank">
                                                                             Download Certificate
 
                                                                         </a>
                                                                     </li>
+                                                                    @if ($event->event->material )
+                                                                        <li>
+                                                                            <a href="{{ Storage::url($event->event->material) }}"
+                                                                                target="_blank">
+                                                                                Download MaterI/Notulen
+
+                                                                            </a>
+                                                                        </li>
+                                                                    @endif
                                                                 </ul>
                                                             </div>
                                                         </div>
