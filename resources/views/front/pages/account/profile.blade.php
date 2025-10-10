@@ -34,13 +34,15 @@
                                     </div>
                                     <div class="ltn__tab-menu-list mb-50">
                                         <div class="nav" style="margin-right: 0;">
-                                            <a class="active show" data-toggle="tab" href="#liton_tab_1_1">{{ __('front.overview') }} <i
+                                            <a class="active show" data-toggle="tab"
+                                                href="#liton_tab_1_1">{{ __('front.overview') }} <i
                                                     class="fas fa-home"></i></a>
-                                            <a data-toggle="tab" href="#liton_tab_1_2">{{ __('front.event_registered') }} <i
-                                                    class="fas fa-file-alt"></i></a>
+                                            <a data-toggle="tab" href="#liton_tab_1_2">{{ __('front.event_registered') }}
+                                                <i class="fas fa-file-alt"></i></a>
                                             <a data-toggle="tab" href="#liton_tab_1_5">{{ __('front.account_details') }} <i
                                                     class="fas fa-user"></i></a>
-                                            <a href="{{ route('logout') }}">{{ __('front.logout') }} <i class="fas fa-sign-out-alt"></i></a>
+                                            <a href="{{ route('logout') }}">{{ __('front.logout') }} <i
+                                                    class="fas fa-sign-out-alt"></i></a>
                                         </div>
                                     </div>
                                 </div>
@@ -90,7 +92,8 @@
                                                         <div class="card text-center border-primary">
                                                             <div class="card-body">
                                                                 <h3 class="text-primary mb-1">{{ $totalEvents }}</h3>
-                                                                <small class="text-muted">{{ __('front.total_events') }}</small>
+                                                                <small
+                                                                    class="text-muted">{{ __('front.total_events') }}</small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -98,7 +101,8 @@
                                                         <div class="card text-center border-success">
                                                             <div class="card-body">
                                                                 <h3 class="text-success mb-1">{{ $completedEvents }}</h3>
-                                                                <small class="text-muted">{{ __('front.completed_events') }}</small>
+                                                                <small
+                                                                    class="text-muted">{{ __('front.completed_events') }}</small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -106,7 +110,8 @@
                                                         <div class="card text-center border-warning">
                                                             <div class="card-body">
                                                                 <h3 class="text-warning mb-1">{{ $ongoingEvents }}</h3>
-                                                                <small class="text-muted">{{ __('front.ongoing_events') }}</small>
+                                                                <small
+                                                                    class="text-muted">{{ __('front.ongoing_events') }}</small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -114,7 +119,8 @@
                                                         <div class="card text-center border-info">
                                                             <div class="card-body">
                                                                 <h3 class="text-info mb-1">{{ $upcomingEvents }}</h3>
-                                                                <small class="text-muted">{{ __('front.upcoming_events') }}</small>
+                                                                <small
+                                                                    class="text-muted">{{ __('front.upcoming_events') }}</small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -123,16 +129,20 @@
                                                 <!-- Event Status Information -->
                                                 @if ($totalEvents > 0)
                                                     <div class="alert alert-info mb-4">
-                                                        <h5><i class="fas fa-info-circle"></i> {{ __('front.event_status_information') }}</h5>
+                                                        <h5><i class="fas fa-info-circle"></i>
+                                                            {{ __('front.event_status_information') }}</h5>
                                                         <ul class="mb-0" style="padding-left: 20px;">
                                                             @if ($completedEvents > 0)
-                                                                <li><strong>{{ $completedEvents }}</strong> {{ __('front.events_completed') }}</li>
+                                                                <li><strong>{{ $completedEvents }}</strong>
+                                                                    {{ __('front.events_completed') }}</li>
                                                             @endif
                                                             @if ($ongoingEvents > 0)
-                                                                <li><strong>{{ $ongoingEvents }}</strong> {{ __('front.events_ongoing') }}</li>
+                                                                <li><strong>{{ $ongoingEvents }}</strong>
+                                                                    {{ __('front.events_ongoing') }}</li>
                                                             @endif
                                                             @if ($upcomingEvents > 0)
-                                                                <li><strong>{{ $upcomingEvents }}</strong> {{ __('front.events_upcoming') }}</li>
+                                                                <li><strong>{{ $upcomingEvents }}</strong>
+                                                                    {{ __('front.events_upcoming') }}</li>
                                                             @endif
                                                             @if ($totalEvents == 0)
                                                                 <li>Anda belum mendaftar pada event manapun. Silakan lihat
@@ -229,7 +239,8 @@
 
                                                             @if ($eventStatus == __('front.event_completed'))
                                                                 <div class="alert alert-success mb-3">
-                                                                    <small><i class="fas fa-info-circle"></i> {{ __('front.event_completed_message') }}</small>
+                                                                    <small><i class="fas fa-info-circle"></i>
+                                                                        {{ __('front.event_completed_message') }}</small>
                                                                 </div>
                                                             @elseif($eventStatus == __('front.event_ongoing'))
                                                                 <div class="alert alert-warning mb-3">
@@ -238,7 +249,8 @@
                                                                 </div>
                                                             @else
                                                                 <div class="alert alert-info mb-3">
-                                                                    <small><i class="fas fa-calendar-check"></i> {{ __('front.event_upcoming_message') }}</small>
+                                                                    <small><i class="fas fa-calendar-check"></i>
+                                                                        {{ __('front.event_upcoming_message') }}</small>
                                                                 </div>
                                                             @endif
 
@@ -247,42 +259,60 @@
                                                                 <div class="row">
                                                                     <div class="col-md-4">
                                                                         <a href="{{ route('event.eticket', $event->id) }}"
-                                                                            target="_blank" class="btn btn-sm btn-outline-primary btn-block mb-2">
-                                                                            <i class="fas fa-ticket-alt"></i> {{ __('front.print_eticket') }}
+                                                                            target="_blank"
+                                                                            class="btn btn-sm btn-outline-primary btn-block mb-2">
+                                                                            <i class="fas fa-ticket-alt"></i>
+                                                                            {{ __('front.print_eticket') }}
                                                                         </a>
                                                                     </div>
                                                                     @if ($eventStatus == __('front.event_completed'))
-                                                                        <div class="col-md-4">
-                                                                            <a href="{{ route('event.certificate', $event->id) }}"
-                                                                                target="_blank" class="btn btn-sm btn-outline-success btn-block mb-2">
-                                                                                <i class="fas fa-certificate"></i> {{ __('front.certificate') }}
-                                                                            </a>
-                                                                        </div>
+                                                                        @if ($event->event->type != 'Rapat')
+                                                                            <div class="col-md-4">
+                                                                                <a href="{{ route('event.certificate', $event->id) }}"
+                                                                                    target="_blank"
+                                                                                    class="btn btn-sm btn-outline-success btn-block mb-2">
+                                                                                    <i class="fas fa-certificate"></i>
+                                                                                    {{ __('front.certificate') }}
+                                                                                </a>
+                                                                            </div>
+                                                                        @endif
                                                                         @if ($event->event->material)
                                                                             <div class="col-md-4">
                                                                                 <a href="{{ Storage::url($event->event->material) }}"
-                                                                                    target="_blank" class="btn btn-sm btn-outline-info btn-block mb-2">
-                                                                                    <i class="fas fa-download"></i> {{ __('front.material') }}
+                                                                                    target="_blank"
+                                                                                    class="btn btn-sm btn-outline-info btn-block mb-2">
+                                                                                    <i class="fas fa-download"></i>
+                                                                                    {{ __('front.material') }}
                                                                                 </a>
                                                                             </div>
                                                                         @endif
                                                                     @else
-                                                                        <div class="col-md-4">
-                                                                            <button class="btn btn-sm btn-outline-secondary btn-block mb-2" disabled>
-                                                                                <i class="fas fa-certificate"></i> {{ __('front.certificate') }}
-                                                                            </button>
-                                                                        </div>
+                                                                        @if ($event->event->type != 'Rapat')
+                                                                            <div class="col-md-4">
+                                                                                <button
+                                                                                    class="btn btn-sm btn-outline-secondary btn-block mb-2"
+                                                                                    disabled>
+                                                                                    <i class="fas fa-certificate"></i>
+                                                                                    {{ __('front.certificate') }}
+                                                                                </button>
+                                                                            </div>
+                                                                        @endif
                                                                         @if ($event->event->material)
                                                                             <div class="col-md-4">
                                                                                 <a href="{{ Storage::url($event->event->material) }}"
-                                                                                    target="_blank" class="btn btn-sm btn-outline-info btn-block mb-2">
-                                                                                    <i class="fas fa-download"></i> {{ __('front.material') }}
+                                                                                    target="_blank"
+                                                                                    class="btn btn-sm btn-outline-info btn-block mb-2">
+                                                                                    <i class="fas fa-download"></i>
+                                                                                    {{ __('front.material') }}
                                                                                 </a>
                                                                             </div>
                                                                         @else
                                                                             <div class="col-md-4">
-                                                                                <button class="btn btn-sm btn-outline-secondary btn-block mb-2" disabled>
-                                                                                    <i class="fas fa-download"></i> {{ __('front.material') }}
+                                                                                <button
+                                                                                    class="btn btn-sm btn-outline-secondary btn-block mb-2"
+                                                                                    disabled>
+                                                                                    <i class="fas fa-download"></i>
+                                                                                    {{ __('front.material') }}
                                                                                 </button>
                                                                             </div>
                                                                         @endif
@@ -295,7 +325,8 @@
                                                     <div class="text-center py-5">
                                                         <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                                                         <h5>{{ __('front.no_events_registered_title') }}</h5>
-                                                        <p class="text-muted">{{ __('front.no_events_registered_desc') }}</p>
+                                                        <p class="text-muted">{{ __('front.no_events_registered_desc') }}
+                                                        </p>
                                                         <a href="{{ route('event.index') }}"
                                                             class="btn theme-btn-1 btn-effect-1">{{ __('front.browse_events') }}</a>
                                                     </div>
@@ -369,7 +400,9 @@
                                                                         <small class="text-danger">{{ $message }}</small>
                                                                     @enderror
                                                                     @if ($me->photo)
-                                                                        <small class="text-muted d-block mt-2">{{ __('front.current_photo') }}: {{ basename($me->photo) }}</small>
+                                                                        <small
+                                                                            class="text-muted d-block mt-2">{{ __('front.current_photo') }}:
+                                                                            {{ basename($me->photo) }}</small>
                                                                     @endif
                                                                 </div>
                                                             </div>
