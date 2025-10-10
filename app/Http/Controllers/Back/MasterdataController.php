@@ -203,7 +203,7 @@ class MasterdataController extends Controller
 
     public function reviewerExport()
     {
-       return Excel::download(new ReviewerAllExport, 'reviewers.xlsx');
+        return Excel::download(new ReviewerAllExport, 'reviewers.xlsx');
     }
 
     public function reviewerUpdate(Request $request, $id)
@@ -248,25 +248,32 @@ class MasterdataController extends Controller
         $reviewers = Reviewer::with('data')->get()->unique('reviewer_id');
         foreach ($reviewers as $reviewer) {
             try {
-                 $user = User::where('reviewer_id', $reviewer->reviewer_id)->first();
-            if ($user) {
-                $reviewer_exists[] = $reviewer->name . ' (' . $reviewer->reviewer_id . ')';
-            } else {
-                // Create new user
-                $user = new User();
-                $user->name = $reviewer->name;
-                $user->email = $reviewer->email;
-                $user->phone = $reviewer->phone;
-                $user->reviewer_id = $reviewer->reviewer_id;
-                $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate one
-                $user->save();
-                $total_data_synced++;
-            }
+                $user = User::where('reviewer_id', $reviewer->reviewer_id)->first();
+                if ($user) {
+                    $reviewer_exists[] = $reviewer->name . ' (' . $reviewer->reviewer_id . ')';
+                } else {
+                    $user = User::where('email', $reviewer->email)->first();
+                    if ($user) {
+                        // Update existing user with reviewer_id
+                        $user->reviewer_id = $reviewer->reviewer_id;
+                        $user->save();
+                        $total_data_synced++;
+                    } else {
+                        // Create new user
+                        $user = new User();
+                        $user->name = $reviewer->name;
+                        $user->email = $reviewer->email;
+                        $user->phone = $reviewer->phone;
+                        $user->reviewer_id = $reviewer->reviewer_id;
+                        $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate one
+                        $user->save();
+                        $total_data_synced++;
+                    }
+                }
             } catch (\Throwable $th) {
                 $total_data_error++;
                 continue;
             }
-
         }
 
         if (count($reviewer_exists) > 0) {
@@ -313,7 +320,7 @@ class MasterdataController extends Controller
 
     public function editorExport()
     {
-       return Excel::download(new EditorAllExport, 'editors.xlsx');
+        return Excel::download(new EditorAllExport, 'editors.xlsx');
     }
 
     public function editorUpdate(Request $request, $id)
@@ -358,25 +365,32 @@ class MasterdataController extends Controller
         $editors = Editor::with('data')->get()->unique('editor_id');
         foreach ($editors as $editor) {
             try {
-                  $user = User::where('editor_id', $editor->editor_id)->first();
-            if ($user) {
-                $editor_exists[] = $editor->name . ' (' . $editor->editor_id . ')';
-            } else {
-                // Create new user
-                $user = new User();
-                $user->name = $editor->name;
-                $user->email = $editor->email;
-                $user->phone = $editor->phone;
-                $user->editor_id = $editor->editor_id;
-                $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate one
-                $user->save();
-                $total_data_synced++;
-            }
+                $user = User::where('editor_id', $editor->editor_id)->first();
+                if ($user) {
+                    $editor_exists[] = $editor->name . ' (' . $editor->editor_id . ')';
+                } else {
+                    $user = User::where('email', $editor->email)->first();
+                    if ($user) {
+                        // Update existing user with editor_id
+                        $user->editor_id = $editor->editor_id;
+                        $user->save();
+                        $total_data_synced++;
+                    } else {
+                        // Create new user
+                        $user = new User();
+                        $user->name = $editor->name;
+                        $user->email = $editor->email;
+                        $user->phone = $editor->phone;
+                        $user->editor_id = $editor->editor_id;
+                        $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate one
+                        $user->save();
+                        $total_data_synced++;
+                    }
+                }
             } catch (\Throwable $th) {
                 $total_data_error++;
                 continue;
             }
-
         }
 
         if (count($editor_exists) > 0) {
