@@ -297,35 +297,101 @@ class EventController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $eventUser = new EventUser();
-        $eventUser->event_id = $id;
-        $eventUser->name = $request->name;
-        $eventUser->email = $request->email;
-        $eventUser->phone = $request->phone;
-        $eventUser->save();
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            // Check if user already exists as participant
+            $existingParticipant = EventUser::where('event_id', $id)
+                ->where('email', $request->email)
+                ->first();
 
-        if ($eventUser->phone && $eventUser->phone != '-') {
-            $response_wa = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-message", [
-                'session' => env('WHATSAPP_API_SESSION'),
-                'to' => whatsappNumber($eventUser->phone),
-                'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
-                    "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
-                    "Berikut detail acara:\n" .
-                    "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
-                    "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
-                    "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
-                    "Pastikan Anda hadir dan catat jadwalnya!\n" .
-                    "Terima kasih telah bergabung.\n\n" .
-                    "_generate by system\n" .
-                    url('/'),
-            ]);
-
-            if ($response_wa->status() != 200) {
-                Log::error('Failed to send WhatsApp messages: ' . $response_wa->body());
+            if ($existingParticipant) {
+                Alert::error('Error', 'Peserta dengan email ' . $request->email . ' sudah terdaftar');
+                return redirect()->back()->withInput();
             }
+
+            $eventUser = new EventUser();
+            $eventUser->event_id = $id;
+            $eventUser->user_id = $user->id;
+            $eventUser->name = $request->name;
+            $eventUser->email = $request->email;
+            $eventUser->phone = $request->phone;
+            $eventUser->save();
+
+            if ($eventUser->phone && $eventUser->phone != '-') {
+                try {
+                    $response_wa = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-message", [
+                        'session' => env('WHATSAPP_API_SESSION'),
+                        'to' => whatsappNumber($eventUser->phone),
+                        'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
+                            "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
+                            "Berikut detail acara:\n" .
+                            "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
+                            "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
+                            "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
+                            "Pastikan Anda hadir dan catat jadwalnya!\n" .
+                            "Terima kasih telah bergabung.\n\n" .
+                            "_generate by system\n" .
+                            url('/'),
+                    ]);
+
+                    if ($response_wa->status() != 200) {
+                        Log::error('Failed to send WhatsApp messages: ' . $response_wa->body());
+                    }
+                } catch (\Throwable $th) {
+                    Log::error('Error in sending WhatsApp message: ' . $th->getMessage());
+                }
+            }
+
+            Alert::success('Sukses', 'Peserta berhasil ditambahkan, user sudah terdaftar sebelumnya');
+            return redirect()->back();
+
+        } else {
+            // Create new user
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+            $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate a random one
+            $user->save();
+
+            $eventUser = new EventUser();
+            $eventUser->event_id = $id;
+            $eventUser->user_id = $user->id;
+            $eventUser->name = $request->name;
+            $eventUser->email = $request->email;
+            $eventUser->phone = $request->phone;
+            $eventUser->save();
+
+            if ($eventUser->phone && $eventUser->phone != '-') {
+                try {
+                    $response_wa = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-message", [
+                        'session' => env('WHATSAPP_API_SESSION'),
+                        'to' => whatsappNumber($eventUser->phone),
+                        'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
+                            "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
+                            "Berikut detail acara:\n" .
+                            "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
+                            "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
+                            "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
+                            "Pastikan Anda hadir dan catat jadwalnya!\n" .
+                            "Terima kasih telah bergabung.\n\n" .
+                            "_generate by system\n" .
+                            url('/'),
+                    ]);
+
+                    if ($response_wa->status() != 200) {
+                        Log::error('Failed to send WhatsApp messages: ' . $response_wa->body());
+                    }
+                } catch (\Throwable $th) {
+                    Log::error('Error in sending WhatsApp message: ' . $th->getMessage());
+                }
+            }
+
+            Alert::success('Sukses', 'Peserta berhasil ditambahkan, user baru telah dibuat');
+            return redirect()->back();
         }
 
-        Alert::success('Sukses', 'Peserta berhasil ditambahkan');
+        Alert::warning('Warning', 'Terjadi Kesalahan');
         return redirect()->back();
     }
 

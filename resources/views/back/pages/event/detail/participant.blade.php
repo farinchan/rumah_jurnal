@@ -55,10 +55,29 @@
                                         <!--end::Close-->
                                     </div>
 
+
                                     <form action="{{ route('back.event.detail.participant.store', $event->id) }}"
                                         method="POST">
                                         @csrf
                                         <div class="modal-body">
+                                            <div class="alert alert-info d-flex align-items-center p-5 mb-5">
+                                                <i class="ki-duotone ki-information-2 fs-1 text-info me-3">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                </i>
+                                                <div class="d-flex flex-column">
+                                                    <h5 class="mb-1">Informasi Tambah Peserta</h5>
+                                                    <span>
+                                                        Jika Peserta sudah memiliki akun di sistem dengan email yang
+                                                        sama, maka data peserta akan terhubung dengan akun tersebut.
+                                                        <br />
+                                                        Jika belum memiliki akun, maka sistem akan membuatkan akun baru
+                                                        secara otomatis dengan password default <strong>rumahjurnal123</strong>.
+                                                        <br />
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <div class="mb-10">
                                                 <label for="email" class="form-label">Nama Peserta</label>
                                                 <input type="text" class="form-control form-control-solid" name="name"
