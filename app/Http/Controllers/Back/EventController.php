@@ -305,7 +305,7 @@ class EventController extends Controller
         $eventUser->save();
 
         if ($eventUser->phone && $eventUser->phone != '-') {
-            $response_wa = Http::post(env('WHATSAPP_API_URL')  . "/send-message", [
+            $response_wa = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-message", [
                 'session' => env('WHATSAPP_API_SESSION'),
                 'to' => whatsappNumber($eventUser->phone),
                 'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
@@ -458,7 +458,7 @@ class EventController extends Controller
             }
         }
 
-        $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+        $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
             'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
             'delay' => 2000,
             'data' => $data_wa
@@ -592,15 +592,22 @@ class EventController extends Controller
             }
         }
 
-        $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
-            'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
-            'delay' => 2000,
-            'data' => $data_wa
-        ]);
+        try {
+            $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
+                'delay' => 2000,
+                'data' => $data_wa
+            ]);
 
-        if ($response->status() != 200) {
-            Log::error('Failed to send WhatsApp messages: ' . $response->body());
+            if ($response->status() != 200) {
+                Log::error('Failed to send WhatsApp messages: ' . $response->body());
+            }
+        } catch (\Throwable $th) {
+            Log::error('Error in sending WhatsApp messages: ' . $th->getMessage());
+            Alert::error('Error', 'Gagal mengirim pesan WhatsApp: ' . $th->getMessage());
         }
+
+
 
         $message = "Import selesai. {$importedCount} editor berhasil diimport";
         if ($skippedCount > 0) {
@@ -924,7 +931,7 @@ class EventController extends Controller
             }
         }
 
-        $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+        $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
             'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
             'delay' => $request->delay,
             'data' => $data

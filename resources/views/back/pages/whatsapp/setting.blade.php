@@ -90,6 +90,7 @@
             function getMySession() {
                 $.ajax({
                     url: '{{ route('api.whatsapp.get-my-session') }}',
+                    timeout: 30000,
                     type: 'GET',
                     success: function(response) {
                         // console.log(response);

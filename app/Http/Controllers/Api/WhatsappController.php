@@ -22,7 +22,7 @@ class WhatsappController extends Controller
     public function getAllSessions(Request $request)
     {
         try {
-            $response_wa = Http::get($this->url_wa  . "/sessions?key=" . $this->secret_key);
+            $response_wa = Http::timeout(60)->get($this->url_wa  . "/sessions?key=" . $this->secret_key);
 
             if ($response_wa->status() != 200) {
                 $response = [
@@ -53,7 +53,7 @@ class WhatsappController extends Controller
     public function getMySession(Request $request)
     {
         try {
-            $response_wa = Http::get($this->url_wa  . "/sessions?key=" . $this->secret_key);
+            $response_wa = Http::timeout(60)->get($this->url_wa  . "/sessions?key=" . $this->secret_key);
 
             if ($response_wa->status() != 200) {
                 $response = [
@@ -96,7 +96,7 @@ class WhatsappController extends Controller
     public function deleteSession(Request $request)
     {
         try {
-            $response_wa = Http::get($this->url_wa  . "/delete-session", [
+            $response_wa = Http::timeout(60)->get($this->url_wa  . "/delete-session", [
                 'session' => $this->session_wa
             ]);
 
@@ -129,7 +129,7 @@ class WhatsappController extends Controller
     public function sendMessage(Request $request)
     {
         try {
-            $response_wa = Http::post($this->url_wa  . "/send-message", [
+            $response_wa = Http::timeout(60)->post($this->url_wa  . "/send-message", [
                 'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
                 'to' => $request->phone,
                 'text' => $request->message
@@ -180,7 +180,7 @@ class WhatsappController extends Controller
         //     ]
         // }
         try {
-            $response_wa = Http::post($this->url_wa  . "/send-bulk-message", [
+            $response_wa = Http::timeout(60)->post($this->url_wa  . "/send-bulk-message", [
                 'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
                 'delay' => $request->delay,
                 'data' => $request->data
@@ -214,7 +214,7 @@ class WhatsappController extends Controller
     public function sendImage(Request $request)
     {
         try {
-            $response_wa = Http::post($this->url_wa  . "/send-image", [
+            $response_wa = Http::timeout(60)->post($this->url_wa  . "/send-image", [
                 'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
                 'to' => $request->phone,
                 'urlImage' => $request->image,
