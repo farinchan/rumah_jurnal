@@ -73,7 +73,8 @@
                                                         sama, maka data peserta akan terhubung dengan akun tersebut.
                                                         <br />
                                                         Jika belum memiliki akun, maka sistem akan membuatkan akun baru
-                                                        secara otomatis dengan password default <strong>rumahjurnal123</strong>.
+                                                        secara otomatis dengan password default
+                                                        <strong>rumahjurnal123</strong>.
                                                         <br />
                                                     </span>
                                                 </div>
@@ -389,14 +390,16 @@
                                         </i>
 
                                     </a>
-                                    <a href="{{ route('event.certificate', $user->id) }}"
-                                        target="_blank" class="btn btn-icon btn-light-success btn-sm me-1"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Sertifikat">
-                                        <i class="ki-duotone ki-document fs-2">
-                                            <span class="path1"></span>
-                                            <span class="path2"></span>
-                                        </i>
-                                    </a>
+                                    @if ($event->type != 'Rapat')
+                                        <a href="{{ route('event.certificate', $user->id) }}" target="_blank"
+                                            class="btn btn-icon btn-light-success btn-sm me-1" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="Sertifikat">
+                                            <i class="ki-duotone ki-document fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                        </a>
+                                    @endif
                                     <a href="#" class="btn btn-icon btn-light-danger btn-sm me-1"
                                         data-bs-toggle="modal" data-bs-target="#kt_modal_delete_user{{ $user->id }}">
                                         <i class="ki-duotone ki-trash fs-2" data-bs-toggle="tooltip"
