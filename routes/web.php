@@ -336,7 +336,9 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::put('/website/info', [BackSettingController::class, 'informationUpdate'])->name('website.info');
 
         Route::get('/banner', [BackSettingController::class, 'banner'])->name('banner');
+        Route::post('/banner/create', [BackSettingController::class, 'bannerCreate'])->name('banner-create');
         Route::put('/banner/{id}/update', [BackSettingController::class, 'bannerUpdate'])->name('banner-update');
+        Route::delete('/banner/{id}/delete', [BackSettingController::class, 'bannerDelete'])->name('banner-delete');
     });
 
     Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
