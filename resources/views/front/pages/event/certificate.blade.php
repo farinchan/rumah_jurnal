@@ -46,7 +46,7 @@
 
         .content-wrapper {
             position: absolute;
-            top: 120mm;
+            top: 140mm;
             left: 125mm;
             transform: translate(-50%, -50%);
             text-align: left;
@@ -113,40 +113,46 @@
             line-height: 1;
         }
 
-        /* Signature section */
+        /* Gaya untuk tanda tangan */
         .signature {
+            width: 430px;
+            margin-top: 0px;
+        }
+
+        /* Signature section */
+        .number_certificate {
             position: absolute;
-            bottom: 40mm;
-            right: 50mm;
-            text-align: center;
-        }
-
-        .signature p {
-            margin: 8px 0;
-            font-size: 16px;
-            color: #495057;
-        }
-
-        .signature img {
-            height: 70px;
-            margin: 15px 0;
-        }
-
-        .signature strong {
-            font-size: 18px;
-            color: #005f73;
-            font-weight: bold;
+            top: 63mm;
+            left: 18mm;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1;
+            color: #424242;
+            line-height: 1;
         }
     </style>
 </head>
 
 <body>
+    @php
+        $dates = explode(' - ', $event_date);
+        $before = $dates[0] ?? null;
+        $after = $dates[1] ?? null;
+        \Carbon\Carbon::setLocale('id');
+        $date_before = $before ? \Carbon\Carbon::parse($before)->translatedFormat('l, d F Y') : null;
+        $date_after = $after ? \Carbon\Carbon::parse($after)->translatedFormat('l, d F Y') : null;
+        // dd($date_before, $date_after);
+    @endphp
     <div class="certificate-container">
         <div class="background-image">
             <img src="{{ public_path('ext_images/template_sertifikat.png') }}"
                 style="width: 100%; height: 100%; object-fit: cover;" alt="Certificate Background">
         </div>
 
+        <div class="number_certificate">
+            Nomor:
+            B-{{ $certificate_number ?? "0000" }}/ln.26/HM.00/{{ $after ? \Carbon\Carbon::parse($after)->format('M') : \Carbon\Carbon::now()->format('M') }}/{{ $after ? \Carbon\Carbon::parse($after)->format('Y') : \Carbon\Carbon::now()->format('Y') }}
+        </div>
         <div class="content-wrapper">
             <div class="event-card">
                 <h1 class="speaker-name">{{ $participant_name }}</h1>
@@ -156,29 +162,17 @@
                 <h2 class="workshop-title">
                     {{ $event_name }}
                 </h2>
-                @php
-                    $dates = explode(' - ', $event_date);
-                    $before = $dates[0] ?? null;
-                    $after = $dates[1] ?? null;
-                    \Carbon\Carbon::setLocale('id');
-                    $date_before = $before ? \Carbon\Carbon::parse($before)->translatedFormat('l, d F Y') : null;
-                    $date_after = $after ? \Carbon\Carbon::parse($after)->translatedFormat('l, d F Y') : null;
-                    // dd($date_before, $date_after);
-                @endphp
+
 
                 <p class="event-details">
                     dilaksanakan oleh Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi <br>pada
                     {{ $date_before }}
                 </p>
+                <img class="signature" src="{{ public_path('ext_images/ttd_firdaus.png') }}" alt="Signature">
             </div>
         </div>
 
-        {{-- <div class="signature">
-            <p>Bukittinggi, {{ $date }}</p>
-            <p>Editor in Chief,</p>
-            <img src="{{ $chief_editor_signature }}" alt="Signature">
-            <p><strong>{{ $chief_editor }}</strong></p>
-        </div> --}}
+
     </div>
 </body>
 
