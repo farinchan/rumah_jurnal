@@ -45,7 +45,7 @@ Route::get('/terms-of-service', [HomeController::class, 'termsOfService'])->name
 
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('login-cdn');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'index'])->name('register');

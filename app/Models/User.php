@@ -22,6 +22,7 @@ class User extends Authenticatable
         'google_id',
         'photo',
         'name',
+        'gender',
         'sinta_id',
         'scopus_id',
         'google_scholar',
@@ -29,6 +30,8 @@ class User extends Authenticatable
         'phone',
         'email',
         'password',
+        'reviewer_id',
+        'editor_id',
     ];
 
     /**
