@@ -346,7 +346,7 @@
                                         <a href="#tabbar" class="btn theme-btn-1 btn-effect-1 text-uppercase"
                                             id="prev_3">Prev
                                             Step</a>
-                                        <button id="submit" type="submit_btn"
+                                        <button id="submit" type="submit_btn" type="submit"
                                             class="btn theme-btn-1 btn-effect-1 text-uppercase">
                                             Submit
                                         </button>
@@ -445,6 +445,22 @@
         $('#prev_3').on('click', function() {
             console.log('prev_3 clicked');
             $('#tab_step_2').trigger('click');
+        });
+
+        $('#submit').on('click', function(e) {
+
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Please wait while we submit your payment',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Submit form
+            $(this).closest('form').submit();
         });
     </script>
     <script>
