@@ -217,6 +217,6 @@ class PaymentController extends Controller
         $paayment->save();
 
         Alert::success('Success', 'Payment has been created');
-        return redirect()->route('payment.index');
+        return redirect()->route('payment.index', ['q' => $submission_id]);
     }
 }

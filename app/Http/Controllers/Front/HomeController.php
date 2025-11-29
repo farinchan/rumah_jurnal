@@ -64,6 +64,35 @@ class HomeController extends Controller
         }
     }
 
+    public function welcomeSpeech()
+    {
+        $setting_web = SettingWebsite::first();
+        $welcome_speech = WelcomeSpeech::first();
+
+        $data = [
+            'title' => 'Welcome Speech',
+            'meta' => [
+                'title' => 'Welcome Speech | ' . $setting_web->name,
+                'description' => 'Welcome Speech ' . $setting_web->name . ' - Sambutan dari editor atau ketua redaksi jurnal.',
+                'keywords' => $setting_web->name . ', Welcome Speech, Editor, Chief Editor, Journal, Research, OJS System',
+                'favicon' => $setting_web->favicon
+            ],
+            'breadcrumbs' => [
+                [
+                    'name' => 'Beranda',
+                    'link' => route('home')
+                ],
+                [
+                    'name' => 'Welcome Speech',
+                    'link' => route('welcome.speech')
+                ]
+            ],
+            'setting_web' => $setting_web,
+            'welcome_speech' => $welcome_speech,
+        ];
+        return view('front.pages.home.welcome_speech', $data);
+    }
+
     public function privacyPolicy()
     {
         $setting_web = SettingWebsite::first();

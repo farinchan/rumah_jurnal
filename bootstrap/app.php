@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
          $middleware->alias([
             'TrustProxies' => \App\Http\Middleware\TrustProxies::class,
+            'login-cdn' => \App\Http\Middleware\LoginCdn::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             '/login',

@@ -182,6 +182,8 @@ class EventController extends Controller
             'event_name' => $eventUser->event->name ?? '',
             'participant_name' => $eventUser->name ?? '',
             'event_date' => $eventUser->event->datetime ?? '',
+            'certificate_number' => str_pad($eventUser->event->id, 4, '0', STR_PAD_LEFT),
+
         ];
         $pdf = Pdf::loadView('front.pages.event.certificate', $data)->setPaper('A4', 'landscape');
         // return $pdf->download('sertifikat_' . $eventUser->id . '.pdf');
