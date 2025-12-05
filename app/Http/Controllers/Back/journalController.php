@@ -258,9 +258,20 @@ class journalController extends Controller
         $validator = Validator::make($request->all(), [
             'reviewer' => 'nullable|array',
             'editor' => 'nullable|array',
+            'author_nik' => 'nullable|string',
+            'author_bank_account' => 'nullable|string|max:255',
+            'author_bank_name' => 'nullable|string|max:255',
+            'author_npwp' => 'nullable|string|max:255',
+            'author_golongan' => 'nullable|string|max:255',
         ], [
             'reviewer.required' => 'Reviewer harus dipilih',
             'reviewer.array' => 'Reviewer harus dipilih',
+            'editor.required' => 'Editor harus dipilih',
+            'editor.array' => 'Editor harus dipilih',
+            'author_bank_account.max' => 'Nomor rekening tidak boleh lebih dari 255 karakter',
+            'author_bank_name.max' => 'Nama bank tidak boleh lebih dari 255 karakter',
+            'author_npwp.max' => 'NPWP tidak boleh lebih dari 255 karakter',
+            'author_golongan.max' => 'Golongan tidak boleh lebih dari 255 karakter',
         ]);
 
         if ($validator->fails()) {
@@ -270,6 +281,11 @@ class journalController extends Controller
 
         $submission->update([
             'free_charge' => $request->free_charge ? 1 : 0,
+            'author_nik' => $request->author_nik,
+            'author_bank_account' => $request->author_bank_account,
+            'author_bank_name' => $request->author_bank_name,
+            'author_npwp' => $request->author_npwp,
+            'author_golongan' => $request->author_golongan,
         ]);
 
 
