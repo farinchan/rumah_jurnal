@@ -59,7 +59,10 @@
                                                         {{ $reviewer->affiliation }}
                                                     </span>
                                                     <span class="">
-                                                        NIK. {{ $reviewer->nik ?? '-' }}
+                                                        NIK. {{ $reviewer->data?->nik ?? '-' }}
+                                                    </span>
+                                                    <span class="">
+                                                        Golongan. {{ $reviewer->data?->golongan ?? '-' }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -587,6 +590,24 @@
                                     <td>
                                         <input type="text" class="form-control" name="npwp"
                                             value="{{ $reviewer->data?->npwp }}" placeholder="Nomor Pokok Wajib Pajak" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="">Golongan</td>
+                                    <td>:</td>
+                                    <td>
+                                        <select class="form-select" name="golongan" >
+                                            <option value="" >Pilih Golongan</option>
+                                            <option value="III-A" {{ $reviewer->data?->golongan == 'III-A' ? 'selected' : '' }}>III-A</option>
+                                            <option value="III-B" {{ $reviewer->data?->golongan == 'III-B' ? 'selected' : '' }}>III-B</option>
+                                            <option value="III-C" {{ $reviewer->data?->golongan == 'III-C' ? 'selected' : '' }}>III-C</option>
+                                            <option value="III-D" {{ $reviewer->data?->golongan == 'III-D' ? 'selected' : '' }}>III-D</option>
+                                            <option value="IV-A" {{ $reviewer->data?->golongan == 'IV-A' ? 'selected' : '' }}>IV-A</option>
+                                            <option value="IV-B" {{ $reviewer->data?->golongan == 'IV-B' ? 'selected' : '' }}>IV-B</option>
+                                            <option value="IV-C" {{ $reviewer->data?->golongan == 'IV-C' ? 'selected' : '' }}>IV-C</option>
+                                            <option value="IV-D" {{ $reviewer->data?->golongan == 'IV-D' ? 'selected' : '' }}>IV-D</option>
+                                            <option value="IV-E" {{ $reviewer->data?->golongan == 'IV-E' ? 'selected' : '' }}>IV-E</option>
+                                        </select>
                                     </td>
                                 </tr>
                             </table>

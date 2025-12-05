@@ -9,7 +9,8 @@
             </div>
             <div class="card-body pt-0">
                 <h3 class="text-gray-800 text-hover-primary mb-4">
-                    {{ $payment->paymentInvoice->submission->submission_id }} - {{ $payment->paymentInvoice->submission->full_title }}
+                    {{ $payment->paymentInvoice->submission->submission_id }} -
+                    {{ $payment->paymentInvoice->submission->full_title }}
                 </h3>
 
                 <div class="mb-4">
@@ -77,18 +78,14 @@
 
                 <div class="mb-5 fv-row">
                     <label class="form-label">Persentase Pembayaran</label>
-                    <input type="text"  class="form-control mb-2"
-                        placeholder="Persentase Pembayaran"
-                        value="{{ $payment->paymentInvoice->payment_percent }} %"
-                        readonly />
+                    <input type="text" class="form-control mb-2" placeholder="Persentase Pembayaran"
+                        value="{{ $payment->paymentInvoice->payment_percent }} %" readonly />
                 </div>
 
                 <div class="mb-5 fv-row">
                     <label class="form-label">Jumlah Pembayaran</label>
-                    <input type="text" name="payment_amount" class="form-control mb-2"
-                        placeholder="Nominal Pembayaran"
-                        value="@money($payment->paymentInvoice->payment_amount)"
-                        readonly />
+                    <input type="text" name="payment_amount" class="form-control mb-2" placeholder="Nominal Pembayaran"
+                        value="@money($payment->paymentInvoice->payment_amount)" readonly />
                 </div>
 
 
@@ -165,23 +162,25 @@
 
                     <div class="mb-5 fv-row">
                         <label class="form-label required">Status Pembayaran</label>
-                        <select name="payment_status" class="form-select mb-2" id="payment_status">
-                            <option value="pending" @if ($payment->status == 'pending') selected @endif>Pending</option>
-                            <option value="accepted" @if ($payment->status == 'accepted') selected @endif>Accepted</option>
-                            <option value="rejected" @if ($payment->status == 'rejected') selected @endif>Rejected</option>
+                        <select name="payment_status" class="form-select mb-2" id="payment_status" {{Auth::user()->hasRole(['super-admin', 'keuangan']) ? '' : 'readonly'}}>
+                            <option value="pending" @if ($payment->payment_status == 'pending') selected @endif>Pending</option>
+                            <option value="accepted" @if ($payment->payment_status == 'accepted') selected @endif>Accepted</option>
+                            <option value="rejected" @if ($payment->payment_status == 'rejected') selected @endif>Rejected</option>
                         </select>
                     </div>
                     <div class="mb-5 fv-row">
                         <label class="form-label">Keterangan</label>
                         <textarea name="payment_note" class="form-control mb-2" rows="5"
-                            placeholder="Berikan Keterangan Untuk Pembayaran Ini maksimal 255 karakter">{{ $payment->payment_note }}</textarea>
+                            placeholder="Berikan Keterangan Untuk Pembayaran Ini maksimal 255 karakter" {{Auth::user()->hasRole(['super-admin', 'keuangan']) ? '' : 'readonly'}}>{{ $payment->payment_note }}</textarea>
                     </div>
 
                 </div>
-                <div class="card-footer d-flex justify-content-end py-6 px-9">
-                    <a href="{{ route('back.finance.verification.index') }}" class="btn btn-light ms-3">Kembali</a>
-                    <button type="submit" id="btn-submit" class="btn btn-warning">Simpan & Selesai</button>
-                </div>
+                @if (Auth::user()->hasRole(['super-admin', 'keuangan']))
+                    <div class="card-footer d-flex justify-content-end py-6 px-9">
+                        <a href="{{ route('back.finance.verification.index') }}" class="btn btn-light ms-3">Kembali</a>
+                        <button type="submit" id="btn-submit" class="btn btn-warning">Simpan & Selesai</button>
+                    </div>
+                @endif
             </form>
         </div>
     </div>
