@@ -1,6 +1,6 @@
 @extends('back.app')
 @section('content')
-    <div id="kt_content_container" class=" container-xxl ">
+    <div id="kt_content_container" class=" container-fluid ">
         @include('back.pages.journal.detail-header')
         <div class="card mb-5 mb-lg-10">
             <div class="card-header">
