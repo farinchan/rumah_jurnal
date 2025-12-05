@@ -11,6 +11,7 @@ use App\Models\EventUser;
 use App\Models\Reviewer;
 use App\Models\Editor;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -63,14 +64,26 @@ class EventController extends Controller
             'meta_title' => 'nullable',
             'meta_description' => 'nullable',
             'meta_keywords' => 'nullable',
+            'material' => 'nullable|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,txt,zip,rar|max:102400',
         ], [
-            'required' => ':attribute harus diisi',
-            'image' => 'File harus berupa gambar',
-            'mimes' => 'File harus berupa gambar',
-            'max' => 'Ukuran file maksimal 8MB',
-            'integer' => ':attribute harus berupa angka',
-            'mimes' => 'File harus berupa PDF',
-            'max' => 'Ukuran file maksimal 8MB',
+            'type.required' => 'Tipe event harus diisi',
+            'status.required' => 'Status event harus diisi',
+            'name.required' => 'Nama event harus diisi',
+            'datetime.required' => 'Tanggal dan waktu event harus diisi',
+            'location.required' => 'Lokasi event harus diisi',
+            'limit.integer' => 'Limit peserta harus berupa angka',
+            'description.required' => 'Deskripsi event harus diisi',
+            'thumbnail.image' => 'File thumbnail harus berupa gambar',
+            'thumbnail.mimes' => 'File thumbnail harus berupa: jpeg, png, jpg, gif, svg',
+            'thumbnail.max' => 'Ukuran file thumbnail maksimal 8MB',
+            'attachment.mimes' => 'File lampiran harus berupa: pdf',
+            'attachment.max' => 'Ukuran file lampiran maksimal 8MB',
+            'is_active.required' => 'Status aktif event harus diisi',
+            'meta_title.required' => 'Meta title harus diisi',
+            'meta_description.required' => 'Meta description harus diisi',
+            'meta_keywords.required' => 'Meta keywords harus diisi',
+            'material.mimes' => 'File materi harus berupa: pdf, doc, docx, ppt, pptx, xls, xlsx, txt, zip, rar',
+            'material.max' => 'Ukuran file materi maksimal 100MB',
         ]);
 
         if ($validator->fails()) {
@@ -111,6 +124,11 @@ class EventController extends Controller
             $event->attachment =  $file->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
         }
 
+        if ($request->hasFile('material')) {
+            $file = $request->file('material');
+            $event->material =  $file->storeAs('event', 'm-' . date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
+        }
+
         $event->save();
 
         Alert::success('Sukses', 'event berhasil ditambahkan');
@@ -146,11 +164,26 @@ class EventController extends Controller
             'meta_title' => 'nullable',
             'meta_description' => 'nullable',
             'meta_keywords' => 'nullable',
+            'material' => 'nullable|mimes:pdf,doc,docx,ppt,pptx,xls,txt,xlsx,zip,rar|max:102400',
         ], [
-            'required' => ':attribute harus diisi',
-            'image' => 'File harus berupa gambar',
-            'mimes' => 'File harus berupa gambar',
-            'max' => 'Ukuran file maksimal 2MB',
+            'type.required' => 'Tipe event harus diisi',
+            'status.required' => 'Status event harus diisi',
+            'name.required' => 'Nama event harus diisi',
+            'datetime.required' => 'Tanggal dan waktu event harus diisi',
+            'location.required' => 'Lokasi event harus diisi',
+            'limit.integer' => 'Limit peserta harus berupa angka',
+            'description.required' => 'Deskripsi event harus diisi',
+            'thumbnail.image' => 'File thumbnail harus berupa gambar',
+            'thumbnail.mimes' => 'File thumbnail harus berupa: jpeg, png, jpg, gif, svg',
+            'thumbnail.max' => 'Ukuran file thumbnail maksimal 8MB',
+            'attachment.mimes' => 'File lampiran harus berupa: pdf',
+            'attachment.max' => 'Ukuran file lampiran maksimal 8MB',
+            'is_active.required' => 'Status aktif event harus diisi',
+            'meta_title.required' => 'Meta title harus diisi',
+            'meta_description.required' => 'Meta description harus diisi',
+            'meta_keywords.required' => 'Meta keywords harus diisi',
+            'material.mimes' => 'File materi harus berupa: pdf, doc, docx, ppt, pptx, xls, xlsx, txt, zip, rar',
+            'material.max' => 'Ukuran file materi maksimal 100MB',
         ]);
 
         if ($validator->fails()) {
@@ -188,6 +221,14 @@ class EventController extends Controller
             }
             $file = $request->file('attachment');
             $event->attachment = $file->storeAs('event', date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
+        }
+
+        if ($request->hasFile('material')) {
+            if ($event->material) {
+                Storage::delete('public/' . $event->material);
+            }
+            $file = $request->file('material');
+            $event->material = $file->storeAs('event', 'm-' . date('YmdHis') . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension(), 'public');
         }
 
         $event->save();
@@ -256,35 +297,101 @@ class EventController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $eventUser = new EventUser();
-        $eventUser->event_id = $id;
-        $eventUser->name = $request->name;
-        $eventUser->email = $request->email;
-        $eventUser->phone = $request->phone;
-        $eventUser->save();
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            // Check if user already exists as participant
+            $existingParticipant = EventUser::where('event_id', $id)
+                ->where('email', $request->email)
+                ->first();
 
-        if ($eventUser->phone && $eventUser->phone != '-') {
-            $response_wa = Http::post(env('WHATSAPP_API_URL')  . "/send-message", [
-                'session' => env('WHATSAPP_API_SESSION'),
-                'to' => whatsappNumber($eventUser->phone),
-                'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
-                    "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
-                    "Berikut detail acara:\n" .
-                    "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
-                    "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
-                    "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
-                    "Pastikan Anda hadir dan catat jadwalnya!\n" .
-                    "Terima kasih telah bergabung.\n\n" .
-                    "_generate by system\n" .
-                    url('/'),
-            ]);
-
-            if ($response_wa->status() != 200) {
-                Log::error('Failed to send WhatsApp messages: ' . $response_wa->body());
+            if ($existingParticipant) {
+                Alert::error('Error', 'Peserta dengan email ' . $request->email . ' sudah terdaftar');
+                return redirect()->back()->withInput();
             }
+
+            $eventUser = new EventUser();
+            $eventUser->event_id = $id;
+            $eventUser->user_id = $user->id;
+            $eventUser->name = $request->name;
+            $eventUser->email = $request->email;
+            $eventUser->phone = $request->phone;
+            $eventUser->save();
+
+            if ($eventUser->phone && $eventUser->phone != '-') {
+                try {
+                    $response_wa = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-message", [
+                        'session' => env('WHATSAPP_API_SESSION'),
+                        'to' => whatsappNumber($eventUser->phone),
+                        'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
+                            "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
+                            "Berikut detail acara:\n" .
+                            "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
+                            "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
+                            "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
+                            "Pastikan Anda hadir dan catat jadwalnya!\n" .
+                            "Terima kasih telah bergabung.\n\n" .
+                            "_generate by system\n" .
+                            url('/'),
+                    ]);
+
+                    if ($response_wa->status() != 200) {
+                        Log::error('Failed to send WhatsApp messages: ' . $response_wa->body());
+                    }
+                } catch (\Throwable $th) {
+                    Log::error('Error in sending WhatsApp message: ' . $th->getMessage());
+                }
+            }
+
+            Alert::success('Sukses', 'Peserta berhasil ditambahkan, user sudah terdaftar sebelumnya');
+            return redirect()->back();
+
+        } else {
+            // Create new user
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+            $user->password = bcrypt('rumahjurnal123'); // Set a default password or generate a random one
+            $user->save();
+
+            $eventUser = new EventUser();
+            $eventUser->event_id = $id;
+            $eventUser->user_id = $user->id;
+            $eventUser->name = $request->name;
+            $eventUser->email = $request->email;
+            $eventUser->phone = $request->phone;
+            $eventUser->save();
+
+            if ($eventUser->phone && $eventUser->phone != '-') {
+                try {
+                    $response_wa = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-message", [
+                        'session' => env('WHATSAPP_API_SESSION'),
+                        'to' => whatsappNumber($eventUser->phone),
+                        'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
+                            "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
+                            "Berikut detail acara:\n" .
+                            "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
+                            "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
+                            "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
+                            "Pastikan Anda hadir dan catat jadwalnya!\n" .
+                            "Terima kasih telah bergabung.\n\n" .
+                            "_generate by system\n" .
+                            url('/'),
+                    ]);
+
+                    if ($response_wa->status() != 200) {
+                        Log::error('Failed to send WhatsApp messages: ' . $response_wa->body());
+                    }
+                } catch (\Throwable $th) {
+                    Log::error('Error in sending WhatsApp message: ' . $th->getMessage());
+                }
+            }
+
+            Alert::success('Sukses', 'Peserta berhasil ditambahkan, user baru telah dibuat');
+            return redirect()->back();
         }
 
-        Alert::success('Sukses', 'Peserta berhasil ditambahkan');
+        Alert::warning('Warning', 'Terjadi Kesalahan');
         return redirect()->back();
     }
 
@@ -417,7 +524,7 @@ class EventController extends Controller
             }
         }
 
-        $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+        $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
             'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
             'delay' => 2000,
             'data' => $data_wa
@@ -551,15 +658,22 @@ class EventController extends Controller
             }
         }
 
-        $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
-            'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
-            'delay' => 2000,
-            'data' => $data_wa
-        ]);
+        try {
+            $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
+                'delay' => 2000,
+                'data' => $data_wa
+            ]);
 
-        if ($response->status() != 200) {
-            Log::error('Failed to send WhatsApp messages: ' . $response->body());
+            if ($response->status() != 200) {
+                Log::error('Failed to send WhatsApp messages: ' . $response->body());
+            }
+        } catch (\Throwable $th) {
+            Log::error('Error in sending WhatsApp messages: ' . $th->getMessage());
+            Alert::error('Error', 'Gagal mengirim pesan WhatsApp: ' . $th->getMessage());
         }
+
+
 
         $message = "Import selesai. {$importedCount} editor berhasil diimport";
         if ($skippedCount > 0) {
@@ -883,7 +997,7 @@ class EventController extends Controller
             }
         }
 
-        $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+        $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
             'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
             'delay' => $request->delay,
             'data' => $data

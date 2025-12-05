@@ -270,6 +270,12 @@ class DashboardController extends Controller
                     ->where('date', '<=', $endDate)
                     ->sum('amount');
 
+                // Calculate distribution based on finance year percentage
+                $distributionPercentage = $financeYear ? $financeYear->distribution_percentage : 80;
+                $totalGrossIncome = $totalIncome + $totalPaymentIncome;
+                $distributionRumahJurnal = ($totalGrossIncome * $distributionPercentage) / 100;
+                $distributionBLU = $totalGrossIncome - $distributionRumahJurnal;
+
                 // Transaction counts
                 $totalTransactionCount = Finance::where('date', '>=', $startDate)
                     ->where('date', '<=', $endDate)
@@ -291,7 +297,11 @@ class DashboardController extends Controller
                         'finance_income' => (int)$totalIncome,
                         'payment_income' => (int)$totalPaymentIncome,
                         'transaction_count' => $totalTransactionCount,
-                        'monthly_transactions' => $monthlyTransactionCount
+                        'monthly_transactions' => $monthlyTransactionCount,
+                        'distribution_percentage' => $distributionPercentage,
+                        'distribution_rumah_jurnal' => (int)$distributionRumahJurnal,
+                        'distribution_blu' => (int)$distributionBLU,
+                        'total_gross_income' => (int)$totalGrossIncome
                     ]
                 ];
             });

@@ -180,7 +180,7 @@
                     <div class="col-lg-12">
                         <div class="ltn__blog-item ltn__blog-item-3">
                             <div class="ltn__blog-img">
-                                <a href="{{ route('news.detail', $news->slug) }}"><img src="{{ $news->getThumbnail() }}"
+                                <a href="{{ route('news.detail', $news->slug) }}"><img src="{{ $news->getThumbnail() }}" style="height: 250px; width: 100%; object-fit: cover; object-position: top;"
                                         alt="#"></a>
                             </div>
                             <div class="ltn__blog-brief">

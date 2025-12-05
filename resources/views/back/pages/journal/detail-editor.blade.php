@@ -1,6 +1,6 @@
 @extends('back.app')
 @section('content')
-    <div id="kt_content_container" class=" container-xxl ">
+    <div id="kt_content_container" class=" container-fluid ">
         @include('back.pages.journal.detail-header')
         <div class="row">
             <div class="col-xxl-8">
@@ -26,11 +26,13 @@
                                         <th class="min-w-150px text-start">Email</th>
                                         <th class="min-w-100px text-start">No.Telp</th>
                                         <th class="min-w-150px text-start">Rekening</th>
+                                        <th class="min-w-150px text-start">NPWP</th>
                                         <th class="min-w-150px text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="fw-6 fw-semibold text-gray-600">
                                     @forelse ($issue->editors as $editor)
+                                    {{-- @dd($editor->data) --}}
                                         <tr>
                                             <td>
                                                 {{ $loop->iteration }}
@@ -51,6 +53,12 @@
 
                                                     <span>
                                                         {{ $editor->affiliation }}
+                                                    </span>
+                                                    <span class="">
+                                                        NIK. {{ $editor->data?->nik ?? '-' }}
+                                                    </span>
+                                                    <span class="">
+                                                        Golongan. {{ $editor->data?->golongan ?? '-' }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -98,9 +106,16 @@
                                                 </span>
                                             </td>
                                             <td class="text-start">
-                                                <span class="fw-bold">{{ $editor->account_bank }}</span><br>
-                                                @if ($editor->account_number)
-                                                    No. Rek: {{ $editor->account_number }}
+                                                <span class="fw-bold">{{ $editor->data?->account_bank }}</span><br>
+                                                @if ($editor->data?->account_number)
+                                                    No. Rek: {{ $editor->data?->account_number }}
+                                                @endif
+                                            </td>
+                                             <td class="text-start">
+                                                @if ($editor->data?->npwp)
+                                                    <span class="fw-bold">{{ $editor->data?->npwp }}</span>
+                                                @else
+                                                    <span class="text-muted">Tidak ada NPWP</span>
                                                 @endif
                                             </td>
                                             <td class="text-end">
@@ -438,6 +453,15 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <td class="required">NIK</td>
+                                    <td>:</td>
+                                    <td>
+                                        <input type="text" class="form-control" name="nik"
+                                            value="{{ $editor->data?->nik }}" placeholder="Nomor Induk Kependudukan"
+                                            required />
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td class="required">Rekening</td>
                                     <td>:</td>
                                     <td>
@@ -547,13 +571,39 @@
                                             @endphp
                                             @foreach ($banks as $bank)
                                                 <option value="{{ $bank }}"
-                                                    {{ isset($editor->account_bank) && $editor->account_bank == $bank ? 'selected' : '' }}>
+                                                    {{ isset($editor->data?->account_bank) && $editor->data?->account_bank == $bank ? 'selected' : '' }}>
                                                     {{ $bank }}</option>
                                             @endforeach
                                         </select>
                                         <input type="text" class="form-control mt-2" placeholder="No. Rekening"
-                                            name="account_number" value="{{ $editor->account_number }}" required />
+                                            name="account_number" value="{{ $editor->data?->account_number }}" required />
 
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="">NPWP</td>
+                                    <td>:</td>
+                                    <td>
+                                        <input type="text" class="form-control" name="npwp"
+                                            value="{{ $editor->data?->npwp }}" placeholder="Nomor Pokok Wajib Pajak" />
+                                    </td>
+                                </tr>
+                                 <tr>
+                                    <td class="">Golongan</td>
+                                    <td>:</td>
+                                    <td>
+                                        <select class="form-select" name="golongan" >
+                                            <option value="" >Pilih Golongan</option>
+                                            <option value="III-A" {{ $editor->data?->golongan == 'III-A' ? 'selected' : '' }}>III-A</option>
+                                            <option value="III-B" {{ $editor->data?->golongan == 'III-B' ? 'selected' : '' }}>III-B</option>
+                                            <option value="III-C" {{ $editor->data?->golongan == 'III-C' ? 'selected' : '' }}>III-C</option>
+                                            <option value="III-D" {{ $editor->data?->golongan == 'III-D' ? 'selected' : '' }}>III-D</option>
+                                            <option value="IV-A" {{ $editor->data?->golongan == 'IV-A' ? 'selected' : '' }}>IV-A</option>
+                                            <option value="IV-B" {{ $editor->data?->golongan == 'IV-B' ? 'selected' : '' }}>IV-B</option>
+                                            <option value="IV-C" {{ $editor->data?->golongan == 'IV-C' ? 'selected' : '' }}>IV-C</option>
+                                            <option value="IV-D" {{ $editor->data?->golongan == 'IV-D' ? 'selected' : '' }}>IV-D</option>
+                                            <option value="IV-E" {{ $editor->data?->golongan == 'IV-E' ? 'selected' : '' }}>IV-E</option>
+                                        </select>
                                     </td>
                                 </tr>
                             </table>

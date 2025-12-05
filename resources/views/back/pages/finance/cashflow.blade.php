@@ -93,7 +93,26 @@
                                                                     <small class="text-danger">{{ $message }}</small>
                                                                 @enderror
                                                             </div>
-
+                                                            <div class="mb-4">
+                                                                <label class="form-label fw-semibold"
+                                                                    for="distribution_percentage">Persentase
+                                                                    Distribusi ke Rumah Jurnal</label>
+                                                                <div class="input-group mb-5">
+                                                                    <input type="number" class="form-control"
+                                                                        placeholder="Persentase Distribusi ke Rumah Jurnal"
+                                                                        name="distribution_percentage" id="distribution_percentage"
+                                                                        value="{{ old('distribution_percentage', 50) }}"
+                                                                        min="0" max="100" required />
+                                                                    <span class="input-group-text">%</span>
+                                                                </div>
+                                                                @error('distribution_percentage')
+                                                                    <small class="text-danger">{{ $message }}</small>
+                                                                @enderror
+                                                                <div class="form-text">Masukkan nilai antara 0 hingga
+                                                                    100. persentase ini menentukan bagian dari total
+                                                                    pendapatan yang akan dialokasikan ke Rumah Jurnal.
+                                                                </div>
+                                                            </div>
                                                         </div>
 
                                                         <div class="modal-footer">
@@ -145,6 +164,26 @@
                                                                 @error('start_date')
                                                                     <small class="text-danger">{{ $message }}</small>
                                                                 @enderror
+                                                            </div>
+                                                            <div class="mb-5">
+                                                                <label class="form-label required">Persentase
+                                                                    Distribusi
+                                                                    ke Rumah Jurnal</label>
+                                                                <div class="input-group mb-5">
+                                                                    <input type="number" class="form-control"
+                                                                        placeholder="Persentase Distribusi ke Rumah Jurnal"
+                                                                        name="distribution_percentage"
+                                                                        value="{{ $finance_year ? $finance_year->distribution_percentage : old('distribution_percentage') }}"
+                                                                        min="0" max="100" required />
+                                                                    <span class="input-group-text">%</span>
+                                                                </div>
+                                                                @error('distribution_percentage')
+                                                                    <small class="text-danger">{{ $message }}</small>
+                                                                @enderror
+                                                                <div class="form-text">Masukkan nilai antara 0 hingga
+                                                                    100. persentase ini menentukan bagian dari total
+                                                                    pendapatan yang akan dialokasikan ke Rumah Jurnal.
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -263,11 +302,41 @@
                                 </div>
                                 <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                                     <div class="d-flex align-items-center">
+                                        <i class="ki-duotone ki-abstract-16 fs-3 text-warning me-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
                                         <div class="fs-4 fw-bold">
                                             {{ $finance_year ? 'Rp ' . number_format($total_balance_now, 0, ',', '.') : 'Rp 0' }}
                                         </div>
                                     </div>
                                     <div class="fw-semibold fs-6 text-gray-500">Balance</div>
+                                </div>
+                                <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fs-4 fw-bold">
+                                            {{ $finance_year ? 'Rp ' . number_format($total_distribution, 0, ',', '.') : 'Rp 0' }}
+                                        </div>
+                                        @if($finance_year)
+                                            <span class="ms-2 fs-6 text-muted">
+                                                ({{ $finance_year->distribution_percentage ?? 0 }}%)
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="fw-semibold fs-6 text-gray-500">Total Distribusi ke Rumah Jurnal</div>
+                                </div>
+                                <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fs-4 fw-bold">
+                                            {{ $finance_year ? 'Rp ' . number_format($total_distributtion_other, 0, ',', '.') : 'Rp 0' }}
+                                        </div>
+                                        @if($finance_year)
+                                            <span class="ms-2 fs-6 text-muted">
+                                                ({{ 100 - ($finance_year->distribution_percentage ?? 0) }}%)
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="fw-semibold fs-6 text-gray-500">Total Distribusi ke BLU UIN Bukittinggi</div>
                                 </div>
                             </div>
                         </div>

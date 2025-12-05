@@ -39,12 +39,13 @@ Route::get('/locale/{locale}', LocaleController::class)->name('locale.change');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/visit', [HomeController::class, 'vistWebsite'])->name('visit.ajax')->middleware('TrustProxies');
+Route::get('/welcome-speech', [HomeController::class, 'welcomeSpeech'])->name('welcome.speech');
 Route::get('/privacy-policy', [HomeController::class, 'privacyPolicy'])->name('privacy.policy');
 Route::get('/terms-of-service', [HomeController::class, 'termsOfService'])->name('terms.service');
 
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('login-cdn');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
@@ -74,6 +75,7 @@ Route::prefix('event')->name('event.')->group(function () {
     Route::post('/{slug}/register', [EventController::class, 'register'])->name('register');
 
     Route::get('/eticket/{uuid}', [EventController::class, 'eticket'])->name('eticket');
+    Route::get('/certificate/{uuid}', [EventController::class, 'certificate'])->name('certificate')->middleware('auth');
 
     Route::get('/presence/{code}', [EventController::class, 'presence'])->name('presence')->middleware('auth');
     Route::post('/presence/{code}/store', [EventController::class, 'presenceStore'])->name('presence.store')->middleware('auth');
@@ -334,7 +336,9 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::put('/website/info', [BackSettingController::class, 'informationUpdate'])->name('website.info');
 
         Route::get('/banner', [BackSettingController::class, 'banner'])->name('banner');
+        Route::post('/banner/create', [BackSettingController::class, 'bannerCreate'])->name('banner-create');
         Route::put('/banner/{id}/update', [BackSettingController::class, 'bannerUpdate'])->name('banner-update');
+        Route::delete('/banner/{id}/delete', [BackSettingController::class, 'bannerDelete'])->name('banner-delete');
     });
 
     Route::prefix('whatsapp')->name('whatsapp.')->group(function () {

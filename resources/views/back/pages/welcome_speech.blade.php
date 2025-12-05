@@ -71,6 +71,24 @@
                                 <div class="text-danger fs-7">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <div class="mb-5">
+                            <label class="form-label">Judul Utama</label>
+                            <input type="text" name="title" class="form-control form-control-solid mb-3"
+                                placeholder="Judul Utama" value="{{ $data->title }}" />
+                            @error('title')
+                                <div class="text-danger fs-7">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label">Subjudul</label>
+                            <input type="text" name="subtitle" class="form-control form-control-solid mb-3"
+                                placeholder="Subjudul" value="{{ $data->subtitle }}" />
+                            @error('subtitle')
+                                <div class="text-danger fs-7">{{ $message }}</div>
+                            @enderror
+                        </div>
                         <div class="mb-10">
                             <label class="form-label required">Konten</label>
                             <div id="quill_content" name="kt_ecommerce_add_category_description" class="min-h-500px mb-2">
@@ -80,6 +98,40 @@
                             @error('content')
                                 <div class="text-danger fs-7">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <div class="row mb-5">
+                            <div class="col-md-6">
+                                <label class="form-label">Nama Penulis</label>
+                                <input type="text" name="author_name" class="form-control form-control-solid mb-3"
+                                    placeholder="Nama Penulis" value="{{ $data->author_name }}" />
+                                @error('author_name')
+                                    <div class="text-danger fs-7">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Posisi/Jabatan</label>
+                                <input type="text" name="author_position" class="form-control form-control-solid mb-3"
+                                    placeholder="Posisi/Jabatan" value="{{ $data->author_position }}" />
+                                @error('author_position')
+                                    <div class="text-danger fs-7">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label">Tanda Tangan Penulis</label>
+                            <input type="file" name="author_signature" class="form-control form-control-solid mb-3"
+                                accept=".png, .jpg, .jpeg" />
+                            @if($data->author_signature)
+                                <div class="mt-3">
+                                    <img src="{{ $data->getAuthorSignature() }}" alt="Current Signature" style="max-height: 100px; border: 1px solid #ddd; padding: 10px;">
+                                </div>
+                            @endif
+                            @error('author_signature')
+                                <div class="text-danger fs-7">{{ $message }}</div>
+                            @enderror
+                            <div class="text-muted fs-7">Upload tanda tangan penulis (opsional)</div>
                         </div>
                     </div>
                 </div>

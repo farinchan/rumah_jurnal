@@ -232,6 +232,23 @@
                                 maksimal 8 MB
                             </div>
                         </div>
+                        <div class="mb-10">
+                            <label class="form-label ">File Materi</label>
+                            @if ($event->material)
+                                <div class="mb-2">
+                                    <a href="{{ asset('storage/' . $event->material) }}" target="_blank">Lihat Materi
+                                        Saat Ini</a>
+                                </div>
+                            @endif
+                            <input type="file" name="material" class="form-control mb-2" accept=".pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx, .txt, .zip, .rar" />
+                            @error('material')
+                                <div class="text-danger fs-7">{{ $message }}</div>
+                            @enderror
+                            <div class="text-muted fs-7">
+                                File materi atau notulen event, Hanya menerima file dengan ekstensi <code>.pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx, .txt, .zip, .rar</code> , dengan ukuran
+                                maksimal 100 MB
+                            </div>
+                        </div>
                         <div>
                             <label class="form-label">Meta Tag Keywords</label>
                             <input id="keyword_tagify" name="meta_keywords" class="form-control mb-2"

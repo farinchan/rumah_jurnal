@@ -1,6 +1,6 @@
 @extends('back.app')
 @section('content')
-    <div id="kt_content_container" class=" container-xxl ">
+    <div id="kt_content_container" class=" container-fluid ">
         @include('back.pages.journal.detail-header')
         <div class="card mb-5 mb-lg-10">
             <div class="card-header">
@@ -39,11 +39,12 @@
                             <tr>
                                 <th class="">ID</th>
                                 <th class="min-w-350px">Submission</th>
+                                <th class="min-w-250px">Info Tambahan Penulis</th>
                                 <th class="min-w-300px">Editor</th>
                                 <th class="min-w-300px">Reviewer</th>
                                 <th class="min-w-100px text-start">Status Submission</th>
                                 @if ($journal->author_fee != 0)
-                                    <th class="min-w-150px text-start ">Pembayaran</th>
+                                    <th class="min-w-300px text-start ">Pembayaran</th>
                                 @endif
                                 <th class="min-w-250px text-center">Action</th>
                             </tr>
@@ -65,6 +66,13 @@
                                                 Published date: {{ $submission->datePublished ?? '-' }}
                                             </span>
                                         </div>
+                                    </td>
+                                    <td>
+                                        NIK: {{ $submission->author_nik ?? '-' }} <br>
+                                        Bank: {{ $submission->author_bank_name ?? '-' }} <br>
+                                        No Rekening: {{ $submission->author_bank_account ?? '-' }} <br>
+                                        NPWP: {{ $submission->author_npwp ?? '-' }} <br>
+                                        Golongan: {{ $submission->author_golongan ?? '-' }}
                                     </td>
                                     <td>
                                         <ul>
@@ -135,6 +143,20 @@
                                                 @else
                                                     <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
                                                 @endif
+
+                                                <ul class="mt-3">
+                                                    @foreach ($submission->paymentInvoices as $invoice)
+                                                        <li>
+                                                            Pembayaran {{ $invoice->payment_percent }}% -
+                                                            @if ($invoice->is_paid)
+                                                                <span class="text-success fs-7 fw-bold">Lunas</span> <a
+                                                                    href="{{ route('back.finance.verification.detail', $invoice->payments()->where('payment_status', 'accepted')->first()->id) }}">(detail)</a>
+                                                            @else
+                                                                <span class="text-warning fs-7 fw-bold">Belum Dibayar</span>
+                                                            @endif
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
                                             </td>
                                         @endif
                                     @endif
@@ -366,6 +388,48 @@
                                                 </label>
                                             </div>
 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Informasi Tambahan</td>
+                                        <td>:</td>
+                                        <td>
+                                            <div class="form-floating mb-5">
+                                                <input type="text" class="form-control" id="floatingInput"
+                                                    name="author_nik" placeholder="xxxxxxx" value="{{ $submission->author_nik }}" />
+                                                <label for="floatingInput">Nomor Induk Kependudukan (NIK)</label>
+                                            </div>
+                                            <div class="form-floating mb-5">
+                                                <input type="text" class="form-control" id="floatingInput"
+                                                    name="author_bank_name" placeholder="xxxxxxx" value="{{ $submission->author_bank_name }}" />
+                                                <label for="floatingInput">Nama Bank</label>
+                                            </div>
+                                            <div class="form-floating mb-5">
+                                                <input type="text" class="form-control" id="floatingInput"
+                                                    name="author_bank_account" placeholder="xxxxxxx" value="{{ $submission->author_bank_account }}" />
+                                                <label for="floatingInput">Nomor Rekening</label>
+                                            </div>
+                                            <div class="form-floating mb-5">
+                                                <input type="text" class="form-control" id="floatingInput"
+                                                    name="author_npwp" placeholder="xxxxxxx" value="{{ $submission->author_npwp }}" />
+                                                <label for="floatingInput">Nomor Pokok Wajib Pajak (NPWP)</label>
+                                            </div>
+                                            <div class="form-floating mb-5">
+                                                <select class="form-select" id="floatingSelect" name="author_golongan"
+                                                    aria-label="Floating label select example">
+                                                    <option >Pilih Golongan</option>
+                                                    <option value="III-A" {{ $submission->author_golongan == 'III-A' ? 'selected' : '' }}>III-A</option>
+                                                    <option value="III-B" {{ $submission->author_golongan == 'III-B' ? 'selected' : '' }}>III-B</option>
+                                                    <option value="III-C" {{ $submission->author_golongan == 'III-C' ? 'selected' : '' }}>III-C</option>
+                                                    <option value="III-D" {{ $submission->author_golongan == 'III-D' ? 'selected' : '' }}>III-D</option>
+                                                    <option value="IV-A" {{ $submission->author_golongan == 'IV-A' ? 'selected' : '' }}>IV-A</option>
+                                                    <option value="IV-B" {{ $submission->author_golongan == 'IV-B' ? 'selected' : '' }}>IV-B</option>
+                                                    <option value="IV-C" {{ $submission->author_golongan == 'IV-C' ? 'selected' : '' }}>IV-C</option>
+                                                    <option value="IV-D" {{ $submission->author_golongan == 'IV-D' ? 'selected' : '' }}>IV-D</option>
+                                                    <option value="IV-E" {{ $submission->author_golongan == 'IV-E' ? 'selected' : '' }}>IV-E</option>
+                                                </select>
+                                                <label for="floatingInput">Golongan</label>
+                                            </div>
                                         </td>
                                     </tr>
                                 </table>
@@ -755,12 +819,12 @@
                                             <div class="d-flex flex-column mw-200px">
                                                 <div class="d-flex align-items-center mb-2">
                                                     ${submission.status == 1 ? `
-                                                                                        <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
-                                                                                        ` : submission.status == 3 ? `
-                                                                                        <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
-                                                                                        ` : submission.status == 4 ? `
-                                                                                        <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
-                                                                                        ` :
+                                                                                                    <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
+                                                                                                    ` : submission.status == 3 ? `
+                                                                                                    <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
+                                                                                                    ` : submission.status == 4 ? `
+                                                                                                    <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
+                                                                                                    ` :
                                                     `<span class="badge badge-light-secondary fs-5 p-2">${submission.statusLabel}</span>`
                                                     }
                                                 </div>

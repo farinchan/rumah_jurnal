@@ -31,6 +31,12 @@ return new class extends Migration
             $table->string('lastModified');
             $table->foreignId('issue_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
 
+            $table->string('author_nik')->nullable();
+            $table->string('author_bank_account')->nullable();
+            $table->string('author_bank_name')->nullable();
+            $table->string('author_npwp')->nullable();
+            $table->string('author_golongan')->nullable();
+
             $table->enum('payment_status', ['pending', 'paid', 'refunded', 'cancelled'])->default('pending');
             $table->boolean('free_charge')->default(false);
             $table->string('invoice_number')->unique()->nullable();

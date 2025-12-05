@@ -123,9 +123,7 @@ class SettingController extends Controller
                     'link' => route('back.setting.banner')
                 ]
             ],
-            'banner1' => SettingBanner::find(1) ?? null,
-            'banner2' => SettingBanner::find(2) ?? null,
-            'banner3' => SettingBanner::find(3) ?? null,
+            'banners' => SettingBanner::all(),
 
         ];
         // dd($data);
@@ -163,5 +161,52 @@ class SettingController extends Controller
         $banner->save();
         Alert::success('Berhasil', 'Pengaturan Banner berhasil diubah');
         return redirect()->route('back.setting.banner')->with('success', 'Pengaturan Banner berhasil diubah');
+    }
+
+    public function bannerCreate(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpg,jpeg,png',
+            'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'url' => 'required|string',
+            'status' => 'nullable|in:1,0',
+        ]);
+
+        $banner = new SettingBanner();
+        $banner->title = $request->title;
+        $banner->subtitle = $request->subtitle;
+        $banner->url = $request->url;
+        $banner->status = $request->status ?? 0;
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $fileName = Str::random(20) . '.' . $image->getClientOriginalExtension();
+            $filePath = $image->storeAs('setting/banner', $fileName, 'public');
+            $banner->image = $filePath;
+        }
+
+        $banner->save();
+        Alert::success('Berhasil', 'Banner baru berhasil ditambahkan');
+        return redirect()->route('back.setting.banner')->with('success', 'Banner baru berhasil ditambahkan');
+    }
+
+    public function bannerDelete($id)
+    {
+        $banner = SettingBanner::find($id);
+
+        if (!$banner) {
+            Alert::error('Error', 'Banner tidak ditemukan');
+            return redirect()->route('back.setting.banner')->with('error', 'Banner tidak ditemukan');
+        }
+
+        // Delete image file if exists
+        if ($banner->image) {
+            Storage::delete('public/' . $banner->image);
+        }
+
+        $banner->delete();
+        Alert::success('Berhasil', 'Banner berhasil dihapus');
+        return redirect()->route('back.setting.banner')->with('success', 'Banner berhasil dihapus');
     }
 }

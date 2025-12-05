@@ -55,10 +55,30 @@
                                         <!--end::Close-->
                                     </div>
 
+
                                     <form action="{{ route('back.event.detail.participant.store', $event->id) }}"
                                         method="POST">
                                         @csrf
                                         <div class="modal-body">
+                                            <div class="alert alert-info d-flex align-items-center p-5 mb-5">
+                                                <i class="ki-duotone ki-information-2 fs-1 text-info me-3">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                </i>
+                                                <div class="d-flex flex-column">
+                                                    <h5 class="mb-1">Informasi Tambah Peserta</h5>
+                                                    <span>
+                                                        Jika Peserta sudah memiliki akun di sistem dengan email yang
+                                                        sama, maka data peserta akan terhubung dengan akun tersebut.
+                                                        <br />
+                                                        Jika belum memiliki akun, maka sistem akan membuatkan akun baru
+                                                        secara otomatis dengan password default
+                                                        <strong>rumahjurnal123</strong>.
+                                                        <br />
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <div class="mb-10">
                                                 <label for="email" class="form-label">Nama Peserta</label>
                                                 <input type="text" class="form-control form-control-solid" name="name"
@@ -114,6 +134,28 @@
                                                             <strong>Pilih Semua</strong>
                                                         </label>
                                                     </div>
+                                                </div>
+
+                                                <!-- Search Box -->
+                                                <div class="position-relative mb-5">
+                                                    <div class="d-flex align-items-center position-relative">
+                                                        <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5 text-muted">
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+                                                        </i>
+                                                        <input type="text" id="reviewer_search"
+                                                               class="form-control form-control-solid w-100 ps-13 pe-10"
+                                                               placeholder="Cari reviewer berdasarkan nama, email, atau afiliasi..." />
+                                                        <button type="button" id="clear_reviewer_search"
+                                                                class="btn btn-sm btn-icon btn-active-light-primary position-absolute end-0 me-2"
+                                                                style="display: none;" title="Clear search">
+                                                            <i class="ki-duotone ki-cross fs-2">
+                                                                <span class="path1"></span>
+                                                                <span class="path2"></span>
+                                                            </i>
+                                                        </button>
+                                                    </div>
+                                                    <small class="text-muted mt-1">Gunakan pencarian untuk memfilter data reviewer</small>
                                                 </div>
 
                                                 <div class="alert alert-info d-flex align-items-center p-5 mb-5">
@@ -209,6 +251,28 @@
                                                             <strong>Pilih Semua</strong>
                                                         </label>
                                                     </div>
+                                                </div>
+
+                                                <!-- Search Box -->
+                                                <div class="position-relative mb-5">
+                                                    <div class="d-flex align-items-center position-relative">
+                                                        <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5 text-muted">
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+                                                        </i>
+                                                        <input type="text" id="editor_search"
+                                                               class="form-control form-control-solid w-100 ps-13 pe-10"
+                                                               placeholder="Cari editor berdasarkan nama, email, atau afiliasi..." />
+                                                        <button type="button" id="clear_editor_search"
+                                                                class="btn btn-sm btn-icon btn-active-light-primary position-absolute end-0 me-2"
+                                                                style="display: none;" title="Clear search">
+                                                            <i class="ki-duotone ki-cross fs-2">
+                                                                <span class="path1"></span>
+                                                                <span class="path2"></span>
+                                                            </i>
+                                                        </button>
+                                                    </div>
+                                                    <small class="text-muted mt-1">Gunakan pencarian untuk memfilter data editor</small>
                                                 </div>
 
                                                 <div class="alert alert-info d-flex align-items-center p-5 mb-5">
@@ -312,7 +376,7 @@
                             <th class="min-w-125px">Email Terdaftar</th>
                             <th class="min-w-125px">No.telp Terdaftar</th>
                             <th class="min-w-125px">Tanggal Mendaftar</th>
-                            <th class="text-end min-w-100px">Actions</th>
+                            <th class="text-end min-w-150px">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="text-gray-600 fw-semibold">
@@ -370,6 +434,16 @@
                                         </i>
 
                                     </a>
+                                    @if ($event->type != 'Rapat')
+                                        <a href="{{ route('event.certificate', $user->id) }}" target="_blank"
+                                            class="btn btn-icon btn-light-success btn-sm me-1" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="Sertifikat">
+                                            <i class="ki-duotone ki-document fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                        </a>
+                                    @endif
                                     <a href="#" class="btn btn-icon btn-light-danger btn-sm me-1"
                                         data-bs-toggle="modal" data-bs-target="#kt_modal_delete_user{{ $user->id }}">
                                         <i class="ki-duotone ki-trash fs-2" data-bs-toggle="tooltip"
@@ -434,12 +508,53 @@
             // Load reviewers when modal is shown
             $('#kt_modal_import_reviewer').on('show.bs.modal', function() {
                 loadReviewers();
+            });
 
+            // Reset search when reviewer modal is hidden
+            $('#kt_modal_import_reviewer').on('hidden.bs.modal', function() {
+                const searchInput = document.getElementById('reviewer_search');
+                const clearButton = document.getElementById('clear_reviewer_search');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                if (clearButton) {
+                    clearButton.style.display = 'none';
+                }
+                // Show all rows when modal is closed
+                const rows = document.querySelectorAll('#reviewer_list tr');
+                rows.forEach(row => {
+                    if (!row.classList.contains('no-results-row')) {
+                        row.style.display = '';
+                    } else {
+                        row.remove();
+                    }
+                });
             });
 
             // Load editors when modal is shown
             $('#kt_modal_import_editor').on('show.bs.modal', function() {
                 loadEditors();
+            });
+
+            // Reset search when modal is hidden
+            $('#kt_modal_import_editor').on('hidden.bs.modal', function() {
+                const searchInput = document.getElementById('editor_search');
+                const clearButton = document.getElementById('clear_editor_search');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                if (clearButton) {
+                    clearButton.style.display = 'none';
+                }
+                // Show all rows when modal is closed
+                const rows = document.querySelectorAll('#editor_list tr');
+                rows.forEach(row => {
+                    if (!row.classList.contains('no-results-row')) {
+                        row.style.display = '';
+                    } else {
+                        row.remove();
+                    }
+                });
             });
 
             // Function to load reviewers
@@ -506,6 +621,9 @@
 
                         // Setup checkbox functionality
                         setupCheckboxes();
+
+                        // Setup search functionality
+                        setupReviewerSearch();
                     })
                     .catch(error => {
                         console.error('Fetch error:', error);
@@ -517,6 +635,116 @@
                             </tr>
                         `;
                     });
+            }
+
+            // Function to setup reviewer search
+            function setupReviewerSearch() {
+                const searchInput = document.getElementById('reviewer_search');
+                const clearButton = document.getElementById('clear_reviewer_search');
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase().trim();
+
+                        // Show/hide clear button
+                        if (clearButton) {
+                            clearButton.style.display = searchTerm ? 'block' : 'none';
+                        }
+
+                        filterReviewers(searchTerm);
+                    });
+                }
+
+                // Clear button functionality
+                if (clearButton) {
+                    clearButton.addEventListener('click', function() {
+                        searchInput.value = '';
+                        this.style.display = 'none';
+                        filterReviewers('');
+                    });
+                }
+            }
+
+            // Function to filter reviewers based on search term
+            function filterReviewers(searchTerm) {
+                const rows = document.querySelectorAll('#reviewer_list tr');
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    // Skip if it's a loading/error/no-data row
+                    if (row.children.length < 6 || row.classList.contains('no-results-row')) {
+                        if (row.classList.contains('no-results-row')) {
+                            row.remove();
+                        }
+                        return;
+                    }
+
+                    const name = row.children[1].textContent.toLowerCase();
+                    const email = row.children[2].textContent.toLowerCase();
+                    const affiliation = row.children[3].textContent.toLowerCase();
+                    const phone = row.children[4].textContent.toLowerCase();
+
+                    const isVisible = searchTerm === '' ||
+                                    name.includes(searchTerm) ||
+                                    email.includes(searchTerm) ||
+                                    affiliation.includes(searchTerm) ||
+                                    phone.includes(searchTerm);
+
+                    if (isVisible) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                        // Uncheck hidden checkboxes
+                        const checkbox = row.querySelector('.reviewer-checkbox');
+                        if (checkbox) {
+                            checkbox.checked = false;
+                        }
+                    }
+                });
+
+                // Update select all checkbox state
+                updateReviewerSelectAllState();
+                updateSubmitButton();
+
+                // Show message if no results found
+                if (visibleCount === 0 && searchTerm !== '') {
+                    const noResultsRow = document.createElement('tr');
+                    noResultsRow.className = 'no-results-row';
+                    noResultsRow.innerHTML = `
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="ki-duotone ki-file-deleted fs-2x text-muted mb-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                            <br>
+                            Tidak ada reviewer yang cocok dengan pencarian "<strong>${searchTerm}</strong>"
+                            <br>
+                            <small class="text-muted">Coba gunakan kata kunci yang berbeda</small>
+                        </td>
+                    `;
+                    document.getElementById('reviewer_list').appendChild(noResultsRow);
+                }
+            }
+
+            // Function to update reviewer select all state based on visible checkboxes
+            function updateReviewerSelectAllState() {
+                const selectAllMain = document.getElementById('select_all_reviewers');
+                const selectAllHeader = document.getElementById('check_all_header');
+                const visibleCheckboxes = Array.from(document.querySelectorAll('.reviewer-checkbox'))
+                    .filter(checkbox => checkbox.closest('tr').style.display !== 'none');
+
+                if (visibleCheckboxes.length === 0) {
+                    selectAllMain.checked = false;
+                    selectAllHeader.checked = false;
+                    return;
+                }
+
+                const checkedVisibleCount = visibleCheckboxes.filter(cb => cb.checked).length;
+                const allVisibleChecked = checkedVisibleCount === visibleCheckboxes.length;
+
+                selectAllMain.checked = allVisibleChecked;
+                selectAllHeader.checked = allVisibleChecked;
             }
 
             // Function to load editors
@@ -583,6 +811,9 @@
 
                         // Setup checkbox functionality
                         setupEditorCheckboxes();
+
+                        // Setup search functionality
+                        setupEditorSearch();
                     })
                     .catch(error => {
                         console.error('Fetch error:', error);
@@ -596,6 +827,116 @@
                     });
             }
 
+            // Function to setup editor search
+            function setupEditorSearch() {
+                const searchInput = document.getElementById('editor_search');
+                const clearButton = document.getElementById('clear_editor_search');
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase().trim();
+
+                        // Show/hide clear button
+                        if (clearButton) {
+                            clearButton.style.display = searchTerm ? 'block' : 'none';
+                        }
+
+                        filterEditors(searchTerm);
+                    });
+                }
+
+                // Clear button functionality
+                if (clearButton) {
+                    clearButton.addEventListener('click', function() {
+                        searchInput.value = '';
+                        this.style.display = 'none';
+                        filterEditors('');
+                    });
+                }
+            }
+
+            // Function to filter editors based on search term
+            function filterEditors(searchTerm) {
+                const rows = document.querySelectorAll('#editor_list tr');
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    // Skip if it's a loading/error/no-data row
+                    if (row.children.length < 6 || row.classList.contains('no-results-row')) {
+                        if (row.classList.contains('no-results-row')) {
+                            row.remove();
+                        }
+                        return;
+                    }
+
+                    const name = row.children[1].textContent.toLowerCase();
+                    const email = row.children[2].textContent.toLowerCase();
+                    const affiliation = row.children[3].textContent.toLowerCase();
+                    const phone = row.children[4].textContent.toLowerCase();
+
+                    const isVisible = searchTerm === '' ||
+                                    name.includes(searchTerm) ||
+                                    email.includes(searchTerm) ||
+                                    affiliation.includes(searchTerm) ||
+                                    phone.includes(searchTerm);
+
+                    if (isVisible) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                        // Uncheck hidden checkboxes
+                        const checkbox = row.querySelector('.editor-checkbox');
+                        if (checkbox) {
+                            checkbox.checked = false;
+                        }
+                    }
+                });
+
+                // Update select all checkbox state
+                updateEditorSelectAllState();
+                updateEditorSubmitButton();
+
+                // Show message if no results found
+                if (visibleCount === 0 && searchTerm !== '') {
+                    const noResultsRow = document.createElement('tr');
+                    noResultsRow.className = 'no-results-row';
+                    noResultsRow.innerHTML = `
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="ki-duotone ki-file-deleted fs-2x text-muted mb-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                            <br>
+                            Tidak ada editor yang cocok dengan pencarian "<strong>${searchTerm}</strong>"
+                            <br>
+                            <small class="text-muted">Coba gunakan kata kunci yang berbeda</small>
+                        </td>
+                    `;
+                    document.getElementById('editor_list').appendChild(noResultsRow);
+                }
+            }
+
+            // Function to update select all state based on visible checkboxes
+            function updateEditorSelectAllState() {
+                const selectAllMain = document.getElementById('select_all_editors');
+                const selectAllHeader = document.getElementById('check_all_editors_header');
+                const visibleCheckboxes = Array.from(document.querySelectorAll('.editor-checkbox'))
+                    .filter(checkbox => checkbox.closest('tr').style.display !== 'none');
+
+                if (visibleCheckboxes.length === 0) {
+                    selectAllMain.checked = false;
+                    selectAllHeader.checked = false;
+                    return;
+                }
+
+                const checkedVisibleCount = visibleCheckboxes.filter(cb => cb.checked).length;
+                const allVisibleChecked = checkedVisibleCount === visibleCheckboxes.length;
+
+                selectAllMain.checked = allVisibleChecked;
+                selectAllHeader.checked = allVisibleChecked;
+            }
+
             // Function to setup checkboxes
             function setupCheckboxes() {
                 const selectAllMain = document.getElementById('select_all_reviewers');
@@ -604,7 +945,10 @@
 
                 // Main select all functionality
                 selectAllMain.addEventListener('change', function() {
-                    reviewerCheckboxes.forEach(checkbox => {
+                    const visibleCheckboxes = Array.from(reviewerCheckboxes)
+                        .filter(checkbox => checkbox.closest('tr').style.display !== 'none');
+
+                    visibleCheckboxes.forEach(checkbox => {
                         checkbox.checked = this.checked;
                     });
                     selectAllHeader.checked = this.checked;
@@ -613,7 +957,10 @@
 
                 // Header select all functionality
                 selectAllHeader.addEventListener('change', function() {
-                    reviewerCheckboxes.forEach(checkbox => {
+                    const visibleCheckboxes = Array.from(reviewerCheckboxes)
+                        .filter(checkbox => checkbox.closest('tr').style.display !== 'none');
+
+                    visibleCheckboxes.forEach(checkbox => {
                         checkbox.checked = this.checked;
                     });
                     selectAllMain.checked = this.checked;
@@ -623,12 +970,7 @@
                 // Individual checkbox functionality
                 reviewerCheckboxes.forEach(checkbox => {
                     checkbox.addEventListener('change', function() {
-                        const checkedCount = document.querySelectorAll('.reviewer-checkbox:checked')
-                            .length;
-                        const totalCount = reviewerCheckboxes.length;
-
-                        selectAllMain.checked = checkedCount === totalCount;
-                        selectAllHeader.checked = checkedCount === totalCount;
+                        updateReviewerSelectAllState();
                         updateSubmitButton();
                     });
                 });
@@ -645,7 +987,10 @@
 
                 // Main select all functionality
                 selectAllMain.addEventListener('change', function() {
-                    editorCheckboxes.forEach(checkbox => {
+                    const visibleCheckboxes = Array.from(editorCheckboxes)
+                        .filter(checkbox => checkbox.closest('tr').style.display !== 'none');
+
+                    visibleCheckboxes.forEach(checkbox => {
                         checkbox.checked = this.checked;
                     });
                     selectAllHeader.checked = this.checked;
@@ -654,7 +999,10 @@
 
                 // Header select all functionality
                 selectAllHeader.addEventListener('change', function() {
-                    editorCheckboxes.forEach(checkbox => {
+                    const visibleCheckboxes = Array.from(editorCheckboxes)
+                        .filter(checkbox => checkbox.closest('tr').style.display !== 'none');
+
+                    visibleCheckboxes.forEach(checkbox => {
                         checkbox.checked = this.checked;
                     });
                     selectAllMain.checked = this.checked;
@@ -664,12 +1012,7 @@
                 // Individual checkbox functionality
                 editorCheckboxes.forEach(checkbox => {
                     checkbox.addEventListener('change', function() {
-                        const checkedCount = document.querySelectorAll('.editor-checkbox:checked')
-                            .length;
-                        const totalCount = editorCheckboxes.length;
-
-                        selectAllMain.checked = checkedCount === totalCount;
-                        selectAllHeader.checked = checkedCount === totalCount;
+                        updateEditorSelectAllState();
                         updateEditorSubmitButton();
                     });
                 });
