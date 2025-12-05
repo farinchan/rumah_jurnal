@@ -43,7 +43,7 @@
                                 <th class="min-w-300px">Reviewer</th>
                                 <th class="min-w-100px text-start">Status Submission</th>
                                 @if ($journal->author_fee != 0)
-                                    <th class="min-w-150px text-start ">Pembayaran</th>
+                                    <th class="min-w-300px text-start ">Pembayaran</th>
                                 @endif
                                 <th class="min-w-250px text-center">Action</th>
                             </tr>
@@ -135,6 +135,19 @@
                                                 @else
                                                     <span class="badge badge-light-secondary fs-7 fw-bold">Unknown</span>
                                                 @endif
+
+                                                <ul class="mt-3">
+                                                    @foreach ($submission->paymentInvoices as $invoice)
+                                                        <li>
+                                                            Pembayaran {{ $invoice->payment_percent }}% -
+                                                            @if ($invoice->is_paid)
+                                                                <span class="text-success fs-7 fw-bold">Lunas</span> <a href="{{ route('back.finance.verification.detail', $invoice->payments()->where('payment_status', "accepted")->first()->id) }}" >(detail)</a>
+                                                            @else
+                                                                <span class="text-warning fs-7 fw-bold">Belum Dibayar</span>
+                                                            @endif
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
                                             </td>
                                         @endif
                                     @endif
@@ -755,12 +768,12 @@
                                             <div class="d-flex flex-column mw-200px">
                                                 <div class="d-flex align-items-center mb-2">
                                                     ${submission.status == 1 ? `
-                                                                                        <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
-                                                                                        ` : submission.status == 3 ? `
-                                                                                        <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
-                                                                                        ` : submission.status == 4 ? `
-                                                                                        <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
-                                                                                        ` :
+                                                                                            <span class="badge badge-light-warning fs-5 p-2">${submission.statusLabel}</span>
+                                                                                            ` : submission.status == 3 ? `
+                                                                                            <span class="badge badge-light-success fs-5 p-2">${submission.statusLabel}</span>
+                                                                                            ` : submission.status == 4 ? `
+                                                                                            <span class="badge badge-light-danger fs-5 p-2">${submission.statusLabel}</span>
+                                                                                            ` :
                                                     `<span class="badge badge-light-secondary fs-5 p-2">${submission.statusLabel}</span>`
                                                     }
                                                 </div>

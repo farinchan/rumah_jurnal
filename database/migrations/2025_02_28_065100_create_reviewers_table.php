@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('account_bank')->nullable();
             $table->string('account_name')->nullable();
             $table->string('account_number')->nullable();
+            
             $table->string('npwp')->nullable();
             $table->foreignId('issue_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
