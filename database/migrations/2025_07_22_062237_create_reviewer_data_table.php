@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('account_name')->nullable();
             $table->string('account_number')->nullable();
             $table->string('npwp')->nullable();
+            $table->string('golongan')->nullable();
             $table->timestamps();
         });
     }

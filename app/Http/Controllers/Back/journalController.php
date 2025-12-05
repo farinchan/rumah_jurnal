@@ -14,6 +14,7 @@ use App\Mail\LoaMail;
 use App\Mail\SkEditorMail;
 use App\Mail\SkReviewerMail;
 use App\Models\Editor;
+use App\Models\EditorData;
 use App\Models\EditorFileIssue;
 use App\Models\Issue;
 use App\Models\Journal;
@@ -1610,12 +1611,24 @@ class journalController extends Controller
 
     public function editorUpdate($journal_path, $issue_id, $id)
     {
+        // dd(request()->all());
         $validator = Validator::make(request()->all(), [
-            'account_bank' => 'required|string',
-            'account_number' => 'required|string',
+            'account_bank' => 'required|string|max:100',
+            'account_number' => 'required|string|max:255',
+            'nik' => 'required|string|max:255',
+            'npwp' => 'nullable|string|max:255',
+            'golongan' => 'nullable|string|max:100',
         ], [
             'account_bank.required' => 'Bank harus diisi',
             'account_number.required' => 'Nomor Rekening harus diisi',
+            'nik.required' => 'NIK harus diisi',
+            'npwp.required' => 'NPWP harus diisi',
+            'golongan.required' => 'Golongan harus diisi',
+            'account_bank.max' => 'Bank maksimal 100 karakter',
+            'account_number.max' => 'Nomor Rekening maksimal 255 karakter',
+            'nik.max' => 'NIK maksimal 255 karakter',
+            'npwp.max' => 'NPWP maksimal 255 karakter',
+            'golongan.max' => 'Golongan maksimal 100 karakter',
         ]);
 
         if ($validator->fails()) {
@@ -1629,10 +1642,17 @@ class journalController extends Controller
             return redirect()->back();
         }
 
-        $editor->update([
-            'account_bank' => request()->account_bank,
-            'account_number' => request()->account_number,
-        ]);
+        EditorData::updateOrCreate(
+            ['editor_id' => $editor->editor_id],
+            [
+                'nik' => request()->nik,
+                'account_bank' => request()->account_bank,
+                'account_number' => request()->account_number,
+                'npwp' => request()->npwp,
+                'golongan' => request()->golongan,
+            ]
+        );
+
         Alert::success('Success', 'Editor has been updated');
         return redirect()->back();
     }
@@ -2239,6 +2259,7 @@ class journalController extends Controller
             'account_bank' => 'required|string',
             'account_number' => 'required|string',
             'npwp' => 'nullable|string|max:100',
+            'golongan' => 'nullable|string|max:100',
         ], [
             'nik.required' => 'NIK harus diisi',
             'nik.string' => 'NIK harus berupa string',
@@ -2269,6 +2290,7 @@ class journalController extends Controller
                 'account_bank' => request()->account_bank,
                 'account_number' => request()->account_number,
                 'npwp' => request()->npwp,
+                'golongan' => request()->golongan,
             ]
         );
 
