@@ -10,12 +10,12 @@
     // Configuration
     const ChatConfig = {
         // API Configuration
-        apiBaseUrl: 'https://rumahjurnal.uinbukittinggi.ac.id',
+        apiBaseUrl: 'https://rumahjurnal.uinbukittinggi.ac.id/api',
         apiEndpoints: {
             sendMessage: '/bot',
             getStatus: '/chat/status'
         },
-        
+
         // Widget Configuration
         title: 'Rumah Jurnal Support',
         subtitle: 'Kami siap membantu Anda',
@@ -24,14 +24,14 @@
         position: 'right', // 'left' or 'right'
         primaryColor: '#0f4aa2',
         secondaryColor: '#0fa36b',
-        
+
         // Auto Response (fallback jika API tidak merespons)
         autoResponses: {
             default: 'Terima kasih atas pesan Anda. Tim kami akan segera merespons.',
             offline: 'Maaf, saat ini kami sedang offline. Pesan Anda telah kami terima dan akan dibalas pada jam kerja.',
             error: 'Maaf, terjadi kesalahan. Silakan coba lagi nanti.'
         },
-        
+
         // Quick Replies
         quickReplies: [
             { text: '📚 Cara Submit Artikel', message: 'Bagaimana cara submit artikel ke jurnal?' },
@@ -90,7 +90,7 @@
                 /* ==========================================
                    CHAT WIDGET STYLES - Scoped dengan prefix
                    ========================================== */
-                
+
                 /* Base Container */
                 .chat-widget-container {
                     all: revert !important;
@@ -488,7 +488,7 @@
                         height: calc(100vh - 100px) !important;
                         bottom: 70px !important;
                     }
-                    
+
                     .chat-widget-container .chat-toggle-btn {
                         width: 54px !important;
                         height: 54px !important;
@@ -509,7 +509,7 @@
                 headset: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAyNTZ2NDBjMCAxMy4zLTEwLjcgMjQtMjQgMjRzLTI0LTEwLjctMjQtMjRWMjU2QzAgMTE0LjYgMTE0LjYgMCAyNTYgMFM1MTIgMTE0LjYgNTEyIDI1NlY0MDAuMWMwIDQ4LjYtMzkuNCA4OC04OC4xIDg4TDMxMy42IDQ4OGMtOC4zIDE0LjMtMjMuOCAyNC00MS42IDI0SDI0MGMtMjYuNSAwLTQ4LTIxLjUtNDgtNDhzMjEuNS00OCA0OC00OGgzMmMxNy44IDAgMzMuMyA5LjcgNDEuNiAyNGwxMTAuNCAuMWMyMi4xIDAgNDAtMTcuOSA0MC00MFYyNTZjMC0xMTQuOS05My4xLTIwOC0yMDgtMjA4ek0xNDQgMjA4aDE2YzE3LjcgMCAzMiAxNC4zIDMyIDMyVjM1MmMwIDE3LjctMTQuMyAzMi0zMiAzMkgxNDRjLTM1LjMgMC02NC0yOC43LTY0LTY0VjI3MmMwLTM1LjMgMjguNy02NCA2NC02NHptMjI0IDBjMzUuMyAwIDY0IDI4LjcgNjQgNjR2NDhjMCAzNS4zLTI4LjcgNjQtNjQgNjRIMzUyYy0xNy43IDAtMzItMTQuMy0zMi0zMlYyNDBjMC0xNy43IDE0LjMtMzIgMzItMzJoMTZ6Ii8+PC9zdmc+',
                 send: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTQ5OC4xIDUuNmMxMC4xIDcgMTUuNCAxOS4xIDEzLjUgMzEuMmwtNjQgNDE2Yy0xLjUgOS43LTcuNCAxOC4yLTE2IDIzcy0xOC45IDUuNC0yOCAxLjZMMjg0IDQyNy43bC02OC41IDc0LjFjLTguOSA5LjctMjIuOSAxMi45LTM1LjIgOC4xUzE2MCA0OTIuNCAxNjAgNDgwVjM5Ni40YzAtNCAxLjUtNy44IDQuMi0xMC43TDMzMS44IDIwMi44YzUuOC02LjMgNS42LTE2LS40LTIycy0xNS43LTYuNC0yMi0uN0wxMDYgMzYwLjggMTcuNyAzMTYuNkM3LjEgMzExLjMgLjMgMzAwLjcgMCAyODkuMXM1LjktMjIuOCAxNi4xLTI4LjdsNDQ4LTI1NmMxMC43LTYuMSAyMy45LTUuNSAzNCAxLjR6Ii8+PC9zdmc+'
             };
-            
+
             const container = document.createElement('div');
             container.className = 'chat-widget-container';
             container.innerHTML = `
@@ -567,7 +567,7 @@
             `;
 
             document.body.appendChild(container);
-            
+
             // Store references
             this.container = container;
             this.toggleBtn = container.querySelector('#chatToggleBtn');
@@ -635,13 +635,13 @@
             this.chatWindow.classList.add('open');
             this.notification.style.display = 'none';
             this.input.focus();
-            
+
             // Add welcome message if no messages yet
             if (this.messages.length === 0) {
                 this.addMessage(this.config.welcomeMessage, 'admin');
             }
-            
-            
+
+
             // Scroll to bottom
             this.scrollToBottom();
         }
@@ -650,7 +650,7 @@
             this.isOpen = false;
             this.toggleBtn.classList.remove('active');
             this.chatWindow.classList.remove('open');
-            
+
         }
 
         async sendMessage() {
@@ -672,7 +672,7 @@
             // Send to API
             try {
                 const response = await this.sendMessageToAPI(message);
-                
+
                 // Hide typing indicator
                 this.hideTypingIndicator();
 
@@ -727,7 +727,7 @@
             typingEl.className = 'typing-indicator';
             typingEl.id = 'typingIndicator';
             typingEl.innerHTML = '<span></span><span></span><span></span>';
-            
+
             this.messagesContainer.appendChild(typingEl);
             this.scrollToBottom();
         }
@@ -750,9 +750,9 @@
 
         formatTime(timestamp) {
             const date = new Date(timestamp);
-            return date.toLocaleTimeString('id-ID', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
+            return date.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
 
@@ -816,7 +816,7 @@
 
         renderChatHistory() {
             this.messagesContainer.innerHTML = '';
-            
+
             this.messages.forEach(msg => {
                 const messageEl = document.createElement('div');
                 messageEl.className = `chat-message ${msg.sender}`;
