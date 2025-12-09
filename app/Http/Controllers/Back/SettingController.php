@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
 use App\Models\SettingBanner;
+use App\Models\SettingBot;
 use App\Models\SettingWebsite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -209,4 +210,57 @@ class SettingController extends Controller
         Alert::success('Berhasil', 'Banner berhasil dihapus');
         return redirect()->route('back.setting.banner')->with('success', 'Banner berhasil dihapus');
     }
+
+    public function bot()
+    {
+        $data = [
+            'title' => 'Pengaturan Bot AI',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Setting',
+                    'link' => route('back.setting.website')
+                ],
+                [
+                    'name' => 'Bot AI',
+                    'link' => route('back.setting.bot')
+                ]
+            ],
+            'settingBot' => SettingBot::first()
+        ];
+        return view('back.pages.setting.bot', $data);
+    }
+
+    public function botUpdate(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'api_production_url' => 'required|url',
+            'api_sandbox_url' => 'required|url',
+            'system_message' => 'nullable|string',
+            'additional_context' => 'nullable|string',
+            'signature' => 'nullable|string',
+            'is_active' => 'nullable|boolean',
+            'is_whatsapp_active' => 'nullable|boolean',
+        ]);
+
+        $settingBot = SettingBot::firstOrNew([]);
+        $settingBot->name = $request->name;
+        $settingBot->api_production_url = $request->api_production_url;
+        $settingBot->api_sandbox_url = $request->api_sandbox_url;
+        $settingBot->system_message = $request->system_message;
+        $settingBot->additional_context = $request->additional_context;
+        $settingBot->signature = $request->signature;
+        $settingBot->is_active = $request->has('is_active') ? $request->is_active : false;
+        $settingBot->is_whatsapp_active = $request->has('is_whatsapp_active') ? $request->is_whatsapp_active : false;
+
+        $settingBot->save();
+
+        Alert::success('Berhasil', 'Pengaturan Bot AI berhasil diperbarui');
+        return redirect()->back()->with('success', 'Pengaturan Bot AI berhasil diperbarui');
+    }
+
 }

@@ -379,6 +379,15 @@
                             <span class="menu-title">Banner</span>
                         </a>
                     </div>
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.setting.bot')) active @endif"
+                            href="{{ route('back.setting.bot') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Bot AI</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         @endrole

@@ -39,6 +39,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
 });
 
+Route::post('/bot', [App\Http\Controllers\Api\BotController::class, 'handleBot'])->name('api.bot.handle');
+
 
 Route::prefix('whatsapp-api')->name('api.whatsapp.')->group(function () {
     Route::get('/get-all-sessions', [App\Http\Controllers\Api\WhatsappController::class, 'getAllSessions'])->name('get-all-sessions');
