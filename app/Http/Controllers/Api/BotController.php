@@ -20,7 +20,7 @@ class BotController extends Controller
 
         try {
             // $appConfig = config('app.env'); // or however you determine the environment
-            $appConfig = "production"; // This should be set based on your environment configuration
+            $appConfig = "local"; // This should be set based on your environment configuration
 
             $apiUrl = '';
 
