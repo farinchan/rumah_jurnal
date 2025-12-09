@@ -32,6 +32,7 @@ class BotController extends Controller
 
             $response = Http::post($apiUrl, [
                 'data' => $request->all(),
+                'name' => $settingBot->name,
                 'system_message' => $settingBot->system_message,
                 'additional_context' => $settingBot->additional_context,
                 'signature' => $settingBot->signature,
