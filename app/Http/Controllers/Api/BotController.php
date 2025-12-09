@@ -35,6 +35,8 @@ class BotController extends Controller
                 'system_message' => $settingBot->system_message,
                 'additional_context' => $settingBot->additional_context,
                 'signature' => $settingBot->signature,
+                'is_active' => $settingBot->is_active,
+                'is_whatsapp_active' => $settingBot->is_whatsapp_active,
             ]);
 
             if ($response->successful()) {
