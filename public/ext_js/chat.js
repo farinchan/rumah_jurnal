@@ -692,6 +692,34 @@
             }
         }
 
+        // Format text with WhatsApp-style formatting
+        formatText(text) {
+            let formatted = text;
+
+            // Escape HTML first to prevent XSS
+            formatted = formatted
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // Bold: *text*
+            formatted = formatted.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+
+            // Italic: _text_
+            formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>');
+
+            // Strikethrough: ~text~
+            formatted = formatted.replace(/~(.*?)~/g, '<del>$1</del>');
+
+            // Monospace: `text`
+            formatted = formatted.replace(/`(.*?)`/g, '<code style="background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 3px; font-family: monospace;">$1</code>');
+
+            // Convert newlines to <br>
+            formatted = formatted.replace(/\n/g, '<br>');
+
+            return formatted;
+        }
+
         addMessage(text, sender = 'user') {
             const messageData = {
                 id: Date.now(),
@@ -707,8 +735,10 @@
             // Create message element
             const messageEl = document.createElement('div');
             messageEl.className = `chat-message ${sender}`;
+            // Format text with WhatsApp-style formatting
+            const formattedText = this.formatText(text);
             messageEl.innerHTML = `
-                ${text}
+                ${formattedText}
                 <span class="message-time">${this.formatTime(messageData.timestamp)}</span>
             `;
 
@@ -820,8 +850,10 @@
             this.messages.forEach(msg => {
                 const messageEl = document.createElement('div');
                 messageEl.className = `chat-message ${msg.sender}`;
+                // Format text with WhatsApp-style formatting
+                const formattedText = this.formatText(msg.text);
                 messageEl.innerHTML = `
-                    ${msg.text}
+                    ${formattedText}
                     <span class="message-time">${this.formatTime(msg.timestamp)}</span>
                 `;
                 this.messagesContainer.appendChild(messageEl);
