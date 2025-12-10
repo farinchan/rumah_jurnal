@@ -19,6 +19,7 @@ return new class extends Migration
             $table->longText('system_message')->nullable();
             $table->longText('additional_context')->nullable();
             $table->text('signature')->nullable();
+            $table->boolean('is_sandbox')->default(true);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_whatsapp_active')->default(false);
             $table->timestamps();

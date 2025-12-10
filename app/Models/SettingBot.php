@@ -17,5 +17,6 @@ class SettingBot extends Model
         'signature',
         'is_active',
         'is_whatsapp_active',
+        'is_sandbox',
     ];
 }

@@ -165,6 +165,30 @@
                         </div>
                     </div>
 
+                    {{-- Sandbox Mode --}}
+                    <div class="row fv-row mb-7">
+                        <div class="col-md-3 text-md-end">
+                            <label class="fs-6 fw-semibold form-label mt-3">
+                                <span>Mode Sandbox</span>
+                                <span class="ms-1" data-bs-toggle="tooltip"
+                                    title="Aktifkan mode sandbox untuk pengujian API">
+                                    <i class="ki-duotone ki-information-5 text-gray-500 fs-6">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="col-md-9 d-flex align-items-center">
+                            <div class="form-check form-switch form-check-custom form-check-solid">
+                                <input class="form-check-input" type="checkbox" name="is_sandbox" value="1"
+                                    {{ isset($settingBot) && $settingBot->is_sandbox ? 'checked' : '' }} />
+                            </div>
+                        </div>
+                    </div>
+
+
                     {{-- Aktivasi Bot --}}
                     <div class="row fv-row mb-7">
                         <div class="col-md-3 text-md-end">

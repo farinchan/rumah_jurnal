@@ -245,6 +245,7 @@ class SettingController extends Controller
             'signature' => 'nullable|string',
             'is_active' => 'nullable|boolean',
             'is_whatsapp_active' => 'nullable|boolean',
+            'is_sandbox' => 'nullable|boolean'
         ]);
 
         $settingBot = SettingBot::firstOrNew([]);
@@ -256,6 +257,7 @@ class SettingController extends Controller
         $settingBot->signature = $request->signature;
         $settingBot->is_active = $request->has('is_active') ? $request->is_active : false;
         $settingBot->is_whatsapp_active = $request->has('is_whatsapp_active') ? $request->is_whatsapp_active : false;
+        $settingBot->is_sandbox = $request->has('is_sandbox') ? $request->is_sandbox : false;
 
         $settingBot->save();
 
