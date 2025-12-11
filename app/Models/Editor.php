@@ -33,6 +33,11 @@ class Editor extends Model
         return $this->belongsTo(Issue::class);
     }
 
+    public function submissionsEdited()
+    {
+        return $this->hasMany(SubmissionEditor::class, 'editor_id');
+    }
+
     public function journals()
     {
         return $this->hasManyThrough(

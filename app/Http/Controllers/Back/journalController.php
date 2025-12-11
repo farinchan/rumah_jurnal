@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Back;
 
 use App\Exports\articleIssueExport;
+use App\Exports\EditorExport;
 use App\Exports\ReviewerExport;
 use App\Http\Controllers\Controller;
 use App\Mail\CertificateEditorMail;
@@ -1103,6 +1104,27 @@ class journalController extends Controller
         ];
         // return response()->json($data);
         return view('back.pages.journal.detail-editor', $data);
+    }
+
+    public function EditorExport($journal_path, $issue_id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $editor = Editor::where('issue_id', $issue_id)->get();
+        if ($editor->isEmpty()) {
+            Alert::error('Error', 'No editors found');
+            return redirect()->back();
+        }
+
+        return Excel::download(new EditorExport($issue_id), 'editors-' . $issue->year . '-' . $issue->volume . '-' . $issue->number . '.xlsx');
     }
 
     public function editorCertificateDownload(Request $request, $journal_path, $issue_id, ?int $id = null)

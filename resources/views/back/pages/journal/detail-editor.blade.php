@@ -10,9 +10,16 @@
                             <h3>Editor</h3>
                         </div>
                         <div class="card-toolbar">
-                            <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal" id="btn_add_editor"
+                            <a href="#" class="btn btn-sm btn-primary my-1 me-3" data-bs-toggle="modal" id="btn_add_editor"
                                 data-bs-target="#modal_select_article">
                                 <i class="ki-duotone ki-plus fs-2"></i> Tambah Editor
+                            </a>
+                            <a href="{{ route('back.journal.editor.export', [$journal->url_path, $issue->id]) }}"
+                                class="btn btn-sm btn-secondary my-1">
+                                <i class="ki-duotone ki-file-up fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i> Export Excel
                             </a>
                         </div>
                     </div>

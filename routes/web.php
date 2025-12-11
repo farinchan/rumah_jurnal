@@ -239,6 +239,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
 
 
         Route::get('/{journal_path}/issue/{issue_id}/editor', [BackJournalController::class, 'editorIndex'])->name('editor.index');
+        Route::get('/{journal_path}/issue/{issue_id}/editor/export', [BackJournalController::class, 'editorExport'])->name('editor.export');
         Route::get('/{journal_path}/issue/{issue_id}/editor/certificate-download/{id?}', [BackJournalController::class, 'editorCertificateDownload'])->name('editor.certificate.download');
         Route::get('/{journal_path}/issue/{issue_id}/editor/certificate-send-mail/{id?}', [BackJournalController::class, 'editorCertificateSendMail'])->name('editor.certificate.send-mail');
         Route::post('/{journal_path}/issue/{issue_id}/editor/file-sk', [BackJournalController::class, 'editorFileSkStore'])->name('editor.file-sk.store');
