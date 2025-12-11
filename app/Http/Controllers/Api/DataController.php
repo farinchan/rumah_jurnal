@@ -71,8 +71,21 @@ class DataController extends Controller
             }
 
             $journal->indexing = $iconIndexing ?? [];
+            $journal->api_key = null; // Remove api_key from the response
+            $journal->ojs_version = null; // Remove ojs_version from the response
             return $journal;
         });
+
+        if ($journals->isNotEmpty()) {
+            return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $journals], 200);
+        } else {
+            return response()->json(['status' => false, 'message' => 'Data not found'], 404);
+        }
+    }
+
+    public function dataJournal2(Request $request)
+    {
+        $journals = Journal::orderBy('context_id')->get()->makeHidden(['api_key', 'ojs_version', 'created_at', 'updated_at', 'deleted_at', 'url_path', 'context_id', 'id', 'last_sync', 'thumbnail', 'url', 'editor_chief_signature', 'indexing_others']);
 
         if ($journals->isNotEmpty()) {
             return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $journals], 200);
