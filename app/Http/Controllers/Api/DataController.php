@@ -85,7 +85,7 @@ class DataController extends Controller
 
     public function dataJournal2(Request $request)
     {
-        $journals = Journal::orderBy('context_id')->get()->makeHidden(['api_key', 'ojs_version', 'created_at', 'updated_at', 'deleted_at', 'url_path', 'context_id', 'id', 'last_sync', 'thumbnail', 'url', 'editor_chief_signature', 'indexing_others']);
+        $journals = Journal::orderBy('context_id')->get()->makeHidden(['api_key', 'ojs_version', 'created_at', 'updated_at', 'deleted_at', 'url_path', 'context_id', 'id', 'last_sync', 'thumbnail', 'url', 'editor_chief_signature', 'indexing_others', 'subject', 'faculty']);
 
         if ($journals->isNotEmpty()) {
             return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $journals], 200);
