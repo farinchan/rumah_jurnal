@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Models\News;
 use App\Models\SettingBanner;
+use App\Models\SettingBot;
 use App\Models\SettingWebsite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -129,6 +130,12 @@ class DataController extends Controller
         } else {
             return response()->json(['status' => false, 'message' => 'Data not found'], 404);
         }
+    }
+
+    public function dataAdditional(Request $request)
+    {
+        $bot = SettingBot::first();
+        return response()->json([ 'additional_context' => $bot->additional_context], 200);
     }
 
     public function dataJournalContext(Request $request, $context_id)
