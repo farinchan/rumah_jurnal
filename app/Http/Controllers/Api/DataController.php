@@ -108,6 +108,7 @@ class DataController extends Controller
                                'submission_id' => $submission->submission_id,
                                'article_id' => $submission->submission_id,
                                'authors' => $submission->authorsString,
+                               'article_status' => $submission->status_label,
                                'invoice' => $submission->paymentInvoices()->get()->map(function ($invoice) use ($submission, $issue) {
                                     return [
                                         'invoice' => $invoice->invoice_number . '/JRNL/UINSMDD/' . date('Y', strtotime($invoice->created_at)),
