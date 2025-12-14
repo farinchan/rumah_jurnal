@@ -86,6 +86,123 @@
                         </div>
                     </div>
                 </div>
+                {{-- Statistik Status Pembayaran --}}
+                <div class="separator my-4"></div>
+                <div class="d-flex flex-wrap justify-content-start">
+                    <div class="d-flex flex-wrap">
+                        @php
+                            $totalSubmissions = $issue->submissions->count();
+                            $freeChargeCount = $issue->submissions->where('free_charge', true)->count();
+
+                            // Submissions dengan invoice
+                            $submissionsWithInvoice = $issue->submissions->filter(function($s) {
+                                return !$s->free_charge && $s->paymentInvoices->count() > 0;
+                            });
+
+                            // Submissions tanpa invoice (belum ada tagihan)
+                            $noInvoiceCount = $issue->submissions->filter(function($s) {
+                                return !$s->free_charge && $s->paymentInvoices->count() == 0;
+                            })->count();
+
+                            // Hitung berdasarkan total persentase yang sudah dibayar
+                            $lunasCount = $submissionsWithInvoice->filter(function($s) {
+                                return $s->paymentInvoices->where('is_paid', true)->sum('payment_percent') >= 100;
+                            })->count();
+
+                            $belumBayarCount = $submissionsWithInvoice->filter(function($s) {
+                                return $s->paymentInvoices->where('is_paid', true)->sum('payment_percent') == 0;
+                            })->count();
+
+                            $sebagianCount = $submissionsWithInvoice->filter(function($s) {
+                                $paid = $s->paymentInvoices->where('is_paid', true)->sum('payment_percent');
+                                return $paid > 0 && $paid < 100;
+                            })->count();
+
+                            // Detail invoice per tipe
+                            $allInvoices = $issue->submissions->flatMap->paymentInvoices;
+
+                            $invoice60 = $allInvoices->where('payment_percent', 60);
+                            $invoice60Lunas = $invoice60->where('is_paid', true)->count();
+                            $invoice60Pending = $invoice60->where('is_paid', false)->count();
+
+                            $invoice40 = $allInvoices->where('payment_percent', 40);
+                            $invoice40Lunas = $invoice40->where('is_paid', true)->count();
+                            $invoice40Pending = $invoice40->where('is_paid', false)->count();
+
+                            $invoice100 = $allInvoices->where('payment_percent', 100);
+                            $invoice100Lunas = $invoice100->where('is_paid', true)->count();
+                            $invoice100Pending = $invoice100->where('is_paid', false)->count();
+                        @endphp
+
+                        <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-4 fw-bold text-success" data-kt-countup="true"
+                                    data-kt-countup-value="{{ $lunasCount }}">0</div>
+                            </div>
+                            <div class="fw-semibold fs-6 text-gray-500">Artikel Lunas</div>
+                        </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-4 fw-bold text-warning" data-kt-countup="true"
+                                    data-kt-countup-value="{{ $sebagianCount }}">0</div>
+                            </div>
+                            <div class="fw-semibold fs-6 text-gray-500">Bayar Sebagian</div>
+                        </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-4 fw-bold text-danger" data-kt-countup="true"
+                                    data-kt-countup-value="{{ $belumBayarCount }}">0</div>
+                            </div>
+                            <div class="fw-semibold fs-6 text-gray-500">Belum Bayar</div>
+                        </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-4 fw-bold text-info" data-kt-countup="true"
+                                    data-kt-countup-value="{{ $freeChargeCount }}">0</div>
+                            </div>
+                            <div class="fw-semibold fs-6 text-gray-500">Gratis Biaya</div>
+                        </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-4 fw-bold text-muted" data-kt-countup="true"
+                                    data-kt-countup-value="{{ $noInvoiceCount }}">0</div>
+                            </div>
+                            <div class="fw-semibold fs-6 text-gray-500">Belum Ada Tagihan</div>
+                        </div>
+                    </div>
+                </div>
+                {{-- Detail Invoice per Tipe --}}
+                <div class="d-flex flex-wrap justify-content-start mt-2">
+                    <div class="d-flex flex-wrap">
+                        <div class="border border-gray-300 border-dashed rounded min-w-150px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="fs-6 fw-semibold text-gray-700">Invoice 60%</span>
+                            </div>
+                            <div class="d-flex align-items-center mt-2">
+                                <span class="badge badge-light-success me-2">{{ $invoice60Lunas }} Lunas</span>
+                                <span class="badge badge-light-warning">{{ $invoice60Pending }} Pending</span>
+                            </div>
+                        </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-150px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="fs-6 fw-semibold text-gray-700">Invoice 40%</span>
+                            </div>
+                            <div class="d-flex align-items-center mt-2">
+                                <span class="badge badge-light-success me-2">{{ $invoice40Lunas }} Lunas</span>
+                                <span class="badge badge-light-warning">{{ $invoice40Pending }} Pending</span>
+                            </div>
+                        </div>
+                        <div class="border border-gray-300 border-dashed rounded min-w-150px py-3 px-4 me-6 mb-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="fs-6 fw-semibold text-gray-700">Invoice 100%</span>
+                            </div>
+                            <div class="d-flex align-items-center mt-2">
+                                <span class="badge badge-light-success me-2">{{ $invoice100Lunas }} Lunas</span>
+                                <span class="badge badge-light-warning">{{ $invoice100Pending }} Pending</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="separator"></div>

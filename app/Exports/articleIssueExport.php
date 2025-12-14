@@ -72,32 +72,32 @@ class articleIssueExport implements WithStyles, WithEvents, WithCustomStartCell
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                $sheet->mergeCells('A1:I1');
+                $sheet->mergeCells('A1:J1');
 
-                $issue = Issue::with('journal')->where('id', $this->issue_id)->first();
+                $issue = Issue::with(['journal', 'submissions.paymentInvoices'])->where('id', $this->issue_id)->first();
                 $submissions = $issue->submissions;
 
                 $sheet->setCellValue('A1', 'Daftar Artikel Jurnal');
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->mergeCells('A2:I2');
+                $sheet->mergeCells('A2:J2');
                 $sheet->setCellValue('A2', 'Import Tanggal: ' . date('d-m-Y H:i:s'));
                 $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->mergeCells('A4:I4');
-                $sheet->getStyle('A4:I4')->getFont()->setBold(true);
+                $sheet->mergeCells('A4:J4');
+                $sheet->getStyle('A4:J4')->getFont()->setBold(true);
                 $sheet->setCellValue('A4', 'Jurnal: ' . $issue->journal->title);
 
-                $sheet->mergeCells('A5:I5');
-                $sheet->getStyle('A5:I5')->getFont()->setBold(true);
+                $sheet->mergeCells('A5:J5');
+                $sheet->getStyle('A5:J5')->getFont()->setBold(true);
                 $sheet->setCellValue('A5', 'Issue: Vol.' . $issue->volume . ' No.' . $issue->number . '  (' . $issue->year . '): ' . $issue->title);
 
-                $sheet->mergeCells('A6:I6');
-                $sheet->getStyle('A6:I6')->getFont()->setBold(true);
+                $sheet->mergeCells('A6:J6');
+                $sheet->getStyle('A6:J6')->getFont()->setBold(true);
                 $sheet->setCellValue('A6', 'Total Article: ' . $issue->submissions->count());
 
-                $sheet->getStyle('A8:I9')->applyFromArray([
+                $sheet->getStyle('A8:J9')->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'color' => ['rgb' => 'FFFF00'],  // Warna kuning
@@ -105,7 +105,7 @@ class articleIssueExport implements WithStyles, WithEvents, WithCustomStartCell
                 ]);
 
                 // Menambahkan border untuk heading
-                $sheet->getStyle('A8:I9')->applyFromArray([
+                $sheet->getStyle('A8:J9')->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -150,68 +150,104 @@ class articleIssueExport implements WithStyles, WithEvents, WithCustomStartCell
                 $sheet->setCellValue('I9', 'Affiliasi');
                 $sheet->getStyle('I9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->getStyle('A8:I9')->getFont()->setBold(true);
+                $sheet->setCellValue('J8', 'Status Pembayaran');
+                $sheet->mergeCells('J8:J9');
+                $sheet->getStyle('J8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
-                 $currentRow = 10;
+                // Tambahkan style untuk kolom J di header
+                $sheet->getStyle('J8:J9')->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'color' => ['rgb' => 'FFFF00'],  // Warna kuning
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],  // Warna hitam
+                        ],
+                    ],
+                ]);
 
-                 foreach ($submissions as $index => $submission) {
-                     $startRow = $currentRow;
-                     $authorCount = is_array($submission->authors) ? count($submission->authors) : $submission->authors->count();
-                     $reviewerCount = is_array($submission->reviewers) ? count($submission->reviewers) : $submission->reviewers->count();
-                     $maxRows = max($authorCount, $reviewerCount, 1);
+                $sheet->getStyle('A8:J9')->getFont()->setBold(true);
 
-                     // Merge cells untuk kolom yang tidak perlu diulang
-                     if ($maxRows > 1) {
-                         $endRow = $startRow + $maxRows - 1;
-                         $sheet->mergeCells('A' . $startRow . ':A' . $endRow);
-                         $sheet->mergeCells('D' . $startRow . ':D' . $endRow);
-                         $sheet->mergeCells('E' . $startRow . ':E' . $endRow);
-                         $sheet->mergeCells('F' . $startRow . ':F' . $endRow);
-                         $sheet->mergeCells('G' . $startRow . ':G' . $endRow);
-                     }
+                $currentRow = 10;
 
-                     // Set nilai untuk kolom yang di-merge
-                     $sheet->setCellValue('A' . $startRow, $submission->submission_id);
-                     $sheet->setCellValue('D' . $startRow, $submission->FullTitle);
-                     $sheet->setCellValue('E' . $startRow, $submission->status_label);
+                foreach ($submissions as $index => $submission) {
+                    $startRow = $currentRow;
+                    $authorCount = is_array($submission->authors) ? count($submission->authors) : $submission->authors->count();
+                    $reviewerCount = is_array($submission->reviewers) ? count($submission->reviewers) : $submission->reviewers->count();
+                    $maxRows = max($authorCount, $reviewerCount, 1);
 
-                     if ($submission->urlPublished) {
-                         $sheet->setCellValue('F' . $startRow, '=HYPERLINK("' . $submission->urlPublished . '", "lihat")');
-                         $sheet->getStyle('F' . $startRow)->getFont()->getColor()->setRGB('0000FF');
-                         $sheet->getStyle('F' . $startRow)->getFont()->setUnderline(true);
-                     }
+                    // Merge cells untuk kolom yang tidak perlu diulang
+                    if ($maxRows > 1) {
+                        $endRow = $startRow + $maxRows - 1;
+                        $sheet->mergeCells('A' . $startRow . ':A' . $endRow);
+                        $sheet->mergeCells('D' . $startRow . ':D' . $endRow);
+                        $sheet->mergeCells('E' . $startRow . ':E' . $endRow);
+                        $sheet->mergeCells('F' . $startRow . ':F' . $endRow);
+                        $sheet->mergeCells('G' . $startRow . ':G' . $endRow);
+                        $sheet->mergeCells('J' . $startRow . ':J' . $endRow);
+                    }
 
-                     $sheet->setCellValue('G' . $startRow, $submission->editors->pluck('name')->implode(", "));
+                    // Set nilai untuk kolom yang di-merge
+                    $sheet->setCellValue('A' . $startRow, $submission->submission_id);
+                    $sheet->setCellValue('D' . $startRow, $submission->FullTitle);
+                    $sheet->setCellValue('E' . $startRow, $submission->status_label);
 
-                     // Align center vertical untuk merged cells
-                     if ($maxRows > 1) {
-                         $sheet->getStyle('A' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                         $sheet->getStyle('D' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                         $sheet->getStyle('E' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                         $sheet->getStyle('F' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                         $sheet->getStyle('G' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                     }
+                    if ($submission->urlPublished) {
+                        $sheet->setCellValue('F' . $startRow, '=HYPERLINK("' . $submission->urlPublished . '", "lihat")');
+                        $sheet->getStyle('F' . $startRow)->getFont()->getColor()->setRGB('0000FF');
+                        $sheet->getStyle('F' . $startRow)->getFont()->setUnderline(true);
+                    }
 
-                     // Isi authors dan affiliations per baris
-                     foreach ($submission->authors as $authorIndex => $author) {
-                         $row = $startRow + $authorIndex;
-                         $sheet->setCellValue('B' . $row, $author["name"]);
-                         $sheet->setCellValue('C' . $row, $author["affiliation"]);
-                     }
+                    $sheet->setCellValue('G' . $startRow, $submission->editors->pluck('name')->implode(", "));
 
-                     // Isi reviewers per baris
-                     foreach ($submission->reviewers as $reviewerIndex => $reviewer) {
-                         $row = $startRow + $reviewerIndex;
-                         $sheet->setCellValue('H' . $row, $reviewer->name);
-                            $sheet->setCellValue('I' . $row, $reviewer->affiliation);
-                     }
+                    // Align center vertical untuk merged cells
+                    if ($maxRows > 1) {
+                        $sheet->getStyle('A' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                        $sheet->getStyle('D' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                        $sheet->getStyle('E' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                        $sheet->getStyle('F' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                        $sheet->getStyle('G' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                        $sheet->getStyle('J' . $startRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                    }
 
-                     $currentRow += $maxRows;
-                 }
+                    // Isi authors dan affiliations per baris
+                    foreach ($submission->authors as $authorIndex => $author) {
+                        $row = $startRow + $authorIndex;
+                        $sheet->setCellValue('B' . $row, $author["name"]);
+                        $sheet->setCellValue('C' . $row, $author["affiliation"]);
+                    }
+
+                    // Isi reviewers per baris
+                    foreach ($submission->reviewers as $reviewerIndex => $reviewer) {
+                        $row = $startRow + $reviewerIndex;
+                        $sheet->setCellValue('H' . $row, $reviewer->name);
+                        $sheet->setCellValue('I' . $row, $reviewer->affiliation);
+                    }
+
+                    // Isi status pembayaran per invoice
+                    $paymentStatusLines = [];
+                    if ($submission->free_charge) {
+                        $paymentStatusLines[] = 'Gratis Biaya';
+                    } elseif ($submission->paymentInvoices->count() > 0) {
+                        foreach ($submission->paymentInvoices as $invoice) {
+                            $status = $invoice->is_paid ? 'Lunas' : 'Belum Dibayar';
+                            $paymentStatusLines[] = 'Tagihan ' . $invoice->payment_percent . '%: ' . $status;
+                        }
+                    } else {
+                        $paymentStatusLines[] = 'Belum Ada Tagihan';
+                    }
+                    $paymentStatus = implode("\n", $paymentStatusLines);
+                    $sheet->setCellValue('J' . $startRow, $paymentStatus);
+                    $sheet->getStyle('J' . $startRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setWrapText(true);
+
+                    $currentRow += $maxRows;
+                }
 
                 // Menambahkan border untuk data (mulai dari baris 5 sampai baris terakhir)
                 $rowCount = $sheet->getHighestRow();
-                $sheet->getStyle('A9:I' . $rowCount)->applyFromArray([
+                $sheet->getStyle('A9:J' . $rowCount)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -227,7 +263,7 @@ class articleIssueExport implements WithStyles, WithEvents, WithCustomStartCell
                 ]);
 
                 // Auto-fit kolom (menyesuaikan lebar kolom dengan konten)
-                foreach (range('A', 'I') as $column) {
+                foreach (range('A', 'J') as $column) {
                     $sheet->getColumnDimension($column)->setAutoSize(true);
                 }
             },

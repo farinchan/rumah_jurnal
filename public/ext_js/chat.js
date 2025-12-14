@@ -35,10 +35,10 @@
         // Quick Replies
         quickReplies: [
             { text: '📚 Cara Submit Artikel', message: 'Bagaimana cara submit artikel ke jurnal?' },
-            { text: '📋 Status Artikel', message: 'Bagaimana cara mengecek status artikel yang sudah disubmit?' },
+            // { text: '📋 Status Artikel', message: 'Bagaimana cara mengecek status artikel yang sudah disubmit?' },
             { text: '💰 Biaya Publikasi', message: 'Berapa biaya publikasi jurnal?' },
             { text: '🎓 Akreditasi Jurnal', message: 'Apa saja jurnal yang sudah terakreditasi?' },
-            { text: '📞 Kontak Admin', message: 'Saya ingin berbicara dengan admin.' }
+            // { text: '📞 Kontak Admin', message: 'Saya ingin berbicara dengan admin.' }
         ]
     };
 
