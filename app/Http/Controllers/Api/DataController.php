@@ -94,6 +94,42 @@ class DataController extends Controller
         }
     }
 
+    public function dataPayment(Request $request)
+    {
+        $journals = Journal::orderBy('context_id')->where('author_fee', '>', '0')->get()->map(function ($journal) {
+            return [
+                'jurnal_name' => $journal->name,
+                'jurnal_title' => $journal->title,
+                'payment_info' => $journal->issues()->where('status', 'unpublished')->get()->map(function ($issue) {
+                    return [
+                        'issue' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' (' . $issue->year . ')',
+                        'submission' => $issue->submissions()->get()->map(function ($submission) use ( $issue) {
+                            return [
+                               'submission_id' => $submission->submission_id,
+                               'article_id' => $submission->submission_id,
+                               'authors' => $submission->authorsString,
+                               'invoice' => $submission->paymentInvoices()->get()->map(function ($invoice) use ($submission, $issue) {
+                                    return [
+                                        'invoice' => $invoice->invoice_number . '/JRNL/UINSMDD/' . date('Y', strtotime($invoice->created_at)),
+                                        'amount' => 'Rp ' . number_format($invoice->payment_amount, 0, ',', '.'),
+                                        'percentage' => $invoice->payment_percent . '%',
+                                        'status' => $invoice->is_paid ? 'sudah bayar' : 'belum bayar',
+                                    ];
+                                }),
+                            ];
+                        }),
+                    ];
+                }),
+            ];
+        });
+
+        if ($journals->isNotEmpty()) {
+            return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $journals], 200);
+        } else {
+            return response()->json(['status' => false, 'message' => 'Data not found'], 404);
+        }
+    }
+
     public function dataJournalContext(Request $request, $context_id)
     {
         $journal = Journal::where('context_id', $context_id)->orWhere('url_path', $context_id)->first();

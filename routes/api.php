@@ -38,6 +38,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     Route::get('/data/issue/{journal_id}', [App\Http\Controllers\Api\DataController::class, 'dataIssue'])->name('data.issue');
 
+    Route::get('/data/payment', [App\Http\Controllers\Api\DataController::class, 'dataPayment'])->name('data.payment');
+
 });
 
 Route::post('/bot', [App\Http\Controllers\Api\BotController::class, 'handleBot'])->name('api.bot.handle');
