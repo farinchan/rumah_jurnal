@@ -150,5 +150,7 @@ return [
     'save_changes' => 'Save Changes',
     'registered_at' => 'Registered At',
 
+    'instagram_feed' => 'Instagram Feed',
+    'see_our_instagram_feed' => 'See Our Instagram Feed',
 
 ];

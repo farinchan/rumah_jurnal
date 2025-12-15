@@ -68,6 +68,18 @@
             color: #333333;
             margin-bottom: 10px;
         }
+        .tb_onsite_upload_btn_wrap {
+            display: none;
+        }
+        .tb_onsite_upload_btn {
+            display: none;
+        }
+        .tb_onsite_upload_input {
+            display: none;
+        }
+        .tb_post_modal_content {
+            font-size: 14px;
+        }
     </style>
 @endsection
 
@@ -146,7 +158,7 @@
                         <div class="about-author-info d-flex mt-50">
                             <div class="author-name-designation  align-self-center mr-30">
                                 <!-- <h4 class="mb-0">Jerry Henson</h4>
-                                                                <small>/ Shop Director</small> -->
+                                                                    <small>/ Shop Director</small> -->
                                 <div class="btn-wrapper mt-0">
                                     <a class="btn theme-btn-2 btn-effect-1"
                                         href="about.html">{{ __('front.read_more') }}</a>
@@ -180,7 +192,8 @@
                     <div class="col-lg-12">
                         <div class="ltn__blog-item ltn__blog-item-3">
                             <div class="ltn__blog-img">
-                                <a href="{{ route('news.detail', $news->slug) }}"><img src="{{ $news->getThumbnail() }}" style="height: 250px; width: 100%; object-fit: cover; object-position: top;"
+                                <a href="{{ route('news.detail', $news->slug) }}"><img src="{{ $news->getThumbnail() }}"
+                                        style="height: 250px; width: 100%; object-fit: cover; object-position: top;"
                                         alt="#"></a>
                             </div>
                             <div class="ltn__blog-brief">
@@ -259,7 +272,8 @@
                                                     onmouseout="this.style.color='#333'">
                                                     {{ $event->name }}
                                                     @if ($date_after && \Carbon\Carbon::parse($date_after)->isPast())
-                                                        <span class="badge badge-danger ml-2" style="font-size: 12px;">End</span>
+                                                        <span class="badge badge-danger ml-2"
+                                                            style="font-size: 12px;">End</span>
                                                     @endif
                                                 </a>
                                             </h3>
@@ -374,6 +388,27 @@
     </div>
     <!-- IMAGE SLIDER AREA END -->
 
+    <div class="ltn__blog-area pt-120  pb-20">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title-area ltn__section-title-2 text-center">
+                        <h6 class="section-subtitle ltn__secondary-color"><span><i class="fas fa-square-full"></i></span>
+                            {{ __('front.instagram_feed') }}
+                        </h6>
+                        <h1 class="section-title">
+                            {{ __('front.see_our_instagram_feed') }}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row  ">
+                <div class="tagembed-widget" style="width:100%;height:100%;overflow:auto;" data-widget-id="311267"
+                    data-website="1"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="ltn__contact-message-area pb-90 pt-90  ">
         <div class="container contact-form-box box-shadow white-bg">
             <h3 class="title-2">{{ __('front.contact_us') }}</h3>
@@ -457,16 +492,17 @@
 @endsection
 
 @section('scripts')
-    <script>
-        $.ajax({
-            url: "{{ route('visit.ajax') }}",
-            type: "GET",
-            success: function(response) {
-                console.log(response);
-            },
-            error: function(error) {
-                console.log(error);
-            }
-        });
+    <script src="https://widget.tagembed.com/embed.min.js" type="text/javascript">
+        < script >
+            $.ajax({
+                url: "{{ route('visit.ajax') }}",
+                type: "GET",
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
     </script>
 @endsection

@@ -149,4 +149,7 @@ return [
     'confirm_new_password' => 'تأكيد كلمة المرور الجديدة',
     'save_changes' => 'حفظ التغييرات',
     'registered_at' => 'تاريخ التسجيل',
+
+    'instagram_feed' => 'موجز إنستغرام',
+    'see_our_instagram_feed' => 'اطّلع على موجز إنستغرام الخاص بنا',
 ];

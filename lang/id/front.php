@@ -149,5 +149,7 @@ return [
     'save_changes' => 'Simpan Perubahan',
     'registered_at' => 'Terdaftar Pada',
 
+    'instagram_feed' => 'Feed Instagram',
+    'see_our_instagram_feed' => 'Lihat Feed Instagram Kami',
 
 ];
