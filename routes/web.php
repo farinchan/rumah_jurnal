@@ -285,7 +285,7 @@ Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
         Route::get('/cashflow/export', [BackFinanceController::class, 'cashflowExport'])->name('cashflow.export');
         Route::post('/cashflow/store', [BackFinanceController::class, 'cashflowStore'])->name('cashflow.store');
         Route::put('/cashflow/{id}/update', [BackFinanceController::class, 'cashflowUpdate'])->name('cashflow.update');
-        Route::get('/cashflow/{id}/delete', [BackFinanceController::class, 'cashflowDestroy'])->name('cashflow.destroy');
+        Route::delete('/cashflow/{id}/delete', [BackFinanceController::class, 'cashflowDestroy'])->name('cashflow.destroy');
     });
 
     Route::prefix('master')->name('master.')->group(function () {
