@@ -150,7 +150,7 @@
                                                             Pembayaran {{ $invoice->payment_percent }}% -
                                                             @if ($invoice->is_paid)
                                                                 <span class="text-success fs-7 fw-bold">Lunas</span>
-                                                                @if ($invoice->payments()->where('payment_status', 'accepted')->first()->id)
+                                                                @if ($invoice->payments()->where('payment_status', 'accepted')->first())
                                                                     <a
                                                                         href="{{ route('back.finance.verification.detail', $invoice->payments()->where('payment_status', 'accepted')->first()->id) }}">(detail)</a>
                                                                 @endif
