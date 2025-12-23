@@ -340,8 +340,6 @@
                                                 WOS
                                             </label>
                                         </div>
-<<<<<<< HEAD
-=======
                                         <div class="form-check form-check-custom form-check-solid form-check-lg mb-2">
                                             <input class="form-check-input" type="checkbox" name="akreditasi[]"
                                                 value="EBSCO" id="ebsco"
@@ -407,7 +405,6 @@
                                             <option value="45" @if ($journal->subject == '45') selected @endif>Aqidah dan Filsafat Islam - S1</option>
                                             <option value="46" @if ($journal->subject == '46') selected @endif>Sosiologi Agama - S1</option>
                                         </select>
->>>>>>> 4950532445c90528a5f6a1eff2909e871834e049
                                     </div>
                                 </div>
                             </div>
