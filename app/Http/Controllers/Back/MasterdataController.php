@@ -33,6 +33,7 @@ class MasterdataController extends Controller
             'journals' => Journal::where('type', 'journal')->get(),
             'proceedings' => Journal::where('type', 'proceeding')->get(),
             'student_research_hubs' => Journal::where('type', 'student_research_hub')->get(),
+            'all_journals' => Journal::all(),
         ];
 
         // return response()->json($data);
@@ -48,6 +49,9 @@ class MasterdataController extends Controller
             'akreditasi' => 'nullable',
             'editor_chief_name' => 'nullable|string|max:255',
             'editor_chief_signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8192',
+            'type' => 'required|in:journal,proceeding,student_research_hub',
+            'subject' => 'nullable|string|max:255',
+            'faculty' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -66,6 +70,7 @@ class MasterdataController extends Controller
         $journal->subject = $request->subject;
         $journal->faculty = $request->faculty;
         $journal->editor_chief_name = $request->editor_chief_name;
+        $journal->type = $request->type;
         if ($request->hasFile('editor_chief_signature')) {
             $file = $request->file('editor_chief_signature');
             $filePath = $file->storeAs('journal-signature', Str::random(10) . '.' . $file->getClientOriginalExtension(), 'public');
