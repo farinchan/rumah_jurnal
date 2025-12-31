@@ -147,14 +147,25 @@
         @endrole
 
         @role('editor|super-admin')
-            <div class="menu-item pt-5">
-                <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Jurnal</span>
-                </div>
-            </div>
+
+
             @php
-                $journal_all = App\Models\Journal::all();
+                $journal_all = App\Models\Journal::where('type', 'journal')->get();
+                $journal_permission_exists = false;
+                foreach ($journal_all as $journal) {
+                    if (auth()->user()->can($journal->url_path)) {
+                        $journal_permission_exists = true;
+                        break;
+                    }
+                }
             @endphp
 
+            @if ($journal_permission_exists)
+                <div class="menu-item pt-5">
+                    <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Jurnal</span>
+                    </div>
+                </div>
+            @endif
 
             @foreach ($journal_all as $journal)
                 @can($journal->url_path)
@@ -170,6 +181,83 @@
                                 </i>
                             </span>
                             <span class="menu-title">{{ $journal->name }}</span>
+                        </a>
+                    </div>
+                @endcan
+            @endforeach
+
+
+            @php
+                $proceeding_all = App\Models\Journal::where('type', 'proceeding')->get();
+                $proceeding_permission_exists = false;
+                foreach ($proceeding_all as $proceeding) {
+                    if (auth()->user()->can($proceeding->url_path)) {
+                        $proceeding_permission_exists = true;
+                        break;
+                    }
+                }
+            @endphp
+
+            @if ($proceeding_permission_exists)
+                <div class="menu-item pt-5">
+                    <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Proceeding</span>
+                    </div>
+                </div>
+            @endif
+
+            @foreach ($proceeding_all as $proceeding)
+                @can($proceeding->url_path)
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->segment(3) == $proceeding->url_path) active @endif"
+                            href="{{ route('back.journal.index', $proceeding->url_path) }}">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-book fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">{{ $proceeding->name }}</span>
+                        </a>
+                    </div>
+                @endcan
+            @endforeach
+
+
+            @php
+                $student_research_hub_all = App\Models\Journal::where('type', 'student_research_hub')->get();
+                $student_research_hub_permission_exists = false;
+                foreach ($student_research_hub_all as $student_research_hub) {
+                    if (auth()->user()->can($student_research_hub->url_path)) {
+                        $student_research_hub_permission_exists = true;
+                        break;
+                    }
+                }
+            @endphp
+
+            @if ($student_research_hub_permission_exists)
+                <div class="menu-item pt-5">
+                    <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Student Research
+                            Hub</span>
+                    </div>
+                </div>
+            @endif
+
+            @foreach ($student_research_hub_all as $student_research_hub)
+                @can($student_research_hub->url_path)
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->segment(3) == $student_research_hub->url_path) active @endif"
+                            href="{{ route('back.journal.index', $student_research_hub->url_path) }}">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-book fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">{{ $student_research_hub->name }}</span>
                         </a>
                     </div>
                 @endcan

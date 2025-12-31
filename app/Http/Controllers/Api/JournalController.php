@@ -22,6 +22,7 @@ class JournalController extends Controller
         $api_key = $request->api_key;
         $url_path = $request->url_path;
         $ojs_version = $request->ojs_version ?? "3.3";
+        $type = $request->type ?? "journal";
 
         if (!$url || !$api_key || !$url_path || !$ojs_version) {
             return response()->json([
@@ -73,6 +74,7 @@ class JournalController extends Controller
                     $jurnal->api_key = $api_key;
                     $jurnal->ojs_version = $ojs_version;
                     $jurnal->last_sync = now();
+                    $jurnal->type = $type;
                     $jurnal->save();
 
                     Permission::create(['name' =>  $url_path]);

@@ -30,7 +30,9 @@ class MasterdataController extends Controller
                     'link' => route('back.master.journal.index')
                 ]
             ],
-            'journals' => Journal::all()
+            'journals' => Journal::where('type', 'journal')->get(),
+            'proceedings' => Journal::where('type', 'proceeding')->get(),
+            'student_research_hubs' => Journal::where('type', 'student_research_hub')->get(),
         ];
 
         // return response()->json($data);

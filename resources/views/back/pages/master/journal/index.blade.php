@@ -4,87 +4,266 @@
         <div class="card card-flush">
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <div class="card-title">
-                    <h2 class="fw-bolder">Journal</h2>
+                    <div class=" hover-scroll-x">
+                        <div class="d-grid">
+                            <ul class="nav nav-tabs flex-nowrap text-nowrap">
+                                <li class="nav-item">
+                                    <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0 active"
+                                        data-bs-toggle="tab" href="#kt_tab_pane_1">Journal</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0"
+                                        data-bs-toggle="tab" href="#kt_tab_pane_2">Proceeding</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0"
+                                        data-bs-toggle="tab" href="#kt_tab_pane_3">Student Research Hub</a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
                     <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_journal">
                         <i class="ki-duotone ki-plus fs-2"></i>
-                        Tambah Jurnal
+                        Tambah
                     </a>
                 </div>
             </div>
         </div>
-        <div class="row g-6 mb-6 g-xl-9 mb-xl-9 mt-3">
-            @forelse ($journals as $journal)
-                <div class="col-md-6 col-xxl-4">
-                    <div class="card ">
-                        <div class="card-body d-flex flex-center flex-column py-9 px-5">
-                            <div class="symbol symbol-100px  mb-5">
-                                <img src="{{ $journal->getJournalThumbnail() }}" alt="image">
-                            </div>
-                            <a href="{{ $journal->url }}" target="_blank"
-                                class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $journal->title }}</a>
-                            <div class="fw-semibold text-gray-500  ">Name: {{ $journal->name }}</div>
-                            <div class="fw-semibold text-gray-500  ">Path: {{ $journal->url_path }}</div>
-                            <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $journal->onlineIssn }} | p-ISSN:
-                                {{ $journal->printIssn }}</div>
-                            <div class="fw-semibold text-gray-500  ">Akreditasi:
-                                @foreach ($journal->indexing ?? [] as $akreditasi_item)
-                                    <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
-                                @endforeach
-                            </div>
-                            <div class="fw-semibold text-gray-500 mb-3 ">
-                                Editor Chief: {{ $journal->editor_chief_name ?? '-' }}
-                            </div>
-                            <div class="d-flex flex-center flex-wrap mb-3">
-                                <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
-                                    <div class="fs-6 fw-bold text-gray-700 text-center">
-                                        @money($journal->author_fee ?? 0)</div>
-                                    <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
-                                </div>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="kt_tab_pane_1" role="tabpanel">
+                <div class="row g-6 mb-6 g-xl-9 mb-xl-9 mt-3">
+                    @forelse ($journals as $journal)
+                        <div class="col-md-6 col-xxl-4">
+                            <div class="card ">
+                                <div class="card-body d-flex flex-center flex-column py-9 px-5">
+                                    <div class="symbol symbol-100px  mb-5">
+                                        <img src="{{ $journal->getJournalThumbnail() }}" alt="image">
+                                    </div>
+                                    <a href="{{ $journal->url }}" target="_blank"
+                                        class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $journal->title }}</a>
+                                    <div class="fw-semibold text-gray-500  ">Name: {{ $journal->name }}</div>
+                                    <div class="fw-semibold text-gray-500  ">Path: {{ $journal->url_path }}</div>
+                                    <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $journal->onlineIssn }} | p-ISSN:
+                                        {{ $journal->printIssn }}</div>
+                                    <div class="fw-semibold text-gray-500  ">Akreditasi:
+                                        @foreach ($journal->indexing ?? [] as $akreditasi_item)
+                                            <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
+                                        @endforeach
+                                    </div>
+                                    <div class="fw-semibold text-gray-500 mb-3 ">
+                                        Editor Chief: {{ $journal->editor_chief_name ?? '-' }}
+                                    </div>
+                                    <div class="d-flex flex-center flex-wrap mb-3">
+                                        <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
+                                            <div class="fs-6 fw-bold text-gray-700 text-center">
+                                                @money($journal->author_fee ?? 0)</div>
+                                            <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+                                        </div>
 
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-light-info btn-sm"
+                                            onclick="syncJournal('{{ $journal->url_path }}')">
+                                            <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
+                                                data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                                <span class="path3"></span>
+                                                <span class="path4"></span>
+                                            </i> Sync
+                                        </button>
+                                        <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#edit_journal_{{ $journal->id }}">
+                                            <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
+                                                data-bs-placement="bottom" title="edit Informasi Jurnal">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                                <span class="path3"></span>
+                                                <span class="path4"></span>
+                                            </i> Edit
+                                        </a>
+                                        <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#delete_journal_{{ $journal->id }}">
+                                            <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
+                                                data-bs-placement="bottom" title="Hapus Jurnal">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                                <span class="path3"></span>
+                                                <span class="path4"></span>
+                                            </i> Hapus
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <button class="btn btn-light-info btn-sm" onclick="syncJournal('{{ $journal->url_path }}')">
-                                    <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                        title="Sinkronisasi Ulang Jurnal">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                        <span class="path3"></span>
-                                        <span class="path4"></span>
-                                    </i> Sync
-                                </button>
-                                <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#edit_journal_{{ $journal->id }}">
-                                    <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
-                                        data-bs-placement="bottom" title="edit Informasi Jurnal">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                        <span class="path3"></span>
-                                        <span class="path4"></span>
-                                    </i> Edit
-                                </a>
-                                <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#delete_journal_{{ $journal->id }}">
-                                    <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
-                                        data-bs-placement="bottom" title="Hapus Jurnal">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                        <span class="path3"></span>
-                                        <span class="path4"></span>
-                                    </i> Hapus
-                                </a>
+                        </div>
+                    @empty
+                        <div class="col-md-12">
+                            <div class="card mt-10">
+                                <div class="card-body">
+                                    <p class="text-center">Belum ada jurnal yang diimport</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforelse
+
+                </div>
+            </div>
+            <div class="tab-pane fade" id="kt_tab_pane_2" role="tabpanel">
+                @forelse ($proceedings as $proceeding)
+                    <div class="col-md-6 col-xxl-4">
+                        <div class="card ">
+                            <div class="card-body d-flex flex-center flex-column py-9 px-5">
+                                <div class="symbol symbol-100px  mb-5">
+                                    <img src="{{ $proceeding->getJournalThumbnail() }}" alt="image">
+                                </div>
+                                <a href="{{ $proceeding->url }}" target="_blank"
+                                    class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $proceeding->title }}</a>
+                                <div class="fw-semibold text-gray-500  ">Name: {{ $proceeding->name }}</div>
+                                <div class="fw-semibold text-gray-500  ">Path: {{ $proceeding->url_path }}</div>
+                                <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $proceeding->onlineIssn }} | p-ISSN:
+                                    {{ $proceeding->printIssn }}</div>
+                                <div class="fw-semibold text-gray-500  ">Akreditasi:
+                                    @foreach ($proceeding->indexing ?? [] as $akreditasi_item)
+                                        <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
+                                    @endforeach
+                                </div>
+                                <div class="fw-semibold text-gray-500 mb-3 ">
+                                    Editor Chief: {{ $proceeding->editor_chief_name ?? '-' }}
+                                </div>
+                                <div class="d-flex flex-center flex-wrap mb-3">
+                                    <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
+                                        <div class="fs-6 fw-bold text-gray-700 text-center">
+                                            @money($proceeding->author_fee ?? 0)</div>
+                                        <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+                                    </div>
+
+                                </div>
+                                <div>
+                                    <button class="btn btn-light-info btn-sm"
+                                        onclick="syncJournal('{{ $proceeding->url_path }}')">
+                                        <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                        </i> Sync
+                                    </button>
+                                    <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#edit_journal_{{ $proceeding->id }}">
+                                        <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom" title="edit Informasi Jurnal">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                        </i> Edit
+                                    </a>
+                                    <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#delete_journal_{{ $proceeding->id }}">
+                                        <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom" title="Hapus Jurnal">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                        </i> Hapus
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            @empty
-                <div class="col-md-12">
-                    <div class="alert alert-info">Belum ada jurnal yang diimport</div>
-                </div>
-            @endforelse
+                @empty
+                    <div class="col-md-12">
+                        <div class="card mt-10">
+                            <div class="card-body">
+                                <p class="text-center">Belum ada proceeding yang diimport</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+            <div class="tab-pane fade" id="kt_tab_pane_3" role="tabpanel">
+                @forelse ($student_research_hubs as $student_research_hub)
+                    <div class="col-md-6 col-xxl-4">
+                        <div class="card ">
+                            <div class="card-body d-flex flex-center flex-column py-9 px-5">
+                                <div class="symbol symbol-100px  mb-5">
+                                    <img src="{{ $student_research_hub->getJournalThumbnail() }}" alt="image">
+                                </div>
+                                <a href="{{ $student_research_hub->url }}" target="_blank"
+                                    class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $student_research_hub->title }}</a>
+                                <div class="fw-semibold text-gray-500  ">Name: {{ $student_research_hub->name }}</div>
+                                <div class="fw-semibold text-gray-500  ">Path: {{ $student_research_hub->url_path }}</div>
+                                <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $student_research_hub->onlineIssn }} | p-ISSN:
+                                    {{ $student_research_hub->printIssn }}</div>
+                                <div class="fw-semibold text-gray-500  ">Akreditasi:
+                                    @foreach ($student_research_hub->indexing ?? [] as $akreditasi_item)
+                                        <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
+                                    @endforeach
+                                </div>
+                                <div class="fw-semibold text-gray-500 mb-3 ">
+                                    Editor Chief: {{ $student_research_hub->editor_chief_name ?? '-' }}
+                                </div>
+                                <div class="d-flex flex-center flex-wrap mb-3">
+                                    <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
+                                        <div class="fs-6 fw-bold text-gray-700 text-center">
+                                            @money($student_research_hub->author_fee ?? 0)</div>
+                                        <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+                                    </div>
 
+                                </div>
+                                <div>
+                                    <button class="btn btn-light-info btn-sm"
+                                        onclick="syncJournal('{{ $student_research_hub->url_path }}')">
+                                        <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                        </i> Sync
+                                    </button>
+                                    <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#edit_journal_{{ $student_research_hub->id }}">
+                                        <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom" title="edit Informasi Jurnal">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                        </i> Edit
+                                    </a>
+                                    <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#delete_journal_{{ $student_research_hub->id }}">
+                                        <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom" title="Hapus Jurnal">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                        </i> Hapus
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-md-12">
+                        <div class="card mt-10">
+                            <div class="card-body">
+                                <p class="text-center">Belum ada student research hub yang diimport</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
         </div>
+
     </div>
     <div class="modal fade" tabindex="-1" id="add_journal">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -141,6 +320,15 @@
                                 <span class="form-text text-muted">cara mendapatkan API KEY: Klik pada <b>Nama Pengguna</b>
                                     > Pilih <b>View Profile</b> > Klik tab <b>API Key</b> > Klik <b>Generate API
                                         Key</b></span>
+                            </div>
+                            <div class="col-md-12 mt-10">
+                                <label class="form-label">Tipe</label>
+                                <select name="type" class="form-select">
+                                    <option value="journal">Journal</option>
+                                    <option value="proceeding">Proceeding</option>
+                                    <option value="student_research_hub">Student Research Hub</option>
+                                </select>
+                                <span class="form-text text-muted">Pilih tipe jurnal yang ingin diimport</span>
                             </div>
                         </div>
                     </div>
@@ -357,53 +545,94 @@
                                         <label class="form-label">Faculty</label>
                                         <select name="faculty" class="form-control">
                                             <option value="">-- Pilih Fakultas --</option>
-                                            <option value="pascasarjana" @if ($journal->faculty == 'pasca') selected @endif>Pascasarjana</option>
-                                            <option value="syariah" @if ($journal->faculty == 'fsyar') selected @endif>Syariah</option>
-                                            <option value="ftik" @if ($journal->faculty == 'ftik') selected @endif>Tarbiyah dan Ilmu Keguruan</option>
-                                            <option value="febi" @if ($journal->faculty == 'febi') selected @endif>Ekonomi dan Bisnis Islam</option>
-                                            <option value="fuad" @if ($journal->faculty == 'fuad') selected @endif>Ushuluddin Adab dan Dakwah</option>
+                                            <option value="pascasarjana"
+                                                @if ($journal->faculty == 'pasca') selected @endif>Pascasarjana</option>
+                                            <option value="syariah" @if ($journal->faculty == 'fsyar') selected @endif>
+                                                Syariah</option>
+                                            <option value="ftik" @if ($journal->faculty == 'ftik') selected @endif>
+                                                Tarbiyah dan Ilmu Keguruan</option>
+                                            <option value="febi" @if ($journal->faculty == 'febi') selected @endif>
+                                                Ekonomi dan Bisnis Islam</option>
+                                            <option value="fuad" @if ($journal->faculty == 'fuad') selected @endif>
+                                                Ushuluddin Adab dan Dakwah</option>
                                         </select>
                                     </div>
-                                     <div class="col-md-6">
+                                    <div class="col-md-6">
                                         <label class="form-label">Program Studi</label>
                                         <select name="subject" class="form-control">
                                             <option value="">-- Pilih Prodi --</option>
-                                            <option value="101" @if ($journal->subject == '101') selected @endif>Hukum Islam - S2</option>
-                                            <option value="102" @if ($journal->subject == '102') selected @endif>Manajemen Pendidikan Islam - S2</option>
-                                            <option value="103" @if ($journal->subject == '103') selected @endif>Ilmu Syariah - S3</option>
-                                            <option value="11" @if ($journal->subject == '11') selected @endif>Hukum Keluarga Islam (Ahwal Syakhshiyyah) - S1</option>
-                                            <option value="12" @if ($journal->subject == '12') selected @endif>Hukum Ekonomi Syariah (Muamalah) - S1</option>
-                                            <option value="13" @if ($journal->subject == '13') selected @endif>Hukum Tatanegara (siyasah) - S1</option>
-                                            <option value="14" @if ($journal->subject == '14') selected @endif>Hukum Pidana Islam (Jinayah) - S1</option>
-                                            <option value="201" @if ($journal->subject == '201') selected @endif>Pendidikan Agama Islam - S2</option>
-                                            <option value="202" @if ($journal->subject == '202') selected @endif>Tadris Bahasa Inggris - S2</option>
-                                            <option value="21" @if ($journal->subject == '21') selected @endif>Pendidikan Agama Islam - S1</option>
-                                            <option value="211" @if ($journal->subject == '211') selected @endif>Pendidikan Profesi Guru (PPG) - PROFESI</option>
-                                            <option value="22" @if ($journal->subject == '22') selected @endif>Pendidikan Bahasa Arab - S1</option>
-                                            <option value="23" @if ($journal->subject == '23') selected @endif>Pendidikan Bahasa Inggris - S1</option>
-                                            <option value="24" @if ($journal->subject == '24') selected @endif>Pendidikan Matematika - S1</option>
-                                            <option value="25" @if ($journal->subject == '25') selected @endif>Pendidikan Teknik Informatika Dan Komputer - S1</option>
-                                            <option value="26" @if ($journal->subject == '26') selected @endif>Bimbingan dan Konseling - S1</option>
-                                            <option value="27" @if ($journal->subject == '27') selected @endif>Matematika - S1</option>
-                                            <option value="28" @if ($journal->subject == '28') selected @endif>Statistika - S1</option>
-                                            <option value="29" @if ($journal->subject == '29') selected @endif>Informatika - S1</option>
-                                            <option value="301" @if ($journal->subject == '301') selected @endif>Ekonomi Syariah - S2</option>
-                                            <option value="31" @if ($journal->subject == '31') selected @endif>Perbankan Syariah D3 - D3</option>
-                                            <option value="32" @if ($journal->subject == '32') selected @endif>Ekonomi Islam - S1</option>
-                                            <option value="321" @if ($journal->subject == '321') selected @endif>Pendidikan Agama Islam - S3</option>
-                                            <option value="33" @if ($journal->subject == '33') selected @endif>Perbankan Syariah - S1</option>
-                                            <option value="34" @if ($journal->subject == '34') selected @endif>Akuntansi Syariah - S1</option>
-                                            <option value="35" @if ($journal->subject == '35') selected @endif>Pariwisata Syariah - S1</option>
-                                            <option value="36" @if ($journal->subject == '36') selected @endif>Manajemen Haji dan Umrah - S1</option>
-                                            <option value="37" @if ($journal->subject == '37') selected @endif>Manajemen Bisnis Syariah - S1</option>
-                                            <option value="38" @if ($journal->subject == '38') selected @endif>Bisnis Digital - S1</option>
-                                            <option value="401" @if ($journal->subject == '401') selected @endif>Aqidah dan Filsafat Islam - S2</option>
-                                            <option value="41" @if ($journal->subject == '41') selected @endif>Ilmu Al Qur'an dan Tafsir - S1</option>
-                                            <option value="42" @if ($journal->subject == '42') selected @endif>Ilmu Hadis - S1</option>
-                                            <option value="43" @if ($journal->subject == '43') selected @endif>Komunikasi dan Penyiaran Islam - S1</option>
-                                            <option value="44" @if ($journal->subject == '44') selected @endif>Sejarah Peradaban Islam - S1</option>
-                                            <option value="45" @if ($journal->subject == '45') selected @endif>Aqidah dan Filsafat Islam - S1</option>
-                                            <option value="46" @if ($journal->subject == '46') selected @endif>Sosiologi Agama - S1</option>
+                                            <option value="101" @if ($journal->subject == '101') selected @endif>
+                                                Hukum Islam - S2</option>
+                                            <option value="102" @if ($journal->subject == '102') selected @endif>
+                                                Manajemen Pendidikan Islam - S2</option>
+                                            <option value="103" @if ($journal->subject == '103') selected @endif>Ilmu
+                                                Syariah - S3</option>
+                                            <option value="11" @if ($journal->subject == '11') selected @endif>
+                                                Hukum Keluarga Islam (Ahwal Syakhshiyyah) - S1</option>
+                                            <option value="12" @if ($journal->subject == '12') selected @endif>
+                                                Hukum Ekonomi Syariah (Muamalah) - S1</option>
+                                            <option value="13" @if ($journal->subject == '13') selected @endif>
+                                                Hukum Tatanegara (siyasah) - S1</option>
+                                            <option value="14" @if ($journal->subject == '14') selected @endif>
+                                                Hukum Pidana Islam (Jinayah) - S1</option>
+                                            <option value="201" @if ($journal->subject == '201') selected @endif>
+                                                Pendidikan Agama Islam - S2</option>
+                                            <option value="202" @if ($journal->subject == '202') selected @endif>
+                                                Tadris Bahasa Inggris - S2</option>
+                                            <option value="21" @if ($journal->subject == '21') selected @endif>
+                                                Pendidikan Agama Islam - S1</option>
+                                            <option value="211" @if ($journal->subject == '211') selected @endif>
+                                                Pendidikan Profesi Guru (PPG) - PROFESI</option>
+                                            <option value="22" @if ($journal->subject == '22') selected @endif>
+                                                Pendidikan Bahasa Arab - S1</option>
+                                            <option value="23" @if ($journal->subject == '23') selected @endif>
+                                                Pendidikan Bahasa Inggris - S1</option>
+                                            <option value="24" @if ($journal->subject == '24') selected @endif>
+                                                Pendidikan Matematika - S1</option>
+                                            <option value="25" @if ($journal->subject == '25') selected @endif>
+                                                Pendidikan Teknik Informatika Dan Komputer - S1</option>
+                                            <option value="26" @if ($journal->subject == '26') selected @endif>
+                                                Bimbingan dan Konseling - S1</option>
+                                            <option value="27" @if ($journal->subject == '27') selected @endif>
+                                                Matematika - S1</option>
+                                            <option value="28" @if ($journal->subject == '28') selected @endif>
+                                                Statistika - S1</option>
+                                            <option value="29" @if ($journal->subject == '29') selected @endif>
+                                                Informatika - S1</option>
+                                            <option value="301" @if ($journal->subject == '301') selected @endif>
+                                                Ekonomi Syariah - S2</option>
+                                            <option value="31" @if ($journal->subject == '31') selected @endif>
+                                                Perbankan Syariah D3 - D3</option>
+                                            <option value="32" @if ($journal->subject == '32') selected @endif>
+                                                Ekonomi Islam - S1</option>
+                                            <option value="321" @if ($journal->subject == '321') selected @endif>
+                                                Pendidikan Agama Islam - S3</option>
+                                            <option value="33" @if ($journal->subject == '33') selected @endif>
+                                                Perbankan Syariah - S1</option>
+                                            <option value="34" @if ($journal->subject == '34') selected @endif>
+                                                Akuntansi Syariah - S1</option>
+                                            <option value="35" @if ($journal->subject == '35') selected @endif>
+                                                Pariwisata Syariah - S1</option>
+                                            <option value="36" @if ($journal->subject == '36') selected @endif>
+                                                Manajemen Haji dan Umrah - S1</option>
+                                            <option value="37" @if ($journal->subject == '37') selected @endif>
+                                                Manajemen Bisnis Syariah - S1</option>
+                                            <option value="38" @if ($journal->subject == '38') selected @endif>
+                                                Bisnis Digital - S1</option>
+                                            <option value="401" @if ($journal->subject == '401') selected @endif>
+                                                Aqidah dan Filsafat Islam - S2</option>
+                                            <option value="41" @if ($journal->subject == '41') selected @endif>Ilmu
+                                                Al Qur'an dan Tafsir - S1</option>
+                                            <option value="42" @if ($journal->subject == '42') selected @endif>Ilmu
+                                                Hadis - S1</option>
+                                            <option value="43" @if ($journal->subject == '43') selected @endif>
+                                                Komunikasi dan Penyiaran Islam - S1</option>
+                                            <option value="44" @if ($journal->subject == '44') selected @endif>
+                                                Sejarah Peradaban Islam - S1</option>
+                                            <option value="45" @if ($journal->subject == '45') selected @endif>
+                                                Aqidah dan Filsafat Islam - S1</option>
+                                            <option value="46" @if ($journal->subject == '46') selected @endif>
+                                                Sosiologi Agama - S1</option>
                                         </select>
                                     </div>
                                 </div>
@@ -417,7 +646,8 @@
                             <div class="mb-5">
                                 <label class="form-label mb-3 required">Tanda Tangan Editor In Chief</label><br>
                                 <!--begin::Image input placeholder-->
-                                <div class="image-input image-input-empty image-input-outline image-input-placeholder mb-3 ms-5" style="background-image: url('{{ $journal->getEditorChiefSignature() }}');"
+                                <div class="image-input image-input-empty image-input-outline image-input-placeholder mb-3 ms-5"
+                                    style="background-image: url('{{ $journal->getEditorChiefSignature() }}');"
                                     data-kt-image-input="true">
                                     <div class="image-input-wrapper w-150px h-150px"></div>
                                     <label
