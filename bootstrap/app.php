@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
          $middleware->alias([
             'TrustProxies' => \App\Http\Middleware\TrustProxies::class,
             'login-cdn' => \App\Http\Middleware\LoginCdn::class,
+            '2fa' => \App\Http\Middleware\TwoFactorAuthentication::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             '/login',

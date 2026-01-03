@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\AnnouncementController as BackAnnouncementController;
 use App\Http\Controllers\Back\EmailController;
@@ -47,6 +48,16 @@ Route::get('/terms-of-service', [HomeController::class, 'termsOfService'])->name
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('login-cdn');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Two-Factor Authentication Routes
+Route::prefix('2fa')->name('2fa.')->group(function () {
+    Route::get('/select-method', [TwoFactorController::class, 'selectMethod'])->name('select-method');
+    Route::post('/send-code', [TwoFactorController::class, 'sendCode'])->name('send-code');
+    Route::get('/verify', [TwoFactorController::class, 'showVerifyForm'])->name('verify');
+    Route::post('/verify', [TwoFactorController::class, 'verify'])->name('verify.post');
+    Route::get('/resend', [TwoFactorController::class, 'resend'])->name('resend');
+    Route::get('/cancel', [TwoFactorController::class, 'cancel'])->name('cancel');
+});
 
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
@@ -123,7 +134,7 @@ Route::prefix('contact')->name('contact.')->group(function () {
     Route::post('/', [ContactController::class, 'send'])->name('send');
 });
 
-Route::prefix('back')->name('back.')->middleware('auth')->group(function () {
+Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(function () {
 
 
     Route::get('/dashboard', [BackDashboardController::class, 'index'])->name('dashboard');

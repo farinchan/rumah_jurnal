@@ -55,11 +55,20 @@ class LoginController extends Controller
 
         $loginType = filter_var($request->input('login'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        if (Auth::attempt([$loginType => $request->input('login'), 'password' => $request->input('password')])) {
-            if (Auth::user()->hasRole('super-admin|keuangan|editor|humas')) {
-                Alert::success('Success', 'Login berhasil');
-                return redirect()->intended(route('back.dashboard'));
+        if (Auth::attempt([$loginType => $request->input('login'), 'password' => $request->input('password')], false)) {
+            $user = Auth::user();
+
+            // Check if user has admin roles that require 2FA
+            if ($user->hasRole('super-admin|keuangan|editor|humas')) {
+                // Logout the user temporarily and store user id in session for 2FA
+                Auth::logout();
+                session(['2fa:user:id' => $user->id]);
+                session(['2fa:remember' => $request->has('remember')]);
+
+                return redirect()->route('2fa.select-method');
             }
+
+            // For regular users, login directly
             return redirect()->intended('/');
         }
 
