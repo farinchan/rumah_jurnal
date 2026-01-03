@@ -77,6 +77,7 @@
     <!-- Main JS -->
     <script src="{{ asset('front/js/main.js') }}"></script>
     @include('sweetalert::alert')
+    <script src="https://rumahjurnal.uinbukittinggi.ac.id/ext_js/chat.js"></script>
 
     @yield('scripts')
 
