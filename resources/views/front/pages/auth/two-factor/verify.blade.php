@@ -26,6 +26,8 @@
                         <p>
                             @if($method === 'email')
                                 Kode verifikasi telah dikirim ke <strong>{{ $masked_email }}</strong>
+                            @elseif($method === 'whatsapp')
+                                Kode verifikasi telah dikirim ke WhatsApp <strong>{{ $masked_phone ?? '' }}</strong>
                             @endif
                         </p>
                     </div>
@@ -38,9 +40,15 @@
                             @csrf
 
                             <div class="mb-4 text-center">
+                                @if($method === 'whatsapp')
+                                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                                    <i class="fab fa-whatsapp" style="color: #ffffff; font-size: 40px;"></i>
+                                </div>
+                                @else
                                 <div style="width: 80px; height: 80px; background: #15365F; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
                                     <i class="fas fa-shield-alt" style="color: #C3A356; font-size: 35px;"></i>
                                 </div>
+                                @endif
 
                                 <p class="text-muted mb-4">
                                     Masukkan 6 digit kode yang telah dikirim

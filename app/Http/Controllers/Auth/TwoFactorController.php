@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\TwoFactorCodeMail;
 use App\Models\SettingWebsite;
 use App\Models\TwoFactorCode;
+use App\Services\WhatsappService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -64,7 +65,7 @@ class TwoFactorController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'method' => 'required|in:email'
+            'method' => 'required|in:email,whatsapp'
         ], [
             'method.required' => 'Silakan pilih metode verifikasi',
             'method.in' => 'Metode verifikasi tidak valid'
@@ -84,6 +85,12 @@ class TwoFactorController extends Controller
             return redirect()->route('login');
         }
 
+        // Check if user has phone number for WhatsApp
+        if ($request->method === 'whatsapp' && empty($user->phone)) {
+            Alert::error('Error', 'Nomor WhatsApp tidak terdaftar. Silakan gunakan metode lain.');
+            return redirect()->back();
+        }
+
         // Generate 2FA code
         $twoFactorCode = TwoFactorCode::generateCode($user, $request->method);
 
@@ -97,6 +104,25 @@ class TwoFactorController extends Controller
 
                 session(['2fa:method' => 'email']);
                 Alert::success('Berhasil', 'Kode verifikasi telah dikirim ke email Anda');
+            } catch (\Exception $e) {
+                Alert::error('Error', 'Gagal mengirim kode verifikasi. Silakan coba lagi.');
+                return redirect()->back();
+            }
+        }
+
+        // Send code via WhatsApp
+        if ($request->method === 'whatsapp') {
+            try {
+                $whatsappService = new WhatsappService();
+                $result = $whatsappService->send2FACode($user->phone, $twoFactorCode->code, $user->name);
+
+                if ($result['success']) {
+                    session(['2fa:method' => 'whatsapp']);
+                    Alert::success('Berhasil', 'Kode verifikasi telah dikirim ke WhatsApp Anda');
+                } else {
+                    Alert::error('Error', 'Gagal mengirim kode verifikasi via WhatsApp. Silakan coba lagi.');
+                    return redirect()->back();
+                }
             } catch (\Exception $e) {
                 Alert::error('Error', 'Gagal mengirim kode verifikasi. Silakan coba lagi.');
                 return redirect()->back();
@@ -126,6 +152,7 @@ class TwoFactorController extends Controller
 
         $setting_web = SettingWebsite::first();
         $maskedEmail = $this->maskEmail($user->email);
+        $maskedPhone = $this->maskPhone($user->phone ?? '');
 
         $data = [
             'title' => 'Verifikasi Kode 2FA',
@@ -151,6 +178,7 @@ class TwoFactorController extends Controller
             ],
             'setting_web' => $setting_web,
             'masked_email' => $maskedEmail,
+            'masked_phone' => $maskedPhone,
             'method' => session('2fa:method')
         ];
 
@@ -260,6 +288,22 @@ class TwoFactorController extends Controller
             }
         }
 
+        // Send code via WhatsApp
+        if ($method === 'whatsapp') {
+            try {
+                $whatsappService = new WhatsappService();
+                $result = $whatsappService->send2FACode($user->phone, $twoFactorCode->code, $user->name);
+
+                if ($result['success']) {
+                    Alert::success('Berhasil', 'Kode verifikasi baru telah dikirim ke WhatsApp Anda');
+                } else {
+                    Alert::error('Error', 'Gagal mengirim kode verifikasi via WhatsApp. Silakan coba lagi.');
+                }
+            } catch (\Exception $e) {
+                Alert::error('Error', 'Gagal mengirim kode verifikasi. Silakan coba lagi.');
+            }
+        }
+
         return redirect()->back();
     }
 
@@ -284,5 +328,23 @@ class TwoFactorController extends Controller
         $maskedName = substr($name, 0, 2) . str_repeat('*', max(strlen($name) - 4, 2)) . substr($name, -2);
 
         return $maskedName . '@' . $domain;
+    }
+
+    /**
+     * Mask phone number for display.
+     */
+    private function maskPhone(string $phone): string
+    {
+        if (empty($phone)) {
+            return '';
+        }
+
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        if (strlen($phone) < 6) {
+            return str_repeat('*', strlen($phone));
+        }
+
+        return substr($phone, 0, 4) . str_repeat('*', strlen($phone) - 6) . substr($phone, -2);
     }
 }

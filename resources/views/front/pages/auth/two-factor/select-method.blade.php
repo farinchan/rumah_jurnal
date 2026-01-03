@@ -59,8 +59,25 @@
                                     </div>
                                 </div>
 
+                                <!-- WhatsApp Method -->
+                                <div class="method-card" onclick="selectMethod('whatsapp', this)">
+                                    <input type="radio" name="method" id="method_whatsapp" value="whatsapp">
+                                    <div class="d-flex align-items-center">
+                                        <div class="method-icon whatsapp-icon">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </div>
+                                        <div class="method-content">
+                                            <div class="method-title">WhatsApp</div>
+                                            <p class="method-desc">Kirim kode verifikasi ke nomor WhatsApp terdaftar</p>
+                                        </div>
+                                    </div>
+                                    <div class="check-indicator">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                </div>
+
                                 <!-- SMS Method (Coming Soon) -->
-                                <div class="method-card disabled">
+                                {{-- <div class="method-card disabled">
                                     <input type="radio" name="method" id="method_sms" value="sms" disabled>
                                     <div class="d-flex align-items-center">
                                         <div class="method-icon inactive">
@@ -71,7 +88,7 @@
                                             <p class="method-desc">Kirim kode verifikasi via SMS ke nomor HP</p>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
 
                                 <!-- Authenticator App (Coming Soon) -->
                                 <div class="method-card disabled">
@@ -146,6 +163,13 @@
     }
     .method-card .method-icon.active {
         background: linear-gradient(135deg, #15365F 0%, #1e4a7a 100%) !important;
+    }
+    .method-card .method-icon.whatsapp-icon {
+        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+    }
+    .method-card .method-icon.whatsapp-icon i {
+        color: #ffffff !important;
+        font-size: 26px !important;
     }
     .method-card .method-icon.inactive {
         background: #9ca3af !important;
