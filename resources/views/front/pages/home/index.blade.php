@@ -68,15 +68,19 @@
             color: #333333;
             margin-bottom: 10px;
         }
+
         .tb_onsite_upload_btn_wrap {
             display: none;
         }
+
         .tb_onsite_upload_btn {
             display: none;
         }
+
         .tb_onsite_upload_input {
             display: none;
         }
+
         .tb_post_modal_content {
             font-size: 14px;
         }
@@ -158,7 +162,7 @@
                         <div class="about-author-info d-flex mt-50">
                             <div class="author-name-designation  align-self-center mr-30">
                                 <!-- <h4 class="mb-0">Jerry Henson</h4>
-                                                                    <small>/ Shop Director</small> -->
+                                                                        <small>/ Shop Director</small> -->
                                 <div class="btn-wrapper mt-0">
                                     <a class="btn theme-btn-2 btn-effect-1"
                                         href="about.html">{{ __('front.read_more') }}</a>
@@ -492,17 +496,17 @@
 @endsection
 
 @section('scripts')
-    <script src="https://widget.tagembed.com/embed.min.js" type="text/javascript">
-        < script >
-            $.ajax({
-                url: "{{ route('visit.ajax') }}",
-                type: "GET",
-                success: function(response) {
-                    console.log(response);
-                },
-                error: function(error) {
-                    console.log(error);
-                }
-            });
+    <script src="https://widget.tagembed.com/embed.min.js" type="text/javascript"></script>
+    <script>
+        $.ajax({
+            url: "{{ route('visit.ajax') }}",
+            type: "GET",
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
     </script>
 @endsection
