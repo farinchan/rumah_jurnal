@@ -128,6 +128,19 @@ class NewsController extends Controller
             'name' => 'required',
             'email' => 'required|email',
             'comment' => 'required',
+            'agree' => 'required|accepted',
+            'g-recaptcha-response' => 'required|captcha',
+        ], [
+            'news_id.required' => 'News ID is required',
+            'news_id.exists' => 'News not found',
+            'name.required' => 'Name is required',
+            'email.required' => 'Email is required',
+            'email.email' => 'Invalid email format',
+            'comment.required' => 'Comment is required',
+            'agree.required' => 'You must agree to the terms',
+            'agree.accepted' => 'You must agree to the terms',
+            'g-recaptcha-response.required' => 'Captcha must be filled',
+            'g-recaptcha-response.captcha' => 'Invalid captcha',
         ]);
 
         if ($validator->fails()) {
