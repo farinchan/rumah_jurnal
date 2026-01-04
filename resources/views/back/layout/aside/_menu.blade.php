@@ -411,7 +411,7 @@
                     <span class="menu-icon">
                         <i class="ki-duotone ki-setting-4 fs-2"></i>
                     </span>
-                    <span class="menu-title">Whatsapp API - Chatery</span>
+                    <span class="menu-title">Whatsapp API</span>
                     <span class="menu-arrow"></span>
                 </span>
                 <div class="menu-sub menu-sub-accordion">
