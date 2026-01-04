@@ -106,8 +106,9 @@
                             </div>
 
                             <div class="btn-wrapper mt-0">
-                                <button class="theme-btn-1 btn btn-block" type="submit">
-                                    <i class="fas fa-paper-plane me-2"></i> Kirim Kode Verifikasi
+                                <button id="sendCodeBtn" class="theme-btn-1 btn btn-block" type="submit">
+                                    <span id="sendCodeBtnIcon"><i class="fas fa-paper-plane me-2"></i></span>
+                                    <span id="sendCodeBtnText">Kirim Kode Verifikasi</span>
                                 </button>
                             </div>
 
@@ -274,5 +275,20 @@
         // Check the radio button
         document.getElementById('method_' + method).checked = true;
     }
+
+    // Add loading effect and disable button on submit
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.querySelector('form[action="{{ route('2fa.send-code') }}"]');
+        var btn = document.getElementById('sendCodeBtn');
+        var btnIcon = document.getElementById('sendCodeBtnIcon');
+        var btnText = document.getElementById('sendCodeBtnText');
+        if(form && btn) {
+            form.addEventListener('submit', function() {
+                btn.disabled = true;
+                btnIcon.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>';
+                btnText.textContent = 'Mengirim...';
+            });
+        }
+    });
 </script>
 @endsection
