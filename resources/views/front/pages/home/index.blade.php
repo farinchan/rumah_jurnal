@@ -162,7 +162,7 @@
                         <div class="about-author-info d-flex mt-50">
                             <div class="author-name-designation  align-self-center mr-30">
                                 <!-- <h4 class="mb-0">Jerry Henson</h4>
-                                                                        <small>/ Shop Director</small> -->
+                                                                            <small>/ Shop Director</small> -->
                                 <div class="btn-wrapper mt-0">
                                     <a class="btn theme-btn-2 btn-effect-1"
                                         href="about.html">{{ __('front.read_more') }}</a>
@@ -481,7 +481,15 @@
                             <p><label class="input-info-save mb-0"><input type="checkbox" name="agree">
                                     {{ __('front.message_checkbox') }}
                                 </label></p>
-                            <div class="btn-wrapper mt-0">
+                            <div>
+                                {!! NoCaptcha::renderJs() !!}
+                                {!! NoCaptcha::display() !!}
+
+                                @error('g-recaptcha-response')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="btn-wrapper ">
                                 <button class="btn theme-btn-1 btn-effect-1 text-uppercase" type="submit">
                                     {{ __('front.send_message') }}
                                 </button>

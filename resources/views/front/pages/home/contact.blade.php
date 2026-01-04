@@ -110,7 +110,15 @@
                             <p><label class="input-info-save mb-0"><input type="checkbox" name="agree">
                                 {{ __('front.message_checkbox') }}
                             </label></p>
-                            <div class="btn-wrapper mt-0">
+                            <div>
+                                {!! NoCaptcha::renderJs() !!}
+                                {!! NoCaptcha::display() !!}
+
+                                @error('g-recaptcha-response')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="btn-wrapper ">
                                 <button class="btn theme-btn-1 btn-effect-1 text-uppercase" type="submit">
                                     {{ __('front.send_message') }}
                                 </button>
