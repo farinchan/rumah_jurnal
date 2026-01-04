@@ -54,3 +54,12 @@ Route::prefix('whatsapp-api')->name('api.whatsapp.')->group(function () {
     Route::post('/send-bulk-message', [App\Http\Controllers\Api\WhatsappController::class, 'sendBulkMessage'])->name('send-bulk-message');
     Route::post('/send-image', [App\Http\Controllers\Api\WhatsappController::class, 'sendImage'])->name('send-image');
 });
+
+Route::prefix('chatery-whatsapp-api')->name('api.chatery_whatsapp.')->group(function () {
+
+    Route::get('/session-status', [App\Http\Controllers\Api\WhatsappController::class, 'chateryServerStatus'])->name('session-status');
+    Route::get('/get-my-session', [App\Http\Controllers\Api\WhatsappController::class, 'chateryGetMySession'])->name('get-my-session');
+    Route::post('/connect-session', [App\Http\Controllers\Api\WhatsappController::class, 'chaterySessionStart'])->name('connect-session');
+    Route::post('/delete-session', [App\Http\Controllers\Api\WhatsappController::class, 'chaterySessionLogout'])->name('delete-session');
+    Route::get('/get-qr', [App\Http\Controllers\Api\WhatsappController::class, 'chaterySessionAuthQrCode'])->name('get-qr');
+});

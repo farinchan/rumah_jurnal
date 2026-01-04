@@ -11,6 +11,7 @@ use App\Models\EventUser;
 use App\Models\Reviewer;
 use App\Models\Editor;
 use App\Models\User;
+use App\Services\WhatsappService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
@@ -319,10 +320,10 @@ class EventController extends Controller
 
             if ($eventUser->phone && $eventUser->phone != '-') {
                 try {
-                    $response_wa = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-message", [
-                        'session' => env('WHATSAPP_API_SESSION'),
-                        'to' => whatsappNumber($eventUser->phone),
-                        'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
+                    $whatappService = new WhatsappService();
+                    $whatappService->sendMessage(
+                        whatsappNumber($eventUser->phone),
+                        "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
                             "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
                             "Berikut detail acara:\n" .
                             "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
@@ -332,11 +333,7 @@ class EventController extends Controller
                             "Terima kasih telah bergabung.\n\n" .
                             "_generate by system\n" .
                             url('/'),
-                    ]);
-
-                    if ($response_wa->status() != 200) {
-                        Log::error('Failed to send WhatsApp messages: ' . $response_wa->body());
-                    }
+                    );
                 } catch (\Throwable $th) {
                     Log::error('Error in sending WhatsApp message: ' . $th->getMessage());
                 }
@@ -344,7 +341,6 @@ class EventController extends Controller
 
             Alert::success('Sukses', 'Peserta berhasil ditambahkan, user sudah terdaftar sebelumnya');
             return redirect()->back();
-
         } else {
             // Create new user
             $user = new User();
@@ -364,10 +360,10 @@ class EventController extends Controller
 
             if ($eventUser->phone && $eventUser->phone != '-') {
                 try {
-                    $response_wa = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-message", [
-                        'session' => env('WHATSAPP_API_SESSION'),
-                        'to' => whatsappNumber($eventUser->phone),
-                        'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
+                    $whatsappService = new WhatsappService();
+                    $whatsappService->sendMessage(
+                        whatsappNumber($eventUser->phone),
+                        "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
                             "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
                             "Berikut detail acara:\n" .
                             "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
@@ -377,11 +373,7 @@ class EventController extends Controller
                             "Terima kasih telah bergabung.\n\n" .
                             "_generate by system\n" .
                             url('/'),
-                    ]);
-
-                    if ($response_wa->status() != 200) {
-                        Log::error('Failed to send WhatsApp messages: ' . $response_wa->body());
-                    }
+                    );
                 } catch (\Throwable $th) {
                     Log::error('Error in sending WhatsApp message: ' . $th->getMessage());
                 }
@@ -508,30 +500,25 @@ class EventController extends Controller
             $importedCount++;
 
             if ($eventUser->phone && $eventUser->phone != '-') {
-                $data_wa[] = [
-                    'to' => env('MAIL_ENVIRONMENT') == 'production' ? whatsappNumber($eventUser->phone) : whatsappNumber(env('WHATSAPP_ADMIN_NUMBER')),
-                    'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
-                        "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
-                        "Berikut detail acara:\n" .
-                        "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
-                        "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
-                        "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
-                        "Pastikan Anda hadir dan catat jadwalnya!\n" .
-                        "Terima kasih telah bergabung.\n\n" .
-                        "_generate by system_\n" .
-                        url('/'),
-                ];
+                $data_wa[] = whatsappNumber($eventUser->phone);
             }
         }
 
-        $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
-            'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
-            'delay' => 2000,
-            'data' => $data_wa
-        ]);
-        if ($response->status() != 200) {
-            Log::error('Failed to send WhatsApp messages: ' . $response->body());
-        }
+        $whatsappService = new WhatsappService();
+        $whatsappService->sendBulkMessage(
+            $data_wa,
+            "Halo Bapak/Ibu,\n\n" .
+                "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
+                "Berikut detail acara:\n" .
+                "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
+                "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
+                "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
+                "Pastikan Anda hadir dan catat jadwalnya!\n" .
+                "Terima kasih telah bergabung.\n\n" .
+                "_generate by system_\n" .
+                url('/'),
+            1000
+        );
 
         $message = "Import selesai. {$importedCount} reviewer berhasil diimport";
         if ($skippedCount > 0) {
@@ -642,32 +629,26 @@ class EventController extends Controller
             $importedCount++;
 
             if ($eventUser->phone && $eventUser->phone != '-') {
-                $data_wa[] = [
-                    'to' => env('MAIL_ENVIRONMENT') == 'production' ? whatsappNumber($eventUser->phone) : whatsappNumber(env('WHATSAPP_ADMIN_NUMBER')),
-                    'text' => "Halo Bapak/Ibu " . $eventUser->name . ",\n\n" .
-                        "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
-                        "Berikut detail acara:\n" .
-                        "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
-                        "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
-                        "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
-                        "Pastikan Anda hadir dan catat jadwalnya!\n" .
-                        "Terima kasih telah bergabung.\n\n" .
-                        "_generate by system_\n" .
-                        url('/'),
-                ];
+                $data_wa[] = whatsappNumber($eventUser->phone);
             }
         }
 
         try {
-            $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
-                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
-                'delay' => 2000,
-                'data' => $data_wa
-            ]);
-
-            if ($response->status() != 200) {
-                Log::error('Failed to send WhatsApp messages: ' . $response->body());
-            }
+            $whatsappService = new WhatsappService();
+            $whatsappService->sendBulkMessage(
+                $data_wa,
+                "Halo Bapak/Ibu,\n\n" .
+                    "Selamat! Anda telah ditambahkan ke event *" . ($eventUser->event->type ?? '') . "* " . ($eventUser->event->status ?? '') .  " sebagai peserta.\n\n" .
+                    "Berikut detail acara:\n" .
+                    "• Nama Event: " . ($eventUser->event->name ?? '-') . "\n" .
+                    "• Tanggal & Waktu: " . ($eventUser->event->datetime ?? '-') . "\n" .
+                    "• " . ($eventUser->event->status == 'online' ? 'Link' : 'Lokasi') . ": " . ($eventUser->event->location ?? '-') . "\n\n" .
+                    "Pastikan Anda hadir dan catat jadwalnya!\n" .
+                    "Terima kasih telah bergabung.\n\n" .
+                    "_generate by system_\n" .
+                    url('/'),
+                1000
+            );
         } catch (\Throwable $th) {
             Log::error('Error in sending WhatsApp messages: ' . $th->getMessage());
             Alert::error('Error', 'Gagal mengirim pesan WhatsApp: ' . $th->getMessage());
@@ -997,16 +978,25 @@ class EventController extends Controller
             }
         }
 
-        $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
-            'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
-            'delay' => $request->delay,
-            'data' => $data
-        ]);
+        $whatsappService = new WhatsappService();
+        $whatsappService->sendBulkMessage(
+            collect($data)->pluck('to')->toArray(),
+            $request->message,
+            1000,
+            $filePath,
+            $fileName
+        );
 
-        if ($response->status() != 200) {
-            Alert::error('Error', 'Failed to send bulk message: ' . $response->json()['message'] ?? 'Unknown error');
-            return redirect()->back()->with('error', 'Failed to send bulk message: ' . $response->json()['message'] ?? 'Unknown error');
-        }
+        // $response = Http::timeout(60)->post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
+        //     'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
+        //     'delay' => $request->delay,
+        //     'data' => $data
+        // ]);
+
+        // if ($response->status() != 200) {
+        //     Alert::error('Error', 'Failed to send bulk message: ' . $response->json()['message'] ?? 'Unknown error');
+        //     return redirect()->back()->with('error', 'Failed to send bulk message: ' . $response->json()['message'] ?? 'Unknown error');
+        // }
 
         Alert::success('Sukses', 'Notifikasi berhasil dikirim');
         return redirect()->back()->with('success', 'Notifikasi berhasil dikirim');

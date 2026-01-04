@@ -4,6 +4,7 @@ namespace App\Http\Controllers\back;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\WhatsappService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -31,6 +32,24 @@ class WhatsappController extends Controller
 
         return view('back.pages.whatsapp.setting', $data);
     }
+    public function chaterySetting()
+    {
+        $data = [
+            'title' => 'Pengaturan Whatsapp - Powered by Chatery',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Pengaturan',
+                    'link' => route('back.chatery-whatsapp.setting')
+                ]
+            ],
+        ];
+
+        return view('back.pages.whatsapp_chatery.setting', $data);
+    }
 
     public function message()
     {
@@ -43,12 +62,12 @@ class WhatsappController extends Controller
                 ],
                 [
                     'name' => 'Pesan Whatsapp',
-                    'link' => route('back.whatsapp.message')
+                    'link' => route('back.chatery-whatsapp.message')
                 ]
             ],
         ];
 
-        return view('back.pages.whatsapp.message', $data);
+        return view('back.pages.whatsapp_chatery.message.send-message', $data);
     }
 
     public function sendMessage(Request $request)
@@ -65,13 +84,13 @@ class WhatsappController extends Controller
                 ],
                 [
                     'name' => 'Send Message',
-                    'link' => route('back.whatsapp.message.sendMessage')
+                    'link' => route('back.chatery-whatsapp.message.sendMessage')
                 ],
             ],
             'users' => User::all(),
         ];
 
-        return view('back.pages.whatsapp.message.send-message', $data);
+        return view('back.pages.whatsapp_chatery.message.send-message', $data);
     }
 
     public function sendImage(Request $request)
@@ -88,14 +107,14 @@ class WhatsappController extends Controller
                 ],
                 [
                     'name' => 'Send Image',
-                    'link' => route('back.whatsapp.message.sendImage')
+                    'link' => route('back.chatery-whatsapp.message.sendImage')
                 ],
             ],
             'users' => User::all(),
 
         ];
 
-        return view('back.pages.whatsapp.message.send-image', $data);
+        return view('back.pages.whatsapp_chatery.message.send-image', $data);
     }
 
     public function sendImageProcess(Request $request)
@@ -136,18 +155,9 @@ class WhatsappController extends Controller
         }
 
         try {
-            $response = Http::post(env('WHATSAPP_API_URL')  . "/send-image", [
-                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
-                'to' => whatsappNumber($request->phone),
-                'image' => $imagePath,
-                'caption' => $request->message
-            ]);
+            $whatsappService = new WhatsappService();
+            $whatsappService->sendImage($request->phone, $imagePath, $request->message);
 
-            if ($response->status() != 200) {
-
-                Alert::error('Error', 'Failed to send image: ' . $response->json()['message'] ?? 'Unknown error');
-                return  redirect()->back()->with('error', 'Failed to send image: ' . $response->json()['message'] ?? 'Unknown error');
-            }
             Alert::success('Success', 'Image sent successfully');
             return redirect()->back()->with('success', 'Image sent successfully');
         } catch (\Throwable $th) {
@@ -175,19 +185,17 @@ class WhatsappController extends Controller
                 ],
                 [
                     'name' => 'Send Bulk Message',
-                    'link' => route('back.whatsapp.message.sendBulkMessage')
+                    'link' => route('back.chatery-whatsapp.message.sendBulkMessage')
                 ],
             ],
 
         ];
 
-        return view('back.pages.whatsapp.message.send-bulk-message', $data);
+        return view('back.pages.whatsapp_chatery.message.send-bulk-message', $data);
     }
 
     public function sendBulkMessageProcess(Request $request)
     {
-        dd($request->all());
-
         $validator = Validator::make(
             $request->all(),
             [
@@ -217,10 +225,7 @@ class WhatsappController extends Controller
                     $users = User::all();
                     foreach ($users as $user) {
                         if ($user->phone) {
-                            $data[] = [
-                                'to' => whatsappNumber($user->phone),
-                                'text' => $request->message,
-                            ];
+                            $data[] = whatsappNumber($user->phone);
                         }
                     }
                     continue;
@@ -229,10 +234,7 @@ class WhatsappController extends Controller
                     $user_editors = User::where("editor_id", '!=', null)->get();
                     foreach ($user_editors as $user) {
                         if ($user->phone) {
-                            $data[] = [
-                                'to' => whatsappNumber($user->phone),
-                                'text' => $request->message,
-                            ];
+                            $data[] = whatsappNumber($user->phone);
                         }
                     }
                     continue;
@@ -241,10 +243,7 @@ class WhatsappController extends Controller
                     $user_reviewers = User::where("reviewer_id", '!=', null)->get();
                     foreach ($user_reviewers as $user) {
                         if ($user->phone) {
-                            $data[] = [
-                                'to' => whatsappNumber($user->phone),
-                                'text' => $request->message,
-                            ];
+                            $data[] = whatsappNumber($user->phone);
                         }
                     }
                     continue;
@@ -253,10 +252,7 @@ class WhatsappController extends Controller
                     $user_finances = User::role('keuangan')->get();
                     foreach ($user_finances as $user) {
                         if ($user->phone) {
-                            $data[] = [
-                                'to' => whatsappNumber($user->phone),
-                                'text' => $request->message,
-                            ];
+                            $data[] = whatsappNumber($user->phone);
                         }
                     }
                     continue;
@@ -265,10 +261,7 @@ class WhatsappController extends Controller
                     $user_public_relations = User::role('humas')->get();
                     foreach ($user_public_relations as $user) {
                         if ($user->phone) {
-                            $data[] = [
-                                'to' => whatsappNumber($user->phone),
-                                'text' => $request->message,
-                            ];
+                            $data[] = whatsappNumber($user->phone);
                         }
                     }
                     continue;
@@ -277,35 +270,19 @@ class WhatsappController extends Controller
                     $user_super_admins = User::role('super-admin')->get();
                     foreach ($user_super_admins as $user) {
                         if ($user->phone) {
-                            $data[] = [
-                                'to' => whatsappNumber($user->phone),
-                                'text' => $request->message,
-                            ];
+                            $data[] = whatsappNumber($user->phone);
                         }
                     }
                     continue;
                 }
                 if ($phone['phone']) {
-                    $data[] = [
-                        'to' => whatsappNumber($phone['phone']),
-                        'text' => $request->message,
-                    ];
+                    $data[] = whatsappNumber($phone['phone']);
                     continue;
                 }
             }
 
-            // dd($data);
-
-            $response = Http::post(env('WHATSAPP_API_URL')  . "/send-bulk-message", [
-                'session' => env('WHATSAPP_API_SESSION'), // Use the session name from your environment variable
-                'delay' => $request->delay,
-                'data' => $data
-            ]);
-
-            if ($response->status() != 200) {
-                Alert::error('Error', 'Failed to send bulk message: ' . $response->json()['message'] ?? 'Unknown error');
-                return redirect()->back()->with('error', 'Failed to send bulk message: ' . $response->json()['message'] ?? 'Unknown error');
-            }
+            $whatsappService = new WhatsappService();
+            $whatsappService->sendBulkMessage($data, $request->message, $request->delay ?? 1000);
 
             Alert::success('Success', 'Bulk message has been sent successfully');
             return redirect()->back()->with('success', 'Bulk message has been sent successfully');

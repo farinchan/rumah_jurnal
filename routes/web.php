@@ -356,12 +356,29 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::put('/bot', [BackSettingController::class, 'botUpdate'])->name('bot.update');
     });
 
-    Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
-        Route::get('/setting', [App\Http\Controllers\Back\WhatsappController::class, 'setting'])->name('setting');
+    // Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+    //     Route::get('/setting', [App\Http\Controllers\Back\WhatsappController::class, 'setting'])->name('setting');
+
+    //     Route::prefix('message')->name('message.')->group(function () {
+    //         Route::get('/', function () {
+    //             return redirect()->route('back.whatsapp.message.sendMessage');
+    //         })->name('index');
+    //         Route::get('/send-message', [App\Http\Controllers\Back\WhatsappController::class, 'sendMessage'])->name('sendMessage');
+    //         Route::get('/send-image', [App\Http\Controllers\Back\WhatsappController::class, 'sendImage'])->name('sendImage');
+    //         Route::post('/send-image-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendImageProcess'])->name('sendImageProcess');
+    //         Route::get('/send-bulk-message', [App\Http\Controllers\Back\WhatsappController::class, 'sendBulkMessage'])->name('sendBulkMessage');
+    //         Route::post('/send-bulk-message-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendBulkMessageProcess'])->name('sendBulkMessageProcess');
+
+    //         Route::post('/send-multi-message-process', [App\Http\Controllers\Back\WhatsappController::class, 'sendMultipleMessageProcess'])->name('sendMultipleMessageProcess');
+    //     });
+    // });
+
+    Route::prefix('chatery-whatsapp')->name('chatery-whatsapp.')->group(function () {
+        Route::get('/setting', [App\Http\Controllers\Back\WhatsappController::class, 'chaterySetting'])->name('setting');
 
         Route::prefix('message')->name('message.')->group(function () {
             Route::get('/', function () {
-                return redirect()->route('back.whatsapp.message.sendMessage');
+                return redirect()->route('back.chatery-whatsapp.message.sendMessage');
             })->name('index');
             Route::get('/send-message', [App\Http\Controllers\Back\WhatsappController::class, 'sendMessage'])->name('sendMessage');
             Route::get('/send-image', [App\Http\Controllers\Back\WhatsappController::class, 'sendImage'])->name('sendImage');

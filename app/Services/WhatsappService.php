@@ -11,11 +11,19 @@ class WhatsappService
     private $session_wa;
     private $secret_key;
 
+    private $chatery_url_wa;
+    private $chatery_session_wa;
+    private $chatery_secret_key;
+
     public function __construct()
     {
         $this->url_wa = env('WHATSAPP_API_URL');
         $this->session_wa = env('WHATSAPP_API_SESSION');
         $this->secret_key = env('WHATSAPP_API_SECRET');
+
+        $this->chatery_url_wa = env('CHATERY_WHATSAPP_API_URL');
+        $this->chatery_session_wa = env('CHATERY_WHATSAPP_API_SESSION');
+        $this->chatery_secret_key = env('CHATERY_WHATSAPP_API_SECRET');
     }
 
     /**
@@ -31,10 +39,14 @@ class WhatsappService
             // Format phone number (remove leading 0 and add country code if needed)
             $phone = $this->formatPhoneNumber($phone);
 
-            $response = Http::timeout(60)->post($this->url_wa . "/send-message", [
-                'session' => $this->session_wa,
-                'to' => $phone,
-                'text' => $message
+            $response = Http::timeout(60)->withHeaders([
+                'Content-Type' => 'application/json',
+                'X-Api-Key' => $this->chatery_secret_key,
+            ])->post($this->chatery_url_wa  . "/api/whatsapp/chats/send-text", [
+                'sessionId' => $this->chatery_session_wa, // Use the session name from your environment variable
+                'chatId' => $phone,
+                'message' => $message,
+                'typingTime' => rand(1000, 3000),
             ]);
 
             if ($response->status() === 200) {
@@ -62,6 +74,136 @@ class WhatsappService
             return [
                 'success' => false,
                 'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function sendImage(string $phone, string $imageUrl, string $caption = ''): array
+    {
+        try {
+            // Format phone number (remove leading 0 and add country code if needed)
+            $phone = $this->formatPhoneNumber($phone);
+
+
+            $response = Http::timeout(40)->withHeaders([
+                'Content-Type' => 'application/json',
+                'X-Api-Key' => $this->chatery_secret_key,
+            ])->post($this->chatery_url_wa  . "/api/whatsapp/chats/send-image", [
+                'sessionId' => $this->chatery_session_wa, // Use the session name from your environment variable
+                'chatId' => $phone,
+                "imageUrl" => $imageUrl,
+                "caption" => $caption,
+                "typingTime" => rand(1000, 3000),
+            ]);
+
+            if ($response->status() === 200) {
+                return [
+                    'success' => true,
+                    'message' => 'Image sent successfully'
+                ];
+            }
+
+            Log::error('WhatsApp API Error', [
+                'status' => $response->status(),
+                'response' => $response->json()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Failed to send image',
+                'error' => $response->json()
+            ];
+        } catch (\Exception $e) {
+            Log::error('WhatsApp Service Exception', [
+                'message' => $e->getMessage()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function sendDocument(string $phone, string $documentUrl, string $fileName , string $mimetype): array
+    {
+        try {
+            // Format phone number (remove leading 0 and add country code if needed)
+            $phone = $this->formatPhoneNumber($phone);
+
+            $response = Http::timeout(40)->withHeaders([
+                'Content-Type' => 'application/json',
+                'X-Api-Key' => $this->chatery_secret_key,
+            ])->post($this->chatery_url_wa  . "/api/whatsapp/chats/send-document", [
+                'sessionId' => $this->chatery_session_wa, // Use the session name from your environment variable
+                'chatId' => $phone,
+                "documentUrl" => $documentUrl,
+                "fileName" => $fileName,
+                "mimetype" => $mimetype,
+                "typingTime" => rand(1000, 3000),
+            ]);
+            if ($response->status() === 200) {
+                return [
+                    'success' => true,
+                    'message' => 'Document sent successfully'
+                ];
+            }
+            Log::error('WhatsApp API Error', [
+                'status' => $response->status(),
+                'response' => $response->json()
+            ]);
+            return [
+                'success' => false,
+                'message' => 'Failed to send document',
+                'error' => $response->json()
+            ];
+        } catch (\Exception $e) {
+            Log::error('WhatsApp Service Exception', [
+                'message' => $e->getMessage()
+            ]);
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function sendBulkMessage(array $phones, string $message, int $delay = 1000): array
+    {
+        try {
+            $response = Http::timeout(60)->withHeaders([
+                'Content-Type' => 'application/json',
+                'X-Api-Key' => $this->chatery_secret_key,
+            ])->post($this->chatery_url_wa  . "/api/whatsapp/chats/send-bulk", [
+                'sessionId' => $this->chatery_session_wa,
+                'recipients' => $phones,
+                'message' => $message,
+                'delayBetweenMessages' => $delay,
+                'typingTime' => rand(1000, 3000),
+            ]);
+
+            if ($response->status() === 200) {
+                return [
+                    'success' => true,
+                    'message' => 'Bulk message sent successfully'
+                ];
+            }
+            Log::error('WhatsApp Bulk API Error', [
+                'status' => $response->status(),
+                'response' => $response->json()
+            ]);
+            return [
+                'success' => false,
+                'message' => 'Failed to send bulk message',
+                'error' => $response->json()
+            ];
+        } catch (\Throwable $th) {
+            Log::error('WhatsApp Bulk Service Exception', [
+                'message' => $th->getMessage()
+            ]);
+            return [
+                'success' => false,
+                'message' => $th->getMessage()
             ];
         }
     }
