@@ -220,10 +220,10 @@ class WhatsappService
     {
         $message = "🔐 *Kode Verifikasi 2FA*\n\n"
             . "Halo {$userName},\n\n"
-            . "Kode verifikasi Anda adalah:\n\n"
+            . "Kode verifikasi Anda adalah:\n"
             . "*{$code}*\n\n"
-            . "Kode ini berlaku selama *10 menit*.\n\n"
-            . "Jangan bagikan kode ini kepada siapapun.\n\n"
+            . "Kode ini berlaku selama *10 menit*.\n"
+            . "Jangan bagikan kode ini kepada siapapun.\n"
             . "Jika Anda tidak meminta kode ini, abaikan pesan ini.\n\n"
             . "---\n"
             . "_Pesan ini dikirim otomatis oleh sistem Rumah Jurnal_";
