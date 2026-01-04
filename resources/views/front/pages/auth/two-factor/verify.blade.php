@@ -201,13 +201,6 @@
                 }
 
                 updateHiddenInput();
-
-                // Auto submit when all filled
-                if (hiddenInput.value.length === 6) {
-                    setTimeout(function() {
-                        form.submit();
-                    }, 300);
-                }
             });
 
             // Handle keydown for better control
@@ -294,13 +287,6 @@
                         inputs[nextEmpty].focus();
                     } else {
                         inputs[inputs.length - 1].focus();
-                    }
-
-                    // Auto submit when all filled
-                    if (hiddenInput.value.length === 6) {
-                        setTimeout(function() {
-                            form.submit();
-                        }, 300);
                     }
                 }
             });
