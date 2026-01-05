@@ -743,7 +743,7 @@
                         </div>
                         <!--end::Close-->
                     </div>
-                    <form action="{{ route('back.whatsapp.message.sendMultipleMessageProcess') }}" method="POST"
+                    <form action="{{ route('back.chatery-whatsapp.message.sendMultipleMessageProcess') }}" method="POST"
                         enctype="multipart/form-data">
                         @csrf
                         <div class="modal-body">
@@ -862,7 +862,7 @@
                     </div>
                     <!--end::Close-->
                 </div>
-                <form action="{{ route('back.whatsapp.message.sendMultipleMessageProcess') }}" method="POST"
+                <form action="{{ route('back.chatery-whatsapp.message.sendMultipleMessageProcess') }}" method="POST"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
