@@ -207,7 +207,7 @@
                                                                     <td class="text-center pe-4">
                                                                         @if(!$isAttended && ($isSessionOpen || !$isSessionPast))
                                                                             <a href="{{ route('event.presence', $session->code) }}"
-                                                                               class="btn btn-sm btn-primary"
+                                                                               class="btn btn-sm btn-light-primary"
                                                                                target="_blank">
                                                                                 <i class="ki-duotone ki-entrance-left fs-6 me-1">
                                                                                     <span class="path1"></span>

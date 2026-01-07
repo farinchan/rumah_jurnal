@@ -116,6 +116,28 @@
                         @endif
                     </div>
                 </div>
+                <div class="row mb-7">
+                    <label class="col-lg-4 fw-semibold text-muted">Two-Factor Authentication</label>
+                    <div class="col-lg-8">
+                        @if($user->two_factor_enabled ?? true)
+                            <span class="badge badge-light-success fs-7 fw-bold">
+                                <i class="ki-duotone ki-shield-tick fs-6 text-success me-1">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                                Aktif
+                            </span>
+                        @else
+                            <span class="badge badge-light-danger fs-7 fw-bold">
+                                <i class="ki-duotone ki-shield-cross fs-6 text-danger me-1">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                                Tidak Aktif
+                            </span>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
 

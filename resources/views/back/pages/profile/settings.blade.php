@@ -265,8 +265,80 @@
             </div>
         </div>
 
+        {{-- Two-Factor Authentication Card --}}
+        <div class="card mb-5 mb-xl-10">
+            <div class="card-header border-0 cursor-pointer" role="button">
+                <div class="card-title m-0">
+                    <h3 class="fw-bold m-0">Two-Factor Authentication (2FA)</h3>
+                </div>
+            </div>
+            <div class="card-body border-top p-9">
+                <div class="d-flex flex-wrap align-items-center">
+                    <div class="flex-row-fluid">
+                        <div class="notice d-flex bg-light-success rounded border-success border border-dashed p-6">
+                            <i class="ki-duotone ki-shield-tick fs-2tx text-success me-4">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                            <div class="d-flex flex-stack flex-grow-1 flex-wrap flex-md-nowrap">
+                                <div class="mb-3 mb-md-0 fw-semibold">
+                                    <h4 class="text-gray-900 fw-bold">2FA Aktif</h4>
+                                    <div class="fs-6 text-gray-700 pe-7">Two-Factor Authentication (2FA) selalu aktif untuk keamanan akun Anda. Setiap kali login, kode verifikasi akan dikirim ke email Anda.</div>
+                                </div>
+                                <span class="badge badge-success fs-7 fw-bold py-3 px-4">Wajib Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="separator separator-dashed my-6"></div>
+                <div class="d-flex flex-wrap align-items-center mb-4">
+                    <div class="d-flex flex-column flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="ki-duotone ki-sms fs-2 text-primary me-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                            <span class="fw-bold fs-6">Email Verifikasi</span>
+                        </div>
+                        <span class="text-muted fs-7">Kode OTP akan dikirim ke: <strong class="text-gray-800">{{ $user->email }}</strong></span>
+                    </div>
+                </div>
+                @if($user->phone)
+                    <div class="separator separator-dashed my-6"></div>
+                    <div class="d-flex flex-wrap align-items-center">
+                        <div class="d-flex flex-column flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="ki-duotone ki-whatsapp fs-2 text-success me-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                                <span class="fw-bold fs-6">WhatsApp Verifikasi</span>
+                                <span class="badge badge-light-success fs-8 ms-2">Tersedia</span>
+                            </div>
+                            <span class="text-muted fs-7">Kode OTP juga dapat dikirim ke WhatsApp: <strong class="text-gray-800">{{ $user->phone }}</strong></span>
+                        </div>
+                    </div>
+                @else
+                    <div class="separator separator-dashed my-6"></div>
+                    <div class="d-flex flex-wrap align-items-center">
+                        <div class="d-flex flex-column flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="ki-duotone ki-whatsapp fs-2 text-gray-400 me-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                                <span class="fw-bold fs-6 text-gray-500">WhatsApp Verifikasi</span>
+                                <span class="badge badge-light-warning fs-8 ms-2">Tidak Tersedia</span>
+                            </div>
+                            <span class="text-muted fs-7">Tambahkan nomor telepon di profil untuk mengaktifkan verifikasi via WhatsApp.</span>
+                        </div>
+                    </div>
+                @endif
+
+            </div>
+        </div>
+
         {{-- Connected Accounts Card --}}
-        @if($user->google_id)
         <div class="card mb-5 mb-xl-10">
             <div class="card-header border-0 cursor-pointer" role="button">
                 <div class="card-title m-0">
@@ -274,21 +346,44 @@
                 </div>
             </div>
             <div class="card-body border-top p-9">
-                <div class="notice d-flex bg-light-success rounded border-success border border-dashed mb-6 p-6">
-                    <i class="ki-duotone ki-google fs-2tx text-success me-4">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
-                    <div class="d-flex flex-stack flex-grow-1">
-                        <div class="fw-semibold">
-                            <h4 class="text-gray-900 fw-bold">Terhubung dengan Google</h4>
-                            <div class="fs-6 text-gray-700">Akun Anda terhubung dengan Google untuk login yang lebih mudah.</div>
+                {{-- Google Account --}}
+                <div class="d-flex flex-stack">
+                    <div class="d-flex align-items-center">
+                         <img src="{{ asset("back/media/svg/brand-logos/google-icon.svg") }}" class="w-30px me-6" alt="">
+                        <div class="d-flex flex-column">
+                            <span class="fs-5 fw-bold text-gray-900">Google</span>
+                            @if($user->google_id)
+                                <span class="fs-7 text-muted">ID: {{ $user->google_id }}</span>
+                            @else
+                                <span class="fs-7 text-muted">Belum terhubung</span>
+                            @endif
                         </div>
                     </div>
+
+                    <div class="d-flex">
+
+                        @if($user->google_id)
+                            <span class="badge badge-light-success fs-7 fw-bold">
+                                <i class="ki-duotone ki-check-circle fs-6 text-success me-1">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                                Terhubung
+                            </span>
+                        @else
+                            <span class="badge badge-light-warning fs-7 fw-bold">
+                                <i class="ki-duotone ki-disconnect fs-6 text-warning me-1">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                                Belum Terhubung
+                            </span>
+                        @endif
+                    </div>
                 </div>
+
             </div>
         </div>
-        @endif
     </div>
 @endsection
 @section('scripts')
