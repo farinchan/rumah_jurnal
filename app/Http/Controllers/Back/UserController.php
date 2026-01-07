@@ -108,14 +108,35 @@ class UserController extends Controller
         }
         $user->save();
 
-        if ($request->role_admin) {
+        if ($request->role_super_admin) {
             $user->assignRole('super-admin');
+        }
+        if ($request->role_admin_ejournal) {
+            $user->assignRole('admin-ejournal');
+        }
+         if ($request->role_admin_proceeding) {
+            $user->assignRole('admin-proceeding');
+        }
+        if ($request->role_admin_student_research_hub) {
+            $user->assignRole('admin-student-research-hub');
+        }
+         if ($request->role_editor) {
+            $user->assignRole('editor');
+        }
+        if ($request->role_editor_proceeding) {
+            $user->assignRole('editor-proceeding');
+        }
+        if ($request->role_editor_student_research_hub) {
+            $user->assignRole('editor-student-research-hub');
         }
         if ($request->role_keuangan) {
             $user->assignRole('keuangan');
         }
-        if ($request->role_editor) {
-            $user->assignRole('editor');
+        if ($request->role_keuangan_proceeding) {
+            $user->assignRole('keuangan-proceeding');
+        }
+        if ($request->role_keuangan_student_research_hub) {
+            $user->assignRole('keuangan-student-research-hub');
         }
         if ($request->role_humas) {
             $user->assignRole('humas');
@@ -199,10 +220,15 @@ class UserController extends Controller
         $user->save();
 
 
-        if ($request->role_admin) {
+        if ($request->role_super_admin) {
             $user->assignRole('super-admin');
         } else {
             $user->removeRole('super-admin');
+        }
+        if ($request->role_admin_ejournal) {
+            $user->assignRole('admin-ejournal');
+        } else {
+            $user->removeRole('admin-ejournal');
         }
         if ($request->role_keuangan) {
             $user->assignRole('keuangan');
@@ -214,6 +240,39 @@ class UserController extends Controller
         } else {
             $user->removeRole('editor');
         }
+
+        if ($request->role_admin_proceeding) {
+            $user->assignRole('admin-proceeding');
+        } else {
+            $user->removeRole('admin-proceeding');
+        }
+        if ($request->role_keuangan_proceeding) {
+            $user->assignRole('keuangan-proceeding');
+        } else {
+            $user->removeRole('keuangan-proceeding');
+        }
+        if ($request->role_editor_proceeding) {
+            $user->assignRole('editor-proceeding');
+        } else {
+            $user->removeRole('editor-proceeding');
+        }
+
+        if ($request->role_admin_student_research_hub) {
+            $user->assignRole('admin-student-research-hub');
+        } else {
+            $user->removeRole('admin-student-research-hub');
+        }
+        if ($request->role_keuangan_student_research_hub) {
+            $user->assignRole('keuangan-student-research-hub');
+        } else {
+            $user->removeRole('keuangan-student-research-hub');
+        }
+        if ($request->role_editor_student_research_hub) {
+            $user->assignRole('editor-student-research-hub');
+        } else {
+            $user->removeRole('editor-student-research-hub');
+        }
+
         if ($request->role_humas) {
             $user->assignRole('humas');
         } else {

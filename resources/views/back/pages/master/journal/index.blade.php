@@ -7,18 +7,24 @@
                     <div class=" hover-scroll-x">
                         <div class="d-grid">
                             <ul class="nav nav-tabs flex-nowrap text-nowrap">
-                                <li class="nav-item">
-                                    <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0 active"
-                                        data-bs-toggle="tab" href="#kt_tab_pane_1">Journal</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0"
-                                        data-bs-toggle="tab" href="#kt_tab_pane_2">Proceeding</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0"
-                                        data-bs-toggle="tab" href="#kt_tab_pane_3">Student Research Hub</a>
-                                </li>
+                                @role('super-admin|admin-ejournal')
+                                    <li class="nav-item">
+                                        <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0 active"
+                                            data-bs-toggle="tab" href="#kt_tab_pane_1">Journal</a>
+                                    </li>
+                                @endrole
+                                @role('super-admin|admin-proceeding')
+                                    <li class="nav-item">
+                                        <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0"
+                                            data-bs-toggle="tab" href="#kt_tab_pane_2">Proceeding</a>
+                                    </li>
+                                @endrole
+                                @role('super-admin|admin-student-research-hub')
+                                    <li class="nav-item">
+                                        <a class="nav-link btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-bottom-0"
+                                            data-bs-toggle="tab" href="#kt_tab_pane_3">Student Research Hub</a>
+                                    </li>
+                                @endrole
 
                             </ul>
                         </div>
@@ -34,242 +40,248 @@
             </div>
         </div>
         <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="kt_tab_pane_1" role="tabpanel">
-                <div class="row g-6 mb-6 g-xl-9 mb-xl-9 mt-3">
-                    @forelse ($journals as $journal)
-                        <div class="col-md-6 col-xxl-4">
-                            <div class="card ">
-                                <div class="card-body d-flex flex-center flex-column py-9 px-5">
-                                    <div class="symbol symbol-100px  mb-5">
-                                        <img src="{{ $journal->getJournalThumbnail() }}" alt="image">
-                                    </div>
-                                    <a href="{{ $journal->url }}" target="_blank"
-                                        class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $journal->title }}</a>
-                                    <div class="fw-semibold text-gray-500  ">Name: {{ $journal->name }}</div>
-                                    <div class="fw-semibold text-gray-500  ">Path: {{ $journal->url_path }}</div>
-                                    <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $journal->onlineIssn }} | p-ISSN:
-                                        {{ $journal->printIssn }}</div>
-                                    <div class="fw-semibold text-gray-500  ">Akreditasi:
-                                        @foreach ($journal->indexing ?? [] as $akreditasi_item)
-                                            <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
-                                        @endforeach
-                                    </div>
-                                    <div class="fw-semibold text-gray-500 mb-3 ">
-                                        Editor Chief: {{ $journal->editor_chief_name ?? '-' }}
-                                    </div>
-                                    <div class="d-flex flex-center flex-wrap mb-3">
-                                        <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
-                                            <div class="fs-6 fw-bold text-gray-700 text-center">
-                                                @money($journal->author_fee ?? 0)</div>
-                                            <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+            @role('super-admin|admin-ejournal')
+                <div class="tab-pane fade show active" id="kt_tab_pane_1" role="tabpanel">
+                    <div class="row g-6 mb-6 g-xl-9 mb-xl-9 mt-3">
+                        @forelse ($journals as $journal)
+                            <div class="col-md-6 col-xxl-4">
+                                <div class="card ">
+                                    <div class="card-body d-flex flex-center flex-column py-9 px-5">
+                                        <div class="symbol symbol-100px  mb-5">
+                                            <img src="{{ $journal->getJournalThumbnail() }}" alt="image">
                                         </div>
-
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-light-info btn-sm"
-                                            onclick="syncJournal('{{ $journal->url_path }}')">
-                                            <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Sync
-                                        </button>
-                                        <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#edit_journal_{{ $journal->id }}">
-                                            <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="edit Informasi Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Edit
-                                        </a>
-                                        <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#delete_journal_{{ $journal->id }}">
-                                            <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="Hapus Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Hapus
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-md-12">
-                            <div class="card mt-10">
-                                <div class="card-body">
-                                    <p class="text-center">Belum ada jurnal yang diimport</p>
-                                </div>
-                            </div>
-                        </div>
-                    @endforelse
-
-                </div>
-            </div>
-            <div class="tab-pane fade" id="kt_tab_pane_2" role="tabpanel">
-                <div class="row g-6 mb-6 g-xl-9 mb-xl-9 mt-3">
-                    @forelse ($proceedings as $proceeding)
-                        <div class="col-md-6 col-xxl-4">
-                            <div class="card ">
-                                <div class="card-body d-flex flex-center flex-column py-9 px-5">
-                                    <div class="symbol symbol-100px  mb-5">
-                                        <img src="{{ $proceeding->getJournalThumbnail() }}" alt="image">
-                                    </div>
-                                    <a href="{{ $proceeding->url }}" target="_blank"
-                                        class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $proceeding->title }}</a>
-                                    <div class="fw-semibold text-gray-500  ">Name: {{ $proceeding->name }}</div>
-                                    <div class="fw-semibold text-gray-500  ">Path: {{ $proceeding->url_path }}</div>
-                                    <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $proceeding->onlineIssn }} |
-                                        p-ISSN:
-                                        {{ $proceeding->printIssn }}</div>
-                                    <div class="fw-semibold text-gray-500  ">Akreditasi:
-                                        @foreach ($proceeding->indexing ?? [] as $akreditasi_item)
-                                            <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
-                                        @endforeach
-                                    </div>
-                                    <div class="fw-semibold text-gray-500 mb-3 ">
-                                        Editor Chief: {{ $proceeding->editor_chief_name ?? '-' }}
-                                    </div>
-                                    <div class="d-flex flex-center flex-wrap mb-3">
-                                        <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
-                                            <div class="fs-6 fw-bold text-gray-700 text-center">
-                                                @money($proceeding->author_fee ?? 0)</div>
-                                            <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+                                        <a href="{{ $journal->url }}" target="_blank"
+                                            class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $journal->title }}</a>
+                                        <div class="fw-semibold text-gray-500  ">Name: {{ $journal->name }}</div>
+                                        <div class="fw-semibold text-gray-500  ">Path: {{ $journal->url_path }}</div>
+                                        <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $journal->onlineIssn }} | p-ISSN:
+                                            {{ $journal->printIssn }}</div>
+                                        <div class="fw-semibold text-gray-500  ">Akreditasi:
+                                            @foreach ($journal->indexing ?? [] as $akreditasi_item)
+                                                <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
+                                            @endforeach
                                         </div>
-
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-light-info btn-sm"
-                                            onclick="syncJournal('{{ $proceeding->url_path }}')">
-                                            <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Sync
-                                        </button>
-                                        <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#edit_journal_{{ $proceeding->id }}">
-                                            <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="edit Informasi Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Edit
-                                        </a>
-                                        <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#delete_journal_{{ $proceeding->id }}">
-                                            <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="Hapus Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Hapus
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-md-12">
-                            <div class="card ">
-                                <div class="card-body">
-                                    <p class="text-center">Belum ada proceeding yang diimport</p>
-                                </div>
-                            </div>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-            <div class="tab-pane fade" id="kt_tab_pane_3" role="tabpanel">
-                <div class="row g-6 mb-6 g-xl-9 mb-xl-9 mt-3">
-                    @forelse ($student_research_hubs as $student_research_hub)
-                        <div class="col-md-6 col-xxl-4">
-                            <div class="card ">
-                                <div class="card-body d-flex flex-center flex-column py-9 px-5">
-                                    <div class="symbol symbol-100px  mb-5">
-                                        <img src="{{ $student_research_hub->getJournalThumbnail() }}" alt="image">
-                                    </div>
-                                    <a href="{{ $student_research_hub->url }}" target="_blank"
-                                        class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $student_research_hub->title }}</a>
-                                    <div class="fw-semibold text-gray-500  ">Name: {{ $student_research_hub->name }}</div>
-                                    <div class="fw-semibold text-gray-500  ">Path: {{ $student_research_hub->url_path }}
-                                    </div>
-                                    <div class="fw-semibold text-gray-500  ">e-ISSN:
-                                        {{ $student_research_hub->onlineIssn }} |
-                                        p-ISSN:
-                                        {{ $student_research_hub->printIssn }}</div>
-                                    <div class="fw-semibold text-gray-500  ">Akreditasi:
-                                        @foreach ($student_research_hub->indexing ?? [] as $akreditasi_item)
-                                            <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
-                                        @endforeach
-                                    </div>
-                                    <div class="fw-semibold text-gray-500 mb-3 ">
-                                        Editor Chief: {{ $student_research_hub->editor_chief_name ?? '-' }}
-                                    </div>
-                                    <div class="d-flex flex-center flex-wrap mb-3">
-                                        <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
-                                            <div class="fs-6 fw-bold text-gray-700 text-center">
-                                                @money($student_research_hub->author_fee ?? 0)</div>
-                                            <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+                                        <div class="fw-semibold text-gray-500 mb-3 ">
+                                            Editor Chief: {{ $journal->editor_chief_name ?? '-' }}
                                         </div>
+                                        <div class="d-flex flex-center flex-wrap mb-3">
+                                            <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
+                                                <div class="fs-6 fw-bold text-gray-700 text-center">
+                                                    @money($journal->author_fee ?? 0)</div>
+                                                <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+                                            </div>
 
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-light-info btn-sm"
-                                            onclick="syncJournal('{{ $student_research_hub->url_path }}')">
-                                            <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Sync
-                                        </button>
-                                        <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#edit_journal_{{ $student_research_hub->id }}">
-                                            <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="edit Informasi Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Edit
-                                        </a>
-                                        <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#delete_journal_{{ $student_research_hub->id }}">
-                                            <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom" title="Hapus Jurnal">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                            </i> Hapus
-                                        </a>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-light-info btn-sm"
+                                                onclick="syncJournal('{{ $journal->url_path }}')">
+                                                <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Sync
+                                            </button>
+                                            <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#edit_journal_{{ $journal->id }}">
+                                                <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="edit Informasi Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Edit
+                                            </a>
+                                            <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#delete_journal_{{ $journal->id }}">
+                                                <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="Hapus Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Hapus
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    @empty
-                        <div class="col-md-12">
-                            <div class="card ">
-                                <div class="card-body">
-                                    <p class="text-center">Belum ada student research hub yang diimport</p>
+                        @empty
+                            <div class="col-md-12">
+                                <div class="card mt-10">
+                                    <div class="card-body">
+                                        <p class="text-center">Belum ada jurnal yang diimport</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @endforelse
+                        @endforelse
+
+                    </div>
                 </div>
-            </div>
+            @endrole
+            @role('super-admin|admin-proceeding')
+                <div class="tab-pane fade" id="kt_tab_pane_2" role="tabpanel">
+                    <div class="row g-6 mb-6 g-xl-9 mb-xl-9 mt-3">
+                        @forelse ($proceedings as $proceeding)
+                            <div class="col-md-6 col-xxl-4">
+                                <div class="card ">
+                                    <div class="card-body d-flex flex-center flex-column py-9 px-5">
+                                        <div class="symbol symbol-100px  mb-5">
+                                            <img src="{{ $proceeding->getJournalThumbnail() }}" alt="image">
+                                        </div>
+                                        <a href="{{ $proceeding->url }}" target="_blank"
+                                            class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $proceeding->title }}</a>
+                                        <div class="fw-semibold text-gray-500  ">Name: {{ $proceeding->name }}</div>
+                                        <div class="fw-semibold text-gray-500  ">Path: {{ $proceeding->url_path }}</div>
+                                        <div class="fw-semibold text-gray-500  ">e-ISSN: {{ $proceeding->onlineIssn }} |
+                                            p-ISSN:
+                                            {{ $proceeding->printIssn }}</div>
+                                        <div class="fw-semibold text-gray-500  ">Akreditasi:
+                                            @foreach ($proceeding->indexing ?? [] as $akreditasi_item)
+                                                <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
+                                            @endforeach
+                                        </div>
+                                        <div class="fw-semibold text-gray-500 mb-3 ">
+                                            Editor Chief: {{ $proceeding->editor_chief_name ?? '-' }}
+                                        </div>
+                                        <div class="d-flex flex-center flex-wrap mb-3">
+                                            <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
+                                                <div class="fs-6 fw-bold text-gray-700 text-center">
+                                                    @money($proceeding->author_fee ?? 0)</div>
+                                                <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+                                            </div>
+
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-light-info btn-sm"
+                                                onclick="syncJournal('{{ $proceeding->url_path }}')">
+                                                <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Sync
+                                            </button>
+                                            <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#edit_journal_{{ $proceeding->id }}">
+                                                <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="edit Informasi Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Edit
+                                            </a>
+                                            <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#delete_journal_{{ $proceeding->id }}">
+                                                <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="Hapus Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Hapus
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-md-12">
+                                <div class="card ">
+                                    <div class="card-body">
+                                        <p class="text-center">Belum ada proceeding yang diimport</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            @endrole
+            @role('super-admin|admin-student-research-hub')
+                <div class="tab-pane fade" id="kt_tab_pane_3" role="tabpanel">
+                    <div class="row g-6 mb-6 g-xl-9 mb-xl-9 mt-3">
+                        @forelse ($student_research_hubs as $student_research_hub)
+                            <div class="col-md-6 col-xxl-4">
+                                <div class="card ">
+                                    <div class="card-body d-flex flex-center flex-column py-9 px-5">
+                                        <div class="symbol symbol-100px  mb-5">
+                                            <img src="{{ $student_research_hub->getJournalThumbnail() }}" alt="image">
+                                        </div>
+                                        <a href="{{ $student_research_hub->url }}" target="_blank"
+                                            class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0 text-center">{{ $student_research_hub->title }}</a>
+                                        <div class="fw-semibold text-gray-500  ">Name: {{ $student_research_hub->name }}</div>
+                                        <div class="fw-semibold text-gray-500  ">Path: {{ $student_research_hub->url_path }}
+                                        </div>
+                                        <div class="fw-semibold text-gray-500  ">e-ISSN:
+                                            {{ $student_research_hub->onlineIssn }} |
+                                            p-ISSN:
+                                            {{ $student_research_hub->printIssn }}</div>
+                                        <div class="fw-semibold text-gray-500  ">Akreditasi:
+                                            @foreach ($student_research_hub->indexing ?? [] as $akreditasi_item)
+                                                <span class="badge badge-light-primary">{{ $akreditasi_item }}</span>
+                                            @endforeach
+                                        </div>
+                                        <div class="fw-semibold text-gray-500 mb-3 ">
+                                            Editor Chief: {{ $student_research_hub->editor_chief_name ?? '-' }}
+                                        </div>
+                                        <div class="d-flex flex-center flex-wrap mb-3">
+                                            <div class="border border-dashed rounded min-w-90px py-3 px-4 mx-2 mb-3">
+                                                <div class="fs-6 fw-bold text-gray-700 text-center">
+                                                    @money($student_research_hub->author_fee ?? 0)</div>
+                                                <div class="fw-semibold text-gray-500">Biaya Publikasi</div>
+                                            </div>
+
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-light-info btn-sm"
+                                                onclick="syncJournal('{{ $student_research_hub->url_path }}')">
+                                                <i class="ki-duotone ki-fasten fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="Sinkronisasi Ulang Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Sync
+                                            </button>
+                                            <a href="#" class="btn  btn-light-primary btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#edit_journal_{{ $student_research_hub->id }}">
+                                                <i class="ki-duotone ki-message-edit fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="edit Informasi Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Edit
+                                            </a>
+                                            <a href="#" class="btn  btn-light-danger btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#delete_journal_{{ $student_research_hub->id }}">
+                                                <i class="ki-duotone ki-trash-square fs-2" data-bs-toggle="tooltip"
+                                                    data-bs-placement="bottom" title="Hapus Jurnal">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                </i> Hapus
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-md-12">
+                                <div class="card ">
+                                    <div class="card-body">
+                                        <p class="text-center">Belum ada student research hub yang diimport</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            @endrole
         </div>
 
     </div>
@@ -332,9 +344,15 @@
                             <div class="col-md-12 mt-10">
                                 <label class="form-label">Tipe</label>
                                 <select name="type" class="form-select">
-                                    <option value="journal">Journal</option>
-                                    <option value="proceeding">Proceeding</option>
-                                    <option value="student_research_hub">Student Research Hub</option>
+                                    @role('super-admin|admin-ejournal')
+                                        <option value="journal">Journal</option>
+                                    @endrole
+                                    @role('super-admin|admin-proceeding')
+                                        <option value="proceeding">Proceeding</option>
+                                    @endrole
+                                    @role('super-admin|admin-student-research-hub')
+                                        <option value="student_research_hub">Student Research Hub</option>
+                                    @endrole
                                 </select>
                                 <span class="form-text text-muted">Pilih tipe jurnal yang ingin diimport</span>
                             </div>
@@ -693,12 +711,18 @@
                             <div class="mb-5">
                                 <label class="form-label">Tipe</label>
                                 <select name="type" class="form-select">
-                                    <option value="journal" @if ($journal->type == 'journal') selected @endif>Journal
-                                    </option>
-                                    <option value="proceeding" @if ($journal->type == 'proceeding') selected @endif>
-                                        Proceeding</option>
-                                    <option value="student_research_hub"
-                                        @if ($journal->type == 'student_research_hub') selected @endif>Student Research Hub</option>
+                                    @role('super-admin|admin-ejournal')
+                                        <option value="journal" @if ($journal->type == 'journal') selected @endif>Journal
+                                        </option>
+                                    @endrole
+                                    @role('super-admin|admin-proceeding')
+                                        <option value="proceeding" @if ($journal->type == 'proceeding') selected @endif>
+                                            Proceeding</option>
+                                    @endrole
+                                    @role('super-admin|admin-student-research-hub')
+                                        <option value="student_research_hub"
+                                            @if ($journal->type == 'student_research_hub') selected @endif>Student Research Hub</option>
+                                    @endrole
                                 </select>
                                 <span class="form-text text-muted">Tipe jurnal yang dipilih akan menentukan kategori
                                     jurnal.</span>

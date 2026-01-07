@@ -14,6 +14,9 @@ use App\Models\Event;
 use App\Models\Finance;
 use App\Models\Payment;
 use App\Models\FinanceYear;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class DashboardController extends Controller
 {
@@ -141,12 +144,12 @@ class DashboardController extends Controller
                     DB::raw('SUM(CASE WHEN type = "income" THEN amount ELSE 0 END) as income'),
                     DB::raw('SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) as expense')
                 )
-                ->where('date', '>=', $startDate)
-                ->where('date', '<=', $endDate)
-                ->groupBy(DB::raw('DATE(date)'))
-                ->orderBy('date', 'desc')
-                ->limit(30)
-                ->get();
+                    ->where('date', '>=', $startDate)
+                    ->where('date', '<=', $endDate)
+                    ->groupBy(DB::raw('DATE(date)'))
+                    ->orderBy('date', 'desc')
+                    ->limit(30)
+                    ->get();
 
                 // Payment income data
                 $paymentIncome = Payment::with(['paymentInvoice'])
@@ -154,11 +157,11 @@ class DashboardController extends Controller
                     ->where('created_at', '<=', $endDate)
                     ->where('payment_status', 'accepted')
                     ->get()
-                    ->groupBy(function($payment) {
+                    ->groupBy(function ($payment) {
                         return $payment->created_at->format('Y-m-d');
                     })
-                    ->map(function($payments) {
-                        return $payments->sum(function($payment) {
+                    ->map(function ($payments) {
+                        return $payments->sum(function ($payment) {
                             return $payment->paymentInvoice->payment_amount ?? 0;
                         });
                     });
@@ -313,5 +316,29 @@ class DashboardController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function switchControl($control)
+    {
+
+        if ($control == "journal") {
+            if (Auth::user()->hasRole('admin-ejournal') || Auth::user()->hasRole('editor') || Auth::user()->hasRole('super-admin')) {
+                return redirect()->route('back.dashboard')->cookie('control_panel', $control, 60 * 24 * 30);
+            }
+        }
+        if ($control == "proceeding") {
+            if (Auth::user()->hasRole('admin-proceeding') || Auth::user()->hasRole('editor-proceeding') || Auth::user()->hasRole('super-admin')) {
+                return redirect()->route('back.dashboard')->cookie('control_panel', $control, 60 * 24 * 30);
+            }
+        }
+        if ($control == "student_research_hub") {
+            if (Auth::user()->hasRole('admin-student-research-hub') || Auth::user()->hasRole('editor-student-research-hub') || Auth::user()->hasRole('super-admin')) {
+                return redirect()->route('back.dashboard')->cookie('control_panel', $control, 60 * 24 * 30);
+            }
+        }
+
+        cookie::forget('control_panel');
+        Alert::error('Akses Ditolak', 'Anda tidak memiliki akses ke kontrol Student Research Hub');
+        return redirect()->back();
     }
 }

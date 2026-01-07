@@ -136,6 +136,7 @@ Route::prefix('contact')->name('contact.')->group(function () {
 
 Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(function () {
 
+    Route::get('switch-control/{control}', [BackDashboardController::class, 'switchControl'])->name('switch.control');
 
     Route::get('/dashboard', [BackDashboardController::class, 'index'])->name('dashboard');
     Route::prefix('dashboard')->name('dashboard.')->group(function () {

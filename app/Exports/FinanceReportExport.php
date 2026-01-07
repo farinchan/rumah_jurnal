@@ -22,13 +22,26 @@ class FinanceReportExport implements FromCollection, WithHeadings, WithStyles, W
     protected $issue_id;
     protected $date_start;
     protected $date_end;
+    protected $type;
+    protected $name_type;
 
-    public function __construct($journal_id, $issue_id, $date_start, $date_end)
+    public function __construct($journal_id, $issue_id, $date_start, $date_end, $type)
     {
         $this->journal_id = $journal_id;
         $this->issue_id = $issue_id;
         $this->date_start = $date_start;
         $this->date_end = $date_end;
+        $this->type = $type;
+
+        if ($type == 'journal') {
+            $this->name_type = 'Jurnal';
+        } elseif ($type == 'proceeding') {
+            $this->name_type = 'Proceeding';
+        } elseif ($type == 'student_research_hub') {
+            $this->name_type = 'Student Research Hub';
+        } else {
+            $this->name_type = '-';
+        }
     }
 
     public function collection()
@@ -37,8 +50,14 @@ class FinanceReportExport implements FromCollection, WithHeadings, WithStyles, W
         $issue_id = $this->issue_id;
         $date_start = $this->date_start;
         $date_end = $this->date_end;
+        $type = $this->type;
 
         $data = Submission::with(['paymentInvoices.submission.issue.journal'])
+            ->when($type, function ($query) use ($type) {
+                return $query->whereHas('issue.journal', function ($q) use ($type) {
+                    $q->where('type', $type);
+                });
+            })
             ->when($journal_id, function ($query) use ($journal_id) {
                 return $query->whereHas('issue.journal', function ($q) use ($journal_id) {
                     $q->where('id', $journal_id);
@@ -85,9 +104,9 @@ class FinanceReportExport implements FromCollection, WithHeadings, WithStyles, W
     {
         return [
             'No',
-            'Jurnal',
+            $this->name_type,
             'Penulis',
-            'Judul Pengajuan',
+            'Judul',
             'Edisi',
             'Total Pembayaran',
             'Status LoA',
@@ -114,13 +133,13 @@ class FinanceReportExport implements FromCollection, WithHeadings, WithStyles, W
 
                 // Menambahkan judul di baris 1
                 $sheet->mergeCells('A1:G1');
-                $sheet->setCellValue('A1', 'Laporan Jurnal ' . Carbon::parse($this->date_start)->format('d M Y') . ' - ' . Carbon::parse($this->date_end)->format('d M Y'));
+                $sheet->setCellValue('A1', 'Laporan ' . $this->name_type . ' ' . Carbon::parse($this->date_start)->format('d M Y') . ' - ' . Carbon::parse($this->date_end)->format('d M Y'));
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // Menambahkan tanggal di baris 2
                 $sheet->mergeCells('A2:G2');
-                $sheet->setCellValue('A2', 'Journal: ' . ($this->journal_id ? Journal::find($this->journal_id)->name : 'Semua Jurnal'));
+                $sheet->setCellValue('A2', $this->name_type . ': ' . ($this->journal_id ? Journal::find($this->journal_id)->name : 'Semua ' . $this->name_type));
                 $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(14);
                 $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 

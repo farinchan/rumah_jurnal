@@ -1,5 +1,18 @@
 @extends('back.app')
 @section('content')
+    @php
+        $control_panel = Illuminate\Support\Facades\Cookie::get('control_panel');
+        $name_control_panel;
+        if ($control_panel == 'journal') {
+            $name_control_panel = 'Jurnal';
+        } elseif ($control_panel == 'proceeding') {
+            $name_control_panel = 'Proceeding';
+        } elseif ($control_panel == 'student_research_hub') {
+            $name_control_panel = 'Student Research Hub';
+        } else {
+            $name_control_panel = '-';
+        }
+    @endphp
     <div id="kt_content_container" class=" container-xxl ">
         <div class="row">
             <div class="col-md-3">
@@ -62,7 +75,7 @@
                                 <span class="path4"></span>
                             </i>
                             <select id="journal_id" class="form-select form-select-solid form-select-lg  ps-12">
-                                <option value="0" selected>Semua Jurnal</option>
+                                <option value="0" selected>Semua {{ $name_control_panel }}</option>
                                 @foreach ($journals as $journal)
                                     <option value="{{ $journal->id }}">{{ $journal->title }}</option>
                                 @endforeach
@@ -133,7 +146,7 @@
                             <th class="text-start min-w-250px">Informasi Pembayar</th>
                             <th class="text-start min-w-300px">Invoice</th>
                             <th class="text-start min-w-450px">Submission</th>
-                            <th class="text-start min-w-350px">journal</th>
+                            <th class="text-start min-w-350px">{{ $name_control_panel }}</th>
                             <th class="text-start">Status</th>
                             <th class="text-end min-w-150px">Action</th>
                         </tr>
@@ -148,7 +161,7 @@
 @endsection
 @section('scripts')
     <script>
-       var table =  $('#datatable_ajax').DataTable({
+        var table = $('#datatable_ajax').DataTable({
             processing: true, // Menampilkan indikator loading
             serverSide: true, // Menggunakan server-side processing
             ajax: {

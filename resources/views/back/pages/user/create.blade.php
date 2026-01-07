@@ -66,26 +66,78 @@
                         </div>
                         <div class="card-body pt-0">
                             <div class="form-check mt-3">
-                                <input class="form-check-input" type="checkbox" name="role_admin" value="1"
-                                    @if (old('role_admin') == 1) checked @endif id="flexCheckDefault" />
+                                <input class="form-check-input" type="checkbox" name="role_super_admin" value="1"
+                                    @if (old('role_super_admin') == 1) checked @endif id="flexCheckDefault" />
                                 <label class="form-check-label" for="flexCheckDefault">
                                     Super-Admin/Owner
                                 </label>
                             </div>
                             <div class="form-check mt-3">
-                                <input class="form-check-input" type="checkbox" name="role_keuangan" value="1"
-                                    @if (old('role_keuangan') == 1) checked @endif id="flexCheckKantor" />
+                                <input class="form-check-input" type="checkbox" name="role_admin_ejournal" value="1"
+                                    @if (old('role_admin_ejournal') == 1) checked @endif id="flexCheckKantor" />
                                 <label class="form-check-label" for="flexCheckKantor">
-                                    Bendahara Keuangan
+                                    Admin e-Journal
                                 </label>
                             </div>
                             <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_admin_proceeding" value="1"
+                                    @if (old('role_admin_proceeding') == 1) checked @endif id="flexCheckKantor" />
+                                <label class="form-check-label" for="flexCheckKantor">
+                                    Admin Proceeding
+                                </label>
+                            </div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_admin_student_research_hub" value="1"
+                                    @if (old('role_admin_student_research_hub') == 1) checked @endif id="flexCheckKantor" />
+                                <label class="form-check-label" for="flexCheckKantor">
+                                    Admin Student Research Hub
+                                </label>
+                            </div>
+
+                             <div class="form-check mt-3">
                                 <input class="form-check-input" type="checkbox" name="role_editor" value="1"
                                     @if (old('role_editor') == 1) checked @endif id="flexCheckAgen" />
                                 <label class="form-check-label" for="flexCheckAgen">
-                                    Editor
+                                    Editor e-Journal
                                 </label>
                             </div>
+                                <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_editor_proceeding" value="1"
+                                    @if (old('role_editor_proceeding') == 1) checked @endif id="flexCheckAgen" />
+                                <label class="form-check-label" for="flexCheckAgen">
+                                    Editor Proceeding
+                                </label>
+                            </div>
+                                <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_editor_student_research_hub" value="1"
+                                    @if (old('role_editor_student_research_hub') == 1) checked @endif id="flexCheckAgen" />
+                                <label class="form-check-label" for="flexCheckAgen">
+                                    Editor Student Research Hub
+                                </label>
+                            </div>
+
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_keuangan" value="1"
+                                    @if (old('role_keuangan') == 1) checked @endif id="flexCheckKantor" />
+                                <label class="form-check-label" for="flexCheckKantor">
+                                    Bendahara e-Journal
+                                </label>
+                            </div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_keuangan_proceeding" value="1"
+                                    @if (old('role_keuangan_proceeding') == 1) checked @endif id="flexCheckKantor" />
+                                <label class="form-check-label" for="flexCheckKantor">
+                                    Bendahara Proceeding
+                                </label>
+                            </div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_keuangan_student_research_hub" value="1"
+                                    @if (old('role_keuangan_student_research_hub') == 1) checked @endif id="flexCheckKantor" />
+                                <label class="form-check-label" for="flexCheckKantor">
+                                    Bendahara Student Research Hub
+                                </label>
+                            </div>
+
                             <div class="form-check mt-3">
                                 <input class="form-check-input" type="checkbox" name="role_humas" value="1"
                                     @if (old('role_humas') == 1) checked @endif id="flexCheckAgen" />

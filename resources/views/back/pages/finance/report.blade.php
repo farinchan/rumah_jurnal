@@ -1,11 +1,24 @@
 @extends('back.app')
 @section('content')
+    @php
+        $control_panel = Illuminate\Support\Facades\Cookie::get('control_panel');
+        $name_control_panel;
+        if ($control_panel == 'journal') {
+            $name_control_panel = 'Jurnal';
+        } elseif ($control_panel == 'proceeding') {
+            $name_control_panel = 'Proceeding';
+        } elseif ($control_panel == 'student_research_hub') {
+            $name_control_panel = 'Student Research Hub';
+        } else {
+            $name_control_panel = '-';
+        }
+    @endphp
     <div id="kt_content_container" class="container-fluid">
 
         <div class="card card-flush">
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <div class="card-title">
-                    Laporan Jurnal
+                    Laporan {{ $name_control_panel }}
                 </div>
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
                     <div class="btn-group">
@@ -35,11 +48,11 @@
                 <div class="row mb-10">
                     <div class="col-md-6">
 
-                        <label class="form-label fs-6 fw-bold">Jurnal</label>
+                        <label class="form-label fs-6 fw-bold">{{ $name_control_panel }}</label>
                         <select class="form-select form-select-solid" data-control="select2"
                             data-placeholder="Select an option" name="journal_id" id="journal_id">
                             @if (auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('keuangan'))
-                                <option value="" selected>Semua Jurnal</option>
+                                <option value="" selected>Semua {{ $name_control_panel }}</option>
                             @endif
                             @foreach ($journals as $journal)
                                 @if (auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('keuangan'))
@@ -93,7 +106,7 @@
                 <table class="table align-middle table-row-dashed fs-6 gy-5" id="table_finance">
                     <thead>
                         <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                            <th class="min-w-200px">Jurnal</th>
+                            <th class="min-w-200px">{{ $name_control_panel }}</th>
                             <th class="min-w-300px">Penulis</th>
                             <th class="min-w-300px">Artikel</th>
                             <th class="min-w-200px">Edisi</th>
@@ -125,8 +138,10 @@
                             $('#issue_id').empty();
                             $('#issue_id').append('<option value="" selected>Semua</option>');
                             $.each(data.data, function(key, value) {
-                                $('#issue_id').append('<option value="' + value.id + '"> Vol. ' + value.volume +
-                                    ' No. ' + value.number + ' (' + value.year + '): ' + value.title + '</option>');
+                                $('#issue_id').append('<option value="' + value.id +
+                                    '"> Vol. ' + value.volume +
+                                    ' No. ' + value.number + ' (' + value.year +
+                                    '): ' + value.title + '</option>');
                             });
                         }
                     });

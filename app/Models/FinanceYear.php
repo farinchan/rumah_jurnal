@@ -11,5 +11,6 @@ class FinanceYear extends Model
         'start_date',
         'end_date',
         'is_active',
+        'type_control',
     ];
 }

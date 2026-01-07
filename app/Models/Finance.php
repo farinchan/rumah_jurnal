@@ -18,6 +18,7 @@ class Finance extends Model
         'attachment',
         'created_by',
         'updated_by',
+        'type_control',
     ];
 
     public function createdBy()

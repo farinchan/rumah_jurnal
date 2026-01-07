@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('attachment')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->cascadeOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->enum('type_control', ['journal', 'proceeding', 'student_research_hub']);
             $table->timestamps();
         });
     }

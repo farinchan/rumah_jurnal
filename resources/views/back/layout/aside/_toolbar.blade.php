@@ -2,7 +2,7 @@
 <div class="aside-user d-flex align-items-sm-center justify-content-center py-5">
     <!--begin::Symbol-->
     <div class="symbol symbol-50px">
-        <img src="{{ auth()?->user()?->getPhoto()?? ""}}" alt="" />
+        <img src="{{ auth()?->user()?->getPhoto() ?? '' }}" alt="" />
     </div>
     <!--end::Symbol-->
     <!--begin::Wrapper-->
@@ -12,10 +12,11 @@
             <!--begin::Info-->
             <div class="flex-grow-1 me-2">
                 <!--begin::Username-->
-                <a href="#" class="text-white text-hover-primary fs-6 fw-bold">{{ Auth::user()?->name?? "-" }}</a>
+                <a href="#" class="text-white text-hover-primary fs-6 fw-bold">{{ Auth::user()?->name ?? '-' }}</a>
                 <!--end::Username-->
                 <!--begin::Description-->
-                <span class="text-gray-600 fw-semibold d-block fs-8 mb-1">{{ auth()?->user()?->roles?->pluck('name')->join(', ')?? "" }}</span>
+                <span
+                    class="text-gray-600 fw-semibold d-block fs-8 mb-1">{{ auth()?->user()?->roles?->pluck('name')->join(', ') ?? '' }}</span>
                 <!--end::Description-->
                 <!--begin::Label-->
                 <div class="d-flex align-items-center text-success fs-9">
@@ -30,8 +31,28 @@
     </div>
     <!--end::Wrapper-->
 </div>
-{{-- <!--end::User-->
+<!--end::User-->
 <!--begin::Aside search-->
+@role('super-admin|admin-ejournal|admin-proceeding|admin-student_research_hub|keuangan|keuangan-proceeding|keuangan-student-research-hub|editor|editor-proceeding|editor-student-research-hub')
+@php
+    $control_panel = Illuminate\Support\Facades\Cookie::get('control_panel');
+@endphp
 <div class="aside-search py-5">
+    <div class="border rounded">
+        <select data-control="select2" class="form-select form-select-sm form-select-solid"
+            data-placeholder="Pilih Kontrol" onchange="window.location.href = this.value" data-hide-search="true">
+            <option></option>
+            @role('super-admin|admin-ejournal|keuangan|editor')
+            <option value="{{ route('back.switch.control', 'journal') }}" {{ $control_panel == 'journal' ? 'selected' : '' }}>e-Journal</option>
+            @endrole
+            @role('super-admin|admin-proceeding|keuangan-proceeding|editor-proceeding')
+            <option value="{{ route('back.switch.control', 'proceeding') }}" {{ $control_panel == 'proceeding' ? 'selected' : '' }}>Proceeding</option>
+            @endrole
+            @role('super-admin|admin-student_research_hub|keuangan-student_research_hub|editor-student_research_hub')
+            <option value="{{ route('back.switch.control', 'student_research_hub') }}" {{ $control_panel == 'student_research_hub' ? 'selected' : '' }}>Student Research Hub</option>
+            @endrole
+        </select>
+    </div>
 </div>
-<!--end::Aside search--> --}}
+@endrole
+<!--end::Aside search-->

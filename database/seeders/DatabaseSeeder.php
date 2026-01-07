@@ -20,27 +20,38 @@ class DatabaseSeeder extends Seeder
     {
 
         Role::create(['name' => 'super-admin']);
-        Role::create(['name' => 'keuangan']);
+
+        Role::create(['name' => 'admin-ejournal']);
+        Role::create(['name' => 'admin-proceeding']);
+        Role::create(['name' => 'admin-student-research-hub']);
+
         Role::create(['name' => 'editor']);
+        Role::create(['name' => 'editor-proceeding']);
+        Role::create(['name' => 'editor-student-research-hub']);
+
+        Role::create(['name' => 'keuangan']);
+        Role::create(['name' => 'keuangan-proceeding']);
+        Role::create(['name' => 'keuangan-student-research-hub']);
+
         Role::create(['name' => 'humas']);
 
-       User::create([
+        User::create([
             'name' => 'Fajri - Developer',
             'email' => 'fajri@gariskode.com',
             'password' => bcrypt('password'),
         ])->assignRole('super-admin');
 
-            SettingWebsite::create([
-                'name' => 'Rumah Jurnal UIN Sjech M.Djamil Djambek bukttinggi',
-                'logo' => 'logo.png',
-                'favicon' => 'favicon.png',
-                'email' => 'rumahjurnal.uinbukittinggi@gmail.com',
-                'phone' => '089613390766',
-                'address' => 'Data Center Building, 2nd floor, State Islamic University of Sjech M. Djamil Djambek Bukittinggi. Gurun Aua St, Kubang Putih, Banuhampu, Agam - West Sumatra - Indonesia.',
-                'latitude' => '-0.32177371869479526',
-                'longitude' => '100.39795359131934',
-                'about' => '<p><strong>Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi</strong> adalah portal publikasi ilmiah resmi Universitas Islam Negeri Sjech M. Djamil Djambek Bukittinggi yang menyediakan akses terbuka terhadap berbagai jurnal akademik dari berbagai disiplin ilmu. Website ini bertujuan untuk mendukung pengembangan dan penyebaran penelitian ilmiah yang berkualitas serta menjadi wadah bagi akademisi, peneliti, dan mahasiswa dalam mempublikasikan hasil penelitian mereka.</p><p>Melalui platform ini, pengguna dapat mengakses, mengunduh, serta membaca artikel-artikel ilmiah yang telah melewati proses peer-review. Selain itu, Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi juga menyediakan informasi mengenai kebijakan penerbitan, petunjuk penulisan, serta jadwal penerbitan jurnal untuk mendukung transparansi dan kualitas publikasi. Dengan adanya portal ini, universitas berkomitmen untuk berkontribusi dalam pengembangan ilmu pengetahuan yang lebih luas, baik di tingkat nasional maupun internasional.</p>',
-            ]);
+        SettingWebsite::create([
+            'name' => 'Rumah Jurnal UIN Sjech M.Djamil Djambek bukttinggi',
+            'logo' => 'logo.png',
+            'favicon' => 'favicon.png',
+            'email' => 'rumahjurnal.uinbukittinggi@gmail.com',
+            'phone' => '089613390766',
+            'address' => 'Data Center Building, 2nd floor, State Islamic University of Sjech M. Djamil Djambek Bukittinggi. Gurun Aua St, Kubang Putih, Banuhampu, Agam - West Sumatra - Indonesia.',
+            'latitude' => '-0.32177371869479526',
+            'longitude' => '100.39795359131934',
+            'about' => '<p><strong>Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi</strong> adalah portal publikasi ilmiah resmi Universitas Islam Negeri Sjech M. Djamil Djambek Bukittinggi yang menyediakan akses terbuka terhadap berbagai jurnal akademik dari berbagai disiplin ilmu. Website ini bertujuan untuk mendukung pengembangan dan penyebaran penelitian ilmiah yang berkualitas serta menjadi wadah bagi akademisi, peneliti, dan mahasiswa dalam mempublikasikan hasil penelitian mereka.</p><p>Melalui platform ini, pengguna dapat mengakses, mengunduh, serta membaca artikel-artikel ilmiah yang telah melewati proses peer-review. Selain itu, Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi juga menyediakan informasi mengenai kebijakan penerbitan, petunjuk penulisan, serta jadwal penerbitan jurnal untuk mendukung transparansi dan kualitas publikasi. Dengan adanya portal ini, universitas berkomitmen untuk berkontribusi dalam pengembangan ilmu pengetahuan yang lebih luas, baik di tingkat nasional maupun internasional.</p>',
+        ]);
 
         SettingBanner::create([
             'title' => 'Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi',
@@ -96,6 +107,5 @@ class DatabaseSeeder extends Seeder
             'meta_description' => 'Panggilan Artikel Ilmiah untuk Edisi Terbaru Jurnal Ilmiah',
             'meta_keywords' => 'panggilan artikel ilmiah, jurnal ilmiah, artikel ilmiah, call for paper',
         ]);
-
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SettingWebsite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 
@@ -78,6 +79,7 @@ class LoginController extends Controller
 
     public function logout()
     {
+        Cookie::forget('control_panel');
         Auth::logout();
         return redirect()->route('login');
     }

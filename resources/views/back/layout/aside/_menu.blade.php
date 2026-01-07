@@ -146,186 +146,173 @@
             </div>
         @endrole
 
-        @role('editor|super-admin')
 
+        @php
+            $control_panel = Illuminate\Support\Facades\Cookie::get('control_panel');
+        @endphp
 
-            @php
-                $journal_all = App\Models\Journal::where('type', 'journal')->get();
-                $journal_permission_exists = false;
-                foreach ($journal_all as $journal) {
-                    if (auth()->user()->can($journal->url_path)) {
-                        $journal_permission_exists = true;
-                        break;
-                    }
-                }
-            @endphp
-
-            @if ($journal_permission_exists)
+        @if ($control_panel == 'journal')
+            @role('editor|admin-ejournal|super-admin')
                 <div class="menu-item pt-5">
                     <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Jurnal</span>
                     </div>
                 </div>
-            @endif
+                @php
+                    $journal_all = App\Models\Journal::where('type', 'journal')->get();
+                @endphp
 
-            @foreach ($journal_all as $journal)
-                @can($journal->url_path)
-                    <div class="menu-item">
-                        <a class="menu-link @if (request()->segment(3) == $journal->url_path) active @endif"
-                            href="{{ route('back.journal.index', $journal->url_path) }}">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-book fs-2">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                    <span class="path3"></span>
-                                    <span class="path4"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">{{ $journal->name }}</span>
-                        </a>
-                    </div>
-                @endcan
-            @endforeach
+                @foreach ($journal_all as $journal)
+                    @can($journal->url_path)
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->segment(3) == $journal->url_path) active @endif"
+                                href="{{ route('back.journal.index', $journal->url_path) }}">
+                                <span class="menu-icon">
+                                    <i class="ki-duotone ki-book fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                        <span class="path4"></span>
+                                    </i>
+                                </span>
+                                <span class="menu-title">{{ $journal->name }}</span>
+                            </a>
+                        </div>
+                    @endcan
+                @endforeach
+            @endrole
+        @endif
 
-
-            @php
-                $proceeding_all = App\Models\Journal::where('type', 'proceeding')->get();
-                $proceeding_permission_exists = false;
-                foreach ($proceeding_all as $proceeding) {
-                    if (auth()->user()->can($proceeding->url_path)) {
-                        $proceeding_permission_exists = true;
-                        break;
-                    }
-                }
-            @endphp
-
-            @if ($proceeding_permission_exists)
+        @if ($control_panel == 'proceeding')
+            @role('editor-proceeding|admin-proceeding|super-admin')
                 <div class="menu-item pt-5">
                     <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Proceeding</span>
                     </div>
                 </div>
-            @endif
+                @php
+                    $proceeding_all = App\Models\Journal::where('type', 'proceeding')->get();
+                @endphp
+                @foreach ($proceeding_all as $proceeding)
+                    @can($proceeding->url_path)
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->segment(3) == $proceeding->url_path) active @endif"
+                                href="{{ route('back.journal.index', $proceeding->url_path) }}">
+                                <span class="menu-icon">
+                                    <i class="ki-duotone ki-book fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                        <span class="path4"></span>
+                                    </i>
+                                </span>
+                                <span class="menu-title">{{ $proceeding->name }}</span>
+                            </a>
+                        </div>
+                    @endcan
+                @endforeach
+            @endrole
+        @endif
 
-            @foreach ($proceeding_all as $proceeding)
-                @can($proceeding->url_path)
-                    <div class="menu-item">
-                        <a class="menu-link @if (request()->segment(3) == $proceeding->url_path) active @endif"
-                            href="{{ route('back.journal.index', $proceeding->url_path) }}">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-book fs-2">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                    <span class="path3"></span>
-                                    <span class="path4"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">{{ $proceeding->name }}</span>
-                        </a>
-                    </div>
-                @endcan
-            @endforeach
-
-
-            @php
-                $student_research_hub_all = App\Models\Journal::where('type', 'student_research_hub')->get();
-                $student_research_hub_permission_exists = false;
-                foreach ($student_research_hub_all as $student_research_hub) {
-                    if (auth()->user()->can($student_research_hub->url_path)) {
-                        $student_research_hub_permission_exists = true;
-                        break;
-                    }
-                }
-            @endphp
-
-            @if ($student_research_hub_permission_exists)
+        @if ($control_panel == 'student_research_hub')
+            @role('editor-student-research-hub|admin-student-research-hub|super-admin')
                 <div class="menu-item pt-5">
                     <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Student Research
                             Hub</span>
                     </div>
                 </div>
-            @endif
 
-            @foreach ($student_research_hub_all as $student_research_hub)
-                @can($student_research_hub->url_path)
-                    <div class="menu-item">
-                        <a class="menu-link @if (request()->segment(3) == $student_research_hub->url_path) active @endif"
-                            href="{{ route('back.journal.index', $student_research_hub->url_path) }}">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-book fs-2">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                    <span class="path3"></span>
-                                    <span class="path4"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">{{ $student_research_hub->name }}</span>
-                        </a>
+                @php
+                    $student_research_hub_all = App\Models\Journal::where('type', 'student_research_hub')->get();
+                @endphp
+
+                @foreach ($student_research_hub_all as $student_research_hub)
+                    @can($student_research_hub->url_path)
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->segment(3) == $student_research_hub->url_path) active @endif"
+                                href="{{ route('back.journal.index', $student_research_hub->url_path) }}">
+                                <span class="menu-icon">
+                                    <i class="ki-duotone ki-book fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                        <span class="path4"></span>
+                                    </i>
+                                </span>
+                                <span class="menu-title">{{ $student_research_hub->name }}</span>
+                            </a>
+                        </div>
+                    @endcan
+                @endforeach
+            @endrole
+        @endif
+
+        @if ($control_panel)
+            @role('super-admin|admin-admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub')
+                <div class="menu-item pt-5">
+                    <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Keuangan</span>
                     </div>
-                @endcan
-            @endforeach
-        @endrole
-
-        @role('keuangan|super-admin')
-            <div class="menu-item pt-5">
-                <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Keuangan</span>
                 </div>
-            </div>
 
-            <div class= "menu-item">
-                <a class="menu-link @if (request()->routeIs('back.finance.verification.index')) active @endif"
-                    href="{{ route('back.finance.verification.index') }}">
-                    <span class="menu-icon">
-                        <i class="ki-duotone ki-two-credit-cart fs-2">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                            <span class="path3"></span>
-                            <span class="path4"></span>
-                            <span class="path5"></span>
-                        </i>
-                    </span>
-                    <span class="menu-title">Verifikasi</span>
-                    @php
-                        $payment_count = App\Models\Payment::where('payment_status', 'pending')->count();
-                    @endphp
-                    @if ($payment_count > 0)
-                        <span class="menu-badge">
-                            <span class="badge badge-warning"> {{ $payment_count }} </span>
+                <div class= "menu-item">
+                    <a class="menu-link @if (request()->routeIs('back.finance.verification.index')) active @endif"
+                        href="{{ route('back.finance.verification.index') }}">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-two-credit-cart fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                                <span class="path4"></span>
+                                <span class="path5"></span>
+                            </i>
                         </span>
-                    @endif
-                </a>
-            </div>
-            <div class="menu-item">
-                <a class="menu-link @if (request()->routeIs('back.finance.cashflow.index')) active @endif"
-                    href="{{ route('back.finance.cashflow.index') }}">
-                    <span class="menu-icon">
-                        <i class="ki-duotone ki-wallet fs-2">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                            <span class="path3"></span>
-                            <span class="path4"></span>
-                        </i>
-                    </span>
-                    <span class="menu-title">CashFlow</span>
-                </a>
-            </div>
+                        <span class="menu-title">Verifikasi</span>
+                        @php
+                            $payment_count = App\Models\Payment::where('payment_status', 'pending')
+                                ->WhereHas('paymentInvoice.submission.issue.journal', function ($q) use (
+                                    $control_panel,
+                                ) {
+                                    $q->where('type', $control_panel);
+                                })
+                                ->count();
+                        @endphp
+                        @if ($payment_count > 0)
+                            <span class="menu-badge">
+                                <span class="badge badge-warning"> {{ $payment_count }} </span>
+                            </span>
+                        @endif
+                    </a>
+                </div>
+                <div class= "menu-item">
+                    <a class="menu-link @if (request()->routeIs('back.finance.report.index')) active @endif"
+                        href="{{ route('back.finance.report.index') }}">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-financial-schedule fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                                <span class="path4"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">Laporan</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a class="menu-link @if (request()->routeIs('back.finance.cashflow.index')) active @endif"
+                        href="{{ route('back.finance.cashflow.index') }}">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-wallet fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                                <span class="path4"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">CashFlow</span>
+                    </a>
+                </div>
+            @endrole
+        @endif
 
-            <div class= "menu-item">
-                <a class="menu-link @if (request()->routeIs('back.finance.report.index')) active @endif"
-                    href="{{ route('back.finance.report.index') }}">
-                    <span class="menu-icon">
-                        <i class="ki-duotone ki-financial-schedule fs-2">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                            <span class="path3"></span>
-                            <span class="path4"></span>
-                        </i>
-                    </span>
-                    <span class="menu-title">Laporan</span>
-                </a>
-            </div>
-        @endrole
-
-
-        @role('super-admin')
+        @role('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub')
             <div class="menu-item pt-5">
                 <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Administrator</span>
                 </div>

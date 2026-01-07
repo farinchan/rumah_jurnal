@@ -114,6 +114,18 @@
                 });
             }
         });
+
+
+
+        @if (session('permission_denied'))
+            Swal.fire({
+            icon: 'error',
+            title: 'Akses Ditolak',
+            text: '{{ session('permission_denied') }}',
+            confirmButtonText: 'OK'
+            });
+        @endif
+
     </script>
 
     @yield('scripts')
