@@ -48,7 +48,7 @@
             @role('super-admin|admin-proceeding|keuangan-proceeding|editor-proceeding')
             <option value="{{ route('back.switch.control', 'proceeding') }}" {{ $control_panel == 'proceeding' ? 'selected' : '' }}>Proceeding</option>
             @endrole
-            @role('super-admin|admin-student_research_hub|keuangan-student_research_hub|editor-student_research_hub')
+            @role('super-admin|admin-student-research-hub|keuangan-student-research-hub|editor-student-research-hub')
             <option value="{{ route('back.switch.control', 'student_research_hub') }}" {{ $control_panel == 'student_research_hub' ? 'selected' : '' }}>Student Research Hub</option>
             @endrole
         </select>

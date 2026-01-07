@@ -322,17 +322,17 @@ class DashboardController extends Controller
     {
 
         if ($control == "journal") {
-            if (Auth::user()->hasRole('admin-ejournal') || Auth::user()->hasRole('editor') || Auth::user()->hasRole('super-admin')) {
+            if (Auth::user()->hasRole('admin-ejournal') || Auth::user()->hasRole('editor') || Auth::user()->hasRole('super-admin')|| Auth::user()->hasRole('keuangan')) {
                 return redirect()->route('back.dashboard')->cookie('control_panel', $control, 60 * 24 * 30);
             }
         }
         if ($control == "proceeding") {
-            if (Auth::user()->hasRole('admin-proceeding') || Auth::user()->hasRole('editor-proceeding') || Auth::user()->hasRole('super-admin')) {
+            if (Auth::user()->hasRole('admin-proceeding') || Auth::user()->hasRole('editor-proceeding') || Auth::user()->hasRole('super-admin')|| Auth::user()->hasRole('keuangan-proceeding')) {
                 return redirect()->route('back.dashboard')->cookie('control_panel', $control, 60 * 24 * 30);
             }
         }
         if ($control == "student_research_hub") {
-            if (Auth::user()->hasRole('admin-student-research-hub') || Auth::user()->hasRole('editor-student-research-hub') || Auth::user()->hasRole('super-admin')) {
+            if (Auth::user()->hasRole('admin-student-research-hub') || Auth::user()->hasRole('editor-student-research-hub') || Auth::user()->hasRole('super-admin')|| Auth::user()->hasRole('keuangan-student-research-hub')) {
                 return redirect()->route('back.dashboard')->cookie('control_panel', $control, 60 * 24 * 30);
             }
         }
