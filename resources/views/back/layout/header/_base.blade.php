@@ -51,7 +51,7 @@
                                 <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px"
                                     data-kt-menu="true" style="">
                                     <div class="menu-item px-5">
-                                        <a href="{{ route('account.profile') }}" class="menu-link px-5">
+                                        <a href="{{ route('back.profile.index') }}" class="menu-link px-5">
                                             <i class="ki-duotone ki-user fs-2 me-3">
                                                 <span class="path1"></span>
                                                 <span class="path2"></span>

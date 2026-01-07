@@ -217,11 +217,9 @@
                                 </a>
                                 <ul>
                                     @auth
-                                        <li><a href="{{ route('account.profile') }}">{{ __('layout.my_profile') }}</a>
-                                        </li>
-                                        @role('super-admin|keuangan|editor|humas')
-                                            <li><a href="{{ route('back.dashboard') }}">{{ __('layout.dashboard') }}</a></li>
-                                        @endrole
+                                        <li><a href="{{ route('back.profile.index') }}">{{ __('layout.my_profile') }}</a></li>
+                                        <li><a href="{{ route('back.dashboard') }}">{{ __('layout.dashboard') }}</a></li>
+
                                         <li><a href="{{ route('logout') }}">{{ __('layout.logout') }}</a></li>
                                     @endauth
                                     @guest
@@ -280,7 +278,7 @@
                 {{-- <li><a href="{{ route('event.index') }}">{{ __('layout.event') }}</a></li>
                 <li><a href="{{ route('announcement.index') }}">{{ __('layout.announcement') }}</a></li> --}}
 
-                <li ><a href="#">{{ __('layout.profile') }}</a>
+                <li><a href="#">{{ __('layout.profile') }}</a>
                     <ul class="sub-menu">
                         @php
                             $menu_profiles = \App\Models\MenuProfil::all();
