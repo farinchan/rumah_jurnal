@@ -36,6 +36,17 @@ class DashboardController extends Controller
         return view('back.pages.dashboard.index', $data);
     }
 
+    public function stats()
+    {
+        $data = [
+            'journals' => \App\Models\Journal::count(),
+            'submissions' => \App\Models\Submission::count(),
+            'events' => \App\Models\Event::count(),
+            'users' => \App\Models\User::count(),
+        ];
+        return response()->json($data);
+    }
+
     public function visistorStat()
     {
 

@@ -140,6 +140,7 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
 
     Route::get('/dashboard', [BackDashboardController::class, 'index'])->name('dashboard');
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/stats', [BackDashboardController::class, 'stats'])->name('stats');
         Route::get('/visitor-stat', [BackDashboardController::class, 'visistorStat'])->name('visitor.stat');
 
         Route::get('/news', [BackDashboardController::class, 'news'])->name('news');
