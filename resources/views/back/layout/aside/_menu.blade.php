@@ -328,28 +328,16 @@
 
         @php
             $unlock_administrator_menu = false;
-            if (
-                $control_panel == 'journal' &&
-                auth()
-                    ->user()
-                    ->hasAnyRole(['super-admin', 'admin-ejournal'])
-            ) {
+            if ($control_panel == 'journal' && auth()->user()->hasRole('admin-ejournal')) {
                 $unlock_administrator_menu = true;
             }
-            if (
-                $control_panel == 'proceeding' &&
-                auth()
-                    ->user()
-                    ->hasAnyRole(['super-admin', 'admin-proceeding'])
-            ) {
+            if ($control_panel == 'proceeding' && auth()->user()->hasRole('admin-proceeding')) {
                 $unlock_administrator_menu = true;
             }
-            if (
-                $control_panel == 'student_research_hub' &&
-                auth()
-                    ->user()
-                    ->hasAnyRole(['super-admin', 'admin-student-research-hub'])
-            ) {
+            if ($control_panel == 'student_research_hub' && auth()->user()->hasRole('admin-student-research-hub')) {
+                $unlock_administrator_menu = true;
+            }
+            if (auth()->user()->hasRole('super-admin')) {
                 $unlock_administrator_menu = true;
             }
         @endphp
