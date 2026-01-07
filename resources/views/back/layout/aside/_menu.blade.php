@@ -49,6 +49,20 @@
             </div>
         </div>
 
+        <div class="menu-item">
+            <a class="menu-link @if (request()->routeIs('back.profile.*')) active @endif"
+                href="{{ route('back.profile.index') }}">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-profile-circle fs-1">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                        <span class="path3"></span>
+                    </i>
+                </span>
+                <span class="menu-title">Profil Saya</span>
+            </a>
+        </div>
+
         @role('humas|super-admin')
             <div class="menu-item pt-5">
                 <div class="menu-content">

@@ -149,6 +149,14 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/cashflow-stat', [BackDashboardController::class, 'cashflowStat'])->name('cashflow.stat');
     });
 
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Back\ProfileController::class, 'index'])->name('index');
+        Route::get('/settings', [App\Http\Controllers\Back\ProfileController::class, 'settings'])->name('settings');
+        Route::get('/events', [App\Http\Controllers\Back\ProfileController::class, 'events'])->name('events');
+        Route::put('/update', [App\Http\Controllers\Back\ProfileController::class, 'update'])->name('update');
+        Route::put('/password-update', [App\Http\Controllers\Back\ProfileController::class, 'passwordUpdate'])->name('password.update');
+    });
+
     Route::prefix('announcement')->name('announcement.')->group(function () {
         Route::get('/', [BackAnnouncementController::class, 'index'])->name('index');
         Route::get('/create', [BackAnnouncementController::class, 'create'])->name('create');
