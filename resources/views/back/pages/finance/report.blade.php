@@ -55,16 +55,8 @@
                                 <option value="" selected>Semua {{ $name_control_panel }}</option>
                             @endif
                             @foreach ($journals as $journal)
-                                @if (auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('keuangan'))
                                     <option value="{{ $journal->id }}">{{ $journal->title }}</option>
-                                @else
-                                    @php
-                                        $permissionNames = Auth::user()->getPermissionNames();
-                                    @endphp
-                                    @if ($journal->permissions->contains($journal->url_path, $permissionNames))
-                                        <option value="{{ $journal->id }}">{{ $journal->title }}</option>
-                                    @endif
-                                @endif
+
                             @endforeach
 
                         </select>

@@ -260,7 +260,7 @@
         @endif
 
         @if ($control_panel)
-            @role('super-admin|admin-admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub')
+            @role('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub')
                 <div class="menu-item pt-5">
                     <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Keuangan</span>
                     </div>
@@ -326,7 +326,35 @@
             @endrole
         @endif
 
-        @role('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub')
+        @php
+            $unlock_administrator_menu = false;
+            if (
+                $control_panel == 'journal' &&
+                auth()
+                    ->user()
+                    ->hasAnyRole(['super-admin', 'admin-ejournal'])
+            ) {
+                $unlock_administrator_menu = true;
+            }
+            if (
+                $control_panel == 'proceeding' &&
+                auth()
+                    ->user()
+                    ->hasAnyRole(['super-admin', 'admin-proceeding'])
+            ) {
+                $unlock_administrator_menu = true;
+            }
+            if (
+                $control_panel == 'student_research_hub' &&
+                auth()
+                    ->user()
+                    ->hasAnyRole(['super-admin', 'admin-student-research-hub'])
+            ) {
+                $unlock_administrator_menu = true;
+            }
+        @endphp
+
+        @if ($unlock_administrator_menu)
             <div class="menu-item pt-5">
                 <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Administrator</span>
                 </div>
@@ -405,39 +433,39 @@
                     </div>
                 </div>
             </div>
-
-            <div data-kt-menu-trigger="click"
-                class="menu-item menu-accordion @if (request()->routeIs('back.chatery-whatsapp.*')) here show @endif">
-                <span class="menu-link">
-                    <span class="menu-icon">
-                        <i class="ki-duotone ki-setting-4 fs-2"></i>
+            @role('super-admin')
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion @if (request()->routeIs('back.chatery-whatsapp.*')) here show @endif">
+                    <span class="menu-link">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-setting-4 fs-2"></i>
+                        </span>
+                        <span class="menu-title">Whatsapp API</span>
+                        <span class="menu-arrow"></span>
                     </span>
-                    <span class="menu-title">Whatsapp API</span>
-                    <span class="menu-arrow"></span>
-                </span>
-                <div class="menu-sub menu-sub-accordion">
-                    <div class="menu-item">
-                        <a class="menu-link @if (request()->routeIs('back.chatery-whatsapp.setting')) active @endif"
-                            href="{{ route('back.chatery-whatsapp.setting') }}">
-                            <span class="menu-bullet">
-                                <span class="bullet bullet-dot"></span>
-                            </span>
-                            <span class="menu-title">Pengaturan</span>
-                        </a>
-                    </div>
-                    <div class="menu-item">
-                        <a class="menu-link @if (request()->routeIs('back.chatery-whatsapp.message.*')) active @endif"
-                            href="{{ route('back.chatery-whatsapp.message.index') }}">
-                            <span class="menu-bullet">
-                                <span class="bullet bullet-dot"></span>
-                            </span>
-                            <span class="menu-title">Kirim Pesan</span>
-                        </a>
+                    <div class="menu-sub menu-sub-accordion">
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs('back.chatery-whatsapp.setting')) active @endif"
+                                href="{{ route('back.chatery-whatsapp.setting') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Pengaturan</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs('back.chatery-whatsapp.message.*')) active @endif"
+                                href="{{ route('back.chatery-whatsapp.message.index') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Kirim Pesan</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {{-- <div data-kt-menu-trigger="click"
+                {{-- <div data-kt-menu-trigger="click"
                 class="menu-item menu-accordion @if (request()->routeIs('back.whatsapp.*')) here show @endif">
                 <span class="menu-link">
                     <span class="menu-icon">
@@ -468,49 +496,50 @@
                 </div>
             </div> --}}
 
-            <div data-kt-menu-trigger="click"
-                class="menu-item menu-accordion @if (request()->routeIs('back.setting.*')) here show @endif">
-                <span class="menu-link">
-                    <span class="menu-icon">
-                        <i class="ki-duotone ki-setting-2 fs-2">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                        </i>
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion @if (request()->routeIs('back.setting.*')) here show @endif">
+                    <span class="menu-link">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-setting-2 fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">Pengaturan</span>
+                        <span class="menu-arrow"></span>
                     </span>
-                    <span class="menu-title">Pengaturan</span>
-                    <span class="menu-arrow"></span>
-                </span>
-                <div class="menu-sub menu-sub-accordion">
-                    <div class="menu-item">
-                        <a class="menu-link @if (request()->routeIs('back.setting.website')) active @endif"
-                            href="{{ route('back.setting.website') }}">
-                            <span class="menu-bullet">
-                                <span class="bullet bullet-dot"></span>
-                            </span>
-                            <span class="menu-title">Website</span>
-                        </a>
-                    </div>
-                    <div class="menu-item">
-                        <a class="menu-link @if (request()->routeIs('back.setting.banner')) active @endif"
-                            href="{{ route('back.setting.banner') }}">
-                            <span class="menu-bullet">
-                                <span class="bullet bullet-dot"></span>
-                            </span>
-                            <span class="menu-title">Banner</span>
-                        </a>
-                    </div>
-                    <div class="menu-item">
-                        <a class="menu-link @if (request()->routeIs('back.setting.bot')) active @endif"
-                            href="{{ route('back.setting.bot') }}">
-                            <span class="menu-bullet">
-                                <span class="bullet bullet-dot"></span>
-                            </span>
-                            <span class="menu-title">Bot AI</span>
-                        </a>
+                    <div class="menu-sub menu-sub-accordion">
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs('back.setting.website')) active @endif"
+                                href="{{ route('back.setting.website') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Website</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs('back.setting.banner')) active @endif"
+                                href="{{ route('back.setting.banner') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Banner</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs('back.setting.bot')) active @endif"
+                                href="{{ route('back.setting.bot') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Bot AI</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        @endrole
+            @endrole
+        @endif
 
     </div>
 
