@@ -60,8 +60,9 @@ class LoginController extends Controller
             $user = Auth::user();
 
             // Check if user has admin roles that require 2FA
-            if ($user->hasRole('super-admin|keuangan|editor|humas')) {
-                // Logout the user temporarily and store user id in session for 2FA
+            if ($user->roles()->doesntExist()) {
+                return redirect()->intended('/');
+            } else {
                 Auth::logout();
                 session(['2fa:user:id' => $user->id]);
                 session(['2fa:remember' => $request->has('remember')]);
@@ -70,7 +71,7 @@ class LoginController extends Controller
             }
 
             // For regular users, login directly
-            return redirect()->intended('/');
+
         }
 
         Alert::error('Error', 'Email atau username dan password salah');

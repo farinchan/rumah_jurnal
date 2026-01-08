@@ -243,8 +243,18 @@ class TwoFactorController extends Controller
         Alert::success('Berhasil', 'Login berhasil');
 
         // Redirect based on role
-        if ($user->hasRole('super-admin|keuangan|editor|humas')) {
-            return redirect()->intended(route('back.dashboard'));
+        // if ($user->hasRole('super-admin|keuangan|editor|humas')) {
+        //     return redirect()->intended(route('back.dashboard'));
+        // }
+
+        if (Auth::user()->hasRole('admin-ejournal') || Auth::user()->hasRole('editor') || Auth::user()->hasRole('super-admin') || Auth::user()->hasRole('keuangan')) {
+            return redirect()->intended(route('back.dashboard'))->cookie('control_panel', 'journal', 60 * 24 * 30);
+        }
+        if (Auth::user()->hasRole('admin-proceeding') || Auth::user()->hasRole('editor-proceeding') || Auth::user()->hasRole('super-admin') || Auth::user()->hasRole('keuangan-proceeding')) {
+            return redirect()->route('back.dashboard')->cookie('control_panel', 'proceeding', 60 * 24 * 30);
+        }
+        if (Auth::user()->hasRole('admin-student-research-hub') || Auth::user()->hasRole('editor-student-research-hub') || Auth::user()->hasRole('super-admin') || Auth::user()->hasRole('keuangan-student-research-hub')) {
+            return redirect()->route('back.dashboard')->cookie('control_panel', 'student_research_hub', 60 * 24 * 30);
         }
 
         return redirect()->intended('/');
