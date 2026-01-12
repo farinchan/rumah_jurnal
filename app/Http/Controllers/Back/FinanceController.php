@@ -735,7 +735,7 @@ class FinanceController extends Controller
             'total_outcome_now' => $outcome,
             'total_income_now' => $income,
             'total_balance_now' => $balance,
-            'total_distribution' => $finance_year_now ? ($income * ($finance_year_now->distribution_percentage / 100)) : 0,
+            'total_distribution' => ($finance_year_now ? ($income * ($finance_year_now->distribution_percentage / 100)) : 0) - $outcome,
             'total_distributtion_other' => $finance_year_now ? ($income * ((100 - $finance_year_now->distribution_percentage) / 100)) : 0,
 
         ];

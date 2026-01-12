@@ -287,8 +287,11 @@ class DashboardController extends Controller
                 // Calculate distribution based on finance year percentage
                 $distributionPercentage = $financeYear ? $financeYear->distribution_percentage : 80;
                 $totalGrossIncome = $totalIncome + $totalPaymentIncome;
-                $distributionRumahJurnal = ($totalGrossIncome * $distributionPercentage) / 100;
-                $distributionBLU = $totalGrossIncome - $distributionRumahJurnal;
+                $totalBalance = $totalGrossIncome - $totalExpense;
+                // Rumah Jurnal: persentase dari (pemasukan - pengeluaran)
+                $distributionRumahJurnal = ($totalBalance * $distributionPercentage) / 100;
+                // BLU: persentase dari pemasukan
+                $distributionBLU = ($totalGrossIncome * (100 - $distributionPercentage)) / 100;
 
                 // Transaction counts
                 $totalTransactionCount = Finance::where('date', '>=', $startDate)
