@@ -75,6 +75,10 @@
                     href="{{ route('back.event.detail.attendance', $event->id) }}">Kehadiran</a>
             </li>
             <li class="nav-item mt-2">
+                <a class="nav-link text-active-primary ms-0 me-10 py-5 {{ request()->routeIs('back.event.detail.certificate') || request()->routeIs('back.event.detail.certificate.*') ? 'active' : '' }}"
+                    href="{{ route('back.event.detail.certificate.index', $event->id) }}">Sertifikat</a>
+            </li>
+            <li class="nav-item mt-2">
                 <a class="nav-link text-active-primary ms-0 me-10 py-5 {{ request()->routeIs('back.event.detail.notification')  ? 'active' : '' }}"
                     href="{{ route('back.event.detail.notification', $event->id) }}">Pemberitahunan (WA/Email)</a>
             </li>

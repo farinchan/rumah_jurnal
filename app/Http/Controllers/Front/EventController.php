@@ -177,18 +177,47 @@ class EventController extends Controller
 
     public function certificate($uuid)
     {
-        $eventUser = EventUser::find($uuid);
+        $eventUser = EventUser::with(['event', 'user'])->find($uuid);
+
+        if (!$eventUser) {
+            Alert::error('Error', 'Event user not found');
+            return redirect()->route('event.index');
+        }
+
+        $event = $eventUser->event;
+
+        // Get certificate template for this event (1 event = 1 template)
+        $template = \App\Models\CertificateTemplate::where('event_id', $event->id)->first();
+
+        // Prepare data
+        $dates = explode(' - ', $event->datetime);
+        $before = $dates[0] ?? null;
+        $after = $dates[1] ?? null;
+        \Carbon\Carbon::setLocale('id');
+        $date_before = $before ? \Carbon\Carbon::parse($before)->translatedFormat('l, d F Y') : null;
+
         $data = [
-            'event_name' => $eventUser->event->name ?? '',
-            'participant_name' => $eventUser->name ?? '',
-            'event_date' => $eventUser->event->datetime ?? '',
-            'certificate_number' => str_pad($eventUser->event->id, 4, '0', STR_PAD_LEFT),
-
+            'event_name' => $event->name ?? '',
+            'participant_name' => $eventUser->name ?? $eventUser->user->name ?? '',
+            'event_date' => $event->datetime ?? '',
+            'date_formatted' => $date_before,
+            'certificate_number' => str_pad($event->id, 4, '0', STR_PAD_LEFT),
         ];
-        $pdf = Pdf::loadView('front.pages.event.certificate', $data)->setPaper('A4', 'landscape');
-        // return $pdf->download('sertifikat_' . $eventUser->id . '.pdf');
-        return $pdf->stream('sertifikat_' . $eventUser->id . '.pdf');
 
+        // Use template if available
+        if ($template) {
+            $data['template'] = $template;
+            $data['event'] = $event;
+            $orientation = $template->orientation == 'landscape' ? 'landscape' : 'portrait';
+            $pdf = Pdf::loadView('back.pages.event.detail.certificate.pdf', $data)
+                ->setPaper($template->paper_size, $orientation);
+        } else {
+            // Fallback to legacy certificate view
+            $pdf = Pdf::loadView('front.pages.event.certificate', $data)
+                ->setPaper('A4', 'landscape');
+        }
+
+        return $pdf->stream('sertifikat_' . $eventUser->id . '.pdf');
     }
 
     public function presence($code)

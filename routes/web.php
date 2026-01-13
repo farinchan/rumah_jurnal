@@ -197,6 +197,17 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
 
             Route::get('/{id}/notification', [BackEventController::class, 'notification'])->name('notification');
             Route::post('/{id}/notification/whatsapp', [BackEventController::class, 'notificationWhatsapp'])->name('notification.whatsapp');
+
+            // Certificate routes (1 event = 1 template)
+            Route::get('/{id}/certificate', [App\Http\Controllers\Back\CertificateController::class, 'index'])->name('certificate.index');
+            Route::get('/{id}/certificate/create', [App\Http\Controllers\Back\CertificateController::class, 'create'])->name('certificate.create');
+            Route::post('/{id}/certificate/store', [App\Http\Controllers\Back\CertificateController::class, 'store'])->name('certificate.store');
+            Route::get('/{id}/certificate/{template_id}/edit', [App\Http\Controllers\Back\CertificateController::class, 'edit'])->name('certificate.edit');
+            Route::put('/{id}/certificate/{template_id}/update', [App\Http\Controllers\Back\CertificateController::class, 'update'])->name('certificate.update');
+            Route::post('/{id}/certificate/{template_id}/save-positions', [App\Http\Controllers\Back\CertificateController::class, 'savePositions'])->name('certificate.save-positions');
+            Route::get('/{id}/certificate/{template_id}/preview', [App\Http\Controllers\Back\CertificateController::class, 'preview'])->name('certificate.preview');
+            Route::delete('/{id}/certificate/{template_id}/delete', [App\Http\Controllers\Back\CertificateController::class, 'destroy'])->name('certificate.destroy');
+            Route::get('/{id}/certificate/generate/{event_user_id}', [App\Http\Controllers\Back\CertificateController::class, 'generateForParticipant'])->name('certificate.generate');
         });
     });
 
