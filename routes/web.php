@@ -45,8 +45,8 @@ Route::get('/privacy-policy', [HomeController::class, 'privacyPolicy'])->name('p
 Route::get('/terms-of-service', [HomeController::class, 'termsOfService'])->name('terms.service');
 
 
-Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('login-cdn');
+Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('TrustProxies');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('login-cdn')->middleware('TrustProxies');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Two-Factor Authentication Routes
@@ -59,8 +59,8 @@ Route::prefix('2fa')->name('2fa.')->group(function () {
     Route::get('/cancel', [TwoFactorController::class, 'cancel'])->name('cancel');
 });
 
-Route::get('/register', [RegisterController::class, 'index'])->name('register');
-Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+Route::get('/register', [RegisterController::class, 'index'])->name('register')->middleware('TrustProxies');
+Route::post('/register', [RegisterController::class, 'register'])->name('register.post')->middleware('TrustProxies');
 
 // Forgot Password Routes
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
@@ -68,8 +68,8 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
 
-Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
-Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect')->middleware('TrustProxies');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback')->middleware('TrustProxies');
 
 Route::prefix('account')->name('account.')->group(function () {
     Route::get('/profile', [AccountController::class, 'profile'])->name('profile');
