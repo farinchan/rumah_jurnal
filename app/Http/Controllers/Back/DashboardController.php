@@ -140,21 +140,25 @@ class DashboardController extends Controller
         return view('back.pages.dashboard.cashflow', $data);
     }
 
-    public function cashflowStat()
+    public function cashflowStat(Request $request)
     {
         try {
-            $data = cache()->remember('cashflow_stats', 60, function () {
-                // Get current finance year
-                $financeYear = FinanceYear::latest()->first();
+            // Get control panel type from cookie
+            $controlPanel = $request->cookie('control_panel', 'journal');
+
+            $data = cache()->remember('cashflow_stats_' . $controlPanel, 60, function () use ($controlPanel) {
+                // Get current finance year based on control panel type
+                $financeYear = FinanceYear::where('type_control', $controlPanel)->latest()->first();
                 $startDate = $financeYear ? $financeYear->start_date : now()->startOfYear()->toDateString();
                 $endDate = $financeYear && $financeYear->end_date ? $financeYear->end_date : now()->addDay()->toDateString();
 
-                // Monthly cashflow data
+                // Monthly cashflow data filtered by control panel
                 $monthlyData = Finance::select(
                     DB::raw('DATE(date) as date'),
                     DB::raw('SUM(CASE WHEN type = "income" THEN amount ELSE 0 END) as income'),
                     DB::raw('SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) as expense')
                 )
+                    ->where('type_control', $controlPanel)
                     ->where('date', '>=', $startDate)
                     ->where('date', '<=', $endDate)
                     ->groupBy(DB::raw('DATE(date)'))
@@ -162,12 +166,16 @@ class DashboardController extends Controller
                     ->limit(30)
                     ->get();
 
-                // Payment income data
-                $paymentIncome = Payment::with(['paymentInvoice'])
+                // Payment income data filtered by control panel (through submission's journal type)
+                $paymentIncome = Payment::with(['paymentInvoice.submission.issue.journal'])
                     ->where('created_at', '>=', $startDate)
                     ->where('created_at', '<=', $endDate)
                     ->where('payment_status', 'accepted')
                     ->get()
+                    ->filter(function ($payment) use ($controlPanel) {
+                        $journal = $payment->paymentInvoice?->submission?->issue?->journal;
+                        return $journal && $journal->type === $controlPanel;
+                    })
                     ->groupBy(function ($payment) {
                         return $payment->created_at->format('Y-m-d');
                     })
@@ -191,15 +199,17 @@ class DashboardController extends Controller
                     ];
                 });
 
-                // Transaction type distribution
+                // Transaction type distribution filtered by control panel
                 $transactionTypes = Finance::select('type', DB::raw('count(*) as count'), DB::raw('sum(amount) as total'))
+                    ->where('type_control', $controlPanel)
                     ->where('date', '>=', $startDate)
                     ->where('date', '<=', $endDate)
                     ->groupBy('type')
                     ->get();
 
-                // Finance Years overview
-                $financeYears = FinanceYear::orderBy('start_date', 'desc')
+                // Finance Years overview filtered by control panel
+                $financeYears = FinanceYear::where('type_control', $controlPanel)
+                    ->orderBy('start_date', 'desc')
                     ->limit(5)
                     ->get();
 
@@ -215,28 +225,34 @@ class DashboardController extends Controller
                         'is_active' => true
                     ]]);
                 } else {
-                    $financeYears = $financeYears->map(function ($year) {
+                    $financeYears = $financeYears->map(function ($year) use ($controlPanel) {
                         $startDate = $year->start_date;
                         $endDate = $year->end_date ?? now()->addDay()->toDateString();
 
-                        // Calculate income for this finance year
+                        // Calculate income for this finance year filtered by control panel
                         $income = Finance::where('type', 'income')
+                            ->where('type_control', $controlPanel)
                             ->where('date', '>=', $startDate)
                             ->where('date', '<=', $endDate)
                             ->sum('amount');
 
-                        // Calculate payment income for this finance year
-                        $paymentIncome = Payment::with(['paymentInvoice'])
+                        // Calculate payment income for this finance year filtered by control panel
+                        $paymentIncome = Payment::with(['paymentInvoice.submission.issue.journal'])
                             ->where('created_at', '>=', $startDate)
                             ->where('created_at', '<=', $endDate)
                             ->where('payment_status', 'accepted')
                             ->get()
+                            ->filter(function ($payment) use ($controlPanel) {
+                                $journal = $payment->paymentInvoice?->submission?->issue?->journal;
+                                return $journal && $journal->type === $controlPanel;
+                            })
                             ->sum(function ($payment) {
                                 return $payment->paymentInvoice->payment_amount ?? 0;
                             });
 
-                        // Calculate outcome for this finance year
+                        // Calculate outcome for this finance year filtered by control panel
                         $outcome = Finance::where('type', 'expense')
+                            ->where('type_control', $controlPanel)
                             ->where('date', '>=', $startDate)
                             ->where('date', '<=', $endDate)
                             ->sum('amount');
@@ -256,30 +272,37 @@ class DashboardController extends Controller
                     });
                 }
 
-                // Recent transactions
-                $recentTransactions = Finance::where('date', '>=', $startDate)
+                // Recent transactions filtered by control panel
+                $recentTransactions = Finance::where('type_control', $controlPanel)
+                    ->where('date', '>=', $startDate)
                     ->where('date', '<=', $endDate)
                     ->orderBy('date', 'desc')
                     ->orderBy('created_at', 'desc')
                     ->limit(10)
                     ->get();
 
-                // Summary totals
+                // Summary totals filtered by control panel
                 $totalIncome = Finance::where('type', 'income')
+                    ->where('type_control', $controlPanel)
                     ->where('date', '>=', $startDate)
                     ->where('date', '<=', $endDate)
                     ->sum('amount');
 
-                $totalPaymentIncome = Payment::with(['paymentInvoice'])
+                $totalPaymentIncome = Payment::with(['paymentInvoice.submission.issue.journal'])
                     ->where('created_at', '>=', $startDate)
                     ->where('created_at', '<=', $endDate)
                     ->where('payment_status', 'accepted')
                     ->get()
+                    ->filter(function ($payment) use ($controlPanel) {
+                        $journal = $payment->paymentInvoice?->submission?->issue?->journal;
+                        return $journal && $journal->type === $controlPanel;
+                    })
                     ->sum(function ($payment) {
                         return $payment->paymentInvoice->payment_amount ?? 0;
                     });
 
                 $totalExpense = Finance::where('type', 'expense')
+                    ->where('type_control', $controlPanel)
                     ->where('date', '>=', $startDate)
                     ->where('date', '<=', $endDate)
                     ->sum('amount');
@@ -293,12 +316,14 @@ class DashboardController extends Controller
                 // BLU: persentase dari pemasukan
                 $distributionBLU = ($totalGrossIncome * (100 - $distributionPercentage)) / 100;
 
-                // Transaction counts
-                $totalTransactionCount = Finance::where('date', '>=', $startDate)
+                // Transaction counts filtered by control panel
+                $totalTransactionCount = Finance::where('type_control', $controlPanel)
+                    ->where('date', '>=', $startDate)
                     ->where('date', '<=', $endDate)
                     ->count();
 
-                $monthlyTransactionCount = Finance::where('date', '>=', now()->startOfMonth())
+                $monthlyTransactionCount = Finance::where('type_control', $controlPanel)
+                    ->where('date', '>=', now()->startOfMonth())
                     ->where('date', '<=', now()->endOfMonth())
                     ->count();
 
@@ -307,6 +332,7 @@ class DashboardController extends Controller
                     'transaction_types' => $transactionTypes->toArray(),
                     'finance_years' => $financeYears->toArray(),
                     'recent_transactions' => $recentTransactions->toArray(),
+                    'control_panel' => $controlPanel,
                     'summary' => [
                         'total_income' => (int)($totalIncome + $totalPaymentIncome),
                         'total_expense' => (int)$totalExpense,
