@@ -586,11 +586,47 @@
                 </div>
                 <div class="modal-body">
                     @if ($journal->author_fee != 0)
+                        @php
+                            // Check payment year setting
+                            $isPaymentPeriodActive = false;
+                            $paymentPeriodMessage = '';
+                            $today = \Carbon\Carbon::now();
+
+                            if ($paymentYearSetting) {
+                                $startDate = \Carbon\Carbon::parse($paymentYearSetting->start_date);
+                                $endDate = \Carbon\Carbon::parse($paymentYearSetting->end_date);
+
+                                if ($today->lt($startDate)) {
+                                    $paymentPeriodMessage = 'Periode pembayaran untuk tahun ' . $issue->year . ' belum dimulai. Periode dimulai pada ' . $startDate->translatedFormat('d F Y') . '.';
+                                } elseif ($today->gt($endDate)) {
+                                    $paymentPeriodMessage = 'Periode pembayaran untuk tahun ' . $issue->year . ' sudah berakhir pada ' . $endDate->translatedFormat('d F Y') . '.';
+                                } else {
+                                    $isPaymentPeriodActive = true;
+                                }
+                            } else {
+                                $paymentPeriodMessage = 'Pengaturan periode pembayaran untuk tahun ' . $issue->year . ' belum dikonfigurasi.';
+                            }
+                        @endphp
+
                         <div class="mb-10">
                             <div class="mb-3">
                                 <label class="d-flex align-items-center fs-5 fw-semibold">
                                     <span class="required">Invoice</span>
                                 </label>
+
+                                @if (!$isPaymentPeriodActive)
+                                    <div class="alert alert-warning d-flex align-items-center p-5 mb-5">
+                                        <i class="ki-duotone ki-shield-tick fs-2hx text-warning me-4">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        <div class="d-flex flex-column">
+                                            <h4 class="mb-1 text-warning">Periode Pembayaran Tidak Aktif</h4>
+                                            <span>{{ $paymentPeriodMessage }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <div class="fs-7 fw-semibold text-muted">
                                     Tagihan 1 - 60% (@money($journal->author_fee * 0.6)) -
                                     @php
@@ -607,6 +643,7 @@
                                     @endif
                                 </div>
                             </div>
+                            @if ($isPaymentPeriodActive)
                             <div class="fv-row fv-plugins-icon-container mb-3">
                                 <div class="d-flex">
                                     <a href="{{ route('back.journal.invoice.mail-send1', $submission->id) }}"
@@ -627,6 +664,7 @@
                                     </a>
                                 </div>
                             </div>
+                            @endif
                             <div class="mb-3">
                                 <div class="fs-7 fw-semibold text-muted">
                                     Tagihan 2 - 40% (@money($journal->author_fee * 0.4)) -
@@ -644,6 +682,7 @@
                                     @endif
                                 </div>
                             </div>
+                            @if ($isPaymentPeriodActive)
                             <div class="fv-row fv-plugins-icon-container mb-3">
                                 <div class="d-flex">
                                     <a href="{{ route('back.journal.invoice.mail-send2', $submission->id) }}"
@@ -664,6 +703,7 @@
                                     </a>
                                 </div>
                             </div>
+                            @endif
                             <div class="mb-3">
                                 <div class="fs-7 fw-semibold text-muted">
                                     Tagihan 100% (@money($journal->author_fee)) -
@@ -683,6 +723,7 @@
                                     @endif
                                 </div>
                             </div>
+                            @if ($isPaymentPeriodActive)
                             <div class="fv-row fv-plugins-icon-container">
                                 <div class="d-flex">
                                     <a href="{{ route('back.journal.invoice.mail-send3', $submission->id) }}"
@@ -703,6 +744,7 @@
                                     </a>
                                 </div>
                             </div>
+                            @endif
                         </div>
                     @endif
                     <div class="mb-10">

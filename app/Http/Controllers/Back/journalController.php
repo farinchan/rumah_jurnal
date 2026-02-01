@@ -214,6 +214,9 @@ class journalController extends Controller
             return abort(404);
         }
 
+        // Get payment year setting based on issue year
+        $paymentYearSetting = \App\Models\PaymentYearSetting::where('year', $issue->year)->first();
+
         $data = [
             'title' => "Vol. " . $issue->volume . " No. " . $issue->number . " (" . $issue->year . "): " . $issue->title,
             'breadcrumbs' => [
@@ -235,6 +238,7 @@ class journalController extends Controller
             'issue' => $issue,
             'editors' => Editor::where('issue_id', $issue_id)->get(),
             'reviewers' => Reviewer::where('issue_id', $issue_id)->get(),
+            'paymentYearSetting' => $paymentYearSetting,
             // 'submissions' => $issue->submissions->pluck('submission_id'),
         ];
         // return response()->json($data);

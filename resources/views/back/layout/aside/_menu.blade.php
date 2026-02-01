@@ -516,6 +516,15 @@
                             </a>
                         </div>
                         <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs('back.setting.payment_year_settings')) active @endif"
+                                href="{{ route('back.setting.payment_year_settings') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Pembayaran Tahun</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
                             <a class="menu-link @if (request()->routeIs('back.setting.bot')) active @endif"
                                 href="{{ route('back.setting.bot') }}">
                                 <span class="menu-bullet">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
+use App\Models\PaymentYearSetting;
 use App\Models\SettingBanner;
 use App\Models\SettingBot;
 use App\Models\SettingWebsite;
@@ -147,7 +148,7 @@ class SettingController extends Controller
         $banner->title = $request->title;
         $banner->subtitle = $request->subtitle;
         $banner->url = $request->url;
-        $banner->status = $request->status?? false;
+        $banner->status = $request->status ?? false;
 
         if ($request->hasFile('image')) {
             if ($banner->image) {
@@ -265,4 +266,83 @@ class SettingController extends Controller
         return redirect()->back()->with('success', 'Pengaturan Bot AI berhasil diperbarui');
     }
 
+    public function paymentYearSettings()
+    {
+        $data = [
+            'title' => 'Payment Year Settings',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Setting',
+                    'link' => route('back.setting.website')
+                ],
+                [
+                    'name' => 'Payment Year Settings',
+                    'link' => route('back.setting.payment_year_settings')
+                ]
+            ],
+            'paymentYearSettings' => PaymentYearSetting::all(),
+        ];
+        return view('back.pages.setting.payment_year_settings', $data);
+    }
+
+    public function paymentYearSettingStore(Request $request)
+    {
+        $request->validate([
+            'year' => 'required|integer|unique:payment_year_settings,year',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $paymentYearSetting = new PaymentYearSetting();
+        $paymentYearSetting->year = $request->year;
+        $paymentYearSetting->start_date = $request->start_date;
+        $paymentYearSetting->end_date = $request->end_date;
+        $paymentYearSetting->save();
+
+        Alert::success('Berhasil', 'Payment Year Setting berhasil ditambahkan');
+        return redirect()->back()->with('success', 'Payment Year Setting berhasil ditambahkan');
+    }
+
+    public function paymentYearSettingDelete($id)
+    {
+        $paymentYearSetting = PaymentYearSetting::find($id);
+
+        if (!$paymentYearSetting) {
+            Alert::error('Error', 'Payment Year Setting tidak ditemukan');
+            return redirect()->back()->with('error', 'Payment Year Setting tidak ditemukan');
+        }
+
+        $paymentYearSetting->delete();
+
+        Alert::success('Berhasil', 'Payment Year Setting berhasil dihapus');
+        return redirect()->back()->with('success', 'Payment Year Setting berhasil dihapus');
+    }
+
+    public function paymentYearSettingUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'year' => 'required|integer|unique:payment_year_settings,year,' . $id,
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $paymentYearSetting = PaymentYearSetting::find($id);
+
+        if (!$paymentYearSetting) {
+            Alert::error('Error', 'Payment Year Setting tidak ditemukan');
+            return redirect()->back()->with('error', 'Payment Year Setting tidak ditemukan');
+        }
+
+        $paymentYearSetting->year = $request->year;
+        $paymentYearSetting->start_date = $request->start_date;
+        $paymentYearSetting->end_date = $request->end_date;
+        $paymentYearSetting->save();
+
+        Alert::success('Berhasil', 'Payment Year Setting berhasil diperbarui');
+        return redirect()->back()->with('success', 'Payment Year Setting berhasil diperbarui');
+    }
 }

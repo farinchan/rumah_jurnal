@@ -375,6 +375,11 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
 
         Route::get('/bot', [BackSettingController::class, 'bot'])->name('bot');
         Route::put('/bot', [BackSettingController::class, 'botUpdate'])->name('bot.update');
+
+        Route::get('/payment-year-settings', [BackSettingController::class, 'paymentYearSettings'])->name('payment_year_settings');
+        Route::post('/payment-year-settings', [BackSettingController::class, 'paymentYearSettingStore'])->name('payment_year_settings.store');
+        Route::put('/payment-year-settings/{id}', [BackSettingController::class, 'paymentYearSettingUpdate'])->name('payment_year_settings.update');
+        Route::delete('/payment-year-settings/{id}', [BackSettingController::class, 'paymentYearSettingDelete'])->name('payment_year_settings.delete');
     });
 
     // Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
