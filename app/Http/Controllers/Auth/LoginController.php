@@ -58,11 +58,10 @@ class LoginController extends Controller
 
         if (Auth::attempt([$loginType => $request->input('login'), 'password' => $request->input('password')], false)) {
             $user = Auth::user();
+            $isTwoFactorEnabled = (bool) data_get(config('auth'), 'two_factor.enabled', true);
 
             // Check if user has admin roles that require 2FA
-            if ($user->roles()->doesntExist()) {
-                return redirect()->intended('/');
-            } else {
+            if ($isTwoFactorEnabled && $user->roles()->exists()) {
                 Auth::logout();
                 session(['2fa:user:id' => $user->id]);
                 session(['2fa:remember' => $request->has('remember')]);
@@ -70,7 +69,8 @@ class LoginController extends Controller
                 return redirect()->route('2fa.select-method');
             }
 
-            // For regular users, login directly
+            // For regular users, or when 2FA is disabled, login directly
+            return redirect()->intended('/');
 
         }
 

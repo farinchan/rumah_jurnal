@@ -16,6 +16,10 @@ class TwoFactorAuthentication
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (!(bool) data_get(config('auth'), 'two_factor.enabled', true)) {
+            return $next($request);
+        }
+
         $user = Auth::user();
 
         // Check if user is authenticated and has admin roles
