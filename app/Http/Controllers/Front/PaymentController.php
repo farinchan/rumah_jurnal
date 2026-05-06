@@ -120,6 +120,7 @@ class PaymentController extends Controller
         if ($submission->issue->journal->url_path != $journal->url_path) {
             abort(404);
         }
+
         $setting_web = SettingWebsite::first();
         $data = [
             'title' => __('front.payment') . ' - Submission ID ' . $submission->submission_id,
@@ -198,6 +199,12 @@ class PaymentController extends Controller
         if ($validator->fails()) {
             Alert::error('Error', $validator->errors()->all());
             return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $paymentCheck = Payment::where('payment_invoice_id', $request->payment_invoice_id)->where('payment_status', 'pending')->first();
+        if ($paymentCheck) {
+            Alert::error('Error', 'Pembayaran pending sudah ada untuk invoice ini. Silakan tunggu hingga diproses sebelum mengirimkan pembayaran lain.');
+            return redirect()->back()->withInput();
         }
 
         $paayment = new Payment();
