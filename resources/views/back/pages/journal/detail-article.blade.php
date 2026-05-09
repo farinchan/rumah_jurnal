@@ -85,7 +85,7 @@
                                                     {{ $editor->affiliation }}
                                                 </li>
                                             @empty
-                                                <li style="list-style: none" class="text-muted">Reviewer belum ditambahkan
+                                                <li style="list-style: none" class="text-muted">Editor belum ditambahkan
                                                 </li>
                                             @endforelse
                                         </ul>
@@ -471,10 +471,16 @@
                                                 <th colspan="4">INVOICE
                                                     {{ $invoice->invoice_number }}/JRNL/UINSMDD/{{ $invoice->created_at->format('Y') }}
                                                     <br>
+                                                   @php
+                                                        $percentLabel = $invoice->is_custom
+                                                            ? 'Custom 100%'
+                                                            : (is_null($invoice->payment_percent)
+                                                                ? '100%'
+                                                                : $invoice->payment_percent . '%');
+                                                    @endphp
                                                     <span class="text-muted fs-7">
-                                                        ({{ $invoice->payment_percent }}%)
+                                                        ({{ $percentLabel }})
                                                         - @money($invoice->payment_amount)
-
                                                     </span>
                                                 </th>
                                             </tr>
@@ -706,12 +712,16 @@
                             @endif
                             <div class="mb-3">
                                 <div class="fs-7 fw-semibold text-muted">
-                                    Tagihan 100% (@money($journal->author_fee)) -
-                                    @php
-                                        $tagihan3 = $submission->paymentInvoices
-                                            ->where('payment_percent', 100)
-                                            ->first();
+                                      @php
+                                        $tagihan3 = $submission->paymentInvoices->first(function ($invoice) {
+                                            return (int) $invoice->payment_percent === 100 && !$invoice->is_custom;
+                                        });
+                                        $tagihan3_amount = $tagihan3 ? $tagihan3->payment_amount : $journal->author_fee;
+                                        $tagihan_custom = $submission->paymentInvoices->first(function ($invoice) {
+                                            return (int) $invoice->payment_percent === 100 && $invoice->is_custom;
+                                        });
                                     @endphp
+                                    Tagihan 3 - (100%) (@money($tagihan3_amount)) -
                                     @if ($tagihan3)
                                         @if ($tagihan3->is_paid)
                                             <span class="text-success fs-7 fw-bold">Lunas</span>
@@ -724,7 +734,7 @@
                                 </div>
                             </div>
                             @if ($isPaymentPeriodActive)
-                            <div class="fv-row fv-plugins-icon-container">
+                            <div class="fv-row fv-plugins-icon-container mb-3">
                                 <div class="d-flex">
                                     <a href="{{ route('back.journal.invoice.mail-send3', $submission->id) }}"
                                         class="btn btn-light w-100 mx-3 btn-loading">
@@ -744,6 +754,55 @@
                                     </a>
                                 </div>
                             </div>
+                            @endif
+                            <div class="mb-3">
+                                <div class="fs-7 fw-semibold text-muted">
+                                    @if ($tagihan_custom)
+                                        Tagihan Custom (100%) (@money($tagihan_custom->payment_amount)) -
+                                        @if ($tagihan_custom->is_paid)
+                                            <span class="text-success fs-7 fw-bold">Lunas</span>
+                                        @else
+                                            <span class="text-warning fs-7 fw-bold">Belum Dibayar</span>
+                                        @endif
+                                    @else
+                                        Tagihan Custom (100%) - <span class="text-danger fw-bold">Belum Terbit</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if ($tagihan_custom)
+                                <div class="fv-row fv-plugins-icon-container mb-3">
+                                    <div class="d-flex">
+                                        <a href="{{ route('back.journal.invoice.custom.mail-send', $tagihan_custom->id) }}"
+                                            class="btn btn-light w-100 mx-3 btn-loading">
+                                            <i class="ki-duotone ki-send fs-2 ">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            Kirim ke Author
+                                        </a>
+                                        <a href="{{ route('back.journal.invoice.custom.generate', $tagihan_custom->id) }}"
+                                            class="btn btn-light w-100 mx-3">
+                                            <i class="ki-duotone ki-file-down fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="fv-row fv-plugins-icon-container mb-3">
+                                    <form action="{{ route('back.journal.invoice.custom.store', $submission->id) }}"
+                                        method="POST" class="d-flex align-items-center">
+                                        @csrf
+                                        <input type="number" name="custom_amount" min="1" step="1"
+                                            class="form-control form-control-solid me-3"
+                                            value="{{ $tagihan_custom ? $tagihan_custom->payment_amount : '' }}"
+                                            placeholder="Jumlah tagihan custom 100%" required />
+                                        <button type="submit" class="btn btn-light">Buat</button>
+                                    </form>
+                                </div>
                             @endif
                         </div>
                     @endif

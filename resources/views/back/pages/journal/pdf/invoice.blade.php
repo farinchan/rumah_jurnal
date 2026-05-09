@@ -70,10 +70,15 @@
             </tr>
         </table>
         </p>
+        @php
+            $percentLabel = ($is_custom ?? false)
+                ? 'Custom 100%'
+                : (is_null($payment_percent) ? '100%' : $payment_percent . '%');
+        @endphp
 
         <p style="margin-top: 20px;">
             Has made an administration payment to {{ $journal }}
-            with an amount of <strong> {{ $payment_percent }}% - @money($payment_amount)</strong> Please transfer your payment via <strong>Bank
+            with an amount of <strong> {{ $percentLabel }} - @money($payment_amount)</strong> Please transfer your payment via <strong>Bank
                 {{ $payment_account->bank }} - Nomor Rekening : {{ $payment_account->account_number }} - An.
                 {{ $payment_account->account_name }}.</strong> Payment Deadline is
             <strong>{{ $payment_due_date }}.</strong>

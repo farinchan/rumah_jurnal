@@ -268,6 +268,10 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/invoice/submission/{id}/mail-send-1', [BackJournalController::class, 'invoiceMailSend1'])->name('invoice.mail-send1');
         Route::get('/invoice/submission/{id}/mail-send-2', [BackJournalController::class, 'invoiceMailSend2'])->name('invoice.mail-send2');
         Route::get('/invoice/submission/{id}/mail-send-3', [BackJournalController::class, 'invoiceMailSend3'])->name('invoice.mail-send3');
+        Route::post('/invoice/submission/{id}/custom', [BackJournalController::class, 'invoiceCustomStore'])->name('invoice.custom.store');
+        Route::get('/invoice/custom/{invoice_id}/generate', [BackJournalController::class, 'invoiceGenerateCustom'])->name('invoice.custom.generate');
+        Route::get('/invoice/custom/{invoice_id}/mail-send', [BackJournalController::class, 'invoiceMailSendCustom'])->name('invoice.custom.mail-send');
+
 
 
         Route::get('/{journal_path}/issue/{issue_id}/editor', [BackJournalController::class, 'editorIndex'])->name('editor.index');
