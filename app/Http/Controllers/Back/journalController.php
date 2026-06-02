@@ -1134,6 +1134,27 @@ class journalController extends Controller
         return redirect()->back();
     }
 
+    public function invoiceDestroy($invoiceId)
+    {
+        $invoice = PaymentInvoice::find($invoiceId);
+        if (!$invoice) {
+            Alert::error('Error', 'Invoice tidak ditemukan');
+            return redirect()->back();
+        }
+
+        if ($invoice->is_paid) {
+            Alert::error('Error', 'Invoice yang sudah lunas tidak dapat dibatalkan');
+            return redirect()->back();
+        }
+
+        // Hapus semua payment terkait invoice ini
+        $invoice->payments()->delete();
+        $invoice->delete();
+
+        Alert::success('Success', 'Invoice berhasil dibatalkan');
+        return redirect()->back();
+    }
+
     public function invoiceGenerateCustom($invoiceId)
     {
         $invoice = PaymentInvoice::find($invoiceId);

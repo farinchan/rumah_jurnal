@@ -271,7 +271,7 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::post('/invoice/submission/{id}/custom', [BackJournalController::class, 'invoiceCustomStore'])->name('invoice.custom.store');
         Route::get('/invoice/custom/{invoice_id}/generate', [BackJournalController::class, 'invoiceGenerateCustom'])->name('invoice.custom.generate');
         Route::get('/invoice/custom/{invoice_id}/mail-send', [BackJournalController::class, 'invoiceMailSendCustom'])->name('invoice.custom.mail-send');
-
+        Route::delete('/invoice/{invoice_id}/destroy', [BackJournalController::class, 'invoiceDestroy'])->name('invoice.destroy');
 
 
         Route::get('/{journal_path}/issue/{issue_id}/editor', [BackJournalController::class, 'editorIndex'])->name('editor.index');
