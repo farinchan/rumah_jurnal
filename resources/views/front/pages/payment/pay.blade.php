@@ -178,7 +178,7 @@
                                         <select class="nice-select" name="payment_invoice_id" required>
                                             @forelse ($payment_invoices as $invoice)
                                                 <option value="{{ $invoice->id }}" int="{{ $invoice->payment_amount }}"
-                                                    percentage="{{ $invoice->payment_percent }}"
+                                                    percentage="{{ $invoice->payment_percent }}" number="{{ $invoice->invoice_number }}"
                                                     {{ old('payment_invoice_id') == $invoice->id ? 'selected' : '' }}>
                                                     INVOICE
                                                     {{ $invoice->invoice_number }}/JRNL/UINSMDD/{{ $invoice->created_at->format('Y') }}
@@ -200,9 +200,9 @@
                                     <div>
                                         {{ __('front.payment_information_amount') }}
                                     </div>
-                                    <div class="ltn__checkout-single-content ltn__coupon-code-wrap">
+                                    <div class="ltn__checkout-single-content ltn__coupon-code-wrap" style="margin-bottom: 0">
 
-                                        <h5> {{ __('front.percentage') }}:
+                                        <h5 style="margin-bottom: 0px;"> {{ __('front.percentage') }}:
                                             <a style="color: #f00; font-weight: 900" id="payment_amount_percentage">
                                                 0
                                             </a>
@@ -213,6 +213,10 @@
                                             </a>
                                         </h5>
                                     </div>
+                                     <div style="margin-bottom: 30px">
+                                        <strong>Catatan Penting: </strong> jumlah yang di transfer harus sesuai dengan jumlah yang tertera dan ada tambahan kode unik di belakang nominal transfer untuk memudahkan proses verifikasi.
+                                    </div>
+
                                     <h6>{{ __('front.payment_proff') }}</h6>
 
                                     <input type="file" id="myFile" name="payment_file"
@@ -467,11 +471,16 @@
         $(document).ready(function() {
             $('select[name="payment_invoice_id"]').on('change', function() {
                 var selectedOption = $(this).find('option:selected');
-                var intValue = selectedOption.attr('int');
+                var intValue = parseFloat(selectedOption.attr('int')) || 0;
+                var totalValue = intValue
                 var formattedValue = new Intl.NumberFormat('id-ID', {
                     style: 'currency',
                     currency: 'IDR'
-                }).format(intValue);
+                }).format(totalValue);
+                // Remove trailing ",00" if present (e.g., "Rp1.000,00" -> "Rp1.000")
+                if (formattedValue.endsWith(',00')) {
+                    formattedValue = formattedValue.replace(/,00$/, '');
+                }
                 var percentage = selectedOption.attr('percentage');
 
                 $('#payment_amount_int').text(formattedValue);
