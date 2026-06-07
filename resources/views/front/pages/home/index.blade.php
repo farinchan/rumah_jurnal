@@ -152,8 +152,11 @@
                     <div class="about-us-info-wrap">
                         <div class="section-title-area ltn__section-title-2">
                             <h6 class="section-subtitle ltn__secondary-color"><span><i
-                                        class="fas fa-square-full"></i></span> {{ __('front.about_us') }}</h6>
-                            <h1 class="section-title">{{ $welcome_speech?->name ?? '-' }}</h1>
+                                        class="fas fa-square-full"></i></span> {{ $welcome_speech?->name ?? 'About Us' }}</h6>
+                            <h2 class="section-title" style="margin-bottom: 0px; font-size: 3rem;">
+                                {{ $welcome_speech?->title ?? '-' }}
+                            </h2>
+                            <h4 style="font-size: 1.5rem;">{{ $welcome_speech?->subtitle ?? '-' }}</h4>
 
                         </div>
                         <p>
@@ -165,7 +168,7 @@
                                                                             <small>/ Shop Director</small> -->
                                 <div class="btn-wrapper mt-0">
                                     <a class="btn theme-btn-2 btn-effect-1"
-                                        href="about.html">{{ __('front.read_more') }}</a>
+                                        href="{{ route('welcome.speech') }}">{{ __('front.read_more') }}</a>
                                 </div>
                             </div>
                         </div>

@@ -7,6 +7,7 @@ use App\Models\WelcomeSpeech;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Str;
 
 class WelcomeSpeechController extends Controller
 {
@@ -34,12 +35,16 @@ class WelcomeSpeechController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
+            'title' => 'required|max:255',
+            'subtitle' => 'nullable|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'content' => 'required',
         ], [
             'name.required' => 'Nama wajib diisi',
             'name.max' => 'Nama maksimal 255 karakter',
-            'image.required' => 'Gambar wajib diisi',
+            'title.required' => 'Judul Utama wajib diisi',
+            'title.max' => 'Judul Utama maksimal 255 karakter',
+            'subtitle.max' => 'Subjudul maksimal 255 karakter',
             'image.image' => 'Gambar harus berupa gambar',
             'image.mimes' => 'Gambar harus berformat jpeg, png, jpg, gif, svg',
             'image.max' => 'Ukuran gambar maksimal 2MB',
@@ -51,28 +56,23 @@ class WelcomeSpeechController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $sekapur_sirih = WelcomeSpeech::first();
-
-
-
-        if (!$sekapur_sirih) {
-            $sekapur_sirih = new WelcomeSpeech();
-        }
+        $data = [
+            'name' => $request->name,
+            'title' => $request->title,
+            'subtitle' => $request->subtitle,
+            'content' => $request->content,
+        ];
 
         if ($request->hasFile('image')) {
-            $sekapur_sirih->fill([
-                'name' => $request->name,
-                'image' => $request->file('image')->storeAs('sekapur_sirih', 'sekapur_sirih.' . $request->file('image')->extension(), 'public'),
-                'content' => $request->content,
-            ]);
-        } else {
-            $sekapur_sirih->fill([
-                'name' => $request->name,
-                'content' => $request->content,
-            ]);
+            $file = $request->file('image');
+            $filename = Str::random(20) . '.' . $file->extension();
+            $data['image'] = $file->storeAs('sekapur_sirih', $filename, 'public');
         }
 
-        $sekapur_sirih->save();
+        WelcomeSpeech::updateOrCreate(
+            ['id' => WelcomeSpeech::first()?->id],
+            $data
+        );
 
         Alert::success('Berhasil', 'Data berhasil diupdate');
         return redirect()->route('back.welcomeSpeech.index');
