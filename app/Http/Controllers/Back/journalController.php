@@ -403,6 +403,22 @@ class journalController extends Controller
         $files = [];
 
         foreach ($submission->authors as $author) {
+            $validationUrl = route('loa.validate', [
+                'submission_id' => $submission->id,
+                'author_id' => $author['id']
+            ]);
+
+            $qrCodeBase64 = null;
+            try {
+                $qrCodeApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($validationUrl);
+                $qrCodeResponse = Http::timeout(10)->get($qrCodeApiUrl);
+                if ($qrCodeResponse->successful()) {
+                    $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeResponse->body());
+                }
+            } catch (\Throwable $th) {
+                Log::error('Failed to generate QR Code for LoA validation: ' . $th->getMessage());
+            }
+
             $data = [
                 'number' => $submission->number ?? "0000",
                 'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
@@ -415,6 +431,7 @@ class journalController extends Controller
                 'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
                 'chief_editor' => $issue->journal->editor_chief_name,
                 'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
+                'qr_code' => $qrCodeBase64,
             ];
             $datas[] = $data;
 
@@ -484,6 +501,22 @@ class journalController extends Controller
 
         foreach ($submission->authors as $author) {
             if ($author['email']) {
+                $validationUrl = route('loa.validate', [
+                    'submission_id' => $submission->id,
+                    'author_id' => $author['id']
+                ]);
+
+                $qrCodeBase64 = null;
+                try {
+                    $qrCodeApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($validationUrl);
+                    $qrCodeResponse = Http::timeout(10)->get($qrCodeApiUrl);
+                    if ($qrCodeResponse->successful()) {
+                        $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeResponse->body());
+                    }
+                } catch (\Throwable $th) {
+                    Log::error('Failed to generate QR Code for LoA validation: ' . $th->getMessage());
+                }
+
                 $data = [
                     'subject' => 'Letter of Acceptance (LoA) for ' . $author['name'],
                     'number' => $submission->number ?? "0000",
@@ -499,6 +532,7 @@ class journalController extends Controller
                     'chief_editor' => $issue->journal->editor_chief_name,
                     'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
                     'setting_web' => SettingWebsite::first(),
+                    'qr_code' => $qrCodeBase64,
                 ];
 
                 // if (Storage::exists('arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf')) {

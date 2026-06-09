@@ -51,6 +51,13 @@
 
     <img style="position: absolute; bottom: 190; left: 40;  width: 120px;" src="{{ $journal_thumbnail }}" alt="">
 
+    @if(isset($qr_code) && $qr_code)
+        <div style="position: absolute; bottom: 70; left: 40; text-align: center; width: 120px;">
+            <img src="{{ $qr_code }}" style="width: 70px; height: 70px;" alt="QR Code Validation">
+            <p style="font-size: 8px; margin: 3px 0 0 0; color: #555; line-height: 1.2;">Pindai untuk validasi LoA<br><span style="color: #999; font-style: italic;">Scan to verify LoA</span></p>
+        </div>
+    @endif
+
     <div class="signature" style="position: absolute; bottom: 190; left: 295; ">
         <p style="margin-bottom: -10px" >Bukittinggi, {{ $date }}</p>
         <p>Editor in Chief,</p>

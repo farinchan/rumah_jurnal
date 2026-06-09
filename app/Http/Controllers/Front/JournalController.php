@@ -70,4 +70,57 @@ class JournalController extends Controller
         ];
         return view('front.pages.journal.detail', $data);
     }
+
+    public function loaValidate(Request $request)
+    {
+        $setting_web = SettingWebsite::first();
+
+        $submissionId = $request->query('submission_id');
+        $authorId = $request->query('author_id');
+
+        $submission = null;
+        $author = null;
+        $isValid = false;
+
+        if ($submissionId && $authorId) {
+            $submission = \App\Models\Submission::with('issue.journal')->find($submissionId);
+
+            if ($submission) {
+                $authors = $submission->authors;
+                foreach ($authors as $auth) {
+                    if (isset($auth['id']) && $auth['id'] == $authorId) {
+                        $author = $auth;
+                        $isValid = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $data = [
+            'title' => 'Validasi Letter of Acceptance (LoA) | ' . $setting_web->name,
+            'meta' => [
+                'title' => 'Validasi Letter of Acceptance (LoA) | ' . $setting_web->name,
+                'description' => 'Verifikasi keaslian Letter of Acceptance (LoA) dari Rumah Jurnal.',
+                'keywords' => $setting_web->name . ', Validasi LoA, Letter of Acceptance, Verification, Authenticity',
+                'favicon' => $setting_web->favicon
+            ],
+            'breadcrumbs' => [
+                [
+                    'name' => 'Beranda',
+                    'link' => route('home')
+                ],
+                [
+                    'name' => 'Validasi LoA',
+                    'link' => route('loa.validate')
+                ]
+            ],
+            'setting_web' => $setting_web,
+            'submission' => $submission,
+            'author' => $author,
+            'isValid' => $isValid
+        ];
+
+        return view('front.pages.journal.loa_validate', $data);
+    }
 }

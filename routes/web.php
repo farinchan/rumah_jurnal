@@ -122,6 +122,8 @@ Route::prefix('journal')->name('journal.')->group(function () {
     Route::get('/{journal_path}', [JournalController::class, 'detail'])->name('detail');
 });
 
+Route::get('/loa/validate', [JournalController::class, 'loaValidate'])->name('loa.validate');
+
 Route::prefix('payment')->name('payment.')->group(function () {
     Route::get('/', [PaymentController::class, 'index'])->name('index');
     Route::get('/{journal_path}/submission/{submission_id}', [PaymentController::class, 'submission'])->name('submission');
