@@ -201,6 +201,7 @@ class LogsController extends Controller
                             data-event="' . e($activity->event) . '"
                             data-subject="' . e($activity->subject_type ? class_basename($activity->subject_type) : '-') . '"
                             data-subject-id="' . e($activity->subject_id ?? '-') . '"
+                            data-subject-type-full="' . e($activity->subject_type ?? '') . '"
                             data-causer="' . e($activity->causer ? $activity->causer->name : 'System') . '"
                             data-time="' . $activity->created_at->format('d M Y H:i:s') . '">
                             <i class="ki-duotone ki-eye fs-4">
@@ -229,5 +230,35 @@ class LogsController extends Controller
             ])
             ->rawColumns(['causer_info', 'event_badge', 'log_name_badge', 'description_info', 'subject_info', 'properties_info', 'created_at_formatted'])
             ->make(true);
+    }
+
+    public function getSubjectData(Request $request)
+    {
+        $subjectType = $request->subject_type;
+        $subjectId = $request->subject_id;
+
+        if (!$subjectType || !$subjectId) {
+            return response()->json(['success' => false, 'message' => 'Parameter tidak lengkap'], 400);
+        }
+
+        // Pastikan class model valid dan exists
+        if (!class_exists($subjectType)) {
+            return response()->json(['success' => false, 'message' => 'Model tidak ditemukan'], 404);
+        }
+
+        $record = $subjectType::find($subjectId);
+
+        if (!$record) {
+            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan atau sudah dihapus', 'data' => null]);
+        }
+
+        // Sembunyikan field sensitif
+        $data = $record->toArray();
+        $hiddenFields = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
+        foreach ($hiddenFields as $field) {
+            unset($data[$field]);
+        }
+
+        return response()->json(['success' => true, 'data' => $data]);
     }
 }

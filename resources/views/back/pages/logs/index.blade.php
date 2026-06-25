@@ -369,19 +369,26 @@
                             </div>
                         </div>
 
-                        {{-- Raw JSON fallback --}}
-                        <div id="raw_json_section" class="d-none">
+                        {{-- Output Sekarang --}}
+                        <div id="current_output_section" class="d-none">
                             <h5 class="fw-bold text-primary mb-3">
-                                <i class="ki-duotone ki-code fs-4 text-primary">
+                                <i class="ki-duotone ki-document fs-4 text-primary">
                                     <span class="path1"></span>
                                     <span class="path2"></span>
-                                    <span class="path3"></span>
-                                    <span class="path4"></span>
                                 </i>
-                                Raw Data (JSON)
+                                Data Sekarang
                             </h5>
-                            <pre id="raw_json" class="bg-light-primary p-4 rounded fs-7"
-                                style="max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;"></pre>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped fs-7">
+                                    <thead class="bg-light-primary">
+                                        <tr>
+                                            <th class="fw-bold" width="30%">Attribute</th>
+                                            <th class="fw-bold">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="current_output_body"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -516,6 +523,7 @@
             var event = $(this).data('event');
             var subject = $(this).data('subject');
             var subjectId = $(this).data('subject-id');
+            var subjectTypeFull = $(this).data('subject-type-full');
             var causer = $(this).data('causer');
             var time = $(this).data('time');
 
@@ -536,18 +544,16 @@
             $('#old_attributes_section').addClass('d-none');
             $('#new_attributes_section').addClass('d-none');
             $('#comparison_section').addClass('d-none');
-            $('#raw_json_section').addClass('d-none');
+            $('#current_output_section').addClass('d-none');
             $('#old_attributes_body').html('');
             $('#new_attributes_body').html('');
             $('#comparison_body').html('');
-            $('#raw_json').text('');
+            $('#current_output_body').html('');
 
             if (typeof properties === 'string') {
                 try {
                     properties = JSON.parse(properties);
                 } catch (e) {
-                    $('#raw_json_section').removeClass('d-none');
-                    $('#raw_json').text(properties);
                     return;
                 }
             }
@@ -625,9 +631,57 @@
                 }
             }
 
-            // Selalu tampilkan Raw JSON di bawah
-            $('#raw_json_section').removeClass('d-none');
-            $('#raw_json').text(JSON.stringify(properties, null, 2));
+            // Tampilkan Output Sekarang via AJAX (seluruh isi data)
+            if (subjectTypeFull && subjectId && subjectId !== '-') {
+                $('#current_output_section').removeClass('d-none');
+                $('#current_output_body').html(
+                    '<tr><td colspan="2" class="text-center text-muted py-4">' +
+                    '<span class="spinner-border spinner-border-sm me-2"></span> Memuat data...' +
+                    '</td></tr>'
+                );
+
+                $.ajax({
+                    url: '{{ route("back.logs.subject-data") }}',
+                    type: 'GET',
+                    data: {
+                        subject_type: subjectTypeFull,
+                        subject_id: subjectId
+                    },
+                    success: function(response) {
+                        $('#current_output_body').html('');
+                        if (response.success && response.data) {
+                            $.each(response.data, function(key, value) {
+                                var displayValue;
+                                if (value === null || value === undefined || value === '') {
+                                    displayValue = '<span class="text-muted fst-italic">kosong</span>';
+                                } else if (typeof value === 'object') {
+                                    displayValue = '<code class="fs-8">' + escapeHtml(JSON.stringify(value, null, 2)) + '</code>';
+                                } else {
+                                    displayValue = escapeHtml(String(value));
+                                }
+                                $('#current_output_body').append(
+                                    '<tr><td class="fw-semibold">' + escapeHtml(key) +
+                                    '</td><td>' + displayValue + '</td></tr>'
+                                );
+                            });
+                        } else {
+                            $('#current_output_body').html(
+                                '<tr><td colspan="2" class="text-center text-muted py-3">' +
+                                '<i class="ki-duotone ki-information-3 fs-4 text-warning me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> ' +
+                                (response.message || 'Data tidak ditemukan atau sudah dihapus') +
+                                '</td></tr>'
+                            );
+                        }
+                    },
+                    error: function() {
+                        $('#current_output_body').html(
+                            '<tr><td colspan="2" class="text-center text-danger py-3">' +
+                            'Gagal memuat data' +
+                            '</td></tr>'
+                        );
+                    }
+                });
+            }
         });
 
         function escapeHtml(text) {

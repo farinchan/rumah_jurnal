@@ -432,5 +432,6 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
     Route::prefix('logs')->name('logs.')->group(function () {
         Route::get('/', [BackLogsController::class, 'index'])->name('index');
         Route::get('/datatable', [BackLogsController::class, 'datatable'])->name('datatable');
+        Route::get('/subject-data', [BackLogsController::class, 'getSubjectData'])->name('subject-data');
     });
 });
