@@ -28,6 +28,7 @@ use App\Http\Controllers\Back\MenuProfilController as BackMenuProfilController;
 use App\Http\Controllers\Back\UserController as BackUserController;
 use App\Http\Controllers\Back\MessageController as BackMessageController;
 use App\Http\Controllers\Back\SettingController as BackSettingController;
+use App\Http\Controllers\Back\LogsController as BackLogsController;
 use App\Http\Controllers\Front\AccountController;
 use App\Http\Controllers\Front\TeamController;
 
@@ -426,5 +427,10 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
     Route::prefix('email')->name('email.')->group(function () {
         Route::post('/send-mail', [EmailController::class, 'sendEmail'])->name('send-mail');
         Route::post('/send-multi-mail', [EmailController::class, 'sendEmailMultiple'])->name('send-multi-mail');
+    });
+
+    Route::prefix('logs')->name('logs.')->group(function () {
+        Route::get('/', [BackLogsController::class, 'index'])->name('index');
+        Route::get('/datatable', [BackLogsController::class, 'datatable'])->name('datatable');
     });
 });

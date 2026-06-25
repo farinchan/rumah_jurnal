@@ -422,6 +422,20 @@
                 </div>
             </div>
             @role('super-admin')
+                <div class="menu-item">
+                    <a class="menu-link @if (request()->routeIs('back.logs.*')) active @endif"
+                        href="{{ route('back.logs.index') }}">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-scroll fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">Activity Log</span>
+                    </a>
+                </div>
+
                 <div data-kt-menu-trigger="click"
                     class="menu-item menu-accordion @if (request()->routeIs('back.chatery-whatsapp.*')) here show @endif">
                     <span class="menu-link">
