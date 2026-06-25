@@ -209,7 +209,7 @@ class journalController extends Controller
             return abort(404);
         }
 
-        $issue = Issue::with(['submissions.paymentInvoices'])->find($issue_id);
+        $issue = Issue::with(['submissions.paymentInvoices', 'submissions.editors', 'submissions.reviewers'])->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -239,6 +239,7 @@ class journalController extends Controller
             'editors' => Editor::where('issue_id', $issue_id)->get(),
             'reviewers' => Reviewer::where('issue_id', $issue_id)->get(),
             'paymentYearSetting' => $paymentYearSetting,
+            'allIssues' => Issue::where('journal_id', $journal->id)->where('id', '!=', $issue_id)->orderBy('year', 'desc')->orderBy('volume', 'desc')->orderBy('number', 'desc')->get(),
             // 'submissions' => $issue->submissions->pluck('submission_id'),
         ];
         // return response()->json($data);
@@ -320,6 +321,57 @@ class journalController extends Controller
         }
 
         Alert::success('Success', 'Artcle has been updated');
+        return redirect()->back();
+    }
+
+        public function articleMoveIssue(Request $request, $journal_path, $issue_id, $id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::with('submissions')->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $submission = $issue->submissions()->find($id);
+        if (!$submission) {
+            return abort(404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'target_issue_id' => 'required|exists:issues,id',
+        ], [
+            'target_issue_id.required' => 'Issue tujuan harus dipilih',
+            'target_issue_id.exists' => 'Issue tujuan tidak ditemukan',
+        ]);
+
+        if ($validator->fails()) {
+            Alert::error('Error', $validator->errors()->first());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $targetIssue = Issue::find($request->target_issue_id);
+
+        // Pastikan target issue milik jurnal yang sama
+        if ($targetIssue->journal_id !== $journal->id) {
+            Alert::error('Error', 'Issue tujuan tidak ditemukan di jurnal ini');
+            return redirect()->back();
+        }
+
+        // Pastikan tidak pindah ke issue yang sama
+        if ($targetIssue->id == $issue->id) {
+            Alert::error('Error', 'Artikel sudah berada di issue ini');
+            return redirect()->back();
+        }
+
+        $submission->update([
+            'issue_id' => $targetIssue->id,
+        ]);
+
+        Alert::success('Success', 'Artikel berhasil dipindahkan ke Vol. ' . $targetIssue->volume . ' No. ' . $targetIssue->number . ' (' . $targetIssue->year . ')');
         return redirect()->back();
     }
 

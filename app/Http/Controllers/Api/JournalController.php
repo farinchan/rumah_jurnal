@@ -170,28 +170,47 @@ class JournalController extends Controller
         }
 
         try {
-            $response = Http::retry(3, 100)->timeout(120)->withHeaders([
-                'Accept' => 'application/json',
-                'Authorization' => 'Bearer ' . $jurnal->api_key
-            ])->get($jurnal->url . '/api/v1/submissions', [
-                'orderBy' => 'dateSubmitted',
-                'count' => 200,
-                'apiToken' => $jurnal->api_key
-            ]);
+            $allItems = [];
+            $perPage = 100;
+            $maxItems = 300;
+            $offset = 0;
 
-            if ($response->status() === 200) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Success',
-                    'data' => $response->json()["items"] ?? []
-                ], 200);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error',
-                    'error' => $response->json()["errorMessage"] ?? "something went wrong"
-                ], $response->status());
+            while ($offset < $maxItems) {
+                $response = Http::retry(3, 100)->timeout(120)->withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $jurnal->api_key
+                ])->get($jurnal->url . '/api/v1/submissions', [
+                    'orderBy' => 'dateSubmitted',
+                    'count' => $perPage,
+                    'offset' => $offset,
+                    'apiToken' => $jurnal->api_key
+                ]);
+
+                if ($response->status() !== 200) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error',
+                        'error' => $response->json()["errorMessage"] ?? "something went wrong"
+                    ], $response->status());
+                }
+
+                $items = $response->json()["items"] ?? [];
+                $allItems = array_merge($allItems, $items);
+
+                // Berhenti jika item yang dikembalikan kurang dari perPage (berarti sudah halaman terakhir)
+                if (count($items) < $perPage) {
+                    break;
+                }
+
+                $offset += $perPage;
             }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Success',
+                'total' => count($allItems),
+                'data' => $allItems
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
