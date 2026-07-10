@@ -181,6 +181,7 @@
                                                 <span class="path4"></span>
                                             </i>
                                         </a>
+                                        @role('super-admin|admin')
                                         <a href="#" class="btn btn-sm btn-light-danger my-1" data-bs-toggle="modal"
                                             data-bs-target="#modal_delete_article_{{ $submission->submission_id }}">
                                             <i class="ki-duotone ki-trash fs-2">
@@ -191,6 +192,7 @@
                                                 <span class="path5"></span>
                                             </i>
                                         </a>
+                                          @endrole
                                     </td>
                                 </tr>
                             @empty
