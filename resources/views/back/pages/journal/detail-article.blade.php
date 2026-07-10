@@ -935,7 +935,7 @@
                         url_path: "{{ $journal->url_path }}"
                     },
                     success: function(response) {
-                        console.log(response);
+                        // console.log(response);
                         // Filter out the submissions that are already in the issue
                         let filter_data = response.data.filter(item => {
                             return !submissions.map(Number).includes(item.id);
@@ -943,18 +943,23 @@
                         console.log(filter_data);
                         $('#list_article').html('');
                         filter_data.forEach(submission => {
+                            const publication = submission.publications?.[0] ?? {};
+                            const titleKey = "{{ $journal->ojs_version }}" == '3.3' ?
+                                'en_US' : 'en';
+                            const title = titleKey in publication.fullTitle ? publication.fullTitle[titleKey] : '';
+                            const authorsString = publication.authorsString ?? '';
                             $('#list_article').append(`
-                            <div class="border border-hover-primary p-7 rounded mb-7 submission-item" data-title="${submission.publications[0].fullTitle.en_US}" data-id="${submission.id}">
+                            <div class="border border-hover-primary p-7 rounded mb-7 submission-item" data-title="${title}" data-id="${submission.id}">
                                 <div class="d-flex flex-stack pb-3">
                                     <div class="d-flex">
                                         <div class="">
                                             <div class="d-flex align-items-center">
                                                 <a href="#" class="text-gray-900 fw-bold text-hover-primary fs-5 me-4">
-                                                    ${submission.publications[0].authorsString}
+                                                    ${authorsString}
                                                 </a>
                                             </div>
                                             <span class="text-muted fw-semibold mb-3">
-                                                ${submission.publications[0].fullTitle.en_US}
+                                                ${title}
                                             </span>
                                         </div>
                                     </div>

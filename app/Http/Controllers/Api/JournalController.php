@@ -66,14 +66,15 @@ class JournalController extends Controller
                     $jurnal->context_id = $response_another->json()["id"];
                     $jurnal->url = $response_another->json()["url"];
                     $jurnal->url_path = $url_path;
-                    $jurnal->title = $response_another->json()["name"]["en_US"] ?? $url_path;
-                    $jurnal->description = $response_another->json()["about"]["en_US"] ?? "No Description";
-                    $jurnal->thumbnail = $response_another->json()["journalThumbnail"]['en_US']['uploadName'] ?? null;
+                    $jurnal->title = $response_another->json()["name"][($ojs_version == '3.3') ? "en_US" : "en"] ?? $url_path;
+                    $jurnal->description = $response_another->json()["about"][($ojs_version == '3.3') ? "en_US" : "en"] ?? "No Description";
+                    $jurnal->thumbnail = $response_another->json()["journalThumbnail"][($ojs_version == '3.3') ? "en_US" : "en"]['uploadName'] ?? null;
                     $jurnal->onlineIssn = $response_another->json()["onlineIssn"] ?? null;
                     $jurnal->printIssn = $response_another->json()["printIssn"] ?? null;
                     $jurnal->api_key = $api_key;
                     $jurnal->ojs_version = $ojs_version;
                     $jurnal->last_sync = now();
+                    $jurnal->editor_chief_name = $response_another->json()["contactName"] ?? null;
                     $jurnal->type = $type;
                     $jurnal->save();
 
@@ -128,9 +129,9 @@ class JournalController extends Controller
             ]);
 
             if ($response->status() === 200) {
-                $jurnal->title = $response->json()["name"]["en_US"] ?? $jurnal->title;
-                $jurnal->description = $response->json()["about"]["en_US"] ?? $jurnal->description;
-                $jurnal->thumbnail = $response->json()["journalThumbnail"]['en_US']['uploadName'] ?? $jurnal->thumbnail;
+                $jurnal->title = $response->json()["name"][($jurnal->ojs_version == '3.3') ? "en_US" : "en"] ?? $jurnal->title;
+                $jurnal->description = $response->json()["about"][($jurnal->ojs_version == '3.3') ? "en_US" : "en"] ?? $jurnal->description;
+                $jurnal->thumbnail = $response->json()["journalThumbnail"][($jurnal->ojs_version == '3.3') ? "en_US" : "en"]['uploadName'] ?? $jurnal->thumbnail;
                 $jurnal->onlineIssn = $response->json()["onlineIssn"] ?? $jurnal->onlineIssn;
                 $jurnal->printIssn = $response->json()["printIssn"] ?? $jurnal->printIssn;
                 $jurnal->last_sync = now();

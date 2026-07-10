@@ -921,6 +921,7 @@
                         console.log(filter_data);
                         $('#list_article').html('');
                         filter_data.forEach(reviewer => {
+                            var affiliation = reviewer.affiliation.en_US ?? reviewer.affiliation.en ?? '';
                             $('#list_article').append(`
                         <div class="border border-hover-primary p-7 rounded mb-7 reviewer-item" data-name="${reviewer.fullName.toLowerCase()}">
                             <div class="d-flex flex-stack pb-3">
@@ -932,7 +933,7 @@
                                             </a>
                                         </div>
                                         <span class="text-muted fw-semibold mb-3">
-                                            ${reviewer.affiliation.en_US}
+                                            ${affiliation}
                                         </span>
                                     </div>
                                 </div>

@@ -323,7 +323,7 @@
                             <div class="col-md-12 mt-10">
                                 <label class="form-label">Versi OJS</label>
                                 <select name="ojs_version" class="form-select">
-                                    <option value="3.4" disabled>OJS 3.4 - coming soon</option>
+                                    <option value="3.5">OJS 3.5</option>
                                     <option value="3.3">OJS 3.3</option>
                                     <option value="3.2" disabled>OJS 3.2</option>
                                 </select>
