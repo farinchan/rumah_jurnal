@@ -31,6 +31,7 @@ use App\Http\Controllers\Back\SettingController as BackSettingController;
 use App\Http\Controllers\Back\LogsController as BackLogsController;
 use App\Http\Controllers\Front\AccountController;
 use App\Http\Controllers\Front\TeamController;
+use App\Http\Controllers\Front\ManuscriptSubmissionController;
 
 Route::get('generate-storage', function () {
     \Illuminate\Support\Facades\Artisan::call('storage:link');
@@ -135,6 +136,16 @@ Route::prefix('payment')->name('payment.')->group(function () {
 Route::prefix('contact')->name('contact.')->group(function () {
     Route::get('/', [ContactController::class, 'index'])->name('index');
     Route::post('/', [ContactController::class, 'send'])->name('send');
+});
+
+Route::prefix('manuscript-submission')->name('manuscript-submission.')->group(function () {
+    Route::get('/', [ManuscriptSubmissionController::class, 'create'])->name('create');
+    Route::post('/', [ManuscriptSubmissionController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('store');
+    Route::get('/success/{submission_code}', [ManuscriptSubmissionController::class, 'success'])
+        ->whereUuid('submission_code')
+        ->name('success');
 });
 
 Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(function () {
