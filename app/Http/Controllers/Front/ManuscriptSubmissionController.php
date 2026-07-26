@@ -9,6 +9,8 @@ use App\Models\Journal;
 use App\Models\SettingWebsite;
 use App\Models\User;
 use App\Models\WaitingSubmission;
+use App\Services\MailRecipientService;
+use App\Services\WhatsappService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +23,11 @@ use RealRashid\SweetAlert\Facades\Alert;
 
 class ManuscriptSubmissionController extends Controller
 {
+    public function __construct(
+        private readonly WhatsappService $whatsappService,
+        private readonly MailRecipientService $mailRecipientService
+    ) {}
+
     public function create(): View
     {
         $settingWeb = SettingWebsite::first();
@@ -173,7 +180,8 @@ class ManuscriptSubmissionController extends Controller
         $submission = WaitingSubmission::create($validated);
 
         try {
-            Mail::to($submission->email)->send(new ManuscriptSubmissionReceivedMail($submission));
+            Mail::to($this->mailRecipientService->resolve($submission->email))
+                ->send(new ManuscriptSubmissionReceivedMail($submission));
         } catch (\Throwable $exception) {
             Log::error('Failed to send manuscript submission confirmation email.', [
                 'submission_id' => $submission->id,
@@ -183,6 +191,7 @@ class ManuscriptSubmissionController extends Controller
             ]);
         }
 
+        $this->notifyAuthorWhatsapp($submission);
         $this->notifyJournalEditors($submission);
 
         Alert::success('Submission received', 'Your manuscript information has been saved successfully.');
@@ -234,7 +243,10 @@ class ManuscriptSubmissionController extends Controller
                 $roleQuery->where('name', 'editor')
                     ->where('guard_name', 'web');
             })
-            ->whereNotNull('email')
+            ->where(function ($contactQuery) {
+                $contactQuery->whereNotNull('email')
+                    ->orWhereNotNull('phone');
+            })
             ->where(function ($query) use ($journalPermission) {
                 $permissionFilter = function ($permissionQuery) use ($journalPermission) {
                     $permissionQuery->where('name', $journalPermission)
@@ -247,20 +259,105 @@ class ManuscriptSubmissionController extends Controller
             ->get();
 
         foreach ($editors as $editor) {
-            try {
-                Mail::to($editor->email)->send(
-                    new NewManuscriptSubmissionEditorMail($submission, $editor)
+            if ($editor->email) {
+                try {
+                    Mail::to($this->mailRecipientService->resolve($editor->email))->send(
+                        new NewManuscriptSubmissionEditorMail($submission, $editor)
+                    );
+                } catch (\Throwable $exception) {
+                    Log::error('Failed to send new manuscript notification to an editor.', [
+                        'submission_id' => $submission->id,
+                        'submission_code' => $submission->submission_code,
+                        'editor_id' => $editor->id,
+                        'recipient' => $editor->email,
+                        'journal_permission' => $journalPermission,
+                        'exception' => $exception->getMessage(),
+                    ]);
+                }
+            }
+
+            if ($editor->phone) {
+                $this->sendWhatsappNotification(
+                    $editor->phone,
+                    $this->editorWhatsappMessage($submission, $editor),
+                    $submission,
+                    'editor',
+                    $editor->id
                 );
-            } catch (\Throwable $exception) {
-                Log::error('Failed to send new manuscript notification to an editor.', [
+            }
+        }
+    }
+
+    private function notifyAuthorWhatsapp(WaitingSubmission $submission): void
+    {
+        $submission->loadMissing('targetJournal');
+
+        $message = "Halo Bapak/Ibu {$submission->first_name} {$submission->last_name},\n\n"
+            ."Kami telah menerima pengajuan manuskrip Anda untuk pemeriksaan awal editorial.\n\n"
+            ."Kode Submission: *{$submission->submission_code}*\n"
+            ."Judul Artikel: {$submission->article_title}\n"
+            .'Jurnal Tujuan: '.($submission->targetJournal?->name ?? '-')."\n"
+            ."Status: *Menunggu pemeriksaan editorial*\n\n"
+            ."Submission melalui formulir ini tidak menjamin penerimaan untuk publikasi. Jika disetujui editor, username dan password akun jurnal akan dikirimkan kepada Anda.\n\n"
+            ."Salam,\n"
+            ."Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi\n\n"
+            ."_Pesan ini dikirim otomatis oleh sistem_\n"
+            .url('/');
+
+        $this->sendWhatsappNotification(
+            $submission->whatsapp_number,
+            $message,
+            $submission,
+            'author'
+        );
+    }
+
+    private function editorWhatsappMessage(WaitingSubmission $submission, User $editor): string
+    {
+        return "Halo Bapak/Ibu {$editor->name},\n\n"
+            ."Ada manuscript submission baru yang memerlukan pemeriksaan editorial.\n\n"
+            ."Kode Submission: *{$submission->submission_code}*\n"
+            ."Penulis: {$submission->first_name} {$submission->last_name}\n"
+            ."Judul Artikel: {$submission->article_title}\n"
+            .'Jurnal Tujuan: '.($submission->targetJournal?->name ?? '-')."\n"
+            ."Jenis Artikel: {$submission->article_type}\n"
+            ."Waktu Submission: {$submission->submitted_at->format('d-m-Y H:i')} WIB\n\n"
+            ."Silakan tindak lanjuti submission tersebut sesuai proses editorial.\n\n"
+            ."Salam,\n"
+            ."Rumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi\n\n"
+            ."_Pesan ini dikirim otomatis oleh sistem_\n"
+            .url('/');
+    }
+
+    private function sendWhatsappNotification(
+        string $phone,
+        string $message,
+        WaitingSubmission $submission,
+        string $recipientType,
+        ?int $editorId = null
+    ): void {
+        try {
+            $result = $this->whatsappService->sendMessage($phone, $message);
+
+            if (! ($result['success'] ?? false)) {
+                Log::warning('Failed to send manuscript WhatsApp notification.', [
                     'submission_id' => $submission->id,
                     'submission_code' => $submission->submission_code,
-                    'editor_id' => $editor->id,
-                    'recipient' => $editor->email,
-                    'journal_permission' => $journalPermission,
-                    'exception' => $exception->getMessage(),
+                    'recipient_type' => $recipientType,
+                    'editor_id' => $editorId,
+                    'recipient' => $phone,
+                    'response' => $result,
                 ]);
             }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to send manuscript WhatsApp notification.', [
+                'submission_id' => $submission->id,
+                'submission_code' => $submission->submission_code,
+                'recipient_type' => $recipientType,
+                'editor_id' => $editorId,
+                'recipient' => $phone,
+                'exception' => $exception->getMessage(),
+            ]);
         }
     }
 }

@@ -14,6 +14,21 @@
                     </div>
                 </div>
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+                    <a href="{{ route('back.journal.manuscript-submissions.index', $journal->url_path) }}"
+                        class="btn btn-light-primary">
+                        <i class="ki-duotone ki-document fs-2"></i>
+                        Manuscript Submissions
+                        @if ($journal->waiting_manuscript_submissions_count > 0)
+                            <span class="badge badge-warning ms-2" title="Waiting">
+                                Waiting: {{ $journal->waiting_manuscript_submissions_count }}
+                            </span>
+                        @endif
+                        @if ($journal->under_review_manuscript_submissions_count > 0)
+                            <span class="badge badge-info ms-2" title="Under Review">
+                                Under Review: {{ $journal->under_review_manuscript_submissions_count }}
+                            </span>
+                        @endif
+                    </a>
                     <div class="w-100 mw-150px">
                         <select class="form-select form-select-solid" data-control="select2" data-hide-search="true"
                             data-placeholder="Status" data-kt-ecommerce-product-filter="status">

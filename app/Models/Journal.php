@@ -51,6 +51,8 @@ class Journal extends Model
         return $this->hasMany(Issue::class, 'journal_id');
     }
 
-
-
+    public function waitingSubmissions()
+    {
+        return $this->hasMany(WaitingSubmission::class, 'target_journal_id');
+    }
 }

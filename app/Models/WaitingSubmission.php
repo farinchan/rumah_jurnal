@@ -42,6 +42,10 @@ class WaitingSubmission extends Model
         'agrees_publication_process',
         'agrees_publication_fees',
         'status',
+        'reviewed_by',
+        'reviewed_at',
+        'editor_notes',
+        'rejection_reason',
         'submitted_at',
     ];
 
@@ -68,11 +72,17 @@ class WaitingSubmission extends Model
             'agrees_publication_process' => 'boolean',
             'agrees_publication_fees' => 'boolean',
             'submitted_at' => 'datetime',
+            'reviewed_at' => 'datetime',
         ];
     }
 
     public function targetJournal(): BelongsTo
     {
         return $this->belongsTo(Journal::class, 'target_journal_id');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

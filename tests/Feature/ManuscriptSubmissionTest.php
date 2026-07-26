@@ -6,6 +6,7 @@ use App\Models\Journal;
 use App\Models\SettingWebsite;
 use App\Models\User;
 use App\Models\WaitingSubmission;
+use App\Services\WhatsappService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -15,7 +16,14 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    config(['mail.environment' => 'production']);
     Mail::fake();
+    $this->whatsappService = Mockery::mock(WhatsappService::class);
+    $this->whatsappService
+        ->shouldReceive('sendMessage')
+        ->byDefault()
+        ->andReturn(['success' => true, 'message' => 'Message sent successfully']);
+    app()->instance(WhatsappService::class, $this->whatsappService);
 
     SettingWebsite::create([
         'name' => 'Rumah Jurnal Test',
@@ -95,7 +103,32 @@ it('stores a valid manuscript submission with a hashed password', function () {
             && $mail->submission->is($submission);
     });
 
+    $this->whatsappService
+        ->shouldHaveReceived('sendMessage')
+        ->once()
+        ->with($submission->whatsapp_number, Mockery::on(
+            fn (string $message) => str_contains($message, $submission->submission_code)
+                && str_contains($message, $submission->article_title)
+        ));
+
     $response->assertRedirect(route('manuscript-submission.success', $submission->submission_code));
+});
+
+it('redirects manuscript email to the local address outside production', function () {
+    config([
+        'mail.environment' => 'local',
+        'mail.local_address' => 'local-mailbox@example.com',
+    ]);
+
+    $this->post(route('manuscript-submission.store'), validManuscriptSubmissionData([
+        'email' => 'local-environment-author@example.com',
+        'username' => 'local_environment_author',
+    ]))->assertSessionHasNoErrors();
+
+    Mail::assertSent(ManuscriptSubmissionReceivedMail::class, function ($mail) {
+        return $mail->hasTo('local-mailbox@example.com')
+            && ! $mail->hasTo('local-environment-author@example.com');
+    });
 });
 
 it('requires three to five keywords and every author declaration', function () {
@@ -146,6 +179,7 @@ it('notifies only editors with permission for the target journal URL path', func
     $matchingEditor = User::create([
         'name' => 'Matching Editor',
         'email' => 'matching-editor@example.com',
+        'phone' => '081234567801',
         'password' => 'password',
     ]);
     $matchingEditor->assignRole($editorRole);
@@ -154,6 +188,7 @@ it('notifies only editors with permission for the target journal URL path', func
     $otherEditor = User::create([
         'name' => 'Other Editor',
         'email' => 'other-editor@example.com',
+        'phone' => '081234567802',
         'password' => 'password',
     ]);
     $otherEditor->assignRole($editorRole);
@@ -174,4 +209,17 @@ it('notifies only editors with permission for the target journal URL path', func
     });
 
     Mail::assertSent(NewManuscriptSubmissionEditorMail::class, 1);
+
+    $this->whatsappService
+        ->shouldHaveReceived('sendMessage')
+        ->with($matchingEditor->phone, Mockery::on(
+            fn (string $message) => str_contains($message, 'Ada manuscript submission baru')
+                && str_contains($message, 'Test Journal')
+        ))
+        ->once();
+
+    $this->whatsappService
+        ->shouldNotHaveReceived('sendMessage', function (string $phone) use ($otherEditor) {
+            return $phone === $otherEditor->phone;
+        });
 });

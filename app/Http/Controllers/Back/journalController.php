@@ -47,10 +47,18 @@ class journalController extends Controller
 
     public function index($journal_path)
     {
-        $journal = Journal::where('url_path', $journal_path)->with('issues.submissions')->first();
+        $journal = Journal::where('url_path', $journal_path)
+            ->with('issues.submissions')
+            ->withCount([
+                'waitingSubmissions as waiting_manuscript_submissions_count' => fn ($query) => $query->where('status', 'waiting'),
+                'waitingSubmissions as under_review_manuscript_submissions_count' => fn ($query) => $query->where('status', 'under_review'),
+            ])
+            ->first();
         if (!$journal) {
             return abort(404);
         }
+        abort_unless(auth()->user()->can($journal->url_path), 403);
+
         $data = [
             'title' => $journal->title,
             'breadcrumbs' => [

@@ -16,6 +16,10 @@ return [
 
     'default' => env('MAIL_MAILER', 'log'),
 
+    'environment' => env('MAIL_ENVIRONMENT', 'local'),
+
+    'local_address' => env('MAIL_LOCAL_ADDRESS'),
+
     /*
     |--------------------------------------------------------------------------
     | Mailer Configurations
