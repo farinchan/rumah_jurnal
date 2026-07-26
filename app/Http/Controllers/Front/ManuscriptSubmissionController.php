@@ -67,7 +67,7 @@ class ManuscriptSubmissionController extends Controller
                 'required',
                 'email:rfc',
                 'max:255',
-                Rule::unique('users', 'email'),
+                // Rule::unique('users', 'email'),
                 Rule::unique('waiting_submissions', 'email'),
             ],
             'username' => [
@@ -75,7 +75,7 @@ class ManuscriptSubmissionController extends Controller
                 'alpha_dash',
                 'min:4',
                 'max:50',
-                Rule::unique('users', 'username'),
+                // Rule::unique('users', 'username'),
                 Rule::unique('waiting_submissions', 'username'),
             ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
