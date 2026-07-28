@@ -186,6 +186,11 @@
                             <div class="alert alert-light-primary">
                                 Perubahan status akan dikirim kepada penulis melalui email dan WhatsApp.
                             </div>
+                            @error('ojs_account')
+                                <div class="alert alert-danger">
+                                    <strong>Akun OJS gagal dibuat.</strong><br>{{ $message }}
+                                </div>
+                            @enderror
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="ki-duotone ki-check fs-2"></i> Update Status
                             </button>
@@ -211,6 +216,25 @@
                             <div class="text-muted fs-7 text-uppercase fw-bold">Last Reviewed At</div>
                             <div>{{ $submission->reviewed_at?->format('d M Y H:i') ?: '—' }}</div>
                         </div>
+                        <div class="separator my-5"></div>
+                        <div class="mb-4">
+                            <div class="text-muted fs-7 text-uppercase fw-bold">OJS Account</div>
+                            @if ($submission->ojs_account_created_at)
+                                <span class="badge badge-light-success">Created</span>
+                            @else
+                                <span class="badge badge-light-secondary">Not Created</span>
+                            @endif
+                        </div>
+                        @if ($submission->ojs_account_created_at)
+                            <div class="mb-4">
+                                <div class="text-muted fs-7 text-uppercase fw-bold">OJS User ID</div>
+                                <div>{{ $submission->ojs_user_id ?: '—' }}</div>
+                            </div>
+                            <div>
+                                <div class="text-muted fs-7 text-uppercase fw-bold">Created At</div>
+                                <div>{{ $submission->ojs_account_created_at->format('d M Y H:i') }} WIB</div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

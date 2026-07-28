@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\WaitingSubmission;
 use App\Services\WhatsappService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
@@ -213,4 +216,145 @@ it('updates review audit and notifies the author by email and WhatsApp', functio
                 && str_contains($message, $submission->rejection_reason)
         ))
         ->once();
+});
+
+it('creates an OJS account from the submitted author fields when accepted', function () {
+    Http::fake([
+        'https://target-journal.test/api/v1/users' => Http::response(['id' => 987], 201),
+    ]);
+
+    $submission = createBackWaitingSubmission($this->journal, [
+        'first_name' => 'Budi',
+        'last_name' => 'Santoso',
+        'email' => 'budi@example.com',
+        'username' => 'budi',
+        'password' => Crypt::encryptString('Rahasia123!'),
+        'whatsapp_number' => '+62 812-3456-7890',
+        'institution' => 'Universitas Contoh',
+        'country' => 'Indonesia',
+        'status' => 'under_review',
+    ]);
+
+    $statusRoute = route('back.journal.manuscript-submissions.status', [
+        $this->journal->url_path,
+        $submission->submission_code,
+    ]);
+
+    $this->actingAs($this->editor)
+        ->patch($statusRoute, ['status' => 'accepted'])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    Http::assertSent(function ($request) {
+        return $request->url() === 'https://target-journal.test/api/v1/users'
+            && $request->method() === 'POST'
+            && $request->hasHeader('Authorization', 'Bearer target-key')
+            && $request->data() === [
+                'username' => 'budi',
+                'password' => 'Rahasia123!',
+                'email' => 'budi@example.com',
+                'givenName' => 'Budi',
+                'familyName' => 'Santoso',
+                'locale' => 'id_ID',
+                'country' => 'ID',
+                'phone' => '+62 812-3456-7890',
+                'affiliation' => 'Universitas Contoh',
+                'mustChangePassword' => true,
+            ];
+    });
+
+    $submission->refresh();
+
+    expect($submission->status)->toBe('accepted')
+        ->and($submission->ojs_user_id)->toBe('987')
+        ->and($submission->ojs_account_created_at)->not->toBeNull();
+
+    Mail::assertSent(ManuscriptSubmissionStatusMail::class, function ($mail) use ($submission) {
+        return $mail->hasTo($submission->email)
+            && $mail->ojsCredentials === [
+                'username' => 'budi',
+                'password' => 'Rahasia123!',
+                'login_url' => 'https://target-journal.test',
+            ];
+    });
+
+    $this->whatsappService
+        ->shouldHaveReceived('sendMessage')
+        ->with($submission->whatsapp_number, Mockery::on(
+            fn (string $message) => str_contains($message, 'Username: budi')
+                && str_contains($message, 'Password sementara: Rahasia123!')
+        ))
+        ->once();
+
+    $this->actingAs($this->editor)
+        ->patch($statusRoute, ['status' => 'accepted'])
+        ->assertSessionHasNoErrors();
+
+    Http::assertSentCount(1);
+    Mail::assertSent(ManuscriptSubmissionStatusMail::class, 1);
+});
+
+it('does not accept the submission when OJS account creation fails', function () {
+    Http::fake([
+        'https://target-journal.test/api/v1/users' => Http::response([
+            'errorMessage' => 'The username already exists.',
+        ], 422),
+    ]);
+
+    $submission = createBackWaitingSubmission($this->journal, [
+        'password' => Crypt::encryptString('Rahasia123!'),
+        'status' => 'under_review',
+    ]);
+
+    $this->actingAs($this->editor)
+        ->patch(route('back.journal.manuscript-submissions.status', [
+            $this->journal->url_path,
+            $submission->submission_code,
+        ]), [
+            'status' => 'accepted',
+        ])
+        ->assertSessionHasErrors([
+            'ojs_account' => 'The username already exists.',
+        ]);
+
+    expect($submission->fresh()->status)->toBe('under_review')
+        ->and($submission->fresh()->ojs_account_created_at)->toBeNull();
+
+    Mail::assertNothingSent();
+    $this->whatsappService->shouldNotHaveReceived('sendMessage');
+});
+
+it('generates a recoverable temporary password for a legacy hashed submission', function () {
+    $passwordSentToOjs = null;
+
+    Http::fake(function ($request) use (&$passwordSentToOjs) {
+        $passwordSentToOjs = $request['password'];
+
+        return Http::response(['id' => 988], 201);
+    });
+
+    $submission = createBackWaitingSubmission($this->journal, [
+        'password' => Hash::make('legacy-password'),
+        'status' => 'under_review',
+    ]);
+
+    $this->actingAs($this->editor)
+        ->patch(route('back.journal.manuscript-submissions.status', [
+            $this->journal->url_path,
+            $submission->submission_code,
+        ]), [
+            'status' => 'accepted',
+        ])
+        ->assertSessionHasNoErrors();
+
+    $submission->refresh();
+
+    expect($passwordSentToOjs)
+        ->toBeString()
+        ->not->toBe('legacy-password')
+        ->and(Crypt::decryptString($submission->password))->toBe($passwordSentToOjs);
+
+    Mail::assertSent(ManuscriptSubmissionStatusMail::class, function ($mail) use ($passwordSentToOjs) {
+        return $mail->ojsCredentials['password'] === $passwordSentToOjs;
+    });
 });

@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Models\WaitingSubmission;
 use App\Services\WhatsappService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -84,7 +84,7 @@ it('shows the manuscript submission form', function () {
         ->assertSee('Test Journal');
 });
 
-it('stores a valid manuscript submission with a hashed password', function () {
+it('stores a valid manuscript submission with an encrypted password', function () {
     $response = $this->post(route('manuscript-submission.store'), validManuscriptSubmissionData());
 
     $response->assertSessionHasNoErrors();
@@ -96,7 +96,8 @@ it('stores a valid manuscript submission with a hashed password', function () {
         ->and($submission->status)->toBe('waiting')
         ->and($submission->keywords)->toBe(['journal', 'research', 'publication'])
         ->and($submission->has_international_authors)->toBeFalse()
-        ->and(Hash::check('password', $submission->password))->toBeTrue();
+        ->and($submission->password)->not->toBe('password')
+        ->and(Crypt::decryptString($submission->password))->toBe('password');
 
     Mail::assertSent(ManuscriptSubmissionReceivedMail::class, function ($mail) use ($submission) {
         return $mail->hasTo('fajri@gariskode.com')

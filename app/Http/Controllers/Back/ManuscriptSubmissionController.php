@@ -10,11 +10,16 @@ use App\Services\MailRecipientService;
 use App\Services\WhatsappService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use RealRashid\SweetAlert\Facades\Alert;
+use ResourceBundle;
+use RuntimeException;
 
 class ManuscriptSubmissionController extends Controller
 {
@@ -116,8 +121,33 @@ class ManuscriptSubmissionController extends Controller
         ]);
 
         $statusChanged = $submission->status !== $validated['status'];
+        $ojsCredentials = null;
 
-        $submission->update([
+        if (
+            $validated['status'] === 'accepted'
+            && $statusChanged
+            && ! $submission->ojs_account_created_at
+        ) {
+            try {
+                $ojsCredentials = $this->createOjsAccount($submission, $journal);
+            } catch (\Throwable $exception) {
+                Log::error('Failed to create an OJS account for an accepted manuscript.', [
+                    'submission_id' => $submission->id,
+                    'submission_code' => $submission->submission_code,
+                    'journal_id' => $journal->id,
+                    'journal_url' => $journal->url,
+                    'exception' => $exception->getMessage(),
+                ]);
+
+                Alert::error('OJS account failed', 'Akun OJS gagal dibuat. Status submission belum diubah.');
+
+                return back()
+                    ->withErrors(['ojs_account' => $exception->getMessage()])
+                    ->withInput();
+            }
+        }
+
+        $updates = [
             'status' => $validated['status'],
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
@@ -125,10 +155,20 @@ class ManuscriptSubmissionController extends Controller
             'rejection_reason' => $validated['status'] === 'rejected'
                 ? $validated['rejection_reason']
                 : null,
-        ]);
+        ];
+
+        if ($ojsCredentials) {
+            $updates['ojs_user_id'] = $ojsCredentials['user_id'];
+            $updates['ojs_account_created_at'] = now();
+        }
+
+        $submission->update($updates);
 
         if ($statusChanged) {
-            $this->notifyAuthor($submission->fresh(['targetJournal', 'reviewer']));
+            $this->notifyAuthor(
+                $submission->fresh(['targetJournal', 'reviewer']),
+                $ojsCredentials
+            );
         }
 
         Alert::success('Status updated', 'Status manuscript submission berhasil diperbarui.');
@@ -148,11 +188,21 @@ class ManuscriptSubmissionController extends Controller
         return $journal;
     }
 
-    private function notifyAuthor(WaitingSubmission $submission): void
-    {
+    private function notifyAuthor(
+        WaitingSubmission $submission,
+        ?array $ojsCredentials = null
+    ): void {
+        $mailCredentials = $ojsCredentials
+            ? [
+                'username' => $ojsCredentials['username'],
+                'password' => $ojsCredentials['password'],
+                'login_url' => $ojsCredentials['login_url'],
+            ]
+            : null;
+
         try {
             Mail::to($this->mailRecipientService->resolve($submission->email))
-                ->send(new ManuscriptSubmissionStatusMail($submission));
+                ->send(new ManuscriptSubmissionStatusMail($submission, $mailCredentials));
         } catch (\Throwable $exception) {
             Log::error('Failed to send manuscript status email.', [
                 'submission_id' => $submission->id,
@@ -165,7 +215,7 @@ class ManuscriptSubmissionController extends Controller
         try {
             $result = $this->whatsappService->sendMessage(
                 $submission->whatsapp_number,
-                $this->statusWhatsappMessage($submission)
+                $this->statusWhatsappMessage($submission, $mailCredentials)
             );
 
             if (! ($result['success'] ?? false)) {
@@ -186,8 +236,10 @@ class ManuscriptSubmissionController extends Controller
         }
     }
 
-    private function statusWhatsappMessage(WaitingSubmission $submission): string
-    {
+    private function statusWhatsappMessage(
+        WaitingSubmission $submission,
+        ?array $ojsCredentials = null
+    ): string {
         $statusLabel = match ($submission->status) {
             'under_review' => 'Sedang Ditinjau',
             'accepted' => 'Diterima pada Pemeriksaan Awal',
@@ -206,8 +258,109 @@ class ManuscriptSubmissionController extends Controller
             $message .= "\nAlasan:\n{$submission->rejection_reason}\n";
         }
 
+        if ($submission->status === 'accepted' && $ojsCredentials) {
+            $message .= "\n*Akun OJS Anda*\n"
+                ."Username: {$ojsCredentials['username']}\n"
+                ."Password sementara: {$ojsCredentials['password']}\n"
+                ."Login: {$ojsCredentials['login_url']}\n\n"
+                ."Anda wajib mengganti password setelah login pertama.\n";
+        }
+
         return $message."\nSilakan periksa email Anda untuk informasi lebih lanjut.\n\n"
             ."Salam,\nRumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi\n\n"
             ."_Pesan ini dikirim otomatis oleh sistem_\n".url('/');
+    }
+
+    private function createOjsAccount(
+        WaitingSubmission $submission,
+        Journal $journal
+    ): array {
+        $password = $this->resolveOjsPassword($submission);
+        $countryCode = $this->countryCode($submission->country);
+        $endpoint = rtrim($journal->url, '/').'/api/v1/users';
+
+        $response = Http::acceptJson()
+            ->withToken($journal->api_key)
+            ->timeout(60)
+            ->post($endpoint, [
+                'username' => $submission->username,
+                'password' => $password,
+                'email' => $submission->email,
+                'givenName' => $submission->first_name,
+                'familyName' => $submission->last_name,
+                'locale' => $countryCode === 'ID' ? 'id_ID' : 'en_US',
+                'country' => $countryCode,
+                'phone' => $submission->whatsapp_number,
+                'affiliation' => $submission->institution,
+                'mustChangePassword' => true,
+            ]);
+
+        if (! $response->successful()) {
+            $message = $response->json('errorMessage')
+                ?? $response->json('message')
+                ?? "OJS returned HTTP {$response->status()}.";
+
+            throw new RuntimeException((string) $message);
+        }
+
+        return [
+            'username' => $submission->username,
+            'password' => $password,
+            'login_url' => $journal->url,
+            'user_id' => (string) (
+                $response->json('id')
+                ?? $response->json('data.id')
+                ?? ''
+            ),
+        ];
+    }
+
+    private function resolveOjsPassword(WaitingSubmission $submission): string
+    {
+        try {
+            return Crypt::decryptString($submission->password);
+        } catch (\Throwable) {
+            $temporaryPassword = Str::password(16);
+
+            $submission->forceFill([
+                'password' => Crypt::encryptString($temporaryPassword),
+            ])->save();
+
+            return $temporaryPassword;
+        }
+    }
+
+    private function countryCode(string $country): string
+    {
+        $country = trim($country);
+
+        if (strlen($country) === 2) {
+            return strtoupper($country);
+        }
+
+        $aliases = [
+            'indonesia' => 'ID',
+            'malaysia' => 'MY',
+            'singapura' => 'SG',
+            'brunei darussalam' => 'BN',
+            'timor leste' => 'TL',
+        ];
+        $normalizedCountry = Str::lower($country);
+
+        if (isset($aliases[$normalizedCountry])) {
+            return $aliases[$normalizedCountry];
+        }
+
+        if (class_exists(ResourceBundle::class)) {
+            $regions = ResourceBundle::create('en', 'ICUDATA-region');
+
+            foreach ($regions['Countries'] ?? [] as $code => $name) {
+                if (Str::lower((string) $name) === $normalizedCountry) {
+                    return strtoupper((string) $code);
+                }
+            }
+        }
+
+        return strtoupper(substr($country, 0, 2));
     }
 }

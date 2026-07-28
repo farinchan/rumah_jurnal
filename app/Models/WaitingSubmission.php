@@ -46,6 +46,8 @@ class WaitingSubmission extends Model
         'reviewed_at',
         'editor_notes',
         'rejection_reason',
+        'ojs_user_id',
+        'ojs_account_created_at',
         'submitted_at',
     ];
 
@@ -56,7 +58,6 @@ class WaitingSubmission extends Model
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
             'keywords' => 'array',
             'has_international_authors' => 'boolean',
             'international_authors' => 'array',
@@ -73,6 +74,7 @@ class WaitingSubmission extends Model
             'agrees_publication_fees' => 'boolean',
             'submitted_at' => 'datetime',
             'reviewed_at' => 'datetime',
+            'ojs_account_created_at' => 'datetime',
         ];
     }
 

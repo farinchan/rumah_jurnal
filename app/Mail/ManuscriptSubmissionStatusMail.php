@@ -13,8 +13,10 @@ class ManuscriptSubmissionStatusMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public WaitingSubmission $submission)
-    {
+    public function __construct(
+        public WaitingSubmission $submission,
+        public ?array $ojsCredentials = null
+    ) {
         $this->submission->loadMissing(['targetJournal', 'reviewer']);
     }
 

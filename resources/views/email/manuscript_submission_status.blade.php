@@ -76,9 +76,37 @@
                             </table>
                             @if ($submission->status === 'accepted')
                                 <p style="line-height:1.7;margin:0 0 18px;">
-                                    Your manuscript may proceed to formal submission. The editorial team will contact
-                                    you regarding account access and the next steps through the journal’s online system.
+                                    Your manuscript may proceed to formal submission.
                                 </p>
+                                @if ($ojsCredentials)
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                                        style="background:#ecfdf3;border:1px solid #abefc6;border-radius:8px;margin-bottom:24px;">
+                                        <tr>
+                                            <td style="padding:16px 18px;">
+                                                <strong>Your OJS account</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border-top:1px solid #abefc6;padding:14px 18px;">
+                                                <strong>Username:</strong> {{ $ojsCredentials['username'] }}<br>
+                                                <strong>Temporary password:</strong> {{ $ojsCredentials['password'] }}<br>
+                                                <strong>Login:</strong>
+                                                <a href="{{ $ojsCredentials['login_url'] }}">
+                                                    {{ $ojsCredentials['login_url'] }}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p style="line-height:1.7;margin:0 0 18px;">
+                                        You must change the temporary password after your first login, then complete
+                                        the formal manuscript submission through the journal’s online system.
+                                    </p>
+                                @else
+                                    <p style="line-height:1.7;margin:0 0 18px;">
+                                        Your OJS account has already been provisioned. Please use the credentials
+                                        previously sent to you or contact the editorial team if you need assistance.
+                                    </p>
+                                @endif
                             @elseif ($submission->status === 'under_review')
                                 <p style="line-height:1.7;margin:0 0 18px;">
                                     The editorial team is reviewing the information and article metadata you submitted.

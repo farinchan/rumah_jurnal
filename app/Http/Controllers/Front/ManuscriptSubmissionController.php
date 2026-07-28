@@ -13,6 +13,7 @@ use App\Services\MailRecipientService;
 use App\Services\WhatsappService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -174,6 +175,7 @@ class ManuscriptSubmissionController extends Controller
             && $request->boolean('international_author_confirmation');
         $validated['status'] = 'waiting';
         $validated['submitted_at'] = now();
+        $validated['password'] = Crypt::encryptString($validated['password']);
 
         unset($validated['password_confirmation']);
 
