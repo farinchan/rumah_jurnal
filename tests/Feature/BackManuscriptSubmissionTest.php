@@ -220,7 +220,15 @@ it('updates review audit and notifies the author by email and WhatsApp', functio
 
 it('creates an OJS account from the submitted author fields when accepted', function () {
     Http::fake([
-        'https://target-journal.test/api/v1/users' => Http::response(['id' => 987], 201),
+        'https://target-journal.test/api/v1/users' => Http::response([
+            'id' => 3,
+            'username' => 'budi',
+            'email' => 'budi@example.com',
+            'givenName' => 'Budi',
+            'familyName' => 'Santoso',
+            'phone' => '+62 812-3456-7890',
+            'userGroupIds' => [17, 14],
+        ], 201),
     ]);
 
     $submission = createBackWaitingSubmission($this->journal, [
@@ -266,7 +274,7 @@ it('creates an OJS account from the submitted author fields when accepted', func
     $submission->refresh();
 
     expect($submission->status)->toBe('accepted')
-        ->and($submission->ojs_user_id)->toBe('987')
+        ->and($submission->ojs_user_id)->toBe('3')
         ->and($submission->ojs_account_created_at)->not->toBeNull();
 
     Mail::assertSent(ManuscriptSubmissionStatusMail::class, function ($mail) use ($submission) {
@@ -297,7 +305,8 @@ it('creates an OJS account from the submitted author fields when accepted', func
 it('does not accept the submission when OJS account creation fails', function () {
     Http::fake([
         'https://target-journal.test/api/v1/users' => Http::response([
-            'errorMessage' => 'The username already exists.',
+            'error' => 'username_exists',
+            'message' => 'The username is already in use.',
         ], 422),
     ]);
 
@@ -314,7 +323,7 @@ it('does not accept the submission when OJS account creation fails', function ()
             'status' => 'accepted',
         ])
         ->assertSessionHasErrors([
-            'ojs_account' => 'The username already exists.',
+            'ojs_account' => 'The username is already in use.',
         ]);
 
     expect($submission->fresh()->status)->toBe('under_review')

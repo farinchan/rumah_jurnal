@@ -632,6 +632,15 @@ class journalController extends Controller
         return redirect()->back();
     }
 
+    private function paymentAmountWithThreeDigitCode(
+        int|float $baseAmount,
+        int|string $invoiceSequence
+    ): int {
+        $threeDigitCode = ((int) $invoiceSequence) % 1000;
+
+        return (int) round($baseAmount) + $threeDigitCode;
+    }
+
     public function invoiceGenerate1($submission)
     {
         $submission = Submission::find($submission);
@@ -660,7 +669,10 @@ class journalController extends Controller
             $invoice = PaymentInvoice::create([
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 60,
-                'payment_amount' => ($issue->journal->author_fee * 0.6) + $newNumber,
+                'payment_amount' => $this->paymentAmountWithThreeDigitCode(
+                    $issue->journal->author_fee * 0.6,
+                    $newNumber
+                ),
                 'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
@@ -753,7 +765,10 @@ class journalController extends Controller
             $invoice = PaymentInvoice::create([
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 60,
-                'payment_amount' => ($issue->journal->author_fee * 0.6) + $newNumber,
+                'payment_amount' => $this->paymentAmountWithThreeDigitCode(
+                    $issue->journal->author_fee * 0.6,
+                    $newNumber
+                ),
                 'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
@@ -839,7 +854,10 @@ class journalController extends Controller
             $invoice = PaymentInvoice::create([
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 40,
-                'payment_amount' => ($issue->journal->author_fee * 0.4) + $newNumber,
+                'payment_amount' => $this->paymentAmountWithThreeDigitCode(
+                    $issue->journal->author_fee * 0.4,
+                    $newNumber
+                ),
                 'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
@@ -927,7 +945,10 @@ class journalController extends Controller
             $invoice = PaymentInvoice::create([
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 40,
-                'payment_amount' => ($issue->journal->author_fee * 0.4) + $newNumber,
+                'payment_amount' => $this->paymentAmountWithThreeDigitCode(
+                    $issue->journal->author_fee * 0.4,
+                    $newNumber
+                ),
                 'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
@@ -1012,7 +1033,10 @@ class journalController extends Controller
             $invoice = PaymentInvoice::create([
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 100,
-                'payment_amount' => ($issue->journal->author_fee) + $newNumber,
+                'payment_amount' => $this->paymentAmountWithThreeDigitCode(
+                    $issue->journal->author_fee,
+                    $newNumber
+                ),
                 'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
@@ -1105,7 +1129,10 @@ class journalController extends Controller
             $invoice = PaymentInvoice::create([
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 100,
-                'payment_amount' => ($issue->journal->author_fee) + $newNumber,
+                'payment_amount' => $this->paymentAmountWithThreeDigitCode(
+                    $issue->journal->author_fee,
+                    $newNumber
+                ),
                 'payment_due_date' => Carbon::now()->addDays(3),
                 'submission_id' => $submission->id,
             ]);
@@ -1210,7 +1237,10 @@ class journalController extends Controller
             $invoice = PaymentInvoice::create([
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 100,
-                'payment_amount' => (int) $request->custom_amount + $newNumber,
+                'payment_amount' => $this->paymentAmountWithThreeDigitCode(
+                    (int) $request->custom_amount,
+                    $newNumber
+                ),
                 'payment_due_date' => Carbon::now()->addDays(3),
                 'is_custom' => true,
                 'submission_id' => $submission->id,
