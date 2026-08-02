@@ -481,7 +481,7 @@ class journalController extends Controller
             'authors' => $submission->authors,
             'title' => $submission->fullTitle,
             'journal' => $issue->journal->title,
-            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
             'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
             'chief_editor' => $issue->journal->editor_chief_name,
@@ -536,7 +536,7 @@ class journalController extends Controller
             'authors' => $submission->authors,
             'title' => $submission->fullTitle,
             'journal' => $issue->journal->title,
-            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
             'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
             'chief_editor' => $issue->journal->editor_chief_name,
@@ -568,7 +568,7 @@ class journalController extends Controller
                     'affiliation' => $author['affiliation'] ?? '',
                     'title' => $submission->fullTitle,
                     'journal' => $issue->journal->title,
-                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                     'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                     'setting_web' => $settingWeb,
                     'attachments' => $attachmentPath,
@@ -646,7 +646,7 @@ class journalController extends Controller
                 'payment_percent' => $invoice->payment_percent,
                 'payment_amount' => $invoice->payment_amount,
                 'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                 'id' => $submission->submission_id,
                 'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
@@ -747,7 +747,7 @@ class journalController extends Controller
                         'payment_percent' => $invoice->payment_percent,
                         'payment_amount' => $invoice->payment_amount,
                         'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                         'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                         'id' => $submission->submission_id,
                         'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
@@ -831,7 +831,7 @@ class journalController extends Controller
                 'payment_percent' => $invoice->payment_percent,
                 'payment_amount' => $invoice->payment_amount,
                 'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                 'id' => $submission->submission_id,
                 'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
@@ -927,7 +927,7 @@ class journalController extends Controller
                         'payment_percent' => $invoice->payment_percent,
                         'payment_amount' => $invoice->payment_amount,
                         'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                         'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                         'id' => $submission->submission_id,
                         'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
@@ -1010,7 +1010,7 @@ class journalController extends Controller
                 'payment_percent' => $invoice->payment_percent,
                 'payment_amount' => $invoice->payment_amount,
                 'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                 'id' => $submission->submission_id,
                 'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
@@ -1111,7 +1111,7 @@ class journalController extends Controller
                         'payment_percent' => $invoice->payment_percent,
                         'payment_amount' => $invoice->payment_amount,
                         'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                         'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                         'id' => $submission->submission_id,
                         'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
@@ -1269,7 +1269,7 @@ class journalController extends Controller
                 'payment_percent' => $invoice->payment_percent,
                 'payment_amount' => $invoice->payment_amount,
                 'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                 'id' => $submission->submission_id,
                 'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
@@ -1355,7 +1355,7 @@ class journalController extends Controller
                         'payment_percent' => $invoice->payment_percent,
                         'payment_amount' => $invoice->payment_amount,
                         'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                         'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
                         'id' => $submission->submission_id,
                         'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
@@ -1509,7 +1509,7 @@ class journalController extends Controller
                 'name' => $editor->name,
                 'affiliation' => $editor->affiliation,
                 'journal' => $issue->journal->title,
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             ];
 
             $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-editor', $data)->setPaper('A4', 'landscape');
@@ -1567,7 +1567,7 @@ class journalController extends Controller
                     'name' => $editor->name,
                     'affiliation' => $editor->affiliation,
                     'journal' => $issue->journal->title,
-                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 ];
 
                 $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-editor', $data)->setPaper('A4', 'landscape');
@@ -1647,7 +1647,7 @@ class journalController extends Controller
             }
 
             $data = [
-                'subject' => 'Certificate Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+                'subject' => 'Certificate Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year . ': ' . $issue->title,
                 'number' =>  $editor->number ?? "0000",
                 'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
                 'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
@@ -1668,7 +1668,7 @@ class journalController extends Controller
                 'name' => $editor->name,
                 'affiliation' => $editor->affiliation,
                 'journal' => $issue->journal->title,
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 'setting_web' => SettingWebsite::first(),
                 'email' => $editor->email,
             ];
@@ -1718,7 +1718,7 @@ class journalController extends Controller
                     $editor->save();
                 }
                 $data = [
-                    'subject' => 'Certificate Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+                    'subject' => 'Certificate Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year . ': ' . $issue->title,
                     'number' =>  $editor->number ?? "0000",
                     'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
                     'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
@@ -1739,7 +1739,7 @@ class journalController extends Controller
                     'name' => $editor->name,
                     'affiliation' => $editor->affiliation,
                     'journal' => $issue->journal->title,
-                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                     'setting_web' => SettingWebsite::first(),
                     'email' => $editor->email,
                 ];
@@ -1834,9 +1834,9 @@ class journalController extends Controller
         }
 
         $data = [
-            'subject' => 'SK Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+            'subject' => 'SK Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year . ': ' . $issue->title,
             'journal' => $issue->journal->title,
-            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
             'attachments' => storage_path('app/public/' . $file->file),
             'setting_web' => SettingWebsite::first(),
@@ -1928,9 +1928,9 @@ class journalController extends Controller
         }
 
         $data = [
-            'subject' => 'Fee Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+            'subject' => 'Fee Editor - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year . ': ' . $issue->title,
             'journal' => $issue->journal->title,
-            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
             'attachments' => storage_path('app/public/' . $file->file),
             'setting_web' => SettingWebsite::first(),
@@ -2151,7 +2151,7 @@ class journalController extends Controller
                 'name' => $reviewer->name,
                 'affiliation' => $reviewer->affiliation,
                 'journal' => $issue->journal->title,
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 'manuscript_count' => $reviewer->submissionsReviewed->count(),
                 'chief_editor' => $issue->journal->editor_chief_name ?? 'Editor in Chief',
                 'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
@@ -2212,7 +2212,7 @@ class journalController extends Controller
                     'name' => $reviewer->name,
                     'affiliation' => $reviewer->affiliation,
                     'journal' => $issue->journal->title,
-                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 ];
 
                 $pdf = Pdf::loadView('back.pages.journal.pdf.certificate-reviewer', $data)->setPaper('A4', 'landscape');
@@ -2290,7 +2290,7 @@ class journalController extends Controller
             }
 
             $data = [
-                'subject' => 'Certificate Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+                'subject' => 'Certificate Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year . ': ' . $issue->title,
                 'number' =>  $reviewer->number ?? "0000",
                 'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
                 'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
@@ -2311,7 +2311,7 @@ class journalController extends Controller
                 'name' => $reviewer->name,
                 'affiliation' => $reviewer->affiliation,
                 'journal' => $issue->journal->title,
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                 'manuscript_count' => $reviewer->submissionsReviewed->count(),
                 'chief_editor' => $issue->journal->editor_chief_name ?? 'Editor in Chief',
                 'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
@@ -2361,7 +2361,7 @@ class journalController extends Controller
                     $reviewer->save();
                 }
                 $data = [
-                    'subject' => 'Certificate Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+                    'subject' => 'Certificate Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year . ': ' . $issue->title,
                     'number' =>  $reviewer->number ?? "0000",
                     'month' => strtoupper(\Carbon\Carbon::now()->locale('id')->isoFormat('MMMM')),
                     'month_roman' => strtoupper(\Carbon\Carbon::now()->format('n')) ? [
@@ -2382,7 +2382,7 @@ class journalController extends Controller
                     'name' => $reviewer->name,
                     'affiliation' => $reviewer->affiliation,
                     'journal' => $issue->journal->title,
-                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+                    'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
                     'manuscript_count' => $reviewer->submissionsReviewed->count(),
                     'chief_editor' => $issue->journal->editor_chief_name ?? 'Editor in Chief',
                     'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
@@ -2477,9 +2477,9 @@ class journalController extends Controller
         }
 
         $data = [
-            'subject' => 'SK Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+            'subject' => 'SK Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year . ': ' . $issue->title,
             'journal' => $issue->journal->title,
-            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
             'attachments' => storage_path('app/public/' . $file->file),
             'setting_web' => SettingWebsite::first(),
@@ -2571,9 +2571,9 @@ class journalController extends Controller
         }
 
         $data = [
-            'subject' => 'Fee Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year . ': ' . $issue->title,
+            'subject' => 'Fee Reviewer - ' . $issue->journal->title . ' Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year . ': ' . $issue->title,
             'journal' => $issue->journal->title,
-            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
             'attachments' => storage_path('app/public/' . $file->file),
             'setting_web' => SettingWebsite::first(),
@@ -2859,7 +2859,7 @@ class journalController extends Controller
                             "Judul Artikel: " . ($submission->fullTitle ?? '-') . "\n" .
                             "Penulis: " . ($submission->authorsString ?? '-') . "\n" .
                             "Jurnal: " . ($submission->issue->journal->title ?? '-') . "\n" .
-                            "Edisi: Vol. " . ($submission->issue->volume ?? '-') . " No. " . ($submission->issue->number ?? '-') . " Tahun " . ($submission->issue->year ?? '-') . "\n\n" .
+                            "Edisi: Vol. " . ($submission->issue->volume ?? '-') . " No. " . ($submission->issue->number ?? '-') . " Edition " . ($submission->issue->year ?? '-') . "\n\n" .
                             "Kami lampirkan file surat penerimaan (Letter of Acceptance) untuk artikel Anda. Jika file tidak terkirim, Anda dapat mengunduhnya melalui tautan berikut:\n" .
                             asset('storage/' . $path) . "\n\n" .
                             "Terimakasih atas kontribusi Anda terhadap kemajuan ilmu pengetahuan melalui publikasi di jurnal kami.\n\n" .
@@ -2877,7 +2877,7 @@ class journalController extends Controller
                     //         "Judul Artikel: " . ($submission->fullTitle ?? '-') . "\n" .
                     //         "Penulis: " . ($submission->authorsString ?? '-') . "\n" .
                     //         "Jurnal: " . ($submission->issue->journal->title ?? '-') . "\n" .
-                    //         "Edisi: Vol. " . ($submission->issue->volume ?? '-') . " No. " . ($submission->issue->number ?? '-') . " Tahun " . ($submission->issue->year ?? '-') . "\n\n" .
+                    //         "Edisi: Vol. " . ($submission->issue->volume ?? '-') . " No. " . ($submission->issue->number ?? '-') . " Edition " . ($submission->issue->year ?? '-') . "\n\n" .
                     //         "Kami lampirkan file surat penerimaan (Letter of Acceptance) untuk artikel Anda. Jika file tidak terkirim, Anda dapat mengunduhnya melalui tautan berikut:\n" .
                     //         asset('storage/' . $path) . "\n\n" .
                     //         "Terimakasih atas kontribusi Anda terhadap kemajuan ilmu pengetahuan melalui publikasi di jurnal kami.\n\n" .
