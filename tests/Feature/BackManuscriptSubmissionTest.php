@@ -275,7 +275,9 @@ it('creates an OJS account from the submitted author fields when accepted', func
 
     expect($submission->status)->toBe('accepted')
         ->and($submission->ojs_user_id)->toBe('3')
-        ->and($submission->ojs_account_created_at)->not->toBeNull();
+        ->and($submission->ojs_account_created_at)->not->toBeNull()
+        ->and($submission->ojs_response)->toBeArray()
+        ->and($submission->ojs_response['id'])->toBe(3);
 
     Mail::assertSent(ManuscriptSubmissionStatusMail::class, function ($mail) use ($submission) {
         return $mail->hasTo($submission->email)

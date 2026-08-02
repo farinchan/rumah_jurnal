@@ -82,16 +82,18 @@ class JournalController extends Controller
         $author = null;
         $isValid = false;
 
-        if ($submissionId && $authorId) {
+        if ($submissionId) {
             $submission = \App\Models\Submission::with('issue.journal')->find($submissionId);
 
             if ($submission) {
-                $authors = $submission->authors;
-                foreach ($authors as $auth) {
-                    if (isset($auth['id']) && $auth['id'] == $authorId) {
-                        $author = $auth;
-                        $isValid = true;
-                        break;
+                $isValid = true;
+                if ($authorId) {
+                    $authors = $submission->authors;
+                    foreach ($authors as $auth) {
+                        if (isset($auth['id']) && $auth['id'] == $authorId) {
+                            $author = $auth;
+                            break;
+                        }
                     }
                 }
             }

@@ -460,89 +460,45 @@ class journalController extends Controller
             return redirect()->back()->with('error', 'Issue not found');
         }
 
-        $files = [];
+        $validationUrl = route('loa.validate', [
+            'submission_id' => $submission->id,
+        ]);
 
-        foreach ($submission->authors as $author) {
-            $validationUrl = route('loa.validate', [
-                'submission_id' => $submission->id,
-                'author_id' => $author['id']
-            ]);
-
-            $qrCodeBase64 = null;
-            try {
-                $qrCodeApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($validationUrl);
-                $qrCodeResponse = Http::timeout(10)->get($qrCodeApiUrl);
-                if ($qrCodeResponse->successful()) {
-                    $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeResponse->body());
-                }
-            } catch (\Throwable $th) {
-                Log::error('Failed to generate QR Code for LoA validation: ' . $th->getMessage());
+        $qrCodeBase64 = null;
+        try {
+            $qrCodeApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($validationUrl);
+            $qrCodeResponse = Http::timeout(10)->get($qrCodeApiUrl);
+            if ($qrCodeResponse->successful()) {
+                $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeResponse->body());
             }
-
-            $data = [
-                'number' => $submission->number ?? "0000",
-                'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                'name' => $author['name'],
-                'affiliation' => $author['affiliation'],
-                'title' => $submission->fullTitle,
-                'journal' => $issue->journal->title,
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
-                'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                'chief_editor' => $issue->journal->editor_chief_name,
-                'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
-                'qr_code' => $qrCodeBase64,
-            ];
-            $datas[] = $data;
-
-            // if (Storage::exists('arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf')) {
-            //     $files[] = storage_path('app/public/arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf');
-            // } else {
-            //     $pdf = Pdf::loadView('back.pages.journal.pdf.loa', $data)->setPaper('A4', 'portrait');
-            //     $path = 'arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf';
-
-            //     Storage::disk('public')->put($path, $pdf->output());
-            //     $files[] = $data['attachments'] = storage_path('app/public/' . $path);
-            // }
-
-            $pdf = Pdf::loadView('back.pages.journal.pdf.loa', $data)->setPaper('A4', 'portrait');
-            $path = 'arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf';
-
-            // Cek apakah file sudah ada di storage
-            if (Storage::exists('arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf')) {
-                // Jika maka hapus dari storage
-                Storage::disk('public')->delete('arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf');
-            }
-            Storage::disk('public')->put($path, $pdf->output());
-            $files[] = $data['attachments'] = storage_path('app/public/' . $path);
+        } catch (\Throwable $th) {
+            Log::error('Failed to generate QR Code for LoA validation: ' . $th->getMessage());
         }
 
-        $zipFileName = 'LoA-' . $submission->submission_id . '.zip';
-        $zip = new ZipArchive;
+        $data = [
+            'number' => $submission->number ?? "0000",
+            'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
+            'authors' => $submission->authors,
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
+            'chief_editor' => $issue->journal->editor_chief_name,
+            'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
+            'qr_code' => $qrCodeBase64,
+        ];
 
-        // Temporary path buat zip-nya
-        $zipPath = storage_path('app/temp/' . $zipFileName);
+        $pdf = Pdf::loadView('back.pages.journal.pdf.loa', $data)->setPaper('A4', 'portrait');
+        $filename = 'LoA-' . $submission->submission_id . '.pdf';
+        $path = 'arsip/loa/' . $filename;
 
-        // Pastikan folder temp ada
-        if (!file_exists(storage_path('app/temp'))) {
-            mkdir(storage_path('app/temp'), 0777, true);
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
+        Storage::disk('public')->put($path, $pdf->output());
 
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            foreach ($files as $file) {
-                $filePath = $file;
-                if (file_exists($filePath)) {
-                    // Add file ke zip (hanya nama file saja di dalam zip)
-                    $zip->addFile($filePath, basename($file));
-                }
-            }
-            $zip->close();
-        } else {
-            Alert::error('Error', 'Failed to create zip file');
-            return redirect()->back()->with('error', 'Failed to create zip file');
-        }
-
-        return response()->download($zipPath)->deleteFileAfterSend(true);
+        return response()->download(storage_path('app/public/' . $path), $filename);
     }
 
     public function loaMailSend($submission)
@@ -559,68 +515,68 @@ class journalController extends Controller
             return redirect()->back()->with('error', 'Issue not found');
         }
 
+        $validationUrl = route('loa.validate', [
+            'submission_id' => $submission->id,
+        ]);
+
+        $qrCodeBase64 = null;
+        try {
+            $qrCodeApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($validationUrl);
+            $qrCodeResponse = Http::timeout(10)->get($qrCodeApiUrl);
+            if ($qrCodeResponse->successful()) {
+                $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeResponse->body());
+            }
+        } catch (\Throwable $th) {
+            Log::error('Failed to generate QR Code for LoA validation: ' . $th->getMessage());
+        }
+
+        $pdfData = [
+            'number' => $submission->number ?? "0000",
+            'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
+            'authors' => $submission->authors,
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
+            'chief_editor' => $issue->journal->editor_chief_name,
+            'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
+            'qr_code' => $qrCodeBase64,
+        ];
+
+        $pdf = Pdf::loadView('back.pages.journal.pdf.loa', $pdfData)->setPaper('A4', 'portrait');
+        $filename = 'LoA-' . $submission->submission_id . '.pdf';
+        $path = 'arsip/loa/' . $filename;
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+        Storage::disk('public')->put($path, $pdf->output());
+        $attachmentPath = storage_path('app/public/' . $path);
+
+        $settingWeb = SettingWebsite::first();
+        $mailEnvironment = env('MAIL_ENVIRONMENT', 'local');
+
         foreach ($submission->authors as $author) {
-            if ($author['email']) {
-                $validationUrl = route('loa.validate', [
-                    'submission_id' => $submission->id,
-                    'author_id' => $author['id']
-                ]);
-
-                $qrCodeBase64 = null;
-                try {
-                    $qrCodeApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($validationUrl);
-                    $qrCodeResponse = Http::timeout(10)->get($qrCodeApiUrl);
-                    if ($qrCodeResponse->successful()) {
-                        $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeResponse->body());
-                    }
-                } catch (\Throwable $th) {
-                    Log::error('Failed to generate QR Code for LoA validation: ' . $th->getMessage());
-                }
-
+            if (!empty($author['email'])) {
                 $data = [
                     'subject' => 'Letter of Acceptance (LoA) for ' . $author['name'],
                     'number' => $submission->number ?? "0000",
                     'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
                     'name' => $author['name'],
                     'email' => $author['email'],
-                    'affiliation' => $author['affiliation'],
+                    'affiliation' => $author['affiliation'] ?? '',
                     'title' => $submission->fullTitle,
                     'journal' => $issue->journal->title,
                     'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Tahun ' . $issue->year,
                     'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                    'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                    'chief_editor' => $issue->journal->editor_chief_name,
-                    'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
-                    'setting_web' => SettingWebsite::first(),
-                    'qr_code' => $qrCodeBase64,
+                    'setting_web' => $settingWeb,
+                    'attachments' => $attachmentPath,
                 ];
 
-                // if (Storage::exists('arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf')) {
-                //     $data['attachments'] = storage_path('app/public/arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf');
-                // } else {
-                //     $pdf = Pdf::loadView('back.pages.journal.pdf.loa', $data)->setPaper('A4', 'portrait');
-                //     $path = 'arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf';
-
-                //     Storage::disk('public')->put($path, $pdf->output());
-                //     $data['attachments'] = $data['attachments'] = storage_path('app/public/' . $path);
-                // }
-
-                $pdf = Pdf::loadView('back.pages.journal.pdf.loa', $data)->setPaper('A4', 'portrait');
-                $path = 'arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf';
-
-                // Cek apakah file sudah ada di storage
-                if (Storage::exists('arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf')) {
-                    // Jika maka hapus dari storage
-                    Storage::disk('public')->delete('arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $author['id'] . '.pdf');
-                }
-                Storage::disk('public')->put($path, $pdf->output());
-                $files[] = $data['attachments'] = storage_path('app/public/' . $path);
-
-                $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
-                if ($mailEnvirontment == 'production') {
+                if ($mailEnvironment == 'production') {
                     Mail::to($author['email'])->send(new LoaMail($data));
                 } else {
-                    // For testing purpose
                     Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new LoaMail($data));
                 }
             }
@@ -2892,7 +2848,7 @@ class journalController extends Controller
                     'apiToken' => $jurnal->api_key
                 ]);
                 if ($response2->status() === 200) {
-                    $path = 'arsip/loa/' . 'LoA-' . $submission->submission_id . '-' . $submission->id . '-' . $submission->authors[0]['id'] . '.pdf';
+                    $path = 'arsip/loa/' . 'LoA-' . $submission->submission_id . '.pdf';
                     $data2 = $response2->json();
 
                     $whatsappService = new WhatsappService();

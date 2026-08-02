@@ -33,8 +33,14 @@
 
     <div style="top: 250px;  position: absolute; font-size: 14px;">
         <p>Dear Author,<br>
-            <strong>{{ $name }}</strong><br>
-            <em>{{ $affiliation }}</em>
+            @if(isset($authors) && is_array($authors) && count($authors) > 0)
+                @foreach($authors as $author)
+                    <strong>{{ $author['name'] }}</strong>@if(!empty($author['affiliation'])) - <em>{{ $author['affiliation'] }}</em>@endif<br>
+                @endforeach
+            @elseif(isset($name))
+                <strong>{{ $name }}</strong><br>
+                @if(!empty($affiliation))<em>{{ $affiliation }}</em>@endif
+            @endif
         </p>
 
         <p style="margin-top: 30px;">

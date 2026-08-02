@@ -48,6 +48,7 @@ class WaitingSubmission extends Model
         'rejection_reason',
         'ojs_user_id',
         'ojs_account_created_at',
+        'ojs_response',
         'submitted_at',
     ];
 
@@ -75,6 +76,7 @@ class WaitingSubmission extends Model
             'submitted_at' => 'datetime',
             'reviewed_at' => 'datetime',
             'ojs_account_created_at' => 'datetime',
+            'ojs_response' => 'array',
         ];
     }
 

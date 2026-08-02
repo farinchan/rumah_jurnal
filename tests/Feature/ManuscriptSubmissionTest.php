@@ -81,7 +81,9 @@ it('shows the manuscript submission form', function () {
     $this->get(route('manuscript-submission.create'))
         ->assertOk()
         ->assertSee('Submit Your Manuscript')
-        ->assertSee('Test Journal');
+        ->assertSee('Test Journal')
+        ->assertSee('select2@4.0.13', false)
+        ->assertSee('Select or search the intended UIN journal');
 });
 
 it('stores a valid manuscript submission with an encrypted password', function () {

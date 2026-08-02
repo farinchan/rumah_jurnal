@@ -13,6 +13,8 @@
 @endsection
 
 @section('styles')
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css">
     <style>
         input[type="text"],
         input[type="email"],
@@ -178,6 +180,66 @@
             margin-bottom: 5px;
             padding: 10px 14px;
             width: 100%;
+        }
+
+        .select2-container {
+            display: block;
+            width: 100% !important;
+        }
+
+        .select2-container .select2-selection--single {
+            align-items: center;
+            border: 1px solid #dce2e9;
+            border-radius: 8px;
+            display: flex;
+            height: 52px;
+            padding: 0 42px 0 14px;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #15365f;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #26364a;
+            line-height: normal;
+            padding: 0;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #758091;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px;
+            right: 12px;
+        }
+
+        .select2-dropdown {
+            border-color: #dce2e9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .select2-search--dropdown {
+            padding: 10px;
+        }
+
+        .select2-search--dropdown .select2-search__field {
+            border: 1px solid #dce2e9;
+            border-radius: 6px;
+            height: 42px;
+            padding: 8px 10px;
+        }
+
+        .select2-results__options {
+            max-height: 280px !important;
+            overflow-y: auto !important;
+        }
+
+        .select2-container.is-invalid .select2-selection--single {
+            border-color: #dc3545;
         }
 
         textarea.form-control {
@@ -502,11 +564,11 @@
                                         </div>
                                     @else
                                         <select class="form-select" id="target_journal_id" name="target_journal_id"
-                                            required>
+                                            data-placeholder="Select or search the intended UIN journal" required>
                                             <option value="">Select the intended UIN journal</option>
                                             @foreach ($journals as $journal)
                                                 <option value="{{ $journal->id }}" @selected(old('target_journal_id') == $journal->id)>
-                                                    {{ $journal->name ?: $journal->title }}
+                                                    {{ $journal->title ?: $journal->name }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -849,6 +911,7 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const steps = Array.from(document.querySelectorAll('.submission-step'));
@@ -858,8 +921,34 @@
             const internationalSection = document.getElementById('international-authors-section');
             const internationalList = document.getElementById('international-authors-list');
             const internationalConfirmation = document.getElementById('international_author_confirmation');
+            const targetJournal = document.getElementById('target_journal_id');
             const serverErrors = @json(array_keys($errors->toArray()));
             let currentStep = 0;
+
+            if (window.jQuery) {
+                window.jQuery(function() {
+                    window.setTimeout(function() {
+                        if (typeof window.jQuery.fn.select2 !== 'function') return;
+
+                        const targetJournalSelect = window.jQuery(targetJournal);
+
+                        if (targetJournalSelect.next('.nice-select').length) {
+                            targetJournalSelect.niceSelect('destroy');
+                        }
+
+                        targetJournalSelect.select2({
+                            allowClear: true,
+                            minimumResultsForSearch: 0,
+                            placeholder: targetJournal.dataset.placeholder,
+                            width: '100%'
+                        });
+
+                        targetJournalSelect.on('change', function() {
+                            targetJournalSelect.next('.select2-container').removeClass('is-invalid');
+                        });
+                    }, 0);
+                });
+            }
 
             const errorStepMap = [
                 [],
@@ -907,6 +996,13 @@
 
                 for (const field of fields) {
                     if (!field.checkValidity()) {
+                        if (field === targetJournal && window.jQuery?.fn?.select2) {
+                            const targetJournalSelect = window.jQuery(targetJournal);
+                            targetJournalSelect.next('.select2-container').addClass('is-invalid');
+                            targetJournalSelect.select2('open');
+                            return false;
+                        }
+
                         field.reportValidity();
                         field.focus();
                         return false;
@@ -1019,7 +1115,15 @@
                     const invalidField = form.querySelector(':invalid');
                     const invalidStep = steps.findIndex(step => step.contains(invalidField));
                     showStep(invalidStep >= 0 ? invalidStep : currentStep);
-                    setTimeout(() => invalidField.reportValidity(), 50);
+                    setTimeout(function() {
+                        if (invalidField === targetJournal && window.jQuery?.fn?.select2) {
+                            const targetJournalSelect = window.jQuery(targetJournal);
+                            targetJournalSelect.next('.select2-container').addClass('is-invalid');
+                            targetJournalSelect.select2('open');
+                        } else {
+                            invalidField.reportValidity();
+                        }
+                    }, 50);
                 }
             });
 

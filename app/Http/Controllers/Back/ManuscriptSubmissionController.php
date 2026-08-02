@@ -129,7 +129,51 @@ class ManuscriptSubmissionController extends Controller
             && ! $submission->ojs_account_created_at
         ) {
             try {
-                $ojsCredentials = $this->createOjsAccount($submission, $journal);
+                $password = $this->resolveOjsPassword($submission);
+                $countryCode = $this->countryCode($submission->country);
+                $endpoint = rtrim($journal->url, '/').'/api/v1/users';
+
+                $response = Http::acceptJson()
+                    ->withToken($journal->api_key)
+                    ->withOptions([
+                        'allow_redirects' => [
+                            'strict' => true,
+                            'max' => 10,
+                        ],
+                    ])
+                    ->timeout(60)
+                    ->post($endpoint, [
+                        'username' => $submission->username,
+                        'password' => $password,
+                        'email' => $submission->email,
+                        'givenName' => $submission->first_name,
+                        'familyName' => $submission->last_name,
+                        'locale' => $countryCode === 'ID' ? 'id_ID' : 'en_US',
+                        'country' => $countryCode,
+                        'phone' => $submission->whatsapp_number,
+                        'affiliation' => $submission->institution,
+                        'mustChangePassword' => true,
+                    ]);
+
+                if (! $response->successful()) {
+                    $message = $response->json('errorMessage')
+                        ?? $response->json('message')
+                        ?? "OJS returned HTTP {$response->status()}.";
+
+                    throw new RuntimeException((string) $message);
+                }
+
+                $responseData = $response->json();
+                $ojsUserId = (string) ($responseData['id'] ?? $responseData['userId'] ?? '');
+
+                $ojsCredentials = [
+                    'user_id' => $ojsUserId,
+                    'username' => $submission->username,
+                    'password' => $password,
+                    'login_url' => rtrim($journal->url, '/'),
+                    'response_data' => $responseData,
+                ];
+
             } catch (\Throwable $exception) {
                 Log::error('Failed to create an OJS account for an accepted manuscript.', [
                     'submission_id' => $submission->id,
@@ -160,6 +204,7 @@ class ManuscriptSubmissionController extends Controller
         if ($ojsCredentials) {
             $updates['ojs_user_id'] = $ojsCredentials['user_id'];
             $updates['ojs_account_created_at'] = now();
+            $updates['ojs_response'] = $ojsCredentials['response_data'] ?? null;
         }
 
         $submission->update($updates);
@@ -271,49 +316,6 @@ class ManuscriptSubmissionController extends Controller
             ."_Pesan ini dikirim otomatis oleh sistem_\n".url('/');
     }
 
-    private function createOjsAccount(
-        WaitingSubmission $submission,
-        Journal $journal
-    ): array {
-        $password = $this->resolveOjsPassword($submission);
-        $countryCode = $this->countryCode($submission->country);
-        $endpoint = rtrim($journal->url, '/').'/api/v1/users';
-
-        $response = Http::acceptJson()
-            ->withToken($journal->api_key)
-            ->timeout(60)
-            ->post($endpoint, [
-                'username' => $submission->username,
-                'password' => $password,
-                'email' => $submission->email,
-                'givenName' => $submission->first_name,
-                'familyName' => $submission->last_name,
-                'locale' => $countryCode === 'ID' ? 'id_ID' : 'en_US',
-                'country' => $countryCode,
-                'phone' => $submission->whatsapp_number,
-                'affiliation' => $submission->institution,
-                'mustChangePassword' => true,
-            ]);
-
-        if (! $response->successful()) {
-            $message = $response->json('errorMessage')
-                ?? $response->json('message')
-                ?? "OJS returned HTTP {$response->status()}.";
-
-            throw new RuntimeException((string) $message);
-        }
-
-        return [
-            'username' => $submission->username,
-            'password' => $password,
-            'login_url' => $journal->url,
-            'user_id' => (string) (
-                $response->json('id')
-                ?? $response->json('data.id')
-                ?? ''
-            ),
-        ];
-    }
 
     private function resolveOjsPassword(WaitingSubmission $submission): string
     {
@@ -351,16 +353,6 @@ class ManuscriptSubmissionController extends Controller
             return $aliases[$normalizedCountry];
         }
 
-        if (class_exists(ResourceBundle::class)) {
-            $regions = ResourceBundle::create('en', 'ICUDATA-region');
-
-            foreach ($regions['Countries'] ?? [] as $code => $name) {
-                if (Str::lower((string) $name) === $normalizedCountry) {
-                    return strtoupper((string) $code);
-                }
-            }
-        }
-
-        return strtoupper(substr($country, 0, 2));
+        return 'ID';
     }
 }
