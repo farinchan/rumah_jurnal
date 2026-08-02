@@ -45,8 +45,8 @@ return [
     'publication_fee' => 'Biaya Publikasi',
     'view_journal' => 'Lihat Jurnal',
     'pay_publication_fee' => 'Bayar Biaya Publikasi',
-    'call_for_paper_title' => 'kirimkan naskah Anda sekarang juga',
-    'call_for_paper_desc' => 'Kirimkan naskah penelitian Anda dan berkontribusilah pada kemajuan pengetahuan di bidang Anda',
+    'call_for_paper_title' => 'Kirimkan naskah Anda sekarang juga',
+    'call_for_paper_desc' => 'Kirimkan naskah manuskrip penelitian Anda secara online melalui portal penerimaan naskah dan berikan kontribusi nyata bagi kemajuan ilmu pengetahuan.',
     'call_for_paper_btn' => 'Kirim Sekarang',
 
     'search_article' => 'Cari Artikel',

@@ -349,9 +349,15 @@
                             <p>
                                 {{ __('front.call_for_paper_desc') }} </p>
                         </div>
-                        <div class="btn-wrapper">
-                            <a class="btn btn-effect-4 btn-white font-weight-bold" href="{{ route('journal.index') }}">
-                                {{ __('front.call_for_paper_btn') }} <i class="icon-next"></i></a>
+                        <div class="btn-wrapper mt-30" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+
+                            <a class="btn btn-white font-weight-bold text-uppercase"
+                               href="{{ route('manuscript-submission.create') }}"
+                               style="background-color: #dc3545; color: #ffffff; padding: 16px 32px; border-radius: 30px; font-size: 1rem; display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s ease;"
+                               onmouseover="this.style.transform='translateY(-3px)';"
+                               onmouseout="this.style.transform='translateY(0)';">
+                                {{ __('front.call_for_paper_btn') }} <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
