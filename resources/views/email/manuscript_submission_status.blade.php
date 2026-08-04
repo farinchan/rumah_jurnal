@@ -102,9 +102,26 @@
                                         the formal manuscript submission through the journal’s online system.
                                     </p>
                                 @else
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                                        style="background:#eff8ff;border:1px solid #b2ddff;border-radius:8px;margin-bottom:24px;">
+                                        <tr>
+                                            <td style="padding:16px 18px;">
+                                                <strong>OJS Account Note</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border-top:1px solid #b2ddff;padding:14px 18px;">
+                                                Your email address (<strong>{{ $submission->email }}</strong>) is already registered in our OJS journal system.<br>
+                                                Please log in using your existing OJS account at:
+                                                <a href="{{ rtrim($submission->targetJournal?->url ?? '', '/') }}">
+                                                    {{ rtrim($submission->targetJournal?->url ?? '', '/') }}
+                                                </a><br><br>
+                                                <em>If you have forgotten your password, please use the "Forgot Password" link on the OJS login page.</em>
+                                            </td>
+                                        </tr>
+                                    </table>
                                     <p style="line-height:1.7;margin:0 0 18px;">
-                                        Your OJS account has already been provisioned. Please use the credentials
-                                        previously sent to you or contact the editorial team if you need assistance.
+                                        Please proceed to complete your formal manuscript submission through the journal’s online system using your existing account.
                                     </p>
                                 @endif
                             @elseif ($submission->status === 'under_review')

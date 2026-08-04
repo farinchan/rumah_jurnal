@@ -122,6 +122,8 @@ class ManuscriptSubmissionController extends Controller
 
         $statusChanged = $submission->status !== $validated['status'];
         $ojsCredentials = null;
+        $accountAlreadyExists = false;
+        $ojsResponseData = null;
 
         if (
             $validated['status'] === 'accepted'
@@ -156,23 +158,39 @@ class ManuscriptSubmissionController extends Controller
                     ]);
 
                 if (! $response->successful()) {
-                    $message = $response->json('errorMessage')
+                    $errorMessage = (string) ($response->json('errorMessage')
                         ?? $response->json('message')
-                        ?? "OJS returned HTTP {$response->status()}.";
+                        ?? $response->json('error')
+                        ?? "OJS returned HTTP {$response->status()}.");
 
-                    throw new RuntimeException((string) $message);
+                    if ($this->isEmailAlreadyInUseError($errorMessage)) {
+                        Log::info('OJS account creation skipped because email is already in use.', [
+                            'submission_id' => $submission->id,
+                            'submission_code' => $submission->submission_code,
+                            'email' => $submission->email,
+                            'errorMessage' => $errorMessage,
+                        ]);
+
+                        $accountAlreadyExists = true;
+                        $ojsResponseData = [
+                            'status' => 'already_exists',
+                            'message' => $errorMessage,
+                        ];
+                    } else {
+                        throw new RuntimeException($errorMessage);
+                    }
+                } else {
+                    $responseData = $response->json();
+                    $ojsUserId = (string) ($responseData['id'] ?? $responseData['userId'] ?? '');
+
+                    $ojsCredentials = [
+                        'user_id' => $ojsUserId,
+                        'username' => $submission->username,
+                        'password' => $password,
+                        'login_url' => rtrim($journal->url, '/'),
+                        'response_data' => $responseData,
+                    ];
                 }
-
-                $responseData = $response->json();
-                $ojsUserId = (string) ($responseData['id'] ?? $responseData['userId'] ?? '');
-
-                $ojsCredentials = [
-                    'user_id' => $ojsUserId,
-                    'username' => $submission->username,
-                    'password' => $password,
-                    'login_url' => rtrim($journal->url, '/'),
-                    'response_data' => $responseData,
-                ];
 
             } catch (\Throwable $exception) {
                 Log::error('Failed to create an OJS account for an accepted manuscript.', [
@@ -205,6 +223,9 @@ class ManuscriptSubmissionController extends Controller
             $updates['ojs_user_id'] = $ojsCredentials['user_id'];
             $updates['ojs_account_created_at'] = now();
             $updates['ojs_response'] = $ojsCredentials['response_data'] ?? null;
+        } elseif ($accountAlreadyExists) {
+            $updates['ojs_account_created_at'] = now();
+            $updates['ojs_response'] = $ojsResponseData ?? null;
         }
 
         $submission->update($updates);
@@ -216,7 +237,11 @@ class ManuscriptSubmissionController extends Controller
             );
         }
 
-        Alert::success('Status updated', 'Status manuscript submission berhasil diperbarui.');
+        $successMessage = $accountAlreadyExists
+            ? 'Status manuscript submission berhasil diperbarui. (Email sudah terdaftar di OJS).'
+            : 'Status manuscript submission berhasil diperbarui.';
+
+        Alert::success('Status updated', $successMessage);
 
         return back();
     }
@@ -225,7 +250,6 @@ class ManuscriptSubmissionController extends Controller
     {
         $journal = Journal::query()
             ->where('url_path', $journalPath)
-            ->where('type', 'journal')
             ->firstOrFail();
 
         abort_unless($request->user()->can($journal->url_path), 403);
@@ -303,17 +327,34 @@ class ManuscriptSubmissionController extends Controller
             $message .= "\nAlasan:\n{$submission->rejection_reason}\n";
         }
 
-        if ($submission->status === 'accepted' && $ojsCredentials) {
-            $message .= "\n*Akun OJS Anda*\n"
-                ."Username: {$ojsCredentials['username']}\n"
-                ."Password sementara: {$ojsCredentials['password']}\n"
-                ."Login: {$ojsCredentials['login_url']}\n\n"
-                ."Anda wajib mengganti password setelah login pertama.\n";
+        if ($submission->status === 'accepted') {
+            if ($ojsCredentials) {
+                $message .= "\n*Akun OJS Anda*\n"
+                    ."Username: {$ojsCredentials['username']}\n"
+                    ."Password sementara: {$ojsCredentials['password']}\n"
+                    ."Login: {$ojsCredentials['login_url']}\n\n"
+                    ."Anda wajib mengganti password setelah login pertama.\n";
+            } else {
+                $loginUrl = rtrim($submission->targetJournal?->url ?? url('/'), '/');
+                $message .= "\n*Catatan Akun OJS*\n"
+                    ."Email Anda (*{$submission->email}*) sudah terdaftar di sistem OJS jurnal kami.\n"
+                    ."Silakan login menggunakan akun OJS yang telah Anda miliki sebelumnya melalui tautan:\n"
+                    ."{$loginUrl}\n\n"
+                    ."Jika Anda lupa password, silakan gunakan fitur \"Lupa Password\" pada halaman login website OJS.\n";
+            }
         }
 
         return $message."\nSilakan periksa email Anda untuk informasi lebih lanjut.\n\n"
             ."Salam,\nRumah Jurnal UIN Sjech M. Djamil Djambek Bukittinggi\n\n"
             ."_Pesan ini dikirim otomatis oleh sistem_\n".url('/');
+    }
+
+    private function isEmailAlreadyInUseError(string $errorMessage): bool
+    {
+        $normalized = Str::lower($errorMessage);
+
+        return Str::contains($normalized, ['email', 'username', 'user'])
+            && Str::contains($normalized, ['already', 'use', 'exist', 'registered', 'duplicate', 'taken']);
     }
 
 
