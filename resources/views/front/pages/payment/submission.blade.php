@@ -57,7 +57,7 @@
 
                                     <hr>
                                     <div class="ltn__social-media">
-                                        @if ($journal->author_fee > 0)
+                                        @if (($submission->issue->author_fee ?? $journal->author_fee) > 0)
                                             <ul>
                                                 <li>{{ __('front.payment_status') }}:</li>
                                                 @if ($submission->payment_status == 'paid')
@@ -107,7 +107,7 @@
                                         </ul>
                                     </div>
                                     <hr>
-                                    @if ($journal->author_fee > 0)
+                                    @if (($submission->issue->author_fee ?? $journal->author_fee) > 0)
                                         <div class="ltn__product-details-menu-2">
 
                                             {{ __('front.pay_now_desc') }}
@@ -144,7 +144,7 @@
                                     href="#liton_tab_details_1_1">{{ __('front.abstract') }}</a>
                                 <a data-toggle="tab" href="#liton_tab_details_1_2"
                                     class="">{{ __('front.references') }}</a>
-                                @if ($journal->author_fee > 0)
+                                @if (($submission->issue->author_fee ?? $journal->author_fee) > 0)
                                     <a data-toggle="tab" href="#liton_tab_details_1_3"
                                         class="">{{ __('front.payment') }}</a>
                                 @endif

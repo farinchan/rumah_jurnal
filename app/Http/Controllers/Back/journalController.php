@@ -626,7 +626,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 60,
                 'payment_amount' => $this->paymentAmountWithThreeDigitCode(
-                    $issue->journal->author_fee * 0.6,
+                    ($issue->author_fee ?? $issue->journal->author_fee) * 0.6,
                     $newNumber
                 ),
                 'payment_due_date' => Carbon::now()->addDays(3),
@@ -722,7 +722,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 60,
                 'payment_amount' => $this->paymentAmountWithThreeDigitCode(
-                    $issue->journal->author_fee * 0.6,
+                    ($issue->author_fee ?? $issue->journal->author_fee) * 0.6,
                     $newNumber
                 ),
                 'payment_due_date' => Carbon::now()->addDays(3),
@@ -811,7 +811,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 40,
                 'payment_amount' => $this->paymentAmountWithThreeDigitCode(
-                    $issue->journal->author_fee * 0.4,
+                    ($issue->author_fee ?? $issue->journal->author_fee) * 0.4,
                     $newNumber
                 ),
                 'payment_due_date' => Carbon::now()->addDays(3),
@@ -902,7 +902,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 40,
                 'payment_amount' => $this->paymentAmountWithThreeDigitCode(
-                    $issue->journal->author_fee * 0.4,
+                    ($issue->author_fee ?? $issue->journal->author_fee) * 0.4,
                     $newNumber
                 ),
                 'payment_due_date' => Carbon::now()->addDays(3),
@@ -990,7 +990,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 100,
                 'payment_amount' => $this->paymentAmountWithThreeDigitCode(
-                    $issue->journal->author_fee,
+                    $issue->author_fee ?? $issue->journal->author_fee,
                     $newNumber
                 ),
                 'payment_due_date' => Carbon::now()->addDays(3),
@@ -1086,7 +1086,7 @@ class journalController extends Controller
                 'invoice_number' => $formattedNumber,
                 'payment_percent' => 100,
                 'payment_amount' => $this->paymentAmountWithThreeDigitCode(
-                    $issue->journal->author_fee,
+                    $issue->author_fee ?? $issue->journal->author_fee,
                     $newNumber
                 ),
                 'payment_due_date' => Carbon::now()->addDays(3),

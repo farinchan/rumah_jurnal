@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('title');
             $table->mediumText('description')->nullable();
             $table->enum('status', ['published', 'unpublished'])->default('unpublished');
+            $table->integer('author_fee')->default(0);
             $table->foreignId('journal_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

@@ -105,7 +105,7 @@
                                         </a> --}}
                                     </p>
                                 </div>
-                                @if ($submission?->issue?->journal?->author_fee > 0)
+                                @if (($submission?->issue?->author_fee ?? $submission?->issue?->journal?->author_fee) > 0)
                                     <div>
                                         <span>{{ __('front.payment_status') }}: </span>
                                         @if ($submission->payment_status == 'paid')
@@ -282,7 +282,7 @@
                                                 <i class="far fa-eye"></i>
                                             </a>
                                         </li>
-                                        @if ($submission?->issue?->journal?->author_fee > 0)
+                                        @if (($submission?->issue?->author_fee ?? $submission?->issue?->journal?->author_fee) > 0)
                                             <li>
                                                 <a href="{{ route('payment.pay', [$submission?->issue?->journal?->url_path, $submission?->submission_id]) }}"
                                                     title="Pay Now">

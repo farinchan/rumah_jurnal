@@ -17,6 +17,23 @@ class Issue extends Model
         ->logOnlyDirty()
         ->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
     }
+    protected static function booted(): void
+    {
+        static::creating(function (Issue $issue) {
+            if (is_null($issue->author_fee) || $issue->author_fee === '') {
+                $journal = $issue->journal ?? ($issue->journal_id ? Journal::find($issue->journal_id) : null);
+                $issue->author_fee = $journal?->author_fee ?? 0;
+            }
+        });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'author_fee' => 'integer',
+        ];
+    }
+
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     public function journal()

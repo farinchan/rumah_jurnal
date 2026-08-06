@@ -307,9 +307,9 @@ it('creates an OJS account from the submitted author fields when accepted', func
 it('does not accept the submission when OJS account creation fails', function () {
     Http::fake([
         'https://target-journal.test/api/v1/users' => Http::response([
-            'error' => 'username_exists',
-            'message' => 'The username is already in use.',
-        ], 422),
+            'error' => 'server_error',
+            'message' => 'An internal server error occurred in OJS.',
+        ], 500),
     ]);
 
     $submission = createBackWaitingSubmission($this->journal, [
@@ -325,7 +325,7 @@ it('does not accept the submission when OJS account creation fails', function ()
             'status' => 'accepted',
         ])
         ->assertSessionHasErrors([
-            'ojs_account' => 'The username is already in use.',
+            'ojs_account' => 'An internal server error occurred in OJS.',
         ]);
 
     expect($submission->fresh()->status)->toBe('under_review')
