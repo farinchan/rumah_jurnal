@@ -172,7 +172,12 @@
                     </div>
                 </div>
                 @php
-                    $journal_all = App\Models\Journal::where('type', 'journal')->get();
+                    $journal_all = App\Models\Journal::where('type', 'journal')
+                        ->withCount([
+                            'waitingSubmissions as waiting_manuscript_submissions_count' => fn ($q) => $q->where('status', 'waiting'),
+                            'waitingSubmissions as under_review_manuscript_submissions_count' => fn ($q) => $q->where('status', 'under_review'),
+                        ])
+                        ->get();
                 @endphp
 
                 @foreach ($journal_all as $journal)
@@ -189,6 +194,16 @@
                                     </i>
                                 </span>
                                 <span class="menu-title">{{ $journal->name }}</span>
+                                @if (($journal->waiting_manuscript_submissions_count ?? 0) > 0 || ($journal->under_review_manuscript_submissions_count ?? 0) > 0)
+                                    <span class="menu-badge">
+                                        @if (($journal->waiting_manuscript_submissions_count ?? 0) > 0)
+                                            <span class="badge badge-warning me-1" title="Waiting"> {{ $journal->waiting_manuscript_submissions_count }} </span>
+                                        @endif
+                                        @if (($journal->under_review_manuscript_submissions_count ?? 0) > 0)
+                                            <span class="badge badge-info" title="Under Review"> {{ $journal->under_review_manuscript_submissions_count }} </span>
+                                        @endif
+                                    </span>
+                                @endif
                             </a>
                         </div>
                     @endcan
@@ -203,7 +218,12 @@
                     </div>
                 </div>
                 @php
-                    $proceeding_all = App\Models\Journal::where('type', 'proceeding')->get();
+                    $proceeding_all = App\Models\Journal::where('type', 'proceeding')
+                        ->withCount([
+                            'waitingSubmissions as waiting_manuscript_submissions_count' => fn ($q) => $q->where('status', 'waiting'),
+                            'waitingSubmissions as under_review_manuscript_submissions_count' => fn ($q) => $q->where('status', 'under_review'),
+                        ])
+                        ->get();
                 @endphp
                 @foreach ($proceeding_all as $proceeding)
                     @can($proceeding->url_path)
@@ -219,6 +239,16 @@
                                     </i>
                                 </span>
                                 <span class="menu-title">{{ $proceeding->name }}</span>
+                                @if (($proceeding->waiting_manuscript_submissions_count ?? 0) > 0 || ($proceeding->under_review_manuscript_submissions_count ?? 0) > 0)
+                                    <span class="menu-badge">
+                                        @if (($proceeding->waiting_manuscript_submissions_count ?? 0) > 0)
+                                            <span class="badge badge-warning me-1" title="Waiting"> {{ $proceeding->waiting_manuscript_submissions_count }} </span>
+                                        @endif
+                                        @if (($proceeding->under_review_manuscript_submissions_count ?? 0) > 0)
+                                            <span class="badge badge-info" title="Under Review"> {{ $proceeding->under_review_manuscript_submissions_count }} </span>
+                                        @endif
+                                    </span>
+                                @endif
                             </a>
                         </div>
                     @endcan
@@ -235,7 +265,12 @@
                 </div>
 
                 @php
-                    $student_research_hub_all = App\Models\Journal::where('type', 'student_research_hub')->get();
+                    $student_research_hub_all = App\Models\Journal::where('type', 'student_research_hub')
+                        ->withCount([
+                            'waitingSubmissions as waiting_manuscript_submissions_count' => fn ($q) => $q->where('status', 'waiting'),
+                            'waitingSubmissions as under_review_manuscript_submissions_count' => fn ($q) => $q->where('status', 'under_review'),
+                        ])
+                        ->get();
                 @endphp
 
                 @foreach ($student_research_hub_all as $student_research_hub)
@@ -252,6 +287,16 @@
                                     </i>
                                 </span>
                                 <span class="menu-title">{{ $student_research_hub->name }}</span>
+                                @if (($student_research_hub->waiting_manuscript_submissions_count ?? 0) > 0 || ($student_research_hub->under_review_manuscript_submissions_count ?? 0) > 0)
+                                    <span class="menu-badge">
+                                        @if (($student_research_hub->waiting_manuscript_submissions_count ?? 0) > 0)
+                                            <span class="badge badge-warning me-1" title="Waiting"> {{ $student_research_hub->waiting_manuscript_submissions_count }} </span>
+                                        @endif
+                                        @if (($student_research_hub->under_review_manuscript_submissions_count ?? 0) > 0)
+                                            <span class="badge badge-info" title="Under Review"> {{ $student_research_hub->under_review_manuscript_submissions_count }} </span>
+                                        @endif
+                                    </span>
+                                @endif
                             </a>
                         </div>
                     @endcan
