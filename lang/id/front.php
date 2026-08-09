@@ -86,6 +86,7 @@ return [
     'login_title' => 'Masuk <br> Ke Akun Anda',
     'sign_in' => 'Masuk',
     'forgot_password' => 'Lupa Password?',
+    'remember_me' => 'Ingat Saya',
 
     'bill' => 'Tagihan',
     'unpaid' => 'Belum Dibayar',

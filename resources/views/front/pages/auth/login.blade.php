@@ -50,11 +50,17 @@
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <label class="checkbox-inline mb-0" style="cursor: pointer; user-select: none;">
+                                    <input type="checkbox" name="remember" id="remember" value="1" {{ old('remember') ? 'checked' : '' }}>
+                                    <small class="ms-1">{{ __('front.remember_me') }}</small>
+                                </label>
+                                <div class="go-to-btn">
+                                    <a href="{{ route('password.request') }}"><small>{{ __('front.forgot_password') }}</small></a>
+                                </div>
+                            </div>
                             <div class="btn-wrapper mt-0">
                                 <button class="theme-btn-1 btn btn-block" type="submit">{{ __('front.sign_in') }}</button>
-                            </div>
-                            <div class="go-to-btn mt-20">
-                                <a href="{{ route('password.request') }}"><small>{{ __('front.forgot_password') }}</small></a>
                             </div>
                         </form>
 

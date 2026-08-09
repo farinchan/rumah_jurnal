@@ -55,8 +55,9 @@ class LoginController extends Controller
         }
 
         $loginType = filter_var($request->input('login'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $remember = $request->boolean('remember');
 
-        if (Auth::attempt([$loginType => $request->input('login'), 'password' => $request->input('password')], false)) {
+        if (Auth::attempt([$loginType => $request->input('login'), 'password' => $request->input('password')], $remember)) {
             $user = Auth::user();
             $isTwoFactorEnabled = (bool) data_get(config('auth'), 'two_factor.enabled', true);
 
@@ -64,7 +65,7 @@ class LoginController extends Controller
             if ($isTwoFactorEnabled && $user->roles()->exists()) {
                 Auth::logout();
                 session(['2fa:user:id' => $user->id]);
-                session(['2fa:remember' => $request->has('remember')]);
+                session(['2fa:remember' => $remember]);
 
                 return redirect()->route('2fa.select-method');
             }

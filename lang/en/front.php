@@ -87,6 +87,7 @@ return [
     'login_title' => 'Login <br> To Your Account',
     'sign_in' => 'Sign In',
     'forgot_password' => 'Forgot Password?',
+    'remember_me' => 'Remember Me',
 
     'bill' => 'Bill',
     'unpaid' => 'Unpaid',
