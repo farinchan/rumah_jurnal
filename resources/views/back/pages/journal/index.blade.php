@@ -203,6 +203,20 @@
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
+
+                            @role('super-admin')
+                                <div class="col-md-12 mt-5">
+                                    <label class="form-label">Biaya Publikasi (APC)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" name="author_fee" class="form-control" placeholder="Biaya Penulis (Opsional, otomatis dari jurnal: Rp {{ number_format($journal->author_fee, 0, ',', '.') }})"
+                                            value="{{ old('author_fee', $journal->author_fee) }}" min="0" />
+                                    </div>
+                                    @error('author_fee')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            @endrole
                         </div>
                     </div>
                     <div class="modal-footer">

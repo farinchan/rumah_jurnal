@@ -50,6 +50,20 @@
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
+                        @role('super-admin')
+                            <div class="col-md-12 mt-5">
+                                <label class="form-label">Biaya Publikasi (APC)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" name="author_fee" class="form-control" placeholder="Biaya Penulis (cth: 1500000)"
+                                        value="{{ old('author_fee', $issue->author_fee) }}" min="0" />
+                                </div>
+                                <div class="form-text text-muted">Nominal biaya penulis khusus untuk issue ini (Hanya Super Admin).</div>
+                                @error('author_fee')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+                        @endrole
                         <div class="col-md-12 mt-5">
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select" data-control="select2"
