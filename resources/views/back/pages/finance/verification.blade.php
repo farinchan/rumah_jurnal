@@ -119,7 +119,7 @@
                                 <span class="path6"></span>
                             </i>
                             <input type="datetime-local" id="payment_timestamp_start"
-                                value="{{ now()->subYear()->format('Y-m-d\TH:i') }}"
+                                value="{{ now()->subYears(5)->format('Y-m-d\TH:i') }}"
                                 class="form-control form-control-solid ps-12" />
                         </div>
                     </div>
@@ -134,7 +134,7 @@
                                 <span class="path6"></span>
                             </i>
                             <input type="datetime-local" id="payment_timestamp_end"
-                                value="{{ now()->format('Y-m-d\TH:i') }}" class="form-control form-control-solid ps-12" />
+                                value="{{ now()->addYears(2)->format('Y-m-d\TH:i') }}" class="form-control form-control-solid ps-12" />
                         </div>
                     </div>
                 </div>

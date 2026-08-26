@@ -77,85 +77,124 @@ class FinanceController extends Controller
 
         $type = $this->cookie_control_panel;
 
-        // $payment = Submission::all();
-        // dd($payment);
-        $payment = Payment::with(['paymentInvoice.submission'])
+        $baseQuery = Payment::with(['paymentInvoice.submission.issue.journal'])
             ->when($type, function ($query) use ($type) {
-                return $query->whereHas('paymentInvoice.submission.issue.journal', function ($q) use ($type) {
-                    $q->where('type', $type);
+                return $query->where(function ($q) use ($type) {
+                    $q->whereHas('paymentInvoice.submission.issue.journal', function ($q2) use ($type) {
+                        $q2->where('type', $type);
+                    })
+                    ->orWhereDoesntHave('paymentInvoice')
+                    ->orWhereHas('paymentInvoice', function ($qInv) {
+                        $qInv->whereDoesntHave('submission');
+                    });
                 });
             })
-            ->when($journal_id, function ($query) use ($journal_id) {
+            ->when($journal_id && $journal_id !== '0' && $journal_id !== 'all', function ($query) use ($journal_id) {
                 return $query->whereHas('paymentInvoice.submission.issue', function ($q) use ($journal_id) {
                     $q->where('journal_id', $journal_id);
                 });
             })
             ->when($submission_search, function ($query) use ($submission_search) {
-                return $query->whereHas('paymentInvoice.submission', function ($q) use ($submission_search) {
-                    $q->where('submission_id', 'like', '%' . $submission_search . '%')
-                        ->orWhere('fullTitle', 'like', '%' . $submission_search . '%')
-                        ->orWhere('authorsString', 'like', '%' . $submission_search . '%');
+                return $query->where(function ($q) use ($submission_search) {
+                    $q->where('name', 'like', '%' . $submission_search . '%')
+                        ->orWhere('email', 'like', '%' . $submission_search . '%')
+                        ->orWhere('phone', 'like', '%' . $submission_search . '%')
+                        ->orWhere('payment_account_name', 'like', '%' . $submission_search . '%')
+                        ->orWhereHas('paymentInvoice', function ($qInvoice) use ($submission_search) {
+                            $qInvoice->where('invoice_number', 'like', '%' . $submission_search . '%')
+                                ->orWhereHas('submission', function ($qSub) use ($submission_search) {
+                                    $qSub->where('submission_id', 'like', '%' . $submission_search . '%')
+                                        ->orWhere('fullTitle', 'like', '%' . $submission_search . '%')
+                                        ->orWhere('authorsString', 'like', '%' . $submission_search . '%');
+                                });
+                        });
                 });
             })
-            ->when($payment_status, function ($query) use ($payment_status) {
-                return $query->where('payment_status', $payment_status);
-            })
             ->when($payment_timestamp_start, function ($query) use ($payment_timestamp_start) {
-                return $query->whereDate('payment_timestamp', '>=', date('Y-m-d H:i:s', strtotime($payment_timestamp_start)));
+                return $query->where('payment_timestamp', '>=', Carbon::parse($payment_timestamp_start));
             })
             ->when($payment_timestamp_end, function ($query) use ($payment_timestamp_end) {
-                return $query->whereDate('payment_timestamp', '<=', date('Y-m-d H:i:s', strtotime($payment_timestamp_end)));
+                return $query->where('payment_timestamp', '<=', Carbon::parse($payment_timestamp_end));
+            });
+
+        // Summary counts across all statuses for current filters
+        $summaryCollection = (clone $baseQuery)->get();
+        $payment_pending = $summaryCollection->where('payment_status', 'pending')->count();
+        $payment_accepted = $summaryCollection->where('payment_status', 'accepted')->count();
+        $payment_rejected = $summaryCollection->where('payment_status', 'rejected')->count();
+        $payment_total = $summaryCollection->count();
+
+        // Datatable list query with optional status filter
+        $paymentQuery = (clone $baseQuery)
+            ->when($payment_status && $payment_status !== '0' && $payment_status !== 'all', function ($query) use ($payment_status) {
+                return $query->where('payment_status', $payment_status);
             })
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc');
 
-        $payment_pending = $payment->where('payment_status', 'pending')->count();
-        $payment_accepted = $payment->where('payment_status', 'accepted')->count();
-        $payment_rejected = $payment->where('payment_status', 'rejected')->count();
-        $payment_total = $payment->count();
-
-        // return response()->json([
-        //     'data' => $payment,
-        // ]);
+        $payment = $paymentQuery->get();
 
         return datatables()
             ->of($payment)
             ->addColumn('payment', function ($payment) {
+                $time = $payment->payment_timestamp
+                    ? $payment->payment_timestamp->format('d M Y H:i:s')
+                    : ($payment->created_at ? $payment->created_at->format('d M Y H:i:s') : '-');
+
                 return '
                         <div class="d-flex flex-column">
-                            <span class="text-gray-800 mb-1">' . $payment->payment_timestamp->format('d M Y H:i:s') . '</span>
-                            <span>Nama: ' . $payment->name . '</span>
-                            <span>Email:  ' . $payment->email . '</span>
-                            <span>phone: ' . $payment->phone . '</span>
+                            <span class="text-gray-800 mb-1">' . $time . '</span>
+                            <span>Nama: ' . e($payment->name ?? '-') . '</span>
+                            <span>Email:  ' . e($payment->email ?? '-') . '</span>
+                            <span>phone: ' . e($payment->phone ?? '-') . '</span>
                         </div>
                 ';
             })
             ->addColumn('invoice', function ($payment) {
+                $invoice = $payment->paymentInvoice;
+                if (!$invoice) {
+                    return '<span class="badge badge-light-danger">Invoice #' . e($payment->payment_invoice_id) . ' Tidak Ditemukan</span>';
+                }
+                $invoiceNum = $invoice->invoice_number ?? '-';
+                $invoiceYear = $invoice->created_at ? $invoice->created_at->format('Y') : '-';
+                $invoicePercent = $invoice->payment_percent ?? 0;
+                $invoiceAmount = number_format($invoice->payment_amount ?? 0, 0, ',', '.');
+
                 return '
                         <div class="d-flex flex-column">
-                            <span class="text-gray-800 mb-1">INVOICE ' . $payment->paymentInvoice->invoice_number . '/JRNL/UINSMDD/' . $payment->paymentInvoice->created_at->format('Y') . '</span>
-                            <span>Persentase: ' . $payment->paymentInvoice->payment_percent . '%</span>
-                            <span>Jumlah: Rp ' . number_format($payment->paymentInvoice->payment_amount, 0, ',', '.') . '</span>
+                            <span class="text-gray-800 mb-1">INVOICE ' . e($invoiceNum) . '/JRNL/UINSMDD/' . e($invoiceYear) . '</span>
+                            <span>Persentase: ' . e($invoicePercent) . '%</span>
+                            <span>Jumlah: Rp ' . e($invoiceAmount) . '</span>
                         </div>
                 ';
             })
             ->addColumn('submission', function ($payment) {
+                $sub = $payment->paymentInvoice?->submission;
+                if (!$sub) {
+                    return '<span class="text-muted">Tidak ada submission</span>';
+                }
+
                 return '
                         <div class="d-flex flex-column">
-                            <a href="#"
-                                class="text-gray-800 text-hover-primary"> Submission ID: ' . $payment->paymentInvoice->submission->submission_id . '</a>
-                                <span class="text-gray-800 ">' . $payment->paymentInvoice->submission->fullTitle . '</span>
-                            <span >' . $payment->paymentInvoice->submission->authorsString . '</span>
+                            <a href="#" class="text-gray-800 text-hover-primary"> Submission ID: ' . e($sub->submission_id ?? '-') . '</a>
+                            <span class="text-gray-800 ">' . e($sub->fullTitle ?? '-') . '</span>
+                            <span>' . e($sub->authorsString ?? '-') . '</span>
                         </div>
                 ';
             })
             ->addColumn('journal', function ($payment) {
+                $sub = $payment->paymentInvoice?->submission;
+                $issue = $sub?->issue;
+                $journal = $issue?->journal;
+
+                $journalTitle = $journal->title ?? '-';
+                $edition = $issue
+                    ? ('Vol. ' . $issue->volume . ' No. ' . $issue->number . ' (' . $issue->year . '): ' . $issue->title)
+                    : '-';
 
                 return '
                         <div class="d-flex flex-column">
-                            <a href="#"
-                                class="text-gray-800 text-hover-primary mb-1">' . $payment->paymentInvoice->submission->issue->journal->title . '</a>
-                            <span> Vol. ' . $payment->paymentInvoice->submission->issue->volume . ' No. ' . $payment->paymentInvoice->submission->issue->number . ' (' . $payment->paymentInvoice->submission->issue->year . '): ' . $payment->paymentInvoice->submission->issue->title .  '</span>
+                            <a href="#" class="text-gray-800 text-hover-primary mb-1">' . e($journalTitle) . '</a>
+                            <span> ' . e($edition) . '</span>
                         </div>
                 ';
             })
@@ -168,7 +207,7 @@ class FinanceController extends Controller
                 } elseif ($payment->payment_status == 'rejected') {
                     $status_temp = '<span class="badge badge-light-danger">Rejected</span>';
                 } else {
-                    $status_temp = '<span class="badge badge-light-primary">' . $payment->payment_status . '</span>';
+                    $status_temp = '<span class="badge badge-light-primary">' . e($payment->payment_status) . '</span>';
                 }
                 return $status_temp;
             })
