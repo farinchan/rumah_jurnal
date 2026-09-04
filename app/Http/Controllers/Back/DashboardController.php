@@ -447,6 +447,17 @@ class DashboardController extends Controller
             $selectedJournalId = $matchingControlPanelJournal ? $matchingControlPanelJournal->id : $journals->first()?->id;
         }
 
+        $selectedIssueId = $request->query('issue_id');
+
+        $initialIssues = collect();
+        if ($selectedJournalId) {
+            $initialIssues = Issue::where('journal_id', $selectedJournalId)
+                ->orderBy('year', 'desc')
+                ->orderBy('volume', 'desc')
+                ->orderBy('number', 'desc')
+                ->get();
+        }
+
         $data = [
             'title' => 'Dashboard Jurnal',
             'breadcrumbs' => [
@@ -462,6 +473,8 @@ class DashboardController extends Controller
             'journals' => $journals,
             'grouped_journals' => $groupedJournals,
             'selected_journal_id' => $selectedJournalId,
+            'initial_issues' => $initialIssues,
+            'selected_issue_id' => $selectedIssueId,
             'control_panel' => $controlPanel,
         ];
 
@@ -482,6 +495,7 @@ class DashboardController extends Controller
 
             $controlPanel = $request->cookie('control_panel', 'journal');
             $journalId = $request->get('journal_id');
+            $issueId = $request->get('issue_id');
 
             if ($journalId) {
                 $journal = Journal::find($journalId);
@@ -508,13 +522,36 @@ class DashboardController extends Controller
                 ], 403);
             }
 
+            // Retrieve all issues of this journal for the filter options & total count
+            $allIssues = Issue::where('journal_id', $journal->id)
+                ->orderBy('year', 'desc')
+                ->orderBy('volume', 'desc')
+                ->orderBy('number', 'desc')
+                ->get();
+
+            $selectedIssue = null;
+            if (!empty($issueId) && $issueId !== 'all') {
+                $selectedIssue = $allIssues->firstWhere('id', $issueId);
+                if (!$selectedIssue) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Issue tidak ditemukan pada jurnal ini',
+                    ], 404);
+                }
+            }
+
             // Retrieve issues with submissions, payment invoices, and payments
-            $issues = Issue::where('journal_id', $journal->id)
+            $issuesQuery = Issue::where('journal_id', $journal->id)
                 ->with(['submissions.paymentInvoices.payments'])
                 ->orderBy('year', 'asc')
                 ->orderBy('volume', 'asc')
-                ->orderBy('number', 'asc')
-                ->get();
+                ->orderBy('number', 'asc');
+
+            if ($selectedIssue) {
+                $issuesQuery->where('id', $selectedIssue->id);
+            }
+
+            $issues = $issuesQuery->get();
 
             $totalSubmissions = 0;
             $publishedCount = 0;
@@ -659,6 +696,22 @@ class DashboardController extends Controller
             $yearPublishedSeries = array_column(array_values($yearData), 'published');
             $yearUnpublishedSeries = array_column(array_values($yearData), 'unpublished');
 
+            $issuesOptions = $allIssues->map(function ($iss) {
+                $label = 'Vol. ' . $iss->volume . ' No. ' . $iss->number . ($iss->year ? ' (' . $iss->year . ')' : '');
+                if (!empty($iss->title) && $iss->title !== '-') {
+                    $label .= ' - ' . Str::limit($iss->title, 40);
+                }
+                return [
+                    'id' => $iss->id,
+                    'label' => $label,
+                    'volume' => $iss->volume,
+                    'number' => $iss->number,
+                    'year' => $iss->year,
+                    'title' => $iss->title ?: '-',
+                    'author_fee' => (int)($iss->author_fee ?? 0),
+                ];
+            })->values();
+
             return response()->json([
                 'success' => true,
                 'journal' => [
@@ -666,10 +719,19 @@ class DashboardController extends Controller
                     'name' => $journal->name,
                     'title' => $journal->title,
                     'url_path' => $journal->url_path,
-                    'author_fee' => (int)($journal->author_fee ?? 0),
-                    'total_issues' => $issues->count(),
+                    'author_fee' => (int)($selectedIssue ? ($selectedIssue->author_fee ?? ($journal->author_fee ?? 0)) : ($journal->author_fee ?? 0)),
+                    'journal_author_fee' => (int)($journal->author_fee ?? 0),
+                    'total_issues' => $allIssues->count(),
+                    'filtered_issues_count' => $issues->count(),
+                    'selected_issue' => $selectedIssue ? [
+                        'id' => $selectedIssue->id,
+                        'label' => 'Vol. ' . $selectedIssue->volume . ' No. ' . $selectedIssue->number . ($selectedIssue->year ? ' (' . $selectedIssue->year . ')' : ''),
+                        'author_fee' => (int)($selectedIssue->author_fee ?? ($journal->author_fee ?? 0)),
+                    ] : null,
                 ],
+                'issues_options' => $issuesOptions,
                 'summary' => [
+                    'is_issue_filtered' => !empty($selectedIssue),
                     'total_submissions' => $totalSubmissions,
                     'total_published' => $publishedCount,
                     'total_unpublished' => $unpublishedCount,
@@ -726,7 +788,7 @@ class DashboardController extends Controller
                     ],
                     'article_status_chart' => [
                         'labels' => ['Published', 'Belum Publish', 'Naskah Menunggu'],
-                        'series' => [$publishedCount, $unpublishedCount, $totalWaiting],
+                        'series' => [$publishedCount, $unpublishedCount, $selectedIssue ? 0 : $totalWaiting],
                         'colors' => ['#50CD89', '#FFC700', '#7239EA'],
                     ],
                 ],

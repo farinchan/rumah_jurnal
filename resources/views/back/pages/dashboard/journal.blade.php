@@ -8,7 +8,7 @@
             <div class="card-body py-5">
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="symbol symbol-50px symbol-circle bg-light-primary text-primary d-flex align-items-center justify-content-center">
+                        <div class="symbol symbol-50px symbol-circle bg-light-primary text-primary d-flex align-items-center justify-content-center flex-shrink-0">
                             <i class="ki-duotone ki-book-open fs-2x text-primary">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
@@ -18,18 +18,19 @@
                         </div>
                         <div>
                             <h2 class="text-gray-900 fw-bold mb-1" id="journal_name_display">Dashboard Jurnal</h2>
-                            <div class="text-gray-500 fs-7 d-flex align-items-center gap-2">
-                                <span>Pilih jurnal untuk melihat statistik artikel dan rekapitulasi data</span>
+                            <div class="text-gray-500 fs-7 d-flex flex-wrap align-items-center gap-2">
+                                <span>Pilih jurnal & edisi untuk melihat statistik artikel dan rekap data</span>
                                 <span class="badge badge-light-primary fw-bold" id="journal_fee_badge">Author Fee: Rp 0</span>
+                                <span class="badge badge-light-info fw-bold d-none" id="filtered_issue_badge">Issue: -</span>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Dropdown Jurnal & Refresh --}}
-                    <div class="d-flex align-items-center gap-3">
+                    {{-- Dropdown Jurnal, Dropdown Issue & Refresh (1 Baris) --}}
+                    <div class="d-flex flex-nowrap align-items-end gap-2 gap-sm-3 flex-shrink-0">
                         <div class="d-flex flex-column">
-                            <label class="text-gray-600 fs-8 fw-bold mb-1">GANTI JURNAL</label>
-                            <div class="position-relative w-100 w-md-375px">
+                            <label class="text-gray-600 fs-8 fw-bold mb-1">PILIH JURNAL</label>
+                            <div class="position-relative w-160px w-sm-200px w-md-250px w-lg-280px">
                                 <select id="journal_select" class="form-select form-select-solid form-select-sm fw-bold"
                                     data-control="select2" data-placeholder="Pilih Jurnal">
                                     @forelse ($grouped_journals as $typeLabel => $journalGroup)
@@ -46,8 +47,26 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="d-flex align-items-end pt-4">
-                            <button type="button" id="btn_refresh" class="btn btn-sm btn-icon btn-light-primary" title="Muat Ulang Data">
+
+                        <div class="d-flex flex-column">
+                            <label class="text-gray-600 fs-8 fw-bold mb-1">FILTER ISSUE</label>
+                            <div class="position-relative w-140px w-sm-180px w-md-200px w-lg-220px">
+                                <select id="issue_select" class="form-select form-select-solid form-select-sm fw-bold"
+                                    data-control="select2" data-placeholder="Semua Issue">
+                                    <option value="all" @if(empty($selected_issue_id) || $selected_issue_id === 'all') selected @endif>Semua Issue</option>
+                                    @if(isset($initial_issues))
+                                        @foreach ($initial_issues as $iss)
+                                            <option value="{{ $iss->id }}" @if(isset($selected_issue_id) && $selected_issue_id == $iss->id) selected @endif>
+                                                Vol. {{ $iss->volume }} No. {{ $iss->number }} ({{ $iss->year ?? '-' }})@if(!empty($iss->title) && $iss->title !== '-') - {{ Str::limit($iss->title, 25) }}@endif
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="button" id="btn_refresh" class="btn btn-sm btn-icon btn-light-primary h-38px w-38px flex-shrink-0" title="Muat Ulang Data">
                                 <i class="ki-duotone ki-arrows-circle fs-2">
                                     <span class="path1"></span>
                                     <span class="path2"></span>
@@ -428,8 +447,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const journalSelect = document.getElementById('journal_select');
+    const issueSelect = document.getElementById('issue_select');
     const btnRefresh = document.getElementById('btn_refresh');
     const loadingOverlay = document.getElementById('dashboard_loading_overlay');
+    let isUpdatingIssueDropdown = false;
 
     function formatRupiah(amount) {
         return 'Rp ' + parseInt(amount || 0).toLocaleString('id-ID');
@@ -624,12 +645,27 @@ document.addEventListener('DOMContentLoaded', function () {
     chartArticleStatus.render();
 
     // Main Function to load statistics via API and update DOM
-    function loadJournalStats(journalId) {
+    function loadJournalStats(journalId, issueId = null, shouldUpdateIssueDropdown = false) {
         if (!journalId) return;
 
         loadingOverlay.classList.remove('d-none');
 
-        const url = "{{ route('back.dashboard.journal.stat') }}?journal_id=" + encodeURIComponent(journalId);
+        let url = "{{ route('back.dashboard.journal.stat') }}?journal_id=" + encodeURIComponent(journalId);
+        if (issueId && issueId !== 'all') {
+            url += "&issue_id=" + encodeURIComponent(issueId);
+        }
+
+        // Keep URL in sync without reloading
+        if (window.history && window.history.replaceState) {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('journal_id', journalId);
+            if (issueId && issueId !== 'all') {
+                currentUrl.searchParams.set('issue_id', issueId);
+            } else {
+                currentUrl.searchParams.delete('issue_id');
+            }
+            window.history.replaceState({}, '', currentUrl.toString());
+        }
 
         fetch(url, {
             headers: {
@@ -652,10 +688,48 @@ document.addEventListener('DOMContentLoaded', function () {
             const summary = res.summary;
             const charts = res.charts;
             const issuesTable = res.issues_table;
+            const issuesOptions = res.issues_options || [];
 
             // Update Header & Journal Info DOM
             document.getElementById('journal_name_display').textContent = journal.name || journal.title;
-            document.getElementById('journal_fee_badge').textContent = 'Author Fee: ' + formatRupiah(journal.author_fee);
+
+            const issueBadge = document.getElementById('filtered_issue_badge');
+            if (journal.selected_issue) {
+                document.getElementById('journal_fee_badge').textContent = 'Author Fee Edisi: ' + formatRupiah(journal.author_fee);
+                if (issueBadge) {
+                    issueBadge.textContent = 'Edisi: ' + journal.selected_issue.label;
+                    issueBadge.classList.remove('d-none');
+                }
+            } else {
+                document.getElementById('journal_fee_badge').textContent = 'Author Fee Jurnal: ' + formatRupiah(journal.journal_author_fee || journal.author_fee);
+                if (issueBadge) {
+                    issueBadge.classList.add('d-none');
+                }
+            }
+
+            // Rebuild Issue Select Options if requested (e.g. on journal switch)
+            if (shouldUpdateIssueDropdown) {
+                isUpdatingIssueDropdown = true;
+                if (typeof jQuery !== 'undefined' && $('#issue_select').length) {
+                    const $issueSelect = $('#issue_select');
+                    $issueSelect.empty();
+                    $issueSelect.append(new Option('Semua Issue', 'all', true, true));
+                    issuesOptions.forEach(opt => {
+                        $issueSelect.append(new Option(opt.label, opt.id, false, false));
+                    });
+                    $issueSelect.val('all').trigger('change.select2');
+                } else if (issueSelect) {
+                    issueSelect.innerHTML = '<option value="all" selected>Semua Issue</option>';
+                    issuesOptions.forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt.id;
+                        option.textContent = opt.label;
+                        issueSelect.appendChild(option);
+                    });
+                    issueSelect.value = 'all';
+                }
+                isUpdatingIssueDropdown = false;
+            }
 
             // Update Summary Card 1 (Total Artikel)
             document.getElementById('stat_total_articles').textContent = (summary.total_submissions || 0).toLocaleString('id-ID');
@@ -682,9 +756,15 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('stat_total_paid_received').textContent = formatRupiah(summary.total_paid_received);
             document.getElementById('stat_total_outstanding').textContent = formatRupiah(summary.total_outstanding);
             document.getElementById('stat_total_potential').textContent = formatRupiah(summary.total_potential_revenue);
-            document.getElementById('stat_total_issues').textContent = (journal.total_issues || 0).toLocaleString('id-ID');
-            document.getElementById('stat_waiting_count').textContent = (summary.waiting_submissions.total || 0) + ' Naskah Baru';
-            document.getElementById('stat_waiting_detail').textContent = 'Waiting: ' + summary.waiting_submissions.waiting + ' | Under Review: ' + summary.waiting_submissions.under_review;
+            document.getElementById('stat_total_issues').textContent = (journal.filtered_issues_count ?? journal.total_issues ?? 0).toLocaleString('id-ID') + (summary.is_issue_filtered ? ' (Filter)' : '');
+
+            if (summary.is_issue_filtered) {
+                document.getElementById('stat_waiting_count').textContent = (summary.waiting_submissions.total || 0) + ' Naskah Baru';
+                document.getElementById('stat_waiting_detail').textContent = 'Naskah belum masuk edisi: ' + summary.waiting_submissions.waiting + ' Menunggu | ' + summary.waiting_submissions.under_review + ' Review';
+            } else {
+                document.getElementById('stat_waiting_count').textContent = (summary.waiting_submissions.total || 0) + ' Naskah Baru';
+                document.getElementById('stat_waiting_detail').textContent = 'Waiting: ' + summary.waiting_submissions.waiting + ' | Under Review: ' + summary.waiting_submissions.under_review;
+            }
 
             // Update Legends
             document.getElementById('legend_lunas').textContent = summary.lunas.count + ' (' + formatRupiah(summary.lunas.amount) + ')';
@@ -694,7 +774,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             document.getElementById('legend_stat_published').textContent = summary.total_published + ' Artikel';
             document.getElementById('legend_stat_unpublished').textContent = summary.total_unpublished + ' Artikel';
-            document.getElementById('legend_stat_waiting').textContent = summary.waiting_submissions.total + ' Naskah';
+            document.getElementById('legend_stat_waiting').textContent = (summary.is_issue_filtered ? summary.waiting_submissions.total + ' Naskah (Jurnal)' : summary.waiting_submissions.total + ' Naskah');
 
             // Update Chart 1: Articles Per Issue
             if (charts.issue_chart.categories && charts.issue_chart.categories.length > 0) {
@@ -747,7 +827,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <tr>
                         <td colspan="13" class="text-center py-6 text-gray-500">
                             <i class="ki-duotone ki-information-2 fs-2x text-gray-400 mb-2"></i>
-                            <div class="fw-bold">Belum ada edisi (issue) untuk jurnal ini.</div>
+                            <div class="fw-bold">Belum ada edisi (issue) yang cocok untuk jurnal ini.</div>
                         </td>
                     </tr>
                 `;
@@ -816,32 +896,61 @@ document.addEventListener('DOMContentLoaded', function () {
     // Event listener: Select2 & native change
     if (typeof jQuery !== 'undefined') {
         $('#journal_select').on('change select2:select', function () {
-            loadJournalStats($(this).val());
+            const newJournalId = $(this).val();
+            if (newJournalId) {
+                loadJournalStats(newJournalId, '', true);
+            }
+        });
+
+        $('#issue_select').on('change select2:select', function () {
+            if (isUpdatingIssueDropdown) return;
+            const currentJournalId = $('#journal_select').val();
+            const selectedIssueId = $(this).val();
+            const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
+            loadJournalStats(currentJournalId, filterIssueId, false);
         });
     }
 
     if (journalSelect) {
         journalSelect.addEventListener('change', function () {
-            loadJournalStats(this.value);
+            loadJournalStats(this.value, 'all', true);
+        });
+    }
+
+    if (issueSelect) {
+        issueSelect.addEventListener('change', function () {
+            if (isUpdatingIssueDropdown) return;
+            const currentJournalId = journalSelect ? journalSelect.value : null;
+            const filterIssueId = (this.value === 'all' || !this.value) ? '' : this.value;
+            loadJournalStats(currentJournalId, filterIssueId, false);
         });
     }
 
     if (btnRefresh) {
         btnRefresh.addEventListener('click', function () {
-            const currentVal = (typeof jQuery !== 'undefined' && $('#journal_select').val())
+            const currentJournalId = (typeof jQuery !== 'undefined' && $('#journal_select').val())
                 ? $('#journal_select').val()
                 : (journalSelect ? journalSelect.value : null);
-            loadJournalStats(currentVal);
+            const selectedIssueId = (typeof jQuery !== 'undefined' && $('#issue_select').val())
+                ? $('#issue_select').val()
+                : (issueSelect ? issueSelect.value : null);
+            const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
+            loadJournalStats(currentJournalId, filterIssueId, false);
         });
     }
 
     // Initial Load
-    const initialVal = (typeof jQuery !== 'undefined' && $('#journal_select').val())
+    const initialJournalId = (typeof jQuery !== 'undefined' && $('#journal_select').val())
         ? $('#journal_select').val()
         : (journalSelect ? journalSelect.value : null);
 
-    if (initialVal) {
-        loadJournalStats(initialVal);
+    const initialIssueVal = (typeof jQuery !== 'undefined' && $('#issue_select').val())
+        ? $('#issue_select').val()
+        : (issueSelect ? issueSelect.value : null);
+    const initialIssueId = (initialIssueVal === 'all' || !initialIssueVal) ? '' : initialIssueVal;
+
+    if (initialJournalId) {
+        loadJournalStats(initialJournalId, initialIssueId, false);
     }
 });
 </script>

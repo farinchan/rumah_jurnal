@@ -331,3 +331,94 @@ it('forbids users without allowed roles from accessing journal dashboard', funct
         ->assertStatus(403);
 });
 
+it('filters journal statistics by specific issue', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = createTestJournal([
+        'name' => 'Jurnal Filter Test',
+        'url_path' => 'jfilter',
+        'author_fee' => 400000,
+    ]);
+
+    $issueA = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '10',
+        'number' => '1',
+        'year' => '2025',
+        'title' => 'Edisi Khusus A',
+        'author_fee' => 500000,
+    ]);
+
+    $issueB = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '10',
+        'number' => '2',
+        'year' => '2025',
+        'title' => 'Edisi Khusus B',
+        'author_fee' => 600000,
+    ]);
+
+    Submission::create([
+        'issue_id' => $issueA->id,
+        'submission_id' => 'SUB-A1',
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => false,
+        'payment_status' => 'paid',
+    ]);
+
+    Submission::create([
+        'issue_id' => $issueB->id,
+        'submission_id' => 'SUB-B1',
+        'status' => '1',
+        'status_label' => 'Queued',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => false,
+        'payment_status' => 'pending',
+    ]);
+
+    // Test page view sees the filter dropdown with Semua Issue option
+    $pageResponse = $this->actingAs($user)
+        ->get(route('back.dashboard.journal', ['journal_id' => $journal->id]));
+    $pageResponse->assertStatus(200);
+    $pageResponse->assertSee('id="issue_select"', false);
+    $pageResponse->assertSee('<option value="all"', false);
+    $pageResponse->assertSee('Semua Issue');
+    $pageResponse->assertSee('Vol. 10 No. 1');
+    $pageResponse->assertSee('Vol. 10 No. 2');
+
+    // Test stat API filtered by issueA
+    $apiResponse = $this->actingAs($user)
+        ->getJson(route('back.dashboard.journal.stat', [
+            'journal_id' => $journal->id,
+            'issue_id' => $issueA->id,
+        ]));
+
+    $apiResponse->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'journal' => [
+                'id' => $journal->id,
+                'author_fee' => 500000,
+                'total_issues' => 2,
+                'filtered_issues_count' => 1,
+                'selected_issue' => [
+                    'id' => $issueA->id,
+                ],
+            ],
+            'summary' => [
+                'is_issue_filtered' => true,
+                'total_submissions' => 1,
+                'total_published' => 1,
+                'total_unpublished' => 0,
+            ],
+        ]);
+
+    expect($apiResponse->json('issues_options'))->toHaveCount(2);
+    expect($apiResponse->json('issues_table'))->toHaveCount(1);
+    expect($apiResponse->json('issues_table.0.id'))->toBe($issueA->id);
+});
+
+
