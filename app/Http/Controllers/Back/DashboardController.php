@@ -553,10 +553,8 @@ class DashboardController extends Controller
                 foreach ($issue->submissions as $submission) {
                     $totalSubmissions++;
 
-                    // Published status check
-                    $isPublished = ($submission->status == 3)
-                        || !empty($submission->urlPublished)
-                        || Str::contains(strtolower($submission->status_label ?? ''), 'publish');
+                    // Published status check: hanya status == '3' yang publish, selain itu belum publish
+                    $isPublished = ($submission->status == '3');
 
                     if ($isPublished) {
                         $publishedCount++;
