@@ -14,8 +14,14 @@ use App\Models\Event;
 use App\Models\Finance;
 use App\Models\Payment;
 use App\Models\FinanceYear;
+use App\Models\Journal;
+use App\Models\Issue;
+use App\Models\Submission;
+use App\Models\PaymentInvoice;
+use App\Models\WaitingSubmission;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Str;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class DashboardController extends Controller
@@ -354,6 +360,385 @@ class DashboardController extends Controller
             return response()->json([
                 'error' => 'Failed to load cashflow data',
                 'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    protected array $allowedDashboardJournalRoles = [
+        'super-admin',
+        'admin-ejournal',
+        'admin-proceeding',
+        'admin-student-research-hub',
+        'editor',
+        'editor-proceeding',
+        'editor-student-research-hub',
+    ];
+
+    private function canUserAccessJournal($user, Journal $journal): bool
+    {
+        if (!$user || !$user->hasAnyRole($this->allowedDashboardJournalRoles)) {
+            return false;
+        }
+
+        // super-admin can open everything across all types
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+
+        // admin-ejournal can open all journals, but only for type 'journal'
+        if ($user->hasRole('admin-ejournal') && $journal->type === 'journal') {
+            return true;
+        }
+
+        // admin-proceeding can open all journals, but only for type 'proceeding'
+        if ($user->hasRole('admin-proceeding') && $journal->type === 'proceeding') {
+            return true;
+        }
+
+        // admin-student-research-hub can open all journals, but only for type 'student_research_hub'
+        if ($user->hasRole('admin-student-research-hub') && $journal->type === 'student_research_hub') {
+            return true;
+        }
+
+        // editor roles can only open journals based on permission url_path assigned to them
+        if ($user->hasAnyRole(['editor', 'editor-proceeding', 'editor-student-research-hub'])) {
+            if ($user->can($journal->url_path)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function journal(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->hasAnyRole($this->allowedDashboardJournalRoles)) {
+            abort(403, 'Anda tidak memiliki akses ke Dashboard Jurnal');
+        }
+
+        $controlPanel = $request->cookie('control_panel', 'journal');
+
+        // Get journals accessible to this user based on their role and permissions
+        $journals = Journal::orderBy('type')
+            ->orderBy('name')
+            ->get()
+            ->filter(function ($journal) use ($user) {
+                return $this->canUserAccessJournal($user, $journal);
+            })
+            ->values();
+
+        // Group journals by publication type
+        $typeLabels = [
+            'journal' => 'Jurnal / E-Journal',
+            'proceeding' => 'Proceeding',
+            'student_research_hub' => 'Student Research Hub',
+        ];
+
+        $groupedJournals = $journals->groupBy(function ($item) use ($typeLabels) {
+            return $typeLabels[$item->type] ?? ucfirst(str_replace('_', ' ', $item->type));
+        });
+
+        // Determine initially selected journal
+        $selectedJournalId = $request->query('journal_id');
+        if (!$selectedJournalId || !$journals->contains('id', $selectedJournalId)) {
+            $matchingControlPanelJournal = $journals->firstWhere('type', $controlPanel);
+            $selectedJournalId = $matchingControlPanelJournal ? $matchingControlPanelJournal->id : $journals->first()?->id;
+        }
+
+        $data = [
+            'title' => 'Dashboard Jurnal',
+            'breadcrumbs' => [
+                [
+                    'name' => 'Dashboard',
+                    'link' => route('back.dashboard')
+                ],
+                [
+                    'name' => 'Jurnal',
+                    'link' => route('back.dashboard.journal')
+                ]
+            ],
+            'journals' => $journals,
+            'grouped_journals' => $groupedJournals,
+            'selected_journal_id' => $selectedJournalId,
+            'control_panel' => $controlPanel,
+        ];
+
+        return view('back.pages.dashboard.journal', $data);
+    }
+
+    public function journalStat(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user || !$user->hasAnyRole($this->allowedDashboardJournalRoles)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke Dashboard Jurnal',
+                ], 403);
+            }
+
+            $controlPanel = $request->cookie('control_panel', 'journal');
+            $journalId = $request->get('journal_id');
+
+            if ($journalId) {
+                $journal = Journal::find($journalId);
+            } else {
+                $journals = Journal::orderBy('type')->orderBy('name')->get();
+                $journal = $journals->firstWhere('type', $controlPanel);
+                if (!$journal || !$this->canUserAccessJournal($user, $journal)) {
+                    $journal = $journals->first(fn($j) => $this->canUserAccessJournal($user, $j));
+                }
+            }
+
+            if (!$journal) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Jurnal tidak ditemukan atau Anda belum memiliki jurnal yang ditugaskan',
+                ], 404);
+            }
+
+            // Check authorization specifically for this journal
+            if (!$this->canUserAccessJournal($user, $journal)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke jurnal ini',
+                ], 403);
+            }
+
+            // Retrieve issues with submissions, payment invoices, and payments
+            $issues = Issue::where('journal_id', $journal->id)
+                ->with(['submissions.paymentInvoices.payments'])
+                ->orderBy('year', 'asc')
+                ->orderBy('volume', 'asc')
+                ->orderBy('number', 'asc')
+                ->get();
+
+            $totalSubmissions = 0;
+            $publishedCount = 0;
+            $unpublishedCount = 0;
+
+            $lunasCount = 0;
+            $lunasAmount = 0;
+
+            $belumLunasCount = 0;
+            $belumLunasPaid = 0;
+            $belumLunasRemaining = 0;
+
+            $belumBayarCount = 0;
+            $belumBayarAmount = 0;
+
+            $freeCount = 0;
+
+            $issuesTableData = [];
+            $issueChartCategories = [];
+            $issueChartPublished = [];
+            $issueChartUnpublished = [];
+
+            $yearData = [];
+
+            foreach ($issues as $issue) {
+                $issueFee = $issue->author_fee ?? ($journal->author_fee ?? 0);
+                $issueArticlesCount = $issue->submissions->count();
+                $issuePublished = 0;
+                $issueUnpublished = 0;
+                $issueLunas = 0;
+                $issueBelumLunas = 0;
+                $issueBelumBayar = 0;
+                $issueFree = 0;
+                $issueIncome = 0;
+
+                foreach ($issue->submissions as $submission) {
+                    $totalSubmissions++;
+
+                    // Published status check
+                    $isPublished = ($submission->status == 3)
+                        || !empty($submission->urlPublished)
+                        || Str::contains(strtolower($submission->status_label ?? ''), 'publish');
+
+                    if ($isPublished) {
+                        $publishedCount++;
+                        $issuePublished++;
+                    } else {
+                        $unpublishedCount++;
+                        $issueUnpublished++;
+                    }
+
+                    // Payment status check
+                    $subFee = $issueFee;
+                    $isFree = ($submission->free_charge == 1) || ($subFee <= 0);
+
+                    if ($isFree) {
+                        $freeCount++;
+                        $issueFree++;
+                    } else {
+                        $paidInvoices = $submission->paymentInvoices->where('is_paid', 1);
+                        $paidPercent = $paidInvoices->sum('payment_percent');
+                        $paidAmount = $paidInvoices->sum('payment_amount');
+
+                        if ($paidAmount == 0) {
+                            $acceptedPayments = $submission->paymentInvoices->flatMap->payments->where('payment_status', 'accepted');
+                            $paidAmount = $acceptedPayments->sum('payment_amount');
+                        }
+
+                        $isLunas = ($submission->payment_status === 'paid')
+                            || ($paidPercent >= 100)
+                            || ($subFee > 0 && $paidAmount >= $subFee);
+
+                        if ($isLunas) {
+                            $lunasCount++;
+                            $issueLunas++;
+                            $actualPaid = $paidAmount > 0 ? $paidAmount : $subFee;
+                            $lunasAmount += $actualPaid;
+                            $issueIncome += $actualPaid;
+                        } elseif ($paidPercent > 0 || $paidAmount > 0) {
+                            $belumLunasCount++;
+                            $issueBelumLunas++;
+                            $belumLunasPaid += $paidAmount;
+                            $remaining = max(0, $subFee - $paidAmount);
+                            $belumLunasRemaining += $remaining;
+                            $issueIncome += $paidAmount;
+                        } else {
+                            $belumBayarCount++;
+                            $issueBelumBayar++;
+                            $belumBayarAmount += $subFee;
+                        }
+                    }
+                }
+
+                $year = $issue->year ?: ($issue->created_at ? $issue->created_at->format('Y') : 'Unknown');
+                if (!isset($yearData[$year])) {
+                    $yearData[$year] = [
+                        'published' => 0,
+                        'unpublished' => 0,
+                    ];
+                }
+                $yearData[$year]['published'] += $issuePublished;
+                $yearData[$year]['unpublished'] += $issueUnpublished;
+
+                $issueLabel = 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ($issue->year ? ' (' . $issue->year . ')' : '');
+                $issueChartCategories[] = $issueLabel;
+                $issueChartPublished[] = $issuePublished;
+                $issueChartUnpublished[] = $issueUnpublished;
+
+                $issuesTableData[] = [
+                    'id' => $issue->id,
+                    'volume' => $issue->volume,
+                    'number' => $issue->number,
+                    'year' => $issue->year,
+                    'title' => $issue->title ?: '-',
+                    'issue_label' => $issueLabel,
+                    'author_fee' => (int)$issueFee,
+                    'total_articles' => $issueArticlesCount,
+                    'published_count' => $issuePublished,
+                    'unpublished_count' => $issueUnpublished,
+                    'lunas_count' => $issueLunas,
+                    'belum_lunas_count' => $issueBelumLunas,
+                    'belum_bayar_count' => $issueBelumBayar,
+                    'free_count' => $issueFree,
+                    'total_income' => (int)$issueIncome,
+                    'action_url' => route('back.journal.article.index', [$journal->url_path, $issue->id]),
+                ];
+            }
+
+            // Waiting submissions for this journal
+            $waitingSubmissionsQuery = WaitingSubmission::where('target_journal_id', $journal->id);
+            $totalWaiting = (clone $waitingSubmissionsQuery)->count();
+            $waitingWaiting = (clone $waitingSubmissionsQuery)->where('status', 'waiting')->count();
+            $waitingUnderReview = (clone $waitingSubmissionsQuery)->where('status', 'under_review')->count();
+            $waitingAccepted = (clone $waitingSubmissionsQuery)->where('status', 'accepted')->count();
+
+            // Total revenue received vs outstanding
+            $totalPaidReceived = $lunasAmount + $belumLunasPaid;
+            $totalOutstanding = $belumLunasRemaining + $belumBayarAmount;
+            $totalPotentialRevenue = $totalPaidReceived + $totalOutstanding;
+
+            // Sort year data chronologically
+            ksort($yearData);
+            $yearCategories = array_keys($yearData);
+            $yearPublishedSeries = array_column(array_values($yearData), 'published');
+            $yearUnpublishedSeries = array_column(array_values($yearData), 'unpublished');
+
+            return response()->json([
+                'success' => true,
+                'journal' => [
+                    'id' => $journal->id,
+                    'name' => $journal->name,
+                    'title' => $journal->title,
+                    'url_path' => $journal->url_path,
+                    'author_fee' => (int)($journal->author_fee ?? 0),
+                    'total_issues' => $issues->count(),
+                ],
+                'summary' => [
+                    'total_submissions' => $totalSubmissions,
+                    'total_published' => $publishedCount,
+                    'total_unpublished' => $unpublishedCount,
+                    'published_percentage' => $totalSubmissions > 0 ? round(($publishedCount / $totalSubmissions) * 100, 1) : 0,
+                    'unpublished_percentage' => $totalSubmissions > 0 ? round(($unpublishedCount / $totalSubmissions) * 100, 1) : 0,
+
+                    // Rekap data pembayaran
+                    'lunas' => [
+                        'count' => $lunasCount,
+                        'amount' => (int)$lunasAmount,
+                    ],
+                    'belum_lunas' => [
+                        'count' => $belumLunasCount,
+                        'paid_amount' => (int)$belumLunasPaid,
+                        'remaining_amount' => (int)$belumLunasRemaining,
+                    ],
+                    'belum_bayar' => [
+                        'count' => $belumBayarCount,
+                        'amount' => (int)$belumBayarAmount,
+                    ],
+                    'free' => [
+                        'count' => $freeCount,
+                    ],
+
+                    // Finansial
+                    'total_paid_received' => (int)$totalPaidReceived,
+                    'total_outstanding' => (int)$totalOutstanding,
+                    'total_potential_revenue' => (int)$totalPotentialRevenue,
+
+                    // Naskah waiting
+                    'waiting_submissions' => [
+                        'total' => $totalWaiting,
+                        'waiting' => $waitingWaiting,
+                        'under_review' => $waitingUnderReview,
+                        'accepted' => $waitingAccepted,
+                    ],
+                ],
+                'charts' => [
+                    'issue_chart' => [
+                        'categories' => $issueChartCategories,
+                        'published' => $issueChartPublished,
+                        'unpublished' => $issueChartUnpublished,
+                    ],
+                    'year_chart' => [
+                        'categories' => $yearCategories,
+                        'published' => $yearPublishedSeries,
+                        'unpublished' => $yearUnpublishedSeries,
+                    ],
+                    'payment_chart' => [
+                        'labels' => ['Lunas', 'Belum Lunas', 'Belum Bayar', 'Free Charge'],
+                        'series' => [$lunasCount, $belumLunasCount, $belumBayarCount, $freeCount],
+                        'amounts' => [(int)$lunasAmount, (int)$belumLunasPaid, (int)$belumBayarAmount, 0],
+                        'colors' => ['#50CD89', '#FFC700', '#F1416C', '#009EF7'],
+                    ],
+                    'article_status_chart' => [
+                        'labels' => ['Published', 'Belum Publish', 'Naskah Menunggu'],
+                        'series' => [$publishedCount, $unpublishedCount, $totalWaiting],
+                        'colors' => ['#50CD89', '#FFC700', '#7239EA'],
+                    ],
+                ],
+                'issues_table' => array_reverse($issuesTableData),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal memuat data statistik jurnal',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

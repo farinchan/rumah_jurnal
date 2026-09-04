@@ -28,6 +28,17 @@
                         <span class="menu-title">Default</span>
                     </a>
                 </div>
+                @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|editor|editor-proceeding|editor-student-research-hub')
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.dashboard.journal')) active @endif"
+                            href="{{ route('back.dashboard.journal') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Jurnal</span>
+                        </a>
+                    </div>
+                @endhasanyrole
                 <div class="menu-item">
                     <a class="menu-link @if (request()->routeIs('back.dashboard.news')) active @endif"
                         href="{{ route('back.dashboard.news') }}">
@@ -36,7 +47,9 @@
                         </span>
                         <span class="menu-title">Berita</span>
                     </a>
-                    @role('super-admin|keuangan')
+                </div>
+                @role('super-admin|keuangan')
+                    <div class="menu-item">
                         <a class="menu-link @if (request()->routeIs('back.dashboard.cashflow')) active @endif"
                             href="{{ route('back.dashboard.cashflow') }}">
                             <span class="menu-bullet">
@@ -44,8 +57,8 @@
                             </span>
                             <span class="menu-title">Cashflow</span>
                         </a>
-                    @endrole
-                </div>
+                    </div>
+                @endrole
             </div>
         </div>
 

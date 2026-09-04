@@ -5,25 +5,26 @@
 
 @php
     $setting_web = \App\Models\SettingWebsite::first();
+    $siteName = $setting_web?->name ?? config('app.name', 'Rumah Jurnal');
 @endphp
 
 <head>
     <base href="" />
-    <title>{{ $setting_web->name }}</title>
+    <title>{{ $siteName }}</title>
     <meta charset="utf-8" />
-    <meta name="description" content="{{ Str::limit(strip_tags($setting_web->about), 200, '...') }}" />
+    <meta name="description" content="{{ Str::limit(strip_tags($setting_web?->about ?? ''), 200, '...') }}" />
     <meta name="keywords"
         content="
-            {{ $setting_web->name }}, Admin, OJS, Journal, jurnal, jurnal online, jurnal ilmiah, jurnal internasional, jurnal nasional, jurnal terakreditasi, jurnal terindeks scopus, jurnal terindeks sinta, jurnal terindeks google scholar, jurnal terindeks garuda, jurnal terindeks DOAJ, jurnal terindeks crossref, jurnal terindeks issn, jurnal terindeks e-issn, jurnal terindeks p-issn" />
+            {{ $siteName }}, Admin, OJS, Journal, jurnal, jurnal online, jurnal ilmiah, jurnal internasional, jurnal nasional, jurnal terakreditasi, jurnal terindeks scopus, jurnal terindeks sinta, jurnal terindeks google scholar, jurnal terindeks garuda, jurnal terindeks DOAJ, jurnal terindeks crossref, jurnal terindeks issn, jurnal terindeks e-issn, jurnal terindeks p-issn" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="{{ $setting_web->name }}" />
+    <meta property="og:title" content="{{ $siteName }}" />
     <meta property="og:url" content="{{ url()->current() }}" />
-    <meta property="og:site_name" content="{{ $setting_web->name }}" />
+    <meta property="og:site_name" content="{{ $siteName }}" />
     <link rel="canonical" href="{{ url()->current() }}" />
-    <link rel="shortcut icon" href="{{ Storage::url($setting_web->favicon) }}" />
+    <link rel="shortcut icon" href="{{ $setting_web?->favicon ? Storage::url($setting_web->favicon) : asset('favicon.ico') }}" />
     <!--begin::Fonts(mandatory for all pages)-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" /> <!--end::Fonts-->
     <!--begin::Vendor Stylesheets(used for this page only)-->

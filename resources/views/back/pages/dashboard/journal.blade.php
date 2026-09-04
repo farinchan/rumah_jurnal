@@ -1,0 +1,848 @@
+@extends('back.app')
+
+@section('content')
+    <div id="kt_content_container" class="container-xxl">
+
+        {{-- Header & Dropdown Toolbar --}}
+        <div class="card card-flush mb-5 mb-xl-8">
+            <div class="card-body py-5">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="symbol symbol-50px symbol-circle bg-light-primary text-primary d-flex align-items-center justify-content-center">
+                            <i class="ki-duotone ki-book-open fs-2x text-primary">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                                <span class="path4"></span>
+                            </i>
+                        </div>
+                        <div>
+                            <h2 class="text-gray-900 fw-bold mb-1" id="journal_name_display">Dashboard Jurnal</h2>
+                            <div class="text-gray-500 fs-7 d-flex align-items-center gap-2">
+                                <span>Pilih jurnal untuk melihat statistik artikel dan rekapitulasi data</span>
+                                <span class="badge badge-light-primary fw-bold" id="journal_fee_badge">Author Fee: Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Dropdown Jurnal & Refresh --}}
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex flex-column">
+                            <label class="text-gray-600 fs-8 fw-bold mb-1">GANTI JURNAL</label>
+                            <div class="position-relative w-100 w-md-375px">
+                                <select id="journal_select" class="form-select form-select-solid form-select-sm fw-bold"
+                                    data-control="select2" data-placeholder="Pilih Jurnal">
+                                    @forelse ($grouped_journals as $typeLabel => $journalGroup)
+                                        <optgroup label="{{ $typeLabel }}">
+                                            @foreach ($journalGroup as $item)
+                                                <option value="{{ $item->id }}" @if ($selected_journal_id == $item->id) selected @endif>
+                                                    {{ $item->name }} ({{ $item->url_path }})
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @empty
+                                        <option value="">Tidak ada jurnal yang tersedia</option>
+                                    @endforelse
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-end pt-4">
+                            <button type="button" id="btn_refresh" class="btn btn-sm btn-icon btn-light-primary" title="Muat Ulang Data">
+                                <i class="ki-duotone ki-arrows-circle fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Loading Spinner Overlay Wrapper --}}
+        <div id="dashboard_content_area" class="position-relative">
+            <div id="dashboard_loading_overlay" class="d-none position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex align-items-center justify-content-center z-index-3 rounded">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="text-gray-700 fw-bold fs-6">Memuat data jurnal...</span>
+                </div>
+            </div>
+
+            {{-- Row 1: Artikel & Rekap Pembayaran --}}
+            <div class="row g-5 g-xl-8 mb-5 mb-xl-8">
+                {{-- Total Artikel --}}
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-flush h-100 border-start border-1 border-primary shadow-sm">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-gray-900 lh-1" id="stat_total_articles">0</span>
+                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Total Artikel Masuk</span>
+                            </div>
+                            <div class="symbol symbol-45px">
+                                <div class="symbol-label bg-light-primary">
+                                    <i class="ki-duotone ki-document fs-2x text-primary">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-2 pb-5">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge badge-light-success fs-8 fw-bold">
+                                    <i class="ki-duotone ki-check fs-8 me-1 text-success"></i>
+                                    <span id="stat_published_articles">0</span> Publish
+                                </span>
+                                <span class="badge badge-light-warning fs-8 fw-bold">
+                                    <i class="ki-duotone ki-time fs-8 me-1 text-warning"></i>
+                                    <span id="stat_unpublished_articles">0</span> Belum Publish
+                                </span>
+                            </div>
+                            <div class="progress h-6px bg-light-warning">
+                                <div id="stat_published_bar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <span class="text-gray-400 fs-8 mt-1 d-block text-end" id="stat_published_percent">0% telah terbit</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Status Lunas --}}
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-flush h-100 border-start border-1 border-success shadow-sm">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-success lh-1" id="stat_lunas_count">0</span>
+                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Artikel Lunas (100%)</span>
+                            </div>
+                            <div class="symbol symbol-45px">
+                                <div class="symbol-label bg-light-success">
+                                    <i class="ki-duotone ki-check-circle fs-2x text-success">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-2 pb-5">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-gray-600 fs-7">Uang Diterima:</span>
+                                <span class="fw-bold text-gray-900 fs-7" id="stat_lunas_amount">Rp 0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-gray-600 fs-7">Bebas Biaya (Free):</span>
+                                <span class="badge badge-light-primary fw-bold fs-8" id="stat_free_count">0 Artikel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Status Belum Lunas (DP/Cicil) --}}
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-flush h-100 border-start border-1 border-warning shadow-sm">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-warning lh-1" id="stat_belum_lunas_count">0</span>
+                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Belum Lunas (DP/Cicil)</span>
+                            </div>
+                            <div class="symbol symbol-45px">
+                                <div class="symbol-label bg-light-warning">
+                                    <i class="ki-duotone ki-bill fs-2x text-warning">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                        <span class="path4"></span>
+                                        <span class="path5"></span>
+                                        <span class="path6"></span>
+                                    </i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-2 pb-5">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-gray-600 fs-7">Sudah Masuk:</span>
+                                <span class="fw-bold text-success fs-7" id="stat_belum_lunas_paid">Rp 0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-gray-600 fs-7">Sisa Tagihan:</span>
+                                <span class="fw-bold text-danger fs-7" id="stat_belum_lunas_remaining">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Status Belum Bayar --}}
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-flush h-100 border-start border-1 border-danger shadow-sm">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-danger lh-1" id="stat_belum_bayar_count">0</span>
+                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Belum Bayar (0%)</span>
+                            </div>
+                            <div class="symbol symbol-45px">
+                                <div class="symbol-label bg-light-danger">
+                                    <i class="ki-duotone ki-cross-circle fs-2x text-danger">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-2 pb-5">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-gray-600 fs-7">Total Piutang:</span>
+                                <span class="fw-bold text-danger fs-7" id="stat_belum_bayar_amount">Rp 0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-gray-600 fs-7">Status:</span>
+                                <span class="badge badge-light-danger fs-8 fw-bold">Menunggu Pembayaran</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Row 2: Keuangan & Naskah Masuk --}}
+            <div class="row g-5 g-xl-8 mb-5 mb-xl-8">
+                {{-- Total Pendapatan Masuk --}}
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-flush bg-light-success border border-success border-dashed h-100">
+                        <div class="card-body py-4">
+                            <span class="text-success fw-semibold fs-7 d-block">TOTAL PEMASUKAN DITERIMA</span>
+                            <span class="fs-2x fw-bold text-gray-900 d-block mt-1" id="stat_total_paid_received">Rp 0</span>
+                            <span class="text-gray-600 fs-8">Dari artikel lunas dan cicilan</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Total Piutang / Belum Terbayar --}}
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-flush bg-light-danger border border-danger border-dashed h-100">
+                        <div class="card-body py-4">
+                            <span class="text-danger fw-semibold fs-7 d-block">SISA PIUTANG / BELUM TERBAYAR</span>
+                            <span class="fs-2x fw-bold text-gray-900 d-block mt-1" id="stat_total_outstanding">Rp 0</span>
+                            <span class="text-gray-600 fs-8">Belum bayar + sisa cicilan</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Total Potensi Omzet --}}
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-flush bg-light-primary border border-primary border-dashed h-100">
+                        <div class="card-body py-4">
+                            <span class="text-primary fw-semibold fs-7 d-block">TOTAL POTENSI PENDAPATAN</span>
+                            <span class="fs-2x fw-bold text-gray-900 d-block mt-1" id="stat_total_potential">Rp 0</span>
+                            <span class="text-gray-600 fs-8">Jika seluruh artikel melunasi fee</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Total Issue & Waiting Submissions --}}
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-flush bg-light-info border border-info border-dashed h-100">
+                        <div class="card-body py-4">
+                            <span class="text-info fw-semibold fs-7 d-block">EDISI & NASKAH MENUNGGU</span>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <div>
+                                    <span class="fs-2x fw-bold text-gray-900" id="stat_total_issues">0</span>
+                                    <span class="fs-8 text-gray-600 ms-1">Edisi</span>
+                                </div>
+                                <div>
+                                    <span class="badge badge-info fs-7 fw-bold" id="stat_waiting_count">0 Naskah Baru</span>
+                                </div>
+                            </div>
+                            <span class="text-gray-600 fs-8" id="stat_waiting_detail">Waiting: 0 | Under Review: 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Row 3: Grafik 1 (Artikel per Issue) & Grafik 2 (Donut Pembayaran) --}}
+            <div class="row g-5 g-xl-8 mb-5 mb-xl-8">
+                {{-- Grafik Artikel Publish vs Belum Publish per Edisi --}}
+                <div class="col-xl-8">
+                    <div class="card card-flush h-100 shadow-sm">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <h3 class="card-label fw-bold text-gray-900 fs-4">Statistik Artikel Publish vs Belum Publish per Edisi</h3>
+                                <span class="text-gray-500 fs-7">Perbandingan jumlah artikel terbit dan dalam proses per edisi/issue</span>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div id="chart_articles_per_issue" style="min-height: 350px;"></div>
+                            <div id="empty_chart_issue" class="d-none text-center py-10 text-gray-500">
+                                <i class="ki-duotone ki-chart-simple fs-3x text-gray-400 mb-2"></i>
+                                <p class="mb-0">Belum ada data edisi/issue untuk ditampilkan pada grafik ini.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Donut Chart: Rekap Status Pembayaran --}}
+                <div class="col-xl-4">
+                    <div class="card card-flush h-100 shadow-sm">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <h3 class="card-label fw-bold text-gray-900 fs-4">Distribusi Status Pembayaran</h3>
+                                <span class="text-gray-500 fs-7">Proporsi lunas, belum lunas, belum bayar, dan free</span>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0 d-flex flex-column justify-content-between">
+                            <div id="chart_payment_distribution" style="min-height: 280px;"></div>
+                            <div class="mt-4 pt-4 border-top">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="d-flex align-items-center fs-7 text-gray-700">
+                                        <span class="bullet bullet-dot bg-success me-2"></span>Lunas
+                                    </span>
+                                    <span class="fw-bold fs-7 text-gray-900" id="legend_lunas">0 (Rp 0)</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="d-flex align-items-center fs-7 text-gray-700">
+                                        <span class="bullet bullet-dot bg-warning me-2"></span>Belum Lunas
+                                    </span>
+                                    <span class="fw-bold fs-7 text-gray-900" id="legend_belum_lunas">0 (Rp 0)</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="d-flex align-items-center fs-7 text-gray-700">
+                                        <span class="bullet bullet-dot bg-danger me-2"></span>Belum Bayar
+                                    </span>
+                                    <span class="fw-bold fs-7 text-gray-900" id="legend_belum_bayar">0 (Rp 0)</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="d-flex align-items-center fs-7 text-gray-700">
+                                        <span class="bullet bullet-dot bg-primary me-2"></span>Free Charge
+                                    </span>
+                                    <span class="fw-bold fs-7 text-gray-900" id="legend_free">0 Artikel</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Row 4: Grafik 3 (Tren per Tahun) & Grafik 4 (Status Naskah) --}}
+            <div class="row g-5 g-xl-8 mb-5 mb-xl-8">
+                {{-- Tren Publikasi per Tahun --}}
+                <div class="col-xl-8">
+                    <div class="card card-flush h-100 shadow-sm">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <h3 class="card-label fw-bold text-gray-900 fs-4">Tren Publikasi per Tahun</h3>
+                                <span class="text-gray-500 fs-7">Jumlah publikasi dan naskah diproses berdasarkan tahun terbit</span>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div id="chart_articles_per_year" style="min-height: 320px;"></div>
+                            <div id="empty_chart_year" class="d-none text-center py-10 text-gray-500">
+                                <i class="ki-duotone ki-chart-line fs-3x text-gray-400 mb-2"></i>
+                                <p class="mb-0">Belum ada data tahunan untuk ditampilkan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Donut Chart: Status Naskah Keseluruhan --}}
+                <div class="col-xl-4">
+                    <div class="card card-flush h-100 shadow-sm">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <h3 class="card-label fw-bold text-gray-900 fs-4">Status Naskah & Alur</h3>
+                                <span class="text-gray-500 fs-7">Distribusi artikel terbit, proses, dan naskah baru</span>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0 d-flex flex-column justify-content-between">
+                            <div id="chart_article_status" style="min-height: 280px;"></div>
+                            <div class="mt-4 pt-4 border-top">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="d-flex align-items-center fs-7 text-gray-700">
+                                        <span class="bullet bullet-dot bg-success me-2"></span>Published
+                                    </span>
+                                    <span class="fw-bold fs-7 text-gray-900" id="legend_stat_published">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="d-flex align-items-center fs-7 text-gray-700">
+                                        <span class="bullet bullet-dot bg-warning me-2"></span>Belum Publish
+                                    </span>
+                                    <span class="fw-bold fs-7 text-gray-900" id="legend_stat_unpublished">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="d-flex align-items-center fs-7 text-gray-700">
+                                        <span class="bullet bullet-dot bg-info me-2"></span>Naskah Baru (Waiting)
+                                    </span>
+                                    <span class="fw-bold fs-7 text-gray-900" id="legend_stat_waiting">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Row 5: Tabel Rekapitulasi per Edisi (Issue) --}}
+            <div class="card card-flush shadow-sm mb-5 mb-xl-8">
+                <div class="card-header pt-5">
+                    <div class="card-title d-flex flex-column">
+                        <h3 class="card-label fw-bold text-gray-900 fs-4">Rekapitulasi Artikel & Pembayaran per Edisi (Issue)</h3>
+                        <span class="text-gray-500 fs-7">Rincian status publikasi, pembayaran, dan realisasi pendapatan per edisi</span>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table table-row-dashed table-row-gray-300 align-middle gs-4 gy-4">
+                            <thead>
+                                <tr class="fw-bold fs-7 text-gray-500 text-uppercase bg-light">
+                                    <th class="min-w-40px text-center">No</th>
+                                    <th class="min-w-175px">Edisi / Issue</th>
+                                    <th class="min-w-80px text-center">Tahun</th>
+                                    <th class="min-w-100px text-end">Author Fee</th>
+                                    <th class="min-w-90px text-center">Total Artikel</th>
+                                    <th class="min-w-90px text-center">Publish</th>
+                                    <th class="min-w-90px text-center">Belum Publish</th>
+                                    <th class="min-w-80px text-center">Lunas</th>
+                                    <th class="min-w-80px text-center">Belum Lunas</th>
+                                    <th class="min-w-80px text-center">Belum Bayar</th>
+                                    <th class="min-w-80px text-center">Free</th>
+                                    <th class="min-w-120px text-end">Uang Masuk</th>
+                                    <th class="min-w-80px text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table_issues_body">
+                                <tr>
+                                    <td colspan="13" class="text-center py-5 text-gray-500">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                                        Memuat data tabel edisi...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const journalSelect = document.getElementById('journal_select');
+    const btnRefresh = document.getElementById('btn_refresh');
+    const loadingOverlay = document.getElementById('dashboard_loading_overlay');
+
+    function formatRupiah(amount) {
+        return 'Rp ' + parseInt(amount || 0).toLocaleString('id-ID');
+    }
+
+    // 1. Chart: Articles Per Issue (Bar/Column)
+    const chartArticlesPerIssueOptions = {
+        series: [{
+            name: 'Published',
+            data: []
+        }, {
+            name: 'Belum Publish',
+            data: []
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: { show: true }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                borderRadius: 5
+            },
+        },
+        dataLabels: { enabled: false },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        colors: ['#50CD89', '#FFC700'],
+        xaxis: {
+            categories: [],
+            labels: {
+                rotate: -35,
+                maxHeight: 100,
+                style: { fontSize: '11px' }
+            }
+        },
+        yaxis: {
+            title: { text: 'Jumlah Artikel' },
+            labels: {
+                formatter: function (val) { return parseInt(val || 0); }
+            }
+        },
+        fill: { opacity: 1 },
+        legend: { position: 'top' },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return parseInt(val || 0) + ' Artikel';
+                }
+            }
+        }
+    };
+    const chartArticlesPerIssue = new ApexCharts(document.querySelector("#chart_articles_per_issue"), chartArticlesPerIssueOptions);
+    chartArticlesPerIssue.render();
+
+    // 2. Chart: Payment Distribution (Donut)
+    const chartPaymentDistributionOptions = {
+        series: [0, 0, 0, 0],
+        chart: {
+            type: 'donut',
+            height: 280
+        },
+        labels: ['Lunas', 'Belum Lunas', 'Belum Bayar', 'Free Charge'],
+        colors: ['#50CD89', '#FFC700', '#F1416C', '#009EF7'],
+        legend: { show: false },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+                return val > 0 ? val.toFixed(0) + '%' : '';
+            }
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%',
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Total Artikel',
+                            formatter: function (w) {
+                                return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + ' Artikel';
+                }
+            }
+        }
+    };
+    const chartPaymentDistribution = new ApexCharts(document.querySelector("#chart_payment_distribution"), chartPaymentDistributionOptions);
+    chartPaymentDistribution.render();
+
+    // 3. Chart: Articles Per Year (Bar/Column)
+    const chartArticlesPerYearOptions = {
+        series: [{
+            name: 'Published',
+            data: []
+        }, {
+            name: 'Belum Publish',
+            data: []
+        }],
+        chart: {
+            type: 'bar',
+            height: 320,
+            toolbar: { show: true }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '45%',
+                borderRadius: 4
+            },
+        },
+        dataLabels: { enabled: false },
+        colors: ['#50CD89', '#FFC700'],
+        xaxis: {
+            categories: [],
+            title: { text: 'Tahun Terbit' }
+        },
+        yaxis: {
+            title: { text: 'Jumlah Artikel' },
+            labels: {
+                formatter: function (val) { return parseInt(val || 0); }
+            }
+        },
+        legend: { position: 'top' },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return parseInt(val || 0) + ' Artikel';
+                }
+            }
+        }
+    };
+    const chartArticlesPerYear = new ApexCharts(document.querySelector("#chart_articles_per_year"), chartArticlesPerYearOptions);
+    chartArticlesPerYear.render();
+
+    // 4. Chart: Article Status (Donut)
+    const chartArticleStatusOptions = {
+        series: [0, 0, 0],
+        chart: {
+            type: 'donut',
+            height: 280
+        },
+        labels: ['Published', 'Belum Publish', 'Naskah Menunggu'],
+        colors: ['#50CD89', '#FFC700', '#7239EA'],
+        legend: { show: false },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+                return val > 0 ? val.toFixed(0) + '%' : '';
+            }
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%',
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Total Naskah',
+                            formatter: function (w) {
+                                return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + ' Naskah';
+                }
+            }
+        }
+    };
+    const chartArticleStatus = new ApexCharts(document.querySelector("#chart_article_status"), chartArticleStatusOptions);
+    chartArticleStatus.render();
+
+    // Main Function to load statistics via API and update DOM
+    function loadJournalStats(journalId) {
+        if (!journalId) return;
+
+        loadingOverlay.classList.remove('d-none');
+
+        const url = "{{ route('back.dashboard.journal.stat') }}?journal_id=" + encodeURIComponent(journalId);
+
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Gagal mengambil data statistik');
+            }
+            return response.json();
+        })
+        .then(res => {
+            if (!res.success) {
+                throw new Error(res.message || 'Error');
+            }
+
+            const journal = res.journal;
+            const summary = res.summary;
+            const charts = res.charts;
+            const issuesTable = res.issues_table;
+
+            // Update Header & Journal Info DOM
+            document.getElementById('journal_name_display').textContent = journal.name || journal.title;
+            document.getElementById('journal_fee_badge').textContent = 'Author Fee: ' + formatRupiah(journal.author_fee);
+
+            // Update Summary Card 1 (Total Artikel)
+            document.getElementById('stat_total_articles').textContent = (summary.total_submissions || 0).toLocaleString('id-ID');
+            document.getElementById('stat_published_articles').textContent = (summary.total_published || 0).toLocaleString('id-ID');
+            document.getElementById('stat_unpublished_articles').textContent = (summary.total_unpublished || 0).toLocaleString('id-ID');
+            document.getElementById('stat_published_bar').style.width = (summary.published_percentage || 0) + '%';
+            document.getElementById('stat_published_percent').textContent = (summary.published_percentage || 0) + '% telah terbit';
+
+            // Update Summary Card 2 (Lunas)
+            document.getElementById('stat_lunas_count').textContent = (summary.lunas.count || 0).toLocaleString('id-ID');
+            document.getElementById('stat_lunas_amount').textContent = formatRupiah(summary.lunas.amount);
+            document.getElementById('stat_free_count').textContent = (summary.free.count || 0) + ' Artikel';
+
+            // Update Summary Card 3 (Belum Lunas)
+            document.getElementById('stat_belum_lunas_count').textContent = (summary.belum_lunas.count || 0).toLocaleString('id-ID');
+            document.getElementById('stat_belum_lunas_paid').textContent = formatRupiah(summary.belum_lunas.paid_amount);
+            document.getElementById('stat_belum_lunas_remaining').textContent = formatRupiah(summary.belum_lunas.remaining_amount);
+
+            // Update Summary Card 4 (Belum Bayar)
+            document.getElementById('stat_belum_bayar_count').textContent = (summary.belum_bayar.count || 0).toLocaleString('id-ID');
+            document.getElementById('stat_belum_bayar_amount').textContent = formatRupiah(summary.belum_bayar.amount);
+
+            // Update Row 2 (Finansial & Waiting)
+            document.getElementById('stat_total_paid_received').textContent = formatRupiah(summary.total_paid_received);
+            document.getElementById('stat_total_outstanding').textContent = formatRupiah(summary.total_outstanding);
+            document.getElementById('stat_total_potential').textContent = formatRupiah(summary.total_potential_revenue);
+            document.getElementById('stat_total_issues').textContent = (journal.total_issues || 0).toLocaleString('id-ID');
+            document.getElementById('stat_waiting_count').textContent = (summary.waiting_submissions.total || 0) + ' Naskah Baru';
+            document.getElementById('stat_waiting_detail').textContent = 'Waiting: ' + summary.waiting_submissions.waiting + ' | Under Review: ' + summary.waiting_submissions.under_review;
+
+            // Update Legends
+            document.getElementById('legend_lunas').textContent = summary.lunas.count + ' (' + formatRupiah(summary.lunas.amount) + ')';
+            document.getElementById('legend_belum_lunas').textContent = summary.belum_lunas.count + ' (' + formatRupiah(summary.belum_lunas.paid_amount) + ')';
+            document.getElementById('legend_belum_bayar').textContent = summary.belum_bayar.count + ' (' + formatRupiah(summary.belum_bayar.amount) + ')';
+            document.getElementById('legend_free').textContent = summary.free.count + ' Artikel';
+
+            document.getElementById('legend_stat_published').textContent = summary.total_published + ' Artikel';
+            document.getElementById('legend_stat_unpublished').textContent = summary.total_unpublished + ' Artikel';
+            document.getElementById('legend_stat_waiting').textContent = summary.waiting_submissions.total + ' Naskah';
+
+            // Update Chart 1: Articles Per Issue
+            if (charts.issue_chart.categories && charts.issue_chart.categories.length > 0) {
+                document.getElementById('chart_articles_per_issue').classList.remove('d-none');
+                document.getElementById('empty_chart_issue').classList.add('d-none');
+
+                chartArticlesPerIssue.updateOptions({
+                    xaxis: { categories: charts.issue_chart.categories },
+                    series: [
+                        { name: 'Published', data: charts.issue_chart.published },
+                        { name: 'Belum Publish', data: charts.issue_chart.unpublished }
+                    ]
+                });
+            } else {
+                document.getElementById('chart_articles_per_issue').classList.add('d-none');
+                document.getElementById('empty_chart_issue').classList.remove('d-none');
+            }
+
+            // Update Chart 2: Payment Distribution
+            const paymentSeries = charts.payment_chart.series || [0, 0, 0, 0];
+            chartPaymentDistribution.updateSeries(paymentSeries);
+
+            // Update Chart 3: Articles Per Year
+            if (charts.year_chart.categories && charts.year_chart.categories.length > 0) {
+                document.getElementById('chart_articles_per_year').classList.remove('d-none');
+                document.getElementById('empty_chart_year').classList.add('d-none');
+
+                chartArticlesPerYear.updateOptions({
+                    xaxis: { categories: charts.year_chart.categories },
+                    series: [
+                        { name: 'Published', data: charts.year_chart.published },
+                        { name: 'Belum Publish', data: charts.year_chart.unpublished }
+                    ]
+                });
+            } else {
+                document.getElementById('chart_articles_per_year').classList.add('d-none');
+                document.getElementById('empty_chart_year').classList.remove('d-none');
+            }
+
+            // Update Chart 4: Article Status
+            const statusSeries = charts.article_status_chart.series || [0, 0, 0];
+            chartArticleStatus.updateSeries(statusSeries);
+
+            // Update Issues Table DOM
+            const tbody = document.getElementById('table_issues_body');
+            tbody.innerHTML = '';
+
+            if (!issuesTable || issuesTable.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="13" class="text-center py-6 text-gray-500">
+                            <i class="ki-duotone ki-information-2 fs-2x text-gray-400 mb-2"></i>
+                            <div class="fw-bold">Belum ada edisi (issue) untuk jurnal ini.</div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                issuesTable.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-center fw-bold text-gray-700">${index + 1}</td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="text-gray-900 fw-bold fs-6">${item.issue_label}</span>
+                                <span class="text-gray-500 fs-8">${item.title}</span>
+                            </div>
+                        </td>
+                        <td class="text-center fw-semibold text-gray-700">${item.year || '-'}</td>
+                        <td class="text-end fw-semibold text-gray-900">${formatRupiah(item.author_fee)}</td>
+                        <td class="text-center">
+                            <span class="badge badge-light-primary fw-bold">${item.total_articles}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-light-success fw-bold">${item.published_count}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-light-warning fw-bold">${item.unpublished_count}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-success fw-bold">${item.lunas_count}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-warning fw-bold">${item.belum_lunas_count}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-danger fw-bold">${item.belum_bayar_count}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-info fw-bold">${item.free_count}</span>
+                        </td>
+                        <td class="text-end fw-bold text-success">${formatRupiah(item.total_income)}</td>
+                        <td class="text-center">
+                            <a href="${item.action_url}" class="btn btn-icon btn-light-primary btn-sm" title="Lihat Artikel Edisi">
+                                <i class="ki-duotone ki-eye fs-4">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                </i>
+                            </a>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Error loading journal stats:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Memuat Data',
+                text: err.message || 'Terjadi kesalahan saat memuat data statistik jurnal.'
+            });
+        })
+        .finally(() => {
+            loadingOverlay.classList.add('d-none');
+        });
+    }
+
+    // Event listener: Select2 & native change
+    if (typeof jQuery !== 'undefined') {
+        $('#journal_select').on('change select2:select', function () {
+            loadJournalStats($(this).val());
+        });
+    }
+
+    if (journalSelect) {
+        journalSelect.addEventListener('change', function () {
+            loadJournalStats(this.value);
+        });
+    }
+
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', function () {
+            const currentVal = (typeof jQuery !== 'undefined' && $('#journal_select').val())
+                ? $('#journal_select').val()
+                : (journalSelect ? journalSelect.value : null);
+            loadJournalStats(currentVal);
+        });
+    }
+
+    // Initial Load
+    const initialVal = (typeof jQuery !== 'undefined' && $('#journal_select').val())
+        ? $('#journal_select').val()
+        : (journalSelect ? journalSelect.value : null);
+
+    if (initialVal) {
+        loadJournalStats(initialVal);
+    }
+});
+</script>
+@endsection
