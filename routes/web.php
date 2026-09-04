@@ -49,7 +49,7 @@ Route::get('/terms-of-service', [HomeController::class, 'termsOfService'])->name
 
 
 Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('TrustProxies');
-Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('login-cdn')->middleware('TrustProxies');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('TrustProxies');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Two-Factor Authentication Routes
