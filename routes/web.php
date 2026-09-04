@@ -459,3 +459,14 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/subject-data', [BackLogsController::class, 'getSubjectData'])->name('subject-data');
     });
 });
+
+Route::get('/sync-issue-author-fees', function () {
+    $exitCode = \Illuminate\Support\Facades\Artisan::call('issues:sync-author-fee');
+    return response()->json([
+        'status' => true,
+        'exit_code' => $exitCode,
+        'message' => 'Issue author fees synced successfully',
+        'output' => \Illuminate\Support\Facades\Artisan::output(),
+    ]);
+})->name('sync-issue-author-fees');
+

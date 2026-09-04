@@ -462,7 +462,7 @@ class FinanceController extends Controller
         if (Storage::exists('arsip/payment/' . $payment->paymentInvoice->created_at->format('Y') . '/' . $payment->paymentInvoice->invoice_number . '/confirm-payment-' . $payment->paymentInvoice->submission->submission_id . '.pdf')) {
             $data['attachments'] = storage_path('app/public/arsip/payment/' . $payment->paymentInvoice->created_at->format('Y') . '/' . $payment->paymentInvoice->invoice_number . '/confirm-payment-' . $payment->paymentInvoice->submission->submission_id . '.pdf');
         } else {
-            $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
+            $pdf = Pdf::loadView('back.pages.journal.pdf.confirm-payment', $data)->setPaper('A4', 'portrait');
             $path = 'arsip/payment/' . $payment->paymentInvoice->created_at->format('Y') . '/' . $payment->paymentInvoice->invoice_number . '/confirm-payment-' . $payment->paymentInvoice->submission->submission_id . '.pdf';
 
             Storage::disk('public')->put($path, $pdf->output());

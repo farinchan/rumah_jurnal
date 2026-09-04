@@ -38,22 +38,47 @@ class Submission extends Model
 
     public function getFullTitleAttribute()
     {
-        $fullTitleRaw = json_decode($this->attributes['fullTitle'], true);
+        $raw = $this->attributes['fullTitle'] ?? null;
+        if (is_null($raw)) return '';
+        $fullTitleRaw = is_string($raw) ? json_decode($raw, true) : $raw;
+        if (is_string($fullTitleRaw)) {
+            $fullTitleRaw = json_decode($fullTitleRaw, true) ?? $fullTitleRaw;
+        }
 
-        return $fullTitleRaw[$this->attributes['locale']] ?? '';
+        if (is_array($fullTitleRaw)) {
+            return $fullTitleRaw[$this->attributes['locale'] ?? 'en'] ?? ($fullTitleRaw['en'] ?? (reset($fullTitleRaw) ?: ''));
+        }
+
+        return (string) $fullTitleRaw;
     }
 
     public function getAuthorsAttribute()
     {
-        $authorsRaw = json_decode($this->attributes['authors'], true);
+        $raw = $this->attributes['authors'] ?? [];
+        $authorsRaw = is_string($raw) ? json_decode($raw, true) : $raw;
+        if (is_string($authorsRaw)) {
+            $authorsRaw = json_decode($authorsRaw, true);
+        }
+        if (!is_array($authorsRaw)) {
+            $authorsRaw = [];
+        }
 
-        $filtered = collect($authorsRaw)->map(function ($author) {
+        $locale = $this->attributes['locale'] ?? 'en';
+
+        $filtered = collect($authorsRaw)->map(function ($author) use ($locale) {
+            $name = $author['name'] ?? ($author['fullName'] ?? ((($author['givenName'][$locale] ?? '') . ' ' . ($author['familyName'][$locale] ?? '')) ?: ''));
+            $affiliation = null;
+            if (isset($author['affiliation'])) {
+                $affiliation = is_array($author['affiliation']) ? ($author['affiliation'][$locale] ?? reset($author['affiliation'])) : $author['affiliation'];
+            } elseif (isset($author['affiliations'][0]['name'])) {
+                $affiliation = is_array($author['affiliations'][0]['name']) ? ($author['affiliations'][0]['name'][$locale] ?? reset($author['affiliations'][0]['name'])) : $author['affiliations'][0]['name'];
+            }
+
             return [
                 'id' => $author['id'] ?? '',
-                'name' => $author['fullName'] ?? (($author['givenName'][$this->locale] ?? '') . ' ' . ($author['familyName'][$this->locale] ?? '')) ?? '',
+                'name' => trim((string) $name),
                 'email' => $author['email'] ?? null,
-                'affiliation' => $author['affiliation'][$this->locale] ?? $author['affiliations'][0]['name'][$this->locale] ?? null,
-
+                'affiliation' => $affiliation,
             ];
         });
         return $filtered->values()->all();
@@ -61,8 +86,18 @@ class Submission extends Model
 
     public function getAbstractAttribute()
     {
-        $abstract = json_decode($this->attributes['abstract'], true);
-        return $abstract[$this->attributes['locale']] ?? '';
+        $raw = $this->attributes['abstract'] ?? null;
+        if (is_null($raw)) return '';
+        $abstract = is_string($raw) ? json_decode($raw, true) : $raw;
+        if (is_string($abstract)) {
+            $abstract = json_decode($abstract, true) ?? $abstract;
+        }
+
+        if (is_array($abstract)) {
+            return $abstract[$this->attributes['locale'] ?? 'en'] ?? ($abstract['en'] ?? (reset($abstract) ?: ''));
+        }
+
+        return (string) $abstract;
     }
     public function getKeywordsAttribute()
     {

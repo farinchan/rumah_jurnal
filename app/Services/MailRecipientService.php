@@ -22,4 +22,24 @@ class MailRecipientService
 
         return $localAddress;
     }
+
+    public function resolveMany(array $productionAddresses): array
+    {
+        if (config('mail.environment', 'local') === 'production') {
+            return array_values(array_unique(array_filter(
+                $productionAddresses,
+                fn($email) => is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL)
+            )));
+        }
+
+        $localAddress = config('mail.local_address');
+
+        if (! is_string($localAddress) || ! filter_var($localAddress, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeException(
+                'MAIL_LOCAL_ADDRESS must contain a valid email address when MAIL_ENVIRONMENT is not production.'
+            );
+        }
+
+        return [$localAddress];
+    }
 }

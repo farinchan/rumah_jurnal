@@ -56,17 +56,31 @@
             With this latter I inform that the article with a title of “<strong>{{ $title }}</strong>”
         </p>
 
-        <p style="margin-top: -10px;">
+        <p style="margin-top: -28px; ">
         <table>
-            <tr style="line-height: 1;">
-                <td style="width: 180px;">Author</td>
-                <td style="width: 0px;">:</td>
-                <td>{{ $name }}</td>
-            </tr>
-            <tr style="line-height: 1;">
-                <td>Affiliation</td>
-                <td>:</td>
-                <td>{{ $affiliation }}</td>
+            <tr style="vertical-align: top; line-height: 1.0;">
+                <td style="width: 180px;">Author(s)</td>
+                <td style="width: 10px;">:</td>
+                <td>
+                    @if(isset($authors) && is_array($authors) && count($authors) > 0)
+                        @foreach($authors as $author)
+                            <div>
+                                <strong>{{ $author['name'] }}</strong>
+                                @if(!empty($author['affiliation']))
+                                    <br><span style="font-size: 13px; color: #444;">{{ $author['affiliation'] }}</span>
+                                @endif
+                            </div>
+                            @if(!$loop->last)
+                                <div style="margin-bottom: 5px;"></div>
+                            @endif
+                        @endforeach
+                    @elseif(isset($name))
+                        <strong>{{ $name }}</strong>
+                        @if(!empty($affiliation))
+                            <br><span style="font-size: 13px; color: #444;">{{ $affiliation }}</span>
+                        @endif
+                    @endif
+                </td>
             </tr>
         </table>
         </p>
@@ -76,7 +90,7 @@
                 : (is_null($payment_percent) ? '100%' : $payment_percent . '%');
         @endphp
 
-        <p style="margin-top: 20px;">
+        <p style="margin-top: 0px;">
             Has made an administration payment to {{ $journal }}
             with an amount of <strong> {{ $percentLabel }} - @money($payment_amount)</strong> Please transfer your payment via <strong>Bank
                 {{ $payment_account->bank }} - Nomor Rekening : {{ $payment_account->account_number }} - An.

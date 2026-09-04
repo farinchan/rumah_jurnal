@@ -28,6 +28,7 @@ use App\Models\SettingWebsite;
 use App\Models\Submission;
 use App\Models\SubmissionEditor;
 use App\Models\SubmissionReviewer;
+use App\Services\MailRecipientService;
 use App\Services\WhatsappService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -496,7 +497,7 @@ class journalController extends Controller
             'journal' => $issue->journal->title,
             'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
             'chief_editor' => $issue->journal->editor_chief_name,
             'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
             'qr_code' => $qrCodeBase64,
@@ -551,7 +552,7 @@ class journalController extends Controller
             'journal' => $issue->journal->title,
             'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
             'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-            'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
             'chief_editor' => $issue->journal->editor_chief_name,
             'chief_editor_signature' => $issue->journal->editor_chief_signature ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $issue->journal->editor_chief_signature))) : null,
             'qr_code' => $qrCodeBase64,
@@ -610,6 +611,39 @@ class journalController extends Controller
         return (int) round($baseAmount) + $threeDigitCode;
     }
 
+    private function getJournalThumbnailBase64(?Journal $journal): string
+    {
+        if (!$journal) {
+            return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        }
+
+        try {
+            $thumbnailUrl = $journal->getJournalThumbnail();
+            if (filter_var($thumbnailUrl, FILTER_VALIDATE_URL)) {
+                $context = stream_context_create([
+                    'http' => [
+                        'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\n",
+                        'timeout' => 5,
+                    ],
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ],
+                ]);
+                $imageContent = @file_get_contents($thumbnailUrl, false, $context);
+                if ($imageContent) {
+                    return 'data:image/png;base64,' . base64_encode($imageContent);
+                }
+            } elseif (file_exists($thumbnailUrl)) {
+                return 'data:image/png;base64,' . base64_encode(file_get_contents($thumbnailUrl));
+            }
+        } catch (\Throwable $th) {
+            Log::warning('Failed to load journal thumbnail: ' . $th->getMessage());
+        }
+
+        return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+    }
+
     public function invoiceGenerate1($submission)
     {
         $submission = Submission::find($submission);
@@ -647,62 +681,35 @@ class journalController extends Controller
             ]);
         }
 
-        $files = [];
-        foreach ($submission->authors as $author) {
-            $data = [
-                'number' => $invoice->invoice_number ?? "0000",
-                'year' => $invoice->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                'name' => $author['name'],
-                'affiliation' => $author['affiliation'],
-                'title' => $submission->fullTitle,
-                'journal' => $issue->journal->title,
-                'payment_percent' => $invoice->payment_percent,
-                'payment_amount' => $invoice->payment_amount,
-                'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
-                'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                'id' => $submission->submission_id,
-                'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                'payment_account' => PaymentAccount::first(),
-            ];
+        $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
+        $data = [
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authors' => $submission->authors,
+            'name' => $submission->authors[0]['name'] ?? ($submission->authorsString ?? ''),
+            'affiliation' => $submission->authors[0]['affiliation'] ?? '',
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+        ];
 
-            if (Storage::exists('arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf')) {
-                $files[] = storage_path('app/public/arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf');
-            } else {
-                $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
-                $path = 'arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf';
+        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
+        $filename = 'invoice-' . $submission->submission_id . '-60.pdf';
+        $path = 'arsip/invoice/' . $yearFolder . '/' . $invoice->invoice_number . '/' . $filename;
 
-                Storage::disk('public')->put($path, $pdf->output());
-                $files[] = $data['attachments'] = storage_path('app/public/' . $path);
-            }
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
+        Storage::disk('public')->put($path, $pdf->output());
 
-        $zipFileName = 'INVOICE-' . $submission->submission_id . '.zip';
-        $zip = new ZipArchive;
-
-        // Temporary path buat zip-nya
-        $zipPath = storage_path('app/temp/' . $zipFileName);
-
-        // Pastikan folder temp ada
-        if (!file_exists(storage_path('app/temp'))) {
-            mkdir(storage_path('app/temp'), 0777, true);
-        }
-
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            foreach ($files as $file) {
-                $filePath = $file;
-                if (file_exists($filePath)) {
-                    // Add file ke zip (hanya nama file saja di dalam zip)
-                    $zip->addFile($filePath, basename($file));
-                }
-            }
-            $zip->close();
-        } else {
-            Alert::error('Error', 'Failed to create zip file');
-            return redirect()->back()->with('error', 'Failed to create zip file');
-        }
-
-        return response()->download($zipPath)->deleteFileAfterSend(true);
+        return response()->download(storage_path('app/public/' . $path), $filename);
     }
 
     public function invoiceMailSend1($submission)
@@ -743,52 +750,75 @@ class journalController extends Controller
             ]);
         }
 
-        foreach ($submission->authors as $author) {
-            try {
-                if ($author['email']) {
-                    $data = [
-                        'subject' => 'Invoice for ' . $author['name'],
-                        'number' => $invoice->invoice_number ?? "0000",
-                        'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                        'authorString' => $submission->authorsString,
-                        'name' => $author['name'],
-                        'email' => $author['email'],
-                        'affiliation' => $author['affiliation'],
-                        'title' => $submission->fullTitle,
-                        'journal' => $issue->journal->title,
-                        'journal_path' => $issue->journal->url_path,
-                        'payment_percent' => $invoice->payment_percent,
-                        'payment_amount' => $invoice->payment_amount,
-                        'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
-                        'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                        'id' => $submission->submission_id,
-                        'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                        'payment_account' => PaymentAccount::first(),
-                        'setting_web' => SettingWebsite::first(),
-                    ];
+        $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
+        $filename = 'invoice-' . $submission->submission_id . '-60.pdf';
+        $path = 'arsip/invoice/' . $yearFolder . '/' . $invoice->invoice_number . '/' . $filename;
 
-                    if (Storage::exists('arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf')) {
-                        $data['attachments'] = storage_path('app/public/arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf');
-                    } else {
-                        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
-                        $path = 'arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf';
+        $pdfData = [
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authors' => $submission->authors,
+            'name' => $submission->authors[0]['name'] ?? ($submission->authorsString ?? ''),
+            'affiliation' => $submission->authors[0]['affiliation'] ?? '',
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+        ];
 
-                        Storage::disk('public')->put($path, $pdf->output());
-                        $data['attachments'] = storage_path('app/public/' . $path);
-                    }
-                }
-                $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
-                if ($mailEnvirontment == 'production') {
-                    Mail::to($author['email'])->send(new InvoiceMail($data));
-                } else {
-                    // For testing purpose
-                    Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new InvoiceMail($data));
-                }
-            } catch (\Throwable $th) {
-                //throw $th;
-            }
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
+        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $pdfData)->setPaper('A4', 'portrait');
+        Storage::disk('public')->put($path, $pdf->output());
+        $attachmentPath = storage_path('app/public/' . $path);
+
+        $firstAuthor = collect($submission->authors)->first(fn($author) => !empty($author['email']) && filter_var($author['email'], FILTER_VALIDATE_EMAIL));
+
+        if (!$firstAuthor || empty($firstAuthor['email'])) {
+            Alert::error('Error', 'No valid author email found');
+            return redirect()->back();
+        }
+
+        $mailRecipientService = app(MailRecipientService::class);
+        $recipient = $mailRecipientService->resolve($firstAuthor['email']);
+        $settingWeb = SettingWebsite::first();
+
+        $data = [
+            'subject' => 'Invoice for ' . ($submission->authorsString ?? 'Authors'),
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authorString' => $submission->authorsString,
+            'name' => $firstAuthor['name'] ?? ($submission->authors[0]['name'] ?? ($submission->authorsString ?? '')),
+            'email' => $firstAuthor['email'],
+            'affiliation' => $firstAuthor['affiliation'] ?? ($submission->authors[0]['affiliation'] ?? ''),
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'journal_path' => $issue->journal->url_path,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+            'setting_web' => $settingWeb,
+            'attachments' => $attachmentPath,
+        ];
+
+        try {
+            Mail::to($recipient)->send(new InvoiceMail($data));
+        } catch (\Throwable $th) {
+            Log::error('Failed to send invoice email: ' . $th->getMessage());
+        }
+
         $this->sendInvoiceWhatsappNotification($invoice->id);
 
         Alert::success('Success', 'Email has been sent');
@@ -832,57 +862,35 @@ class journalController extends Controller
             ]);
         }
 
-        $files = [];
-        foreach ($submission->authors as $author) {
-            $data = [
-                'number' => $invoice->invoice_number ?? "0000",
-                'year' => $invoice->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                'name' => $author['name'],
-                'affiliation' => $author['affiliation'],
-                'title' => $submission->fullTitle,
-                'journal' => $issue->journal->title,
-                'payment_percent' => $invoice->payment_percent,
-                'payment_amount' => $invoice->payment_amount,
-                'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
-                'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                'id' => $submission->submission_id,
-                'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                'payment_account' => PaymentAccount::first(),
-            ];
+        $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
+        $data = [
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authors' => $submission->authors,
+            'name' => $submission->authors[0]['name'] ?? ($submission->authorsString ?? ''),
+            'affiliation' => $submission->authors[0]['affiliation'] ?? '',
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+        ];
 
-            if (Storage::exists('arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf')) {
-                $files[] = storage_path('app/public/arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf');
-            } else {
-                $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
-                $path = 'arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf';
+        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
+        $filename = 'invoice-' . $submission->submission_id . '-40.pdf';
+        $path = 'arsip/invoice/' . $yearFolder . '/' . $invoice->invoice_number . '/' . $filename;
 
-                Storage::disk('public')->put($path, $pdf->output());
-                $files[] = storage_path('app/public/' . $path);
-            }
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
-        $zipFileName = 'INVOICE-' . $submission->submission_id . '.zip';
-        $zip = new ZipArchive;
-        // Temporary path buat zip-nya
-        $zipPath = storage_path('app/temp/' . $zipFileName);
-        // Pastikan folder temp ada
-        if (!file_exists(storage_path('app/temp'))) {
-            mkdir(storage_path('app/temp'), 0777, true);
-        }
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            foreach ($files as $file) {
-                $filePath = $file;
-                if (file_exists($filePath)) {
-                    // Add file ke zip (hanya nama file saja di dalam zip)
-                    $zip->addFile($filePath, basename($file));
-                }
-            }
-            $zip->close();
-        } else {
-            Alert::error('Error', 'Failed to create zip file');
-            return redirect()->back()->with('error', 'Failed to create zip file');
-        }
-        return response()->download($zipPath)->deleteFileAfterSend(true);
+        Storage::disk('public')->put($path, $pdf->output());
+
+        return response()->download(storage_path('app/public/' . $path), $filename);
     }
 
     public function invoiceMailSend2($submission)
@@ -923,51 +931,75 @@ class journalController extends Controller
             ]);
         }
 
-        foreach ($submission->authors as $author) {
-            try {
-                if ($author['email']) {
-                    $data = [
-                        'subject' => 'Invoice for ' . $author['name'],
-                        'number' => $invoice->invoice_number ?? "0000",
-                        'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                        'authorString' => $submission->authorsString,
-                        'name' => $author['name'],
-                        'email' => $author['email'],
-                        'affiliation' => $author['affiliation'],
-                        'title' => $submission->fullTitle,
-                        'journal' => $issue->journal->title,
-                        'journal_path' => $issue->journal->url_path,
-                        'payment_percent' => $invoice->payment_percent,
-                        'payment_amount' => $invoice->payment_amount,
-                        'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
-                        'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                        'id' => $submission->submission_id,
-                        'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                        'payment_account' => PaymentAccount::first(),
-                        'setting_web' => SettingWebsite::first(),
-                    ];
-                    if (Storage::exists('arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf')) {
-                        $data['attachments'] = storage_path('app/public/arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf');
-                    } else {
-                        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
-                        $path = 'arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf';
+        $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
+        $filename = 'invoice-' . $submission->submission_id . '-40.pdf';
+        $path = 'arsip/invoice/' . $yearFolder . '/' . $invoice->invoice_number . '/' . $filename;
 
-                        Storage::disk('public')->put($path, $pdf->output());
-                        $data['attachments'] = storage_path('app/public/' . $path);
-                    }
-                }
-                $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
-                if ($mailEnvirontment == 'production') {
-                    Mail::to($author['email'])->send(new InvoiceMail($data));
-                } else {
-                    // For testing purpose
-                    Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new InvoiceMail($data));
-                }
-            } catch (\Throwable $th) {
-                //throw $th;
-            }
+        $pdfData = [
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authors' => $submission->authors,
+            'name' => $submission->authors[0]['name'] ?? ($submission->authorsString ?? ''),
+            'affiliation' => $submission->authors[0]['affiliation'] ?? '',
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+        ];
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
+        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $pdfData)->setPaper('A4', 'portrait');
+        Storage::disk('public')->put($path, $pdf->output());
+        $attachmentPath = storage_path('app/public/' . $path);
+
+        $firstAuthor = collect($submission->authors)->first(fn($author) => !empty($author['email']) && filter_var($author['email'], FILTER_VALIDATE_EMAIL));
+
+        if (!$firstAuthor || empty($firstAuthor['email'])) {
+            Alert::error('Error', 'No valid author email found');
+            return redirect()->back();
+        }
+
+        $mailRecipientService = app(MailRecipientService::class);
+        $recipient = $mailRecipientService->resolve($firstAuthor['email']);
+        $settingWeb = SettingWebsite::first();
+
+        $data = [
+            'subject' => 'Invoice for ' . ($submission->authorsString ?? 'Authors'),
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authorString' => $submission->authorsString,
+            'name' => $firstAuthor['name'] ?? ($submission->authors[0]['name'] ?? ($submission->authorsString ?? '')),
+            'email' => $firstAuthor['email'],
+            'affiliation' => $firstAuthor['affiliation'] ?? ($submission->authors[0]['affiliation'] ?? ''),
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'journal_path' => $issue->journal->url_path,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+            'setting_web' => $settingWeb,
+            'attachments' => $attachmentPath,
+        ];
+
+        try {
+            Mail::to($recipient)->send(new InvoiceMail($data));
+        } catch (\Throwable $th) {
+            Log::error('Failed to send invoice email: ' . $th->getMessage());
+        }
+
         $this->sendInvoiceWhatsappNotification($invoice->id);
 
         Alert::success('Success', 'Email has been sent');
@@ -1011,62 +1043,35 @@ class journalController extends Controller
             ]);
         }
 
-        $files = [];
-        foreach ($submission->authors as $author) {
-            $data = [
-                'number' => $invoice->invoice_number ?? "0000",
-                'year' => $invoice->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                'name' => $author['name'],
-                'affiliation' => $author['affiliation'],
-                'title' => $submission->fullTitle,
-                'journal' => $issue->journal->title,
-                'payment_percent' => $invoice->payment_percent,
-                'payment_amount' => $invoice->payment_amount,
-                'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
-                'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                'id' => $submission->submission_id,
-                'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                'payment_account' => PaymentAccount::first(),
-            ];
+        $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
+        $data = [
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authors' => $submission->authors,
+            'name' => $submission->authors[0]['name'] ?? ($submission->authorsString ?? ''),
+            'affiliation' => $submission->authors[0]['affiliation'] ?? '',
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+        ];
 
-            if (Storage::exists('arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf')) {
-                $files[] = storage_path('app/public/arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf');
-            } else {
-                $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
-                $path = 'arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf';
+        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
+        $filename = 'invoice-' . $submission->submission_id . '-100.pdf';
+        $path = 'arsip/invoice/' . $yearFolder . '/' . $invoice->invoice_number . '/' . $filename;
 
-                Storage::disk('public')->put($path, $pdf->output());
-                $files[] = $data['attachments'] = storage_path('app/public/' . $path);
-            }
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
+        Storage::disk('public')->put($path, $pdf->output());
 
-        $zipFileName = 'INVOICE-' . $submission->submission_id . '.zip';
-        $zip = new ZipArchive;
-
-        // Temporary path buat zip-nya
-        $zipPath = storage_path('app/temp/' . $zipFileName);
-
-        // Pastikan folder temp ada
-        if (!file_exists(storage_path('app/temp'))) {
-            mkdir(storage_path('app/temp'), 0777, true);
-        }
-
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            foreach ($files as $file) {
-                $filePath = $file;
-                if (file_exists($filePath)) {
-                    // Add file ke zip (hanya nama file saja di dalam zip)
-                    $zip->addFile($filePath, basename($file));
-                }
-            }
-            $zip->close();
-        } else {
-            Alert::error('Error', 'Failed to create zip file');
-            return redirect()->back()->with('error', 'Failed to create zip file');
-        }
-
-        return response()->download($zipPath)->deleteFileAfterSend(true);
+        return response()->download(storage_path('app/public/' . $path), $filename);
     }
 
     public function invoiceMailSend3($submission)
@@ -1107,51 +1112,75 @@ class journalController extends Controller
             ]);
         }
 
-        foreach ($submission->authors as $author) {
-            try {
-                if ($author['email']) {
-                    $data = [
-                        'subject' => 'Invoice for ' . $author['name'],
-                        'number' => $invoice->invoice_number ?? "0000",
-                        'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                        'authorString' => $submission->authorsString,
-                        'name' => $author['name'],
-                        'email' => $author['email'],
-                        'affiliation' => $author['affiliation'],
-                        'title' => $submission->fullTitle,
-                        'journal' => $issue->journal->title,
-                        'journal_path' => $issue->journal->url_path,
-                        'payment_percent' => $invoice->payment_percent,
-                        'payment_amount' => $invoice->payment_amount,
-                        'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
-                        'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                        'id' => $submission->submission_id,
-                        'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                        'payment_account' => PaymentAccount::first(),
-                        'setting_web' => SettingWebsite::first(),
-                    ];
-                    if (Storage::exists('arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf')) {
-                        $data['attachments'] = storage_path('app/public/arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf');
-                    } else {
-                        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
-                        $path = 'arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id .  '-' . $author['id'] . '.pdf';
+        $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
+        $filename = 'invoice-' . $submission->submission_id . '-100.pdf';
+        $path = 'arsip/invoice/' . $yearFolder . '/' . $invoice->invoice_number . '/' . $filename;
 
-                        Storage::disk('public')->put($path, $pdf->output());
-                        $data['attachments'] = storage_path('app/public/' . $path);
-                    }
-                }
-                $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
-                if ($mailEnvirontment == 'production') {
-                    Mail::to($author['email'])->send(new InvoiceMail($data));
-                } else {
-                    // For testing purpose
-                    Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new InvoiceMail($data));
-                }
-            } catch (\Throwable $th) {
-                //throw $th;
-            }
+        $pdfData = [
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authors' => $submission->authors,
+            'name' => $submission->authors[0]['name'] ?? ($submission->authorsString ?? ''),
+            'affiliation' => $submission->authors[0]['affiliation'] ?? '',
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+        ];
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
+        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $pdfData)->setPaper('A4', 'portrait');
+        Storage::disk('public')->put($path, $pdf->output());
+        $attachmentPath = storage_path('app/public/' . $path);
+
+        $firstAuthor = collect($submission->authors)->first(fn($author) => !empty($author['email']) && filter_var($author['email'], FILTER_VALIDATE_EMAIL));
+
+        if (!$firstAuthor || empty($firstAuthor['email'])) {
+            Alert::error('Error', 'No valid author email found');
+            return redirect()->back();
+        }
+
+        $mailRecipientService = app(MailRecipientService::class);
+        $recipient = $mailRecipientService->resolve($firstAuthor['email']);
+        $settingWeb = SettingWebsite::first();
+
+        $data = [
+            'subject' => 'Invoice for ' . ($submission->authorsString ?? 'Authors'),
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'authorString' => $submission->authorsString,
+            'name' => $firstAuthor['name'] ?? ($submission->authors[0]['name'] ?? ($submission->authorsString ?? '')),
+            'email' => $firstAuthor['email'],
+            'affiliation' => $firstAuthor['affiliation'] ?? ($submission->authors[0]['affiliation'] ?? ''),
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'journal_path' => $issue->journal->url_path,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+            'setting_web' => $settingWeb,
+            'attachments' => $attachmentPath,
+        ];
+
+        try {
+            Mail::to($recipient)->send(new InvoiceMail($data));
+        } catch (\Throwable $th) {
+            Log::error('Failed to send invoice email: ' . $th->getMessage());
+        }
+
         $this->sendInvoiceWhatsappNotification($invoice->id);
 
         Alert::success('Success', 'Email has been sent');
@@ -1268,65 +1297,38 @@ class journalController extends Controller
             return redirect()->back()->with('error', 'Issue not found');
         }
 
-        $files = [];
-        foreach ($submission->authors as $author) {
-            $data = [
-                'number' => $invoice->invoice_number ?? "0000",
-                'year' => $invoice->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                'month' => Carbon::now()->format('m'),
-                'submission_id' => $submission->submission_id,
-                'name' => $author['name'],
-                'affiliation' => $author['affiliation'],
-                'title' => $submission->fullTitle,
-                'journal' => $issue->journal->title,
-                'payment_percent' => $invoice->payment_percent,
-                'payment_amount' => $invoice->payment_amount,
-                'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
-                'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                'id' => $submission->submission_id,
-                'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                'payment_account' => PaymentAccount::first(),
-                'is_custom' => true,
-            ];
+        $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
+        $data = [
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'month' => Carbon::now()->format('m'),
+            'submission_id' => $submission->submission_id,
+            'authors' => $submission->authors,
+            'name' => $submission->authors[0]['name'] ?? ($submission->authorsString ?? ''),
+            'affiliation' => $submission->authors[0]['affiliation'] ?? '',
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+            'is_custom' => true,
+        ];
 
-            if (Storage::exists('arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id . '-' . $author['id'] . '.pdf')) {
-                $files[] = storage_path('app/public/arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id . '-' . $author['id'] . '.pdf');
-            } else {
-                $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
-                $path = 'arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id . '-' . $author['id'] . '.pdf';
+        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
+        $filename = 'invoice-' . $submission->submission_id . '-custom-' . $invoice->id . '.pdf';
+        $path = 'arsip/invoice/' . $yearFolder . '/' . $invoice->invoice_number . '/' . $filename;
 
-                Storage::disk('public')->put($path, $pdf->output());
-                $files[] = $data['attachments'] = storage_path('app/public/' . $path);
-            }
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
+        Storage::disk('public')->put($path, $pdf->output());
 
-        $zipFileName = 'INVOICE-' . $submission->submission_id . '.zip';
-        $zip = new ZipArchive;
-
-        // Temporary path buat zip-nya
-        $zipPath = storage_path('app/temp/' . $zipFileName);
-
-        // Pastikan folder temp ada
-        if (!file_exists(storage_path('app/temp'))) {
-            mkdir(storage_path('app/temp'), 0777, true);
-        }
-
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            foreach ($files as $file) {
-                $filePath = $file;
-                if (file_exists($filePath)) {
-                    // Add file ke zip (hanya nama file saja di dalam zip)
-                    $zip->addFile($filePath, basename($file));
-                }
-            }
-            $zip->close();
-        } else {
-            Alert::error('Error', 'Failed to create zip file');
-            return redirect()->back()->with('error', 'Failed to create zip file');
-        }
-
-        return response()->download($zipPath)->deleteFileAfterSend(true);
+        return response()->download(storage_path('app/public/' . $path), $filename);
     }
 
     public function invoiceMailSendCustom($invoiceId)
@@ -1349,55 +1351,81 @@ class journalController extends Controller
             return redirect()->back()->with('error', 'Issue not found');
         }
 
-        foreach ($submission->authors as $author) {
-            try {
-                if ($author['email']) {
-                    $data = [
-                        'subject' => 'Invoice for ' . $author['name'],
-                        'number' => $invoice->invoice_number ?? "0000",
-                        'year' => $submission->created_at->format('Y') ?? Carbon::now()->format('Y'),
-                        'month' => Carbon::now()->format('m'),
-                        'submission_id' => $submission->submission_id,
-                        'authorString' => $submission->authorsString,
-                        'name' => $author['name'],
-                        'email' => $author['email'],
-                        'affiliation' => $author['affiliation'],
-                        'title' => $submission->fullTitle,
-                        'journal' => $issue->journal->title,
-                        'journal_path' => $issue->journal->url_path,
-                        'payment_percent' => $invoice->payment_percent,
-                        'payment_amount' => $invoice->payment_amount,
-                        'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
-                        'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
-                        'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
-                        'id' => $submission->submission_id,
-                        'journal_thumbnail' => 'data:image/png;base64,' . base64_encode(file_get_contents($issue->journal->getJournalThumbnail())),
-                        'payment_account' => PaymentAccount::first(),
-                        'setting_web' => SettingWebsite::first(),
-                        'is_custom' => true,
-                    ];
+        $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
+        $filename = 'invoice-' . $submission->submission_id . '-custom-' . $invoice->id . '.pdf';
+        $path = 'arsip/invoice/' . $yearFolder . '/' . $invoice->invoice_number . '/' . $filename;
 
-                    if (Storage::exists('arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id . '-' . $author['id'] . '.pdf')) {
-                        $data['attachments'] = storage_path('app/public/arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id . '-' . $author['id'] . '.pdf');
-                    } else {
-                        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $data)->setPaper('A4', 'portrait');
-                        $path = 'arsip/invoice/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_number . '/invoice-' . $submission->submission_id . '-' . $author['id'] . '.pdf';
+        $pdfData = [
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'month' => Carbon::now()->format('m'),
+            'submission_id' => $submission->submission_id,
+            'authors' => $submission->authors,
+            'name' => $submission->authors[0]['name'] ?? ($submission->authorsString ?? ''),
+            'affiliation' => $submission->authors[0]['affiliation'] ?? '',
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+            'is_custom' => true,
+        ];
 
-                        Storage::disk('public')->put($path, $pdf->output());
-                        $data['attachments'] = storage_path('app/public/' . $path);
-                    }
-                }
-                $mailEnvirontment = env('MAIL_ENVIRONMENT', 'local');
-                if ($mailEnvirontment == 'production') {
-                    Mail::to($author['email'])->send(new InvoiceMail($data));
-                } else {
-                    // For testing purpose
-                    Mail::to(env('MAIL_LOCAL_ADDRESS'))->send(new InvoiceMail($data));
-                }
-            } catch (\Throwable $th) {
-                //throw $th;
-            }
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
+        $pdf = Pdf::loadView('back.pages.journal.pdf.invoice', $pdfData)->setPaper('A4', 'portrait');
+        Storage::disk('public')->put($path, $pdf->output());
+        $attachmentPath = storage_path('app/public/' . $path);
+
+        $firstAuthor = collect($submission->authors)->first(fn($author) => !empty($author['email']) && filter_var($author['email'], FILTER_VALIDATE_EMAIL));
+
+        if (!$firstAuthor || empty($firstAuthor['email'])) {
+            Alert::error('Error', 'No valid author email found');
+            return redirect()->back();
+        }
+
+        $mailRecipientService = app(MailRecipientService::class);
+        $recipient = $mailRecipientService->resolve($firstAuthor['email']);
+        $settingWeb = SettingWebsite::first();
+
+        $data = [
+            'subject' => 'Invoice for ' . ($submission->authorsString ?? 'Authors'),
+            'number' => $invoice->invoice_number ?? "0000",
+            'year' => $yearFolder,
+            'month' => Carbon::now()->format('m'),
+            'submission_id' => $submission->submission_id,
+            'authorString' => $submission->authorsString,
+            'name' => $firstAuthor['name'] ?? ($submission->authors[0]['name'] ?? ($submission->authorsString ?? '')),
+            'email' => $firstAuthor['email'],
+            'affiliation' => $firstAuthor['affiliation'] ?? ($submission->authors[0]['affiliation'] ?? ''),
+            'title' => $submission->fullTitle,
+            'journal' => $issue->journal->title,
+            'journal_path' => $issue->journal->url_path,
+            'payment_percent' => $invoice->payment_percent,
+            'payment_amount' => $invoice->payment_amount,
+            'payment_due_date' => \Carbon\Carbon::parse($invoice->payment_due_date)->translatedFormat('d F Y'),
+            'edition' => 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ' Edition ' . $issue->year,
+            'date' => \Carbon\Carbon::now()->translatedFormat('d F Y'),
+            'id' => $submission->submission_id,
+            'journal_thumbnail' => $this->getJournalThumbnailBase64($issue->journal),
+            'payment_account' => PaymentAccount::first(),
+            'setting_web' => $settingWeb,
+            'is_custom' => true,
+            'attachments' => $attachmentPath,
+        ];
+
+        try {
+            Mail::to($recipient)->send(new InvoiceMail($data));
+        } catch (\Throwable $th) {
+            Log::error('Failed to send invoice email: ' . $th->getMessage());
+        }
+
         $this->sendInvoiceWhatsappNotification($invoice->id);
 
         Alert::success('Success', 'Email has been sent');
