@@ -1,5 +1,18 @@
 @extends('back.app')
 
+@section('styles')
+<style>
+    .card-hover-interactive {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-hover-interactive:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+    }
+</style>
+@endsection
+
 @section('content')
     <div id="kt_content_container" class="container-xxl">
 
@@ -159,7 +172,8 @@
 
                 {{-- Status Belum Lunas (DP/Cicil) --}}
                 <div class="col-sm-6 col-xl-3">
-                    <div class="card card-flush h-100 border-start border-1 border-warning shadow-sm">
+                    <div class="card card-flush h-100 border-start border-1 border-warning shadow-sm card-hover-interactive"
+                        id="card_belum_lunas" role="button" tabindex="0" title="Klik untuk melihat rincian submission belum lunas">
                         <div class="card-header pt-5">
                             <div class="card-title d-flex flex-column">
                                 <span class="fs-2hx fw-bold text-warning lh-1" id="stat_belum_lunas_count">0</span>
@@ -178,14 +192,21 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body pt-2 pb-5">
+                        <div class="card-body pt-2 pb-4">
                             <div class="d-flex justify-content-between mb-1">
                                 <span class="text-gray-600 fs-7">Sudah Masuk:</span>
                                 <span class="fw-bold text-success fs-7" id="stat_belum_lunas_paid">Rp 0</span>
                             </div>
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between mb-2">
                                 <span class="text-gray-600 fs-7">Sisa Tagihan:</span>
                                 <span class="fw-bold text-danger fs-7" id="stat_belum_lunas_remaining">Rp 0</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top border-gray-200">
+                                <span class=" fs-8 fw-semibold">Rincian Submission</span>
+                                <i class="ki-duotone ki-arrow-right fs-7 ">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
                             </div>
                         </div>
                     </div>
@@ -193,7 +214,8 @@
 
                 {{-- Status Belum Bayar --}}
                 <div class="col-sm-6 col-xl-3">
-                    <div class="card card-flush h-100 border-start border-1 border-danger shadow-sm">
+                    <div class="card card-flush h-100 border-start border-1 border-danger shadow-sm card-hover-interactive"
+                        id="card_belum_bayar" role="button" tabindex="0" title="Klik untuk melihat rincian submission belum bayar">
                         <div class="card-header pt-5">
                             <div class="card-title d-flex flex-column">
                                 <span class="fs-2hx fw-bold text-danger lh-1" id="stat_belum_bayar_count">0</span>
@@ -208,14 +230,21 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body pt-2 pb-5">
+                        <div class="card-body pt-2 pb-4">
                             <div class="d-flex justify-content-between mb-1">
                                 <span class="text-gray-600 fs-7">Total Piutang:</span>
                                 <span class="fw-bold text-danger fs-7" id="stat_belum_bayar_amount">Rp 0</span>
                             </div>
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between mb-2">
                                 <span class="text-gray-600 fs-7">Status:</span>
                                 <span class="badge badge-light-danger fs-8 fw-bold">Menunggu Pembayaran</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top border-gray-200">
+                                <span class=" fs-8 fw-semibold">Rincian Submission</span>
+                                <i class="ki-duotone ki-arrow-right fs-7 ">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
                             </div>
                         </div>
                     </div>
@@ -440,6 +469,128 @@
 
         </div>
 
+    </div>
+
+    <!-- Modal Detail Submissions (Belum Lunas & Belum Bayar) -->
+    <div class="modal fade" id="modal_submission_payment_detail" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header pb-0 border-0 justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="symbol symbol-40px" id="modal_type_symbol">
+                                <span class="symbol-label bg-light-warning">
+                                    <i class="ki-duotone ki-bill fs-2 text-warning">
+                                        <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span>
+                                    </i>
+                                </span>
+                            </div>
+                            <div>
+                                <h3 class="modal-title fw-bold text-gray-900 mb-0" id="modal_submission_title">Daftar Submission</h3>
+                                <span class="text-muted fs-7 fw-semibold" id="modal_submission_subtitle">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                    </div>
+                </div>
+
+                <!-- Modal Subheader / Summary & Search -->
+                <div class="px-7 pt-4 pb-3 border-bottom">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 bg-light rounded p-3">
+                        <div class="d-flex flex-wrap align-items-center gap-3 gap-md-4">
+                            <div>
+                                <span class="text-gray-500 fs-8 fw-bold d-block">TOTAL NASKAH</span>
+                                <span class="fw-bold fs-6 text-gray-900" id="modal_summary_count">0 Naskah</span>
+                            </div>
+                            <div class="bullet bullet-vertical h-20px bg-gray-300"></div>
+                            <div>
+                                <span class="text-gray-500 fs-8 fw-bold d-block">TOTAL BIAYA</span>
+                                <span class="fw-bold fs-6 text-gray-900" id="modal_summary_fee">Rp 0</span>
+                            </div>
+                            <div class="bullet bullet-vertical h-20px bg-gray-300 col-modal-paid" id="modal_summary_paid_sep"></div>
+                            <div class="col-modal-paid" id="modal_summary_paid_box">
+                                <span class="text-gray-500 fs-8 fw-bold d-block">SUDAH MASUK</span>
+                                <span class="fw-bold fs-6 text-success" id="modal_summary_paid">Rp 0</span>
+                            </div>
+                            <div class="bullet bullet-vertical h-20px bg-gray-300"></div>
+                            <div>
+                                <span class="text-gray-500 fs-8 fw-bold d-block" id="modal_summary_remaining_label">SISA TAGIHAN</span>
+                                <span class="fw-bold fs-6 text-danger" id="modal_summary_remaining">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <!-- Live Search Input -->
+                        <div class="position-relative w-100 w-md-250px">
+                            <i class="ki-duotone ki-magnifier fs-4 text-gray-500 position-absolute top-50 translate-middle-y ms-3">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                            <input type="text" id="modal_submission_search" class="form-control form-control-solid form-control-sm ps-9" placeholder="Cari naskah / penulis...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-body py-4">
+                    <!-- Loading State -->
+                    <div id="modal_submission_loading" class="text-center py-10">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="text-gray-600 fw-semibold fs-7 mt-3">Memuat data submission via API...</div>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="modal_submission_error" class="alert alert-danger d-none my-4">
+                        <div class="d-flex align-items-center">
+                            <i class="ki-duotone ki-cross-circle fs-2hx text-danger me-4"><span class="path1"></span><span class="path2"></span></i>
+                            <div class="d-flex flex-column">
+                                <h5 class="mb-1 text-danger">Terjadi Kesalahan</h5>
+                                <span id="modal_submission_error_text" class="fs-7">Gagal memuat data submission.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table Content -->
+                    <div id="modal_submission_content" class="table-responsive d-none">
+                        <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-3 fs-7" id="modal_submission_table">
+                            <thead>
+                                <tr class="fw-bold text-muted bg-light">
+                                    <th class="ps-4 min-w-40px text-center rounded-start">#</th>
+                                    <th class="min-w-80px">ID</th>
+                                    <th class="min-w-260px">Judul & Penulis</th>
+                                    <th class="min-w-150px">Edisi</th>
+                                    <th class="min-w-100px text-center">Status Naskah</th>
+                                    <th class="min-w-100px text-end">Total Biaya</th>
+                                    <th class="min-w-110px text-end col-modal-paid">Sudah Masuk</th>
+                                    <th class="min-w-110px text-end">Sisa Tagihan</th>
+                                    <th class="min-w-140px">Invoice</th>
+                                    <th class="min-w-80px text-center pe-4 rounded-end">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal_submission_tbody">
+                                <!-- Injected via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="modal_submission_empty" class="text-center py-10 d-none">
+                        <div class="symbol symbol-60px symbol-circle  mb-3 mx-auto d-flex align-items-center justify-content-center">
+                            <i class="ki-duotone ki-check-circle fs-2x text-success">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                        </div>
+                        <div class="fs-5 fw-bold text-gray-800" id="modal_submission_empty_title">Tidak Ada Submission</div>
+                        <div class="text-gray-500 fs-7" id="modal_submission_empty_text">Tidak ada data submission yang cocok dengan kriteria ini.</div>
+                    </div>
+                </div>
+
+                <div class="modal-footer py-3">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -936,6 +1087,259 @@ document.addEventListener('DOMContentLoaded', function () {
                 : (issueSelect ? issueSelect.value : null);
             const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
             loadJournalStats(currentJournalId, filterIssueId, false);
+        });
+    }
+
+    // Modal Submissions & API
+    let currentModalType = 'belum_lunas';
+    let currentModalSubmissions = [];
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function renderModalSubmissionsTable(items, type, isSearching = false) {
+        const tbody = document.getElementById('modal_submission_tbody');
+        const emptyBox = document.getElementById('modal_submission_empty');
+        const emptyText = document.getElementById('modal_submission_empty_text');
+        const emptyTitle = document.getElementById('modal_submission_empty_title');
+        const contentBox = document.getElementById('modal_submission_content');
+
+        if (!tbody) return;
+
+        if (!items || items.length === 0) {
+            contentBox.classList.add('d-none');
+            emptyBox.classList.remove('d-none');
+            if (isSearching) {
+                if (emptyTitle) emptyTitle.textContent = 'Tidak Ditemukan';
+                if (emptyText) emptyText.textContent = 'Tidak ada naskah yang cocok dengan kata kunci pencarian.';
+            } else {
+                if (emptyTitle) emptyTitle.textContent = 'Tidak Ada Submission';
+                if (emptyText) emptyText.textContent = (type === 'belum_lunas')
+                    ? 'Tidak ada submission berstatus belum lunas (DP/Cicil).'
+                    : 'Tidak ada submission berstatus belum bayar (0%).';
+            }
+            return;
+        }
+
+        emptyBox.classList.add('d-none');
+        contentBox.classList.remove('d-none');
+
+        const isBelumLunas = (type === 'belum_lunas');
+
+        let html = '';
+        items.forEach((sub, index) => {
+            const statusBadge = sub.is_published
+                ? '<span class="badge badge-light-success fw-bold fs-8">Published</span>'
+                : `<span class="badge badge-light-warning fw-bold fs-8">${escapeHtml(sub.status_label || 'Belum Publish')}</span>`;
+
+            let invoicesHtml = '<span class="text-muted fs-8 fst-italic">Belum ada invoice</span>';
+            if (sub.invoices && sub.invoices.length > 0) {
+                invoicesHtml = sub.invoices.map(inv => {
+                    const badgeClass = inv.is_paid ? 'badge-light-success text-success' : 'badge-light-danger text-danger';
+                    const statusText = inv.is_paid ? 'Lunas' : 'Belum Lunas';
+                    const percentText = inv.payment_percent ? inv.payment_percent + '%' : 'Inv';
+                    const dueText = inv.due_date ? ` (${escapeHtml(inv.due_date)})` : '';
+                    return `<div class="mb-1"><span class="badge ${badgeClass} fs-9 fw-bold">${escapeHtml(inv.invoice_number)}: ${percentText} - ${statusText}${dueText}</span></div>`;
+                }).join('');
+            }
+
+            const paidColHtml = isBelumLunas
+                ? `<td class="text-end col-modal-paid">
+                    <span class="text-success fw-bold">${formatRupiah(sub.paid_amount)}</span>
+                    <span class="badge badge-light-success fs-9 ms-1">${sub.paid_percent}%</span>
+                   </td>`
+                : '';
+
+            html += `
+                <tr>
+                    <td class="ps-4 text-center text-gray-600 fw-semibold">${index + 1}</td>
+                    <td>
+                        <span class=" text-gray-800 fw-bold">${escapeHtml(sub.submission_id)}</span>
+                    </td>
+                    <td>
+                        <div class="d-flex flex-column">
+                            <span class="text-gray-900 fw-bold fs-7 mb-1">${escapeHtml(sub.title)}</span>
+                            <span class="text-muted fs-8">
+                                <i class="ki-duotone ki-user fs-8 text-gray-400 me-1"><span class="path1"></span><span class="path2"></span></i>
+                                ${escapeHtml(sub.authors)}
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-light-primary fw-semibold fs-8">${escapeHtml(sub.issue_label)}</span>
+                    </td>
+                    <td class="text-center">
+                        ${statusBadge}
+                    </td>
+                    <td class="text-end fw-bold text-gray-800">
+                        ${formatRupiah(sub.author_fee)}
+                    </td>
+                    ${paidColHtml}
+                    <td class="text-end fw-bold text-danger">
+                        ${formatRupiah(sub.remaining_amount)}
+                    </td>
+                    <td>
+                        ${invoicesHtml}
+                    </td>
+                    <td class="text-center pe-4">
+                        <a href="${sub.action_url}" target="_blank" class="btn btn-icon btn-sm btn-light-primary" title="Buka Halaman Artikel Edisi">
+                            <i class="ki-duotone ki-arrow-up-right fs-4">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                        </a>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function openSubmissionModal(type) {
+        currentModalType = type;
+        const journalId = (typeof jQuery !== 'undefined' && $('#journal_select').val())
+            ? $('#journal_select').val()
+            : (journalSelect ? journalSelect.value : null);
+
+        const issueVal = (typeof jQuery !== 'undefined' && $('#issue_select').val())
+            ? $('#issue_select').val()
+            : (issueSelect ? issueSelect.value : null);
+
+        const issueId = (issueVal === 'all' || !issueVal) ? '' : issueVal;
+
+        const modalEl = document.getElementById('modal_submission_payment_detail');
+        if (!modalEl) return;
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+
+        // UI Reset
+        document.getElementById('modal_submission_loading').classList.remove('d-none');
+        document.getElementById('modal_submission_error').classList.add('d-none');
+        document.getElementById('modal_submission_content').classList.add('d-none');
+        document.getElementById('modal_submission_empty').classList.add('d-none');
+        const searchInput = document.getElementById('modal_submission_search');
+        if (searchInput) searchInput.value = '';
+
+        const isBelumLunas = (type === 'belum_lunas');
+        const modalTitle = isBelumLunas ? 'Daftar Submission Belum Lunas (DP/Cicil)' : 'Daftar Submission Belum Bayar (0%)';
+        document.getElementById('modal_submission_title').textContent = modalTitle;
+
+        const typeSymbol = document.getElementById('modal_type_symbol');
+        if (isBelumLunas) {
+            typeSymbol.innerHTML = `
+                <span class="symbol-label bg-light-warning">
+                    <i class="ki-duotone ki-bill fs-2 text-warning">
+                        <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span>
+                    </i>
+                </span>
+            `;
+            document.getElementById('modal_summary_remaining_label').textContent = 'SISA TAGIHAN';
+            document.querySelectorAll('.col-modal-paid').forEach(el => el.classList.remove('d-none'));
+        } else {
+            typeSymbol.innerHTML = `
+                <span class="symbol-label bg-light-danger">
+                    <i class="ki-duotone ki-cross-circle fs-2 text-danger">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                </span>
+            `;
+            document.getElementById('modal_summary_remaining_label').textContent = 'TOTAL PIUTANG';
+            document.querySelectorAll('.col-modal-paid').forEach(el => el.classList.add('d-none'));
+        }
+
+        let url = '{{ route("back.dashboard.journal.submissions") }}?type=' + encodeURIComponent(type);
+        if (journalId) url += '&journal_id=' + encodeURIComponent(journalId);
+        if (issueId) url += '&issue_id=' + encodeURIComponent(issueId);
+
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Status ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            document.getElementById('modal_submission_loading').classList.add('d-none');
+            if (!data.success) {
+                throw new Error(data.message || 'Gagal memuat data');
+            }
+
+            const meta = data.meta || {};
+            const journalName = meta.journal ? meta.journal.name : '-';
+            const issueText = meta.issue ? meta.issue.label : 'Semua Issue';
+            document.getElementById('modal_submission_subtitle').textContent = journalName + ' • ' + issueText;
+
+            document.getElementById('modal_summary_count').textContent = (meta.total_count || 0) + ' Naskah';
+            document.getElementById('modal_summary_fee').textContent = formatRupiah(meta.total_fee || 0);
+            document.getElementById('modal_summary_paid').textContent = formatRupiah(meta.total_paid || 0);
+            document.getElementById('modal_summary_remaining').textContent = formatRupiah(meta.total_remaining || 0);
+
+            currentModalSubmissions = data.submissions || [];
+            renderModalSubmissionsTable(currentModalSubmissions, type, false);
+        })
+        .catch(err => {
+            document.getElementById('modal_submission_loading').classList.add('d-none');
+            document.getElementById('modal_submission_error').classList.remove('d-none');
+            document.getElementById('modal_submission_error_text').textContent = err.message || 'Terjadi kesalahan saat memuat data.';
+        });
+    }
+
+    // Modal Search
+    const modalSearchInput = document.getElementById('modal_submission_search');
+    if (modalSearchInput) {
+        modalSearchInput.addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+            if (!query) {
+                renderModalSubmissionsTable(currentModalSubmissions, currentModalType, false);
+                return;
+            }
+
+            const filtered = currentModalSubmissions.filter(sub => {
+                const title = (sub.title || '').toLowerCase();
+                const authors = (sub.authors || '').toLowerCase();
+                const subId = String(sub.submission_id || '').toLowerCase();
+                const issue = (sub.issue_label || '').toLowerCase();
+                return title.includes(query) || authors.includes(query) || subId.includes(query) || issue.includes(query);
+            });
+
+            renderModalSubmissionsTable(filtered, currentModalType, true);
+        });
+    }
+
+    // Event listeners for card click
+    const cardBelumLunas = document.getElementById('card_belum_lunas');
+    if (cardBelumLunas) {
+        cardBelumLunas.addEventListener('click', function () {
+            openSubmissionModal('belum_lunas');
+        });
+        cardBelumLunas.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openSubmissionModal('belum_lunas');
+            }
+        });
+    }
+
+    const cardBelumBayar = document.getElementById('card_belum_bayar');
+    if (cardBelumBayar) {
+        cardBelumBayar.addEventListener('click', function () {
+            openSubmissionModal('belum_bayar');
+        });
+        cardBelumBayar.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openSubmissionModal('belum_bayar');
+            }
         });
     }
 

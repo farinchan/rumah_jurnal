@@ -421,4 +421,172 @@ it('filters journal statistics by specific issue', function () {
     expect($apiResponse->json('issues_table.0.id'))->toBe($issueA->id);
 });
 
+it('provides modal triggers and serves submissions api for belum lunas and belum bayar', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = createTestJournal([
+        'name' => 'Jurnal Modal Test',
+        'url_path' => 'jmodal',
+        'author_fee' => 1000000,
+    ]);
+
+    $issue = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '1',
+        'number' => '1',
+        'year' => '2025',
+        'title' => 'Edisi Perdana Modal',
+        'author_fee' => 1000000,
+    ]);
+
+    // 1. Submission Lunas
+    $subLunas = Submission::create([
+        'issue_id' => $issue->id,
+        'submission_id' => 'SUB-LUNAS',
+        'fullTitle' => ['en' => 'Artikel Lunas'],
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => false,
+        'payment_status' => 'paid',
+    ]);
+    \App\Models\PaymentInvoice::create([
+        'submission_id' => $subLunas->id,
+        'invoice_number' => 'INV-001',
+        'payment_percent' => 100,
+        'payment_amount' => 1000000,
+        'is_paid' => true,
+    ]);
+
+    // 2. Submission Belum Lunas (DP 40%)
+    $subBelumLunas = Submission::create([
+        'issue_id' => $issue->id,
+        'submission_id' => 'SUB-BELUM-LUNAS',
+        'fullTitle' => ['en' => 'Artikel Belum Lunas'],
+        'authorsString' => 'Budi Santoso',
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => false,
+        'payment_status' => 'pending',
+    ]);
+    \App\Models\PaymentInvoice::create([
+        'submission_id' => $subBelumLunas->id,
+        'invoice_number' => 'INV-002-DP',
+        'payment_percent' => 40,
+        'payment_amount' => 400000,
+        'is_paid' => true,
+    ]);
+    \App\Models\PaymentInvoice::create([
+        'submission_id' => $subBelumLunas->id,
+        'invoice_number' => 'INV-002-SISA',
+        'payment_percent' => 60,
+        'payment_amount' => 600000,
+        'is_paid' => false,
+    ]);
+
+    // 3. Submission Belum Bayar (0%)
+    $subBelumBayar = Submission::create([
+        'issue_id' => $issue->id,
+        'submission_id' => 'SUB-BELUM-BAYAR',
+        'fullTitle' => ['en' => 'Artikel Belum Bayar'],
+        'authorsString' => 'Dewi Lestari',
+        'status' => '1',
+        'status_label' => 'Queued',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => false,
+        'payment_status' => 'pending',
+    ]);
+
+    // 4. Submission Free Charge
+    $subFree = Submission::create([
+        'issue_id' => $issue->id,
+        'submission_id' => 'SUB-FREE',
+        'fullTitle' => ['en' => 'Artikel Gratis'],
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => true,
+        'payment_status' => 'pending',
+    ]);
+
+    // Verify page view has modal and interactive cards
+    $pageResponse = $this->actingAs($user)
+        ->get(route('back.dashboard.journal', ['journal_id' => $journal->id]));
+    $pageResponse->assertStatus(200);
+    $pageResponse->assertSee('id="card_belum_lunas"', false);
+    $pageResponse->assertSee('id="card_belum_bayar"', false);
+    $pageResponse->assertSee('id="modal_submission_payment_detail"', false);
+    $pageResponse->assertSee(route('back.dashboard.journal.submissions'), false);
+
+    // Verify API for Belum Lunas
+    $belumLunasResponse = $this->actingAs($user)
+        ->getJson(route('back.dashboard.journal.submissions', [
+            'journal_id' => $journal->id,
+            'issue_id' => $issue->id,
+            'type' => 'belum_lunas',
+        ]));
+
+    $belumLunasResponse->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'meta' => [
+                'type' => 'belum_lunas',
+                'type_label' => 'Belum Lunas (DP/Cicil)',
+                'total_count' => 1,
+                'total_fee' => 1000000,
+                'total_paid' => 400000,
+                'total_remaining' => 600000,
+            ],
+        ]);
+
+    $submissionsBelumLunas = $belumLunasResponse->json('submissions');
+    expect($submissionsBelumLunas)->toHaveCount(1);
+    expect($submissionsBelumLunas[0]['submission_id'])->toBe('SUB-BELUM-LUNAS');
+    expect($submissionsBelumLunas[0]['title'])->toBe('Artikel Belum Lunas');
+    expect($submissionsBelumLunas[0]['authors'])->toBe('Budi Santoso');
+    expect($submissionsBelumLunas[0]['paid_amount'])->toBe(400000);
+    expect($submissionsBelumLunas[0]['remaining_amount'])->toBe(600000);
+    expect($submissionsBelumLunas[0]['invoices'])->toHaveCount(2);
+
+    // Verify API for Belum Bayar
+    $belumBayarResponse = $this->actingAs($user)
+        ->getJson(route('back.dashboard.journal.submissions', [
+            'journal_id' => $journal->id,
+            'type' => 'belum_bayar',
+        ]));
+
+    $belumBayarResponse->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'meta' => [
+                'type' => 'belum_bayar',
+                'type_label' => 'Belum Bayar (0%)',
+                'total_count' => 1,
+                'total_fee' => 1000000,
+                'total_paid' => 0,
+                'total_remaining' => 1000000,
+            ],
+        ]);
+
+    $submissionsBelumBayar = $belumBayarResponse->json('submissions');
+    expect($submissionsBelumBayar)->toHaveCount(1);
+    expect($submissionsBelumBayar[0]['submission_id'])->toBe('SUB-BELUM-BAYAR');
+    expect($submissionsBelumBayar[0]['title'])->toBe('Artikel Belum Bayar');
+    expect($submissionsBelumBayar[0]['authors'])->toBe('Dewi Lestari');
+    expect($submissionsBelumBayar[0]['paid_amount'])->toBe(0);
+    expect($submissionsBelumBayar[0]['remaining_amount'])->toBe(1000000);
+
+    // Verify unauthorized user is forbidden
+    $unauthorizedUser = User::factory()->create();
+    $this->actingAs($unauthorizedUser)
+        ->getJson(route('back.dashboard.journal.submissions', [
+            'journal_id' => $journal->id,
+            'type' => 'belum_lunas',
+        ]))
+        ->assertStatus(403);
+});
+
+
 

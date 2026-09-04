@@ -803,6 +803,205 @@ class DashboardController extends Controller
         }
     }
 
+    public function journalSubmissions(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user || !$user->hasAnyRole($this->allowedDashboardJournalRoles)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke Dashboard Jurnal',
+                ], 403);
+            }
+
+            $controlPanel = $request->cookie('control_panel', 'journal');
+            $journalId = $request->get('journal_id');
+            $issueId = $request->get('issue_id');
+            $type = $request->get('type', 'belum_lunas');
+
+            if (!in_array($type, ['belum_lunas', 'belum_bayar'])) {
+                $type = 'belum_lunas';
+            }
+
+            if ($journalId) {
+                $journal = Journal::find($journalId);
+            } else {
+                $journals = Journal::orderBy('type')->orderBy('name')->get();
+                $journal = $journals->firstWhere('type', $controlPanel);
+                if (!$journal || !$this->canUserAccessJournal($user, $journal)) {
+                    $journal = $journals->first(fn($j) => $this->canUserAccessJournal($user, $j));
+                }
+            }
+
+            if (!$journal) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Jurnal tidak ditemukan atau Anda belum memiliki jurnal yang ditugaskan',
+                ], 404);
+            }
+
+            // Check authorization specifically for this journal
+            if (!$this->canUserAccessJournal($user, $journal)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke jurnal ini',
+                ], 403);
+            }
+
+            $selectedIssue = null;
+            if (!empty($issueId) && $issueId !== 'all') {
+                $selectedIssue = Issue::where('journal_id', $journal->id)->where('id', $issueId)->first();
+                if (!$selectedIssue) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Issue tidak ditemukan pada jurnal ini',
+                    ], 404);
+                }
+            }
+
+            $issuesQuery = Issue::where('journal_id', $journal->id)
+                ->with(['submissions.paymentInvoices.payments'])
+                ->orderBy('year', 'desc')
+                ->orderBy('volume', 'desc')
+                ->orderBy('number', 'desc');
+
+            if ($selectedIssue) {
+                $issuesQuery->where('id', $selectedIssue->id);
+            }
+
+            $issues = $issuesQuery->get();
+
+            $submissionsList = [];
+            $totalFee = 0;
+            $totalPaid = 0;
+            $totalRemaining = 0;
+
+            foreach ($issues as $issue) {
+                $issueFee = (int)($issue->author_fee ?? ($journal->author_fee ?? 0));
+                $issueLabel = 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ($issue->year ? ' (' . $issue->year . ')' : '');
+
+                foreach ($issue->submissions as $submission) {
+                    $subFee = $issueFee;
+                    $isFree = ($submission->free_charge == 1) || ($subFee <= 0);
+
+                    if ($isFree) {
+                        continue;
+                    }
+
+                    $paidInvoices = $submission->paymentInvoices->where('is_paid', 1);
+                    $paidPercent = (int)$paidInvoices->sum('payment_percent');
+                    $paidAmount = (int)$paidInvoices->sum('payment_amount');
+
+                    if ($paidAmount == 0) {
+                        $acceptedPayments = $submission->paymentInvoices->flatMap->payments->where('payment_status', 'accepted');
+                        $paidAmount = (int)$acceptedPayments->sum('payment_amount');
+                    }
+
+                    $isLunas = ($submission->payment_status === 'paid')
+                        || ($paidPercent >= 100)
+                        || ($subFee > 0 && $paidAmount >= $subFee);
+
+                    if ($isLunas) {
+                        continue;
+                    }
+
+                    $isBelumLunas = ($paidPercent > 0 || $paidAmount > 0);
+                    $isBelumBayar = (!$isBelumLunas);
+
+                    if ($type === 'belum_lunas' && !$isBelumLunas) {
+                        continue;
+                    }
+
+                    if ($type === 'belum_bayar' && !$isBelumBayar) {
+                        continue;
+                    }
+
+                    $remaining = max(0, $subFee - $paidAmount);
+                    $totalFee += $subFee;
+                    $totalPaid += $paidAmount;
+                    $totalRemaining += $remaining;
+
+                    $effectivePercent = $paidPercent;
+                    if ($effectivePercent == 0 && $subFee > 0 && $paidAmount > 0) {
+                        $effectivePercent = (int)round(($paidAmount / $subFee) * 100);
+                    }
+
+                    // Author formatting
+                    $authorDisplay = '-';
+                    if (!empty($submission->authorsString)) {
+                        $authorDisplay = $submission->authorsString;
+                    } elseif (is_array($submission->authors)) {
+                        $names = collect($submission->authors)->pluck('name')->filter()->implode(', ');
+                        if (!empty($names)) {
+                            $authorDisplay = $names;
+                        }
+                    }
+
+                    // Invoices formatting
+                    $invoicesSummary = [];
+                    foreach ($submission->paymentInvoices as $inv) {
+                        $invoicesSummary[] = [
+                            'id' => $inv->id,
+                            'invoice_number' => $inv->invoice_number ?: '-',
+                            'payment_percent' => $inv->payment_percent,
+                            'payment_amount' => (int)$inv->payment_amount,
+                            'is_paid' => (bool)$inv->is_paid,
+                            'due_date' => $inv->payment_due_date ? date('d M Y', strtotime($inv->payment_due_date)) : null,
+                        ];
+                    }
+
+                    $submissionsList[] = [
+                        'id' => $submission->id,
+                        'submission_id' => $submission->submission_id,
+                        'title' => $submission->fullTitle ?: 'Tanpa Judul',
+                        'authors' => $authorDisplay,
+                        'issue_id' => $issue->id,
+                        'issue_label' => $issueLabel,
+                        'status' => $submission->status,
+                        'status_label' => $submission->status_label ?: ($submission->status == '3' ? 'Published' : 'Belum Publish'),
+                        'is_published' => ($submission->status == '3'),
+                        'payment_status' => $submission->payment_status,
+                        'author_fee' => $subFee,
+                        'paid_amount' => $paidAmount,
+                        'remaining_amount' => $remaining,
+                        'paid_percent' => $effectivePercent,
+                        'invoices' => $invoicesSummary,
+                        'action_url' => route('back.journal.article.index', [$journal->url_path, $issue->id]),
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'meta' => [
+                    'type' => $type,
+                    'type_label' => $type === 'belum_lunas' ? 'Belum Lunas (DP/Cicil)' : 'Belum Bayar (0%)',
+                    'journal' => [
+                        'id' => $journal->id,
+                        'name' => $journal->name,
+                        'url_path' => $journal->url_path,
+                    ],
+                    'issue' => $selectedIssue ? [
+                        'id' => $selectedIssue->id,
+                        'label' => 'Vol. ' . $selectedIssue->volume . ' No. ' . $selectedIssue->number . ($selectedIssue->year ? ' (' . $selectedIssue->year . ')' : ''),
+                    ] : null,
+                    'total_count' => count($submissionsList),
+                    'total_fee' => $totalFee,
+                    'total_paid' => $totalPaid,
+                    'total_remaining' => $totalRemaining,
+                ],
+                'submissions' => $submissionsList,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal memuat data submission',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function switchControl($control)
     {
 
