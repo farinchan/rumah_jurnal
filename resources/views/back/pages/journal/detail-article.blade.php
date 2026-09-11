@@ -3,23 +3,21 @@
     <div id="kt_content_container" class=" container-fluid ">
         @include('back.pages.journal.detail-header')
         <div class="card mb-5 mb-lg-10">
-            <div class="card-header">
+            <div class="card-header align-items-center py-5 gap-2 gap-md-5">
                 <div class="card-title">
-                    <h3>Artikel</h3>
-                </div>
-                <div class="card-toolbar">
-                    <div class="my-1 me-4" data-select2-id="select2-data-119-2hcl">
-                        <select class="form-select form-select-sm form-select-solid w-125px select2-hidden-accessible"
-                            data-control="select2" data-placeholder="Select Hours" data-hide-search="true"
-                            data-select2-id="select2-data-10-gwyz" tabindex="-1" aria-hidden="true"
-                            data-kt-initialized="1">
-                            <option value="1" selected="" data-select2-id="select2-data-12-evdw">1 Hours</option>
-                            <option value="2" data-select2-id="select2-data-123-vaul">6 Hours</option>
-                            <option value="3" data-select2-id="select2-data-124-ghz7">12 Hours</option>
-                            <option value="4" data-select2-id="select2-data-125-ax5i">24 Hours</option>
-                        </select>
+                    <h3 class="me-5 mb-0">Artikel</h3>
+                    <div class="d-flex align-items-center position-relative my-1">
+                        <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                        <input type="text" data-kt-article-table-filter="search"
+                            class="form-control form-control-solid form-control-sm w-200px w-md-250px ps-12"
+                            placeholder="Cari Artikel..." />
                     </div>
-                    <a href="#" class="btn btn-sm btn-primary my-1 me-3" data-bs-toggle="modal" id="btn_add_article"
+                </div>
+                <div class="card-toolbar flex-row-fluid justify-content-end gap-3">
+                    <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal" id="btn_add_article"
                         data-bs-target="#modal_select_article">
                         <i class="ki-duotone ki-plus fs-2"></i> Tambah Artikel
                     </a>
@@ -32,25 +30,25 @@
                     </a>
                 </div>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body py-4">
                 <div class="table-responsive">
-                    <table class="table align-middle table-row-bordered table-row-solid gy-4 gs-9">
+                    <table id="table_articles" class="table align-middle table-row-bordered table-row-solid gy-4 gs-9">
                         <thead class="border-gray-200 fs-5 fw-semibold bg-lighten">
                             <tr>
                                 <th class="">ID</th>
-                                <th class="min-w-350px">Submission</th>
-                                <th class="min-w-250px">Info Tambahan Penulis</th>
-                                <th class="min-w-300px">Editor</th>
-                                <th class="min-w-300px">Reviewer</th>
-                                <th class="min-w-100px text-start">Status Submission</th>
+                                <th class="min-w-300px">Submission</th>
+                                <th class="min-w-200px" data-orderable="false">Info Tambahan Penulis</th>
+                                <th class="min-w-200px" data-orderable="false">Editor</th>
+                                <th class="min-w-200px" data-orderable="false">Reviewer</th>
+                                <th class="min-w-120px text-start">Status Submission</th>
                                 @if (($issue->author_fee ?? $journal->author_fee) != 0)
-                                    <th class="min-w-300px text-start ">Pembayaran</th>
+                                    <th class="min-w-250px text-start" data-orderable="false">Pembayaran</th>
                                 @endif
-                                <th class="min-w-250px text-center">Action</th>
+                                <th class="min-w-150px text-center" data-orderable="false" data-searchable="false">Action</th>
                             </tr>
                         </thead>
                         <tbody class="fw-6 fw-semibold text-gray-600">
-                            @forelse ($issue->submissions as $submission)
+                            @foreach ($issue->submissions as $submission)
                                 <tr>
                                     <td>
                                         {{ $submission->submission_id }}
@@ -195,13 +193,7 @@
                                           @endrole
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted fw-semibold fs-6">
-                                        Belum ada artikel yang ditambahkan
-                                    </td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -918,6 +910,48 @@
         let submissions = @json($issue->submissions->pluck('submission_id'));
         let data = [];
         $(document).ready(function() {
+            var articleTable = $('#table_articles').DataTable({
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                order: [],
+                language: {
+                    search: "Cari:",
+                    searchPlaceholder: "Cari artikel...",
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ artikel",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 artikel",
+                    infoFiltered: "(disaring dari _MAX_ total artikel)",
+                    zeroRecords: "Tidak ada artikel yang cocok",
+                    emptyTable: "Belum ada artikel yang ditambahkan pada edisi ini",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: '<i class="ki-duotone ki-right fs-4"><span class="path1"></span><span class="path2"></span></i>',
+                        previous: '<i class="ki-duotone ki-left fs-4"><span class="path1"></span><span class="path2"></span></i>'
+                    }
+                },
+                columnDefs: [
+                    { orderable: false, targets: [2, 3, 4] },
+                    @if (($issue->author_fee ?? $journal->author_fee) != 0)
+                    { orderable: false, targets: [6] },
+                    @endif
+                    { orderable: false, searchable: false, targets: -1 }
+                ],
+                dom: "<'table-responsive'tr>" +
+                    "<'row mt-4'<'col-sm-12 col-md-5 d-flex align-items-center justify-content-center justify-content-md-start'li><'col-sm-12 col-md-7 d-flex align-items-center justify-content-center justify-content-md-end'p>>"
+            });
+
+            // Connect external search input
+            $('[data-kt-article-table-filter="search"]').on('keyup input', function () {
+                articleTable.search(this.value).draw();
+            });
+
+            // Re-init Metronic components when table redraws
+            articleTable.on('draw', function () {
+                if (typeof KTMenu !== 'undefined') {
+                    KTMenu.createInstances();
+                }
+            });
 
             $('#btn_add_article').on('click', function() {
                 // Show the loading spinner
