@@ -175,7 +175,7 @@
                     </div>
 
                 </div>
-                @if (Auth::user()->hasRole(['super-admin', 'keuangan']))
+                @if (Auth::user()->hasRole(['super-admin', 'keuangan', 'keuangan-proceeding', 'keuangan-student-research-hub']))
                     <div class="card-footer d-flex justify-content-end py-6 px-9">
                         <a href="{{ route('back.finance.verification.index') }}" class="btn btn-light ms-3">Kembali</a>
                         <button type="submit" id="btn-submit" class="btn btn-warning">Simpan & Selesai</button>
