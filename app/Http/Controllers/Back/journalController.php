@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use Yajra\DataTables\Facades\DataTables;
 use ZipArchive;
 
 class journalController extends Controller
@@ -224,20 +225,26 @@ class journalController extends Controller
 
     //TODO: ARTCILE SECTION
 
-    public function articleIndex($journal_path, $issue_id)
+    public function articleIndex(Request $request, $journal_path, $issue_id)
     {
+        if ($request->ajax()) {
+            return $this->articleDatatable($request, $journal_path, $issue_id);
+        }
+
         $journal = Journal::where('url_path', $journal_path)->first();
         if (!$journal) {
             return abort(404);
         }
 
-        $issue = Issue::with(['submissions.paymentInvoices', 'submissions.editors', 'submissions.reviewers'])->find($issue_id);
+        $issue = Issue::find($issue_id);
         if (!$issue) {
             return abort(404);
         }
 
         // Get payment year setting based on issue year
         $paymentYearSetting = \App\Models\PaymentYearSetting::where('year', $issue->year)->first();
+
+        $submissionIds = Submission::where('issue_id', $issue->id)->pluck('submission_id');
 
         $data = [
             'title' => "Vol. " . $issue->volume . " No. " . $issue->number . " (" . $issue->year . "): " . $issue->title,
@@ -258,15 +265,273 @@ class journalController extends Controller
             'journal_path' => $journal_path,
             'journal' => $journal,
             'issue' => $issue,
+            'submissionIds' => $submissionIds,
             'editors' => Editor::where('issue_id', $issue_id)->get(),
             'reviewers' => Reviewer::where('issue_id', $issue_id)->get(),
             'paymentYearSetting' => $paymentYearSetting,
             'allIssues' => Issue::where('journal_id', $journal->id)->where('id', '!=', $issue_id)->orderBy('year', 'desc')->orderBy('volume', 'desc')->orderBy('number', 'desc')->get(),
-            // 'submissions' => $issue->submissions->pluck('submission_id'),
         ];
         // return response()->json($data);
         return view('back.pages.journal.detail-article', $data);
     }
+
+    public function articleDatatable(Request $request, $journal_path, $issue_id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->first();
+        if (!$journal) {
+            return abort(404);
+        }
+
+        $issue = Issue::find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
+        $submissionsQuery = Submission::where('issue_id', $issue->id)
+            ->with(['paymentInvoices.payments', 'editors', 'reviewers']);
+
+        if ($request->filled('filter_submission_id')) {
+            $submissionsQuery->where('submission_id', 'like', '%' . $request->filter_submission_id . '%');
+        }
+
+        if ($request->filled('filter_title')) {
+            $submissionsQuery->where('fullTitle', 'like', '%' . $request->filter_title . '%');
+        }
+
+        if ($request->filled('filter_author')) {
+            $submissionsQuery->where('authorsString', 'like', '%' . $request->filter_author . '%');
+        }
+
+        if ($request->filled('filter_status') && $request->filter_status !== 'all') {
+            $submissionsQuery->where('status', $request->filter_status);
+        }
+
+        if ($request->filled('filter_payment') && $request->filter_payment !== 'all') {
+            if ($request->filter_payment === 'free_charge') {
+                $submissionsQuery->where('free_charge', true);
+            } else {
+                $submissionsQuery->where('payment_status', $request->filter_payment)->where('free_charge', false);
+            }
+        }
+
+        if ($request->filled('filter_editor') && $request->filter_editor !== 'all') {
+            $submissionsQuery->whereHas('editors', function ($q) use ($request) {
+                $q->where('editors.id', $request->filter_editor);
+            });
+        }
+
+        if ($request->filled('filter_reviewer') && $request->filter_reviewer !== 'all') {
+            $submissionsQuery->whereHas('reviewers', function ($q) use ($request) {
+                $q->where('reviewers.id', $request->filter_reviewer);
+            });
+        }
+
+        $hasAuthorFee = (($issue->author_fee ?? $journal->author_fee) != 0);
+
+        $dataTable = DataTables::eloquent($submissionsQuery)
+            ->filter(function ($query) {
+                if (request()->has('search') && !empty(request('search')['value'])) {
+                    $keyword = request('search')['value'];
+                    $query->where(function ($q) use ($keyword) {
+                        $q->where('submission_id', 'like', "%{$keyword}%")
+                            ->orWhere('authorsString', 'like', "%{$keyword}%")
+                            ->orWhere('fullTitle', 'like', "%{$keyword}%")
+                            ->orWhere('author_nik', 'like', "%{$keyword}%")
+                            ->orWhere('author_bank_name', 'like', "%{$keyword}%")
+                            ->orWhere('author_bank_account', 'like', "%{$keyword}%")
+                            ->orWhere('author_npwp', 'like', "%{$keyword}%")
+                            ->orWhere('author_golongan', 'like', "%{$keyword}%")
+                            ->orWhere('status_label', 'like', "%{$keyword}%")
+                            ->orWhere('payment_status', 'like', "%{$keyword}%")
+                            ->orWhereHas('editors', function ($eq) use ($keyword) {
+                                $eq->where('name', 'like', "%{$keyword}%");
+                            })
+                            ->orWhereHas('reviewers', function ($rq) use ($keyword) {
+                                $rq->where('name', 'like', "%{$keyword}%");
+                            });
+                    });
+                }
+            })
+            ->orderColumn('submission', function ($query, $order) {
+                $query->orderBy('authorsString', $order);
+            })
+            ->orderColumn('status', function ($query, $order) {
+                $query->orderBy('status', $order);
+            })
+            ->addColumn('submission_id', function ($submission) {
+                return e($submission->submission_id);
+            })
+            ->addColumn('submission', function ($submission) {
+                $urlPublished = $submission->urlPublished ? e($submission->urlPublished) : null;
+                $authorsString = e($submission->authorsString ?? '-');
+                $fullTitle = is_array($submission->fullTitle) ? implode(', ', $submission->fullTitle) : ($submission->fullTitle ?? '-');
+                $fullTitle = e($fullTitle);
+                $datePublished = e($submission->datePublished ?? '-');
+
+                $html = '<div class="d-flex flex-column">';
+                if ($urlPublished) {
+                    $html .= '<a href="' . $urlPublished . '" target="_blank" class="text-gray-800 text-hover-primary mb-1">' . $authorsString . '</a>';
+                } else {
+                    $html .= '<span class="text-gray-800 fw-bold mb-1">' . $authorsString . '</span>';
+                }
+                $html .= '<span>' . $fullTitle . '</span>';
+                $html .= '<span class="text-muted fw-bold">Published date: ' . $datePublished . '</span>';
+                $html .= '</div>';
+
+                return $html;
+            })
+            ->addColumn('author_info', function ($submission) {
+                $nik = e($submission->author_nik ?? '-');
+                $bank = e($submission->author_bank_name ?? '-');
+                $rekening = e($submission->author_bank_account ?? '-');
+                $npwp = e($submission->author_npwp ?? '-');
+                $golongan = e($submission->author_golongan ?? '-');
+
+                return "NIK: {$nik} <br> Bank: {$bank} <br> No Rekening: {$rekening} <br> NPWP: {$npwp} <br> Golongan: {$golongan}";
+            })
+            ->addColumn('editor', function ($submission) {
+                $html = '<ul>';
+                if ($submission->editors->isNotEmpty()) {
+                    foreach ($submission->editors as $editor) {
+                        $html .= '<li><span class="text-gray-800 fw-bold">' . e($editor->name) . '</span><br>' . e($editor->affiliation ?? '-') . '</li>';
+                    }
+                } else {
+                    $html .= '<li style="list-style: none" class="text-muted">Editor belum ditambahkan</li>';
+                }
+                $html .= '</ul>';
+
+                return $html;
+            })
+            ->addColumn('reviewer', function ($submission) {
+                $html = '<ul>';
+                if ($submission->reviewers->isNotEmpty()) {
+                    foreach ($submission->reviewers as $reviewer) {
+                        $html .= '<li><span class="text-gray-800 fw-bold">' . e($reviewer->name) . '</span><br>' . e($reviewer->affiliation ?? '-') . '</li>';
+                    }
+                } else {
+                    $html .= '<li style="list-style: none" class="text-muted">Reviewer belum ditambahkan</li>';
+                }
+                $html .= '</ul>';
+
+                return $html;
+            })
+            ->addColumn('status', function ($submission) {
+                $label = e($submission->status_label ?? '-');
+                if ($submission->status == 1) {
+                    return '<span class="badge badge-light-warning fs-7 fw-bold">' . $label . '</span>';
+                } elseif ($submission->status == 3) {
+                    return '<span class="badge badge-light-success fs-7 fw-bold">' . $label . '</span>';
+                } elseif ($submission->status == 4) {
+                    return '<span class="badge badge-light-danger fs-7 fw-bold">' . $label . '</span>';
+                } else {
+                    return '<span class="badge badge-light-secondary fs-7 fw-bold">' . $label . '</span>';
+                }
+            });
+
+        if ($hasAuthorFee) {
+            $dataTable->addColumn('payment', function ($submission) {
+                if ($submission->free_charge) {
+                    return '<span class="badge badge-light-primary fs-7 fw-bold">Free Charge</span>';
+                }
+
+                $paymentStatus = e($submission->payment_status ?? 'Unknown');
+                if ($submission->payment_status == 'pending') {
+                    $badge = '<span class="badge badge-light-warning fs-7 fw-bold">' . $paymentStatus . '</span>';
+                } elseif ($submission->payment_status == 'paid') {
+                    $badge = '<span class="badge badge-light-success fs-7 fw-bold">' . $paymentStatus . '</span>';
+                } elseif ($submission->payment_status == 'refund' || $submission->payment_status == 'cancelled') {
+                    $badge = '<span class="badge badge-light-danger fs-7 fw-bold">' . $paymentStatus . '</span>';
+                } else {
+                    $badge = '<span class="badge badge-light-secondary fs-7 fw-bold">' . $paymentStatus . '</span>';
+                }
+
+                $list = '<ul class="mt-3">';
+                foreach ($submission->paymentInvoices as $invoice) {
+                    $list .= '<li>Pembayaran ' . e($invoice->payment_percent) . '% - ';
+                    if ($invoice->is_paid) {
+                        $list .= '<span class="text-success fs-7 fw-bold">Lunas</span>';
+                        $acceptedPayment = $invoice->payments->firstWhere('payment_status', 'accepted');
+                        if ($acceptedPayment) {
+                            $list .= ' <a href="' . route('back.finance.verification.detail', $acceptedPayment->id) . '">(detail)</a>';
+                        }
+                    } else {
+                        $list .= '<span class="text-warning fs-7 fw-bold">Belum Dibayar</span>';
+                    }
+                    $list .= '</li>';
+                }
+                $list .= '</ul>';
+
+                return $badge . $list;
+            });
+        }
+
+        $dataTable->addColumn('action', function ($submission) use ($journal, $issue) {
+            $subId = e($submission->submission_id);
+            $viewUrl = route('back.journal.article.modal-view', [$journal->url_path, $issue->id, $submission->id]);
+            $actionUrl = route('back.journal.article.modal-action', [$journal->url_path, $issue->id, $submission->id]);
+            $deleteUrl = route('back.journal.article.destroy', [$journal->url_path, $issue->id, $submission->id]);
+
+            $viewBtn = '<button type="button" class="btn btn-sm btn-light-info my-1 me-1 btn-view-article" data-url="' . $viewUrl . '" data-submission-id="' . $subId . '" title="Lihat Detail">' .
+                '<i class="ki-duotone ki-eye fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></button>';
+
+            $menuBtn = '<button type="button" class="btn btn-sm btn-light-primary my-1 me-1 btn-action-article" data-url="' . $actionUrl . '" data-submission-id="' . $subId . '" title="Menu Aksi">' .
+                '<i class="ki-duotone ki-menu fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i></button>';
+
+            $deleteBtn = '';
+            if (auth()->check() && auth()->user()->hasAnyRole(['super-admin', 'admin'])) {
+                $deleteBtn = '<button type="button" class="btn btn-sm btn-light-danger my-1 btn-delete-article" data-url="' . $deleteUrl . '" data-title="Submission ID ' . $subId . '" data-submission-id="' . $subId . '" title="Hapus Artikel">' .
+                    '<i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></button>';
+            }
+
+            return '<div class="text-end text-nowrap">' . $viewBtn . $menuBtn . $deleteBtn . '</div>';
+        });
+
+        $rawColumns = ['submission_id', 'submission', 'author_info', 'editor', 'reviewer', 'status', 'action'];
+        if ($hasAuthorFee) {
+            $rawColumns[] = 'payment';
+        }
+
+        return $dataTable->rawColumns($rawColumns)->make(true);
+    }
+
+    public function articleModalView($journal_path, $issue_id, $id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->firstOrFail();
+        $issue = Issue::findOrFail($issue_id);
+        $submission = Submission::where('issue_id', $issue->id)
+            ->with(['paymentInvoices.payments', 'editors', 'reviewers'])
+            ->findOrFail($id);
+
+        $editors = Editor::where('issue_id', $issue_id)->get();
+        $reviewers = Reviewer::where('issue_id', $issue_id)->get();
+        $allIssues = Issue::where('journal_id', $journal->id)->where('id', '!=', $issue_id)
+            ->orderBy('year', 'desc')->orderBy('volume', 'desc')->orderBy('number', 'desc')->get();
+
+        return view('back.pages.journal.modal-view-article', [
+            'journal' => $journal,
+            'issue' => $issue,
+            'submission' => $submission,
+            'editors' => $editors,
+            'reviewers' => $reviewers,
+            'allIssues' => $allIssues,
+        ]);
+    }
+
+    public function articleModalAction($journal_path, $issue_id, $id)
+    {
+        $journal = Journal::where('url_path', $journal_path)->firstOrFail();
+        $issue = Issue::findOrFail($issue_id);
+        $submission = Submission::where('issue_id', $issue->id)
+            ->with(['paymentInvoices.payments'])
+            ->findOrFail($id);
+
+        return view('back.pages.journal.modal-action-article', [
+            'journal' => $journal,
+            'issue' => $issue,
+            'submission' => $submission,
+        ]);
+    }
+
 
     public function articleUpdate(Request $request, $journal_path, $issue_id, $id)
     {

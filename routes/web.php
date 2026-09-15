@@ -288,6 +288,9 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/{journal_path}/issue/{issue_id}/dashboard', [BackJournalController::class, 'dashboardIndex'])->name('dashboard.index');
 
         Route::get('/{journal_path}/issue/{issue_id}/article', [BackJournalController::class, 'articleIndex'])->name('article.index');
+        Route::get('/{journal_path}/issue/{issue_id}/article-datatable', [BackJournalController::class, 'articleDatatable'])->name('article.datatable');
+        Route::get('/{journal_path}/issue/{issue_id}/article/{id}/modal-view', [BackJournalController::class, 'articleModalView'])->name('article.modal-view');
+        Route::get('/{journal_path}/issue/{issue_id}/article/{id}/modal-action', [BackJournalController::class, 'articleModalAction'])->name('article.modal-action');
         Route::put('/{journal_path}/issue/{issue_id}/article/{id}/update', [BackJournalController::class, 'articleUpdate'])->name('article.update');
         Route::put('/{journal_path}/issue/{issue_id}/article/{id}/move-issue', [BackJournalController::class, 'articleMoveIssue'])->name('article.move-issue');
         Route::delete('/{journal_path}/issue/{issue_id}/article/{id}/destroy', [BackJournalController::class, 'articleDestroy'])->name('article.destroy');
