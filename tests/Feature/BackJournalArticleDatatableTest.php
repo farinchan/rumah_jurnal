@@ -8,12 +8,14 @@ use App\Models\SettingWebsite;
 use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Role::firstOrCreate(['name' => 'super-admin']);
+    Role::firstOrCreate(['name' => 'admin']);
     Role::firstOrCreate(['name' => 'editor']);
 
     SettingWebsite::create([
@@ -213,6 +215,7 @@ it('renders dynamic modal view content for an article', function () {
     $response->assertSee('Judul Dynamic Modal View');
     $response->assertSee('Informasi');
     $response->assertSee('History Pembayaran');
+    $response->assertSee('Akun OJS');
 });
 
 it('renders dynamic modal action content for an article', function () {
@@ -460,5 +463,230 @@ it('filters specifically by submission ID and by title separately', function () 
     $resPayment->assertStatus(200);
     expect($resPayment->json('recordsFiltered'))->toBe(1);
     expect($resPayment->json('data.0.submission_id'))->toBe('1002');
+});
+
+it('renders ojs account details inside akun ojs tab when fetched from ojs api', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = Journal::create([
+        'name' => 'Jurnal OJS Account Test',
+        'title' => 'Jurnal OJS Account Test Title',
+        'context_id' => 993,
+        'url' => 'https://journal.test/account-ojs',
+        'url_path' => 'account-ojs',
+        'type' => 'journal',
+        'author_fee' => 0,
+        'api_key' => 'secret_token_123',
+        'ojs_version' => '3.3',
+        'last_sync' => now(),
+    ]);
+
+    $issue = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '1',
+        'number' => '1',
+        'year' => '2025',
+        'title' => 'Edisi OJS Account',
+        'author_fee' => 0,
+    ]);
+
+    $submission = Submission::create([
+        'issue_id' => $issue->id,
+        'submission_id' => '777',
+        'fullTitle' => ['en' => 'Penelitian OJS Account'],
+        'authorsString' => 'Prof. OJS Author',
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+    ]);
+
+    Http::fake([
+        'https://journal.test/account-ojs/api/v1/submissions/777/participants*' => Http::response([
+            [
+                'id' => 88,
+                'fullName' => 'Prof. OJS Author',
+                'userGroup' => 'Author',
+                '_href' => 'https://journal.test/account-ojs/api/v1/users/88',
+            ],
+            [
+                'id' => 99,
+                'fullName' => 'Dr. Editor Jurnal',
+                'userGroup' => 'Journal editor',
+                '_href' => 'https://journal.test/account-ojs/api/v1/users/99',
+            ]
+        ], 200),
+        'https://journal.test/account-ojs/api/v1/users/99*' => Http::response([
+            'id' => 99,
+            'fullName' => 'Dr. Editor Jurnal',
+            'userName' => 'editorjurnal99',
+            'email' => 'editor@uin.ac.id',
+            'phone' => '089999999999',
+            'dateLastLogin' => '2025-09-01 08:00:00',
+        ], 200),
+        'https://journal.test/account-ojs/api/v1/users/88*' => Http::response([
+            'id' => 88,
+            'fullName' => 'Prof. OJS Author',
+            'userName' => 'ojsauthor88',
+            'email' => 'ojsauthor88@uin.ac.id',
+            'phone' => '081298765432',
+            'dateLastLogin' => '2025-08-10 14:23:45',
+        ], 200),
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('back.journal.article.modal-view', [$journal->url_path, $issue->id, $submission->id]));
+
+    $response->assertStatus(200);
+    $response->assertSee('Akun OJS');
+    $response->assertSee('#88');
+    $response->assertSee('Prof. OJS Author');
+    $response->assertSee('ojsauthor88');
+    $response->assertSee('ojsauthor88@uin.ac.id');
+    $response->assertSee('081298765432');
+    $response->assertSee('Date Last Login');
+    $response->assertSee('2025');
+    $response->assertSee('14:23');
+    // Ensure editor account is filtered out
+    $response->assertDontSee('Dr. Editor Jurnal');
+    $response->assertDontSee('editorjurnal99');
+});
+
+it('allows super-admin to delete submission', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = Journal::create([
+        'name' => 'Jurnal Delete Perm Test',
+        'title' => 'Jurnal Delete Perm Test Title',
+        'context_id' => 992,
+        'url' => 'https://journal.test/jdel',
+        'url_path' => 'jdel',
+        'type' => 'journal',
+        'author_fee' => 0,
+        'api_key' => 'secret_key',
+        'ojs_version' => '3.3',
+        'last_sync' => now(),
+    ]);
+
+    $issue = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '1',
+        'number' => '1',
+        'year' => '2025',
+        'title' => 'Edisi Del',
+        'author_fee' => 0,
+    ]);
+
+    $submission = Submission::create([
+        'issue_id' => $issue->id,
+        'submission_id' => 'DEL-01',
+        'fullTitle' => ['en' => 'Article to delete'],
+        'authorsString' => 'Delete Author',
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+    ]);
+
+    $response = $this->actingAs($user)
+        ->delete(route('back.journal.article.destroy', [$journal->url_path, $issue->id, $submission->id]));
+
+    $response->assertRedirect();
+    expect(Submission::find($submission->id))->toBeNull();
+});
+
+it('forbids non-super-admin from deleting submission', function () {
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+
+    $journal = Journal::create([
+        'name' => 'Jurnal Delete Perm Test 2',
+        'title' => 'Jurnal Delete Perm Test Title 2',
+        'context_id' => 991,
+        'url' => 'https://journal.test/jdel2',
+        'url_path' => 'jdel2',
+        'type' => 'journal',
+        'author_fee' => 0,
+        'api_key' => 'secret_key',
+        'ojs_version' => '3.3',
+        'last_sync' => now(),
+    ]);
+
+    $issue = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '1',
+        'number' => '1',
+        'year' => '2025',
+        'title' => 'Edisi Del 2',
+        'author_fee' => 0,
+    ]);
+
+    $submission = Submission::create([
+        'issue_id' => $issue->id,
+        'submission_id' => 'DEL-02',
+        'fullTitle' => ['en' => 'Article that must not be deleted'],
+        'authorsString' => 'Protected Author',
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+    ]);
+
+    $response = $this->actingAs($user)
+        ->delete(route('back.journal.article.destroy', [$journal->url_path, $issue->id, $submission->id]));
+
+    $response->assertStatus(403);
+    expect(Submission::find($submission->id))->not->toBeNull();
+});
+
+it('shows delete button in datatable only to super-admin', function () {
+    $superAdmin = User::factory()->create();
+    $superAdmin->assignRole('super-admin');
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole('admin');
+
+    $journal = Journal::create([
+        'name' => 'Jurnal Delete Btn Test',
+        'title' => 'Jurnal Delete Btn Test Title',
+        'context_id' => 990,
+        'url' => 'https://journal.test/jdelbtn',
+        'url_path' => 'jdelbtn',
+        'type' => 'journal',
+        'author_fee' => 0,
+        'api_key' => 'secret_key',
+        'ojs_version' => '3.3',
+        'last_sync' => now(),
+    ]);
+
+    $issue = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '1',
+        'number' => '1',
+        'year' => '2025',
+        'title' => 'Edisi Del Btn',
+        'author_fee' => 0,
+    ]);
+
+    $submission = Submission::create([
+        'issue_id' => $issue->id,
+        'submission_id' => 'DEL-BTN-01',
+        'fullTitle' => ['en' => 'Article Btn Test'],
+        'authorsString' => 'Btn Author',
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+    ]);
+
+    // Super-admin sees delete button
+    $resSuper = $this->actingAs($superAdmin)
+        ->getJson(route('back.journal.article.datatable', [$journal->url_path, $issue->id]));
+    $resSuper->assertStatus(200);
+    expect($resSuper->json('data.0.action'))->toContain('btn-delete-article');
+
+    // Admin user does NOT see delete button
+    $resAdmin = $this->actingAs($adminUser)
+        ->getJson(route('back.journal.article.datatable', [$journal->url_path, $issue->id]));
+    $resAdmin->assertStatus(200);
+    expect($resAdmin->json('data.0.action'))->not->toContain('btn-delete-article');
 });
 

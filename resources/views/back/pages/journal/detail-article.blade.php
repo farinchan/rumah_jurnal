@@ -222,6 +222,7 @@
     <!--end::Modal Action Article-->
 
     <!--begin::Modal Delete Article (Single Global Modal)-->
+    @hasrole('super-admin')
     <div class="modal fade" tabindex="-1" id="modal_delete_article" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -251,6 +252,7 @@
             </div>
         </div>
     </div>
+    @endhasrole
     <!--end::Modal Delete Article-->
 @endsection
 @section('scripts')

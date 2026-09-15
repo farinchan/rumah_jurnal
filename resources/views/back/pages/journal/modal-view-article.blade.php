@@ -32,6 +32,10 @@
                     href="#kt_tab_pane_2_submission_{{ $submission->id }}">History Pembayaran</a>
             </li>
         @endif
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab"
+                href="#kt_tab_pane_ojs_submission_{{ $submission->id }}">Akun OJS</a>
+        </li>
         @if ($allIssues->count() > 0)
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab"
@@ -229,6 +233,127 @@
                 @endforelse
             </div>
         @endif
+
+        {{-- Tab: Akun OJS --}}
+        <div class="tab-pane fade" id="kt_tab_pane_ojs_submission_{{ $submission->id }}"
+            role="tabpanel">
+            <div class="mh-550px scroll-y me-n7 pe-7">
+                @if ($ojsError && empty($ojsUser) && empty($ojsUsers))
+                    <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-6 mb-5">
+                        <i class="ki-duotone ki-information-5 fs-2tx text-warning me-4">
+                            <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                        </i>
+                        <div class="d-flex flex-stack flex-grow-1">
+                            <div class="fw-semibold">
+                                <h4 class="text-gray-900 fw-bold">Pemberitahuan Akun OJS</h4>
+                                <div class="fs-6 text-gray-700">{{ $ojsError }}</div>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    @php
+                        $accounts = !empty($ojsUsers) ? $ojsUsers : ($ojsUser ? [$ojsUser] : []);
+                    @endphp
+
+                    @forelse ($accounts as $idx => $acc)
+                        <div class="card card-bordered mb-5">
+                            <div class="card-header min-h-50px">
+                                <h3 class="card-title fs-6 fw-bold">
+                                    <i class="ki-duotone ki-user fs-4 text-primary me-2">
+                                        <span class="path1"></span><span class="path2"></span>
+                                    </i>
+                                    Akun OJS
+                                    @if (!empty($acc['userGroup']))
+                                        <span class="badge badge-light-primary ms-2 fs-8">{{ $acc['userGroup'] }}</span>
+                                    @endif
+                                </h3>
+                            </div>
+                            <div class="card-body p-5">
+                                <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-3 fs-6">
+                                    <tr>
+                                        <td class="fw-bold text-gray-600 w-175px">ID Akun OJS</td>
+                                        <td class="w-10px">:</td>
+                                        <td class="text-gray-800 fw-semibold">
+                                            <span class="badge badge-light-dark fs-7">#{{ $acc['id'] ?? $acc['userId'] ?? $acc['user_id'] ?? '-' }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-600">Nama</td>
+                                        <td>:</td>
+                                        <td class="text-gray-800 fw-semibold">{{ $acc['fullName'] ?? $acc['name'] ?? '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-600">Username</td>
+                                        <td>:</td>
+                                        <td class="text-gray-800 fw-semibold">{{ $acc['userName'] ?? $acc['username'] ?? '-' }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-600">Email</td>
+                                        <td>:</td>
+                                        <td class="text-gray-800 fw-semibold">
+                                            @if (!empty($acc['email']))
+                                                <a href="mailto:{{ $acc['email'] }}" class="text-primary">{{ $acc['email'] }}</a>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-600">Nomor HP</td>
+                                        <td>:</td>
+                                        <td class="text-gray-800 fw-semibold">
+                                            @if (!empty($acc['phone']))
+                                                <span>{{ $acc['phone'] }}</span>
+                                                @if (function_exists('whatsappNumber'))
+                                                    <a href="https://wa.me/{{ whatsappNumber($acc['phone']) }}" target="_blank" class="btn btn-sm btn-light-success py-1 px-3 ms-2">
+                                                        <i class="ki-duotone ki-whatsapp fs-5"><span class="path1"></span><span class="path2"></span></i>
+                                                        Hubungi WhatsApp
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <span class="text-muted">Nomor HP belum tercantum di OJS</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-600">Date Last Login</td>
+                                        <td>:</td>
+                                        <td class="text-gray-800 fw-semibold">
+                                            @php
+                                                $lastLoginRaw = $acc['dateLastLogin'] ?? $acc['date_last_login'] ?? $acc['lastLogin'] ?? $acc['last_login'] ?? null;
+                                                $lastLoginFormatted = null;
+                                                if ($lastLoginRaw) {
+                                                    try {
+                                                        $lastLoginFormatted = \Carbon\Carbon::parse($lastLoginRaw)->translatedFormat('d F Y, H:i');
+                                                    } catch (\Throwable $e) {
+                                                        $lastLoginFormatted = $lastLoginRaw;
+                                                    }
+                                                }
+                                            @endphp
+                                            @if ($lastLoginFormatted)
+                                                <span class="text-gray-800 fw-semibold">
+                                                    {{ $lastLoginFormatted }}
+                                                </span>
+                                                @if ($lastLoginRaw && strtotime($lastLoginRaw))
+                                                    <span class="text-muted fs-8 ms-2">({{ \Carbon\Carbon::parse($lastLoginRaw)->diffForHumans() }})</span>
+                                                @endif
+                                            @else
+                                                <span class="text-muted">Belum pernah login / tidak tercatat</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-10 text-muted">
+                            Data akun OJS tidak tersedia.
+                        </div>
+                    @endforelse
+                @endif
+            </div>
+        </div>
 
         {{-- Tab 3: Pindah Issue --}}
         @if ($allIssues->count() > 0)

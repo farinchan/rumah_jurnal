@@ -478,7 +478,7 @@ class journalController extends Controller
                 '<i class="ki-duotone ki-menu fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i></button>';
 
             $deleteBtn = '';
-            if (auth()->check() && auth()->user()->hasAnyRole(['super-admin', 'admin'])) {
+            if (auth()->check() && auth()->user()->hasRole('super-admin')) {
                 $deleteBtn = '<button type="button" class="btn btn-sm btn-light-danger my-1 btn-delete-article" data-url="' . $deleteUrl . '" data-title="Submission ID ' . $subId . '" data-submission-id="' . $subId . '" title="Hapus Artikel">' .
                     '<i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></button>';
             }
@@ -507,6 +507,54 @@ class journalController extends Controller
         $allIssues = Issue::where('journal_id', $journal->id)->where('id', '!=', $issue_id)
             ->orderBy('year', 'desc')->orderBy('volume', 'desc')->orderBy('number', 'desc')->get();
 
+        $ojsUsers = [];
+        $ojsError = null;
+
+        try {
+            if (!empty($journal->url) && !empty($journal->api_key)) {
+                $response1 = Http::timeout(10)->withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $journal->api_key
+                ])->get(rtrim($journal->url, '/') . '/api/v1/submissions/' . $submission->submission_id . '/participants', [
+                    'apiToken' => $journal->api_key
+                ]);
+
+                if ($response1->status() === 200) {
+                    $data1 = $response1->json();
+                    if (!empty($data1) && isset($data1[0]['_href'])) {
+                        $participant = $data1[0];
+                        $response2 = Http::timeout(5)->withHeaders([
+                            'Accept' => 'application/json',
+                            'Authorization' => 'Bearer ' . $journal->api_key
+                        ])->get($participant['_href'], [
+                            'apiToken' => $journal->api_key
+                        ]);
+
+                        if ($response2->status() === 200) {
+                            $u = $response2->json();
+                            if (empty($u['id']) && !empty($participant['id'])) {
+                                $u['id'] = $participant['id'];
+                            }
+                            $u['userGroup'] = $participant['userGroup'] ?? null;
+                            $ojsUsers[] = $u;
+                        } else {
+                            $ojsError = 'Gagal mengambil detail user dari OJS (HTTP ' . $response2->status() . ')';
+                        }
+                    } else {
+                        $ojsError = 'Data partisipan untuk submission ini tidak ditemukan di OJS.';
+                    }
+                } else {
+                    $ojsError = 'Gagal mengambil data partisipan dari OJS (HTTP ' . $response1->status() . ')';
+                }
+            } else {
+                $ojsError = 'URL Jurnal atau API Key OJS belum diatur.';
+            }
+        } catch (\Throwable $th) {
+            $ojsError = 'Terjadi kesalahan koneksi ke server OJS: ' . $th->getMessage();
+        }
+
+        $ojsUser = $ojsUsers[0] ?? null;
+
         return view('back.pages.journal.modal-view-article', [
             'journal' => $journal,
             'issue' => $issue,
@@ -514,6 +562,9 @@ class journalController extends Controller
             'editors' => $editors,
             'reviewers' => $reviewers,
             'allIssues' => $allIssues,
+            'ojsUser' => $ojsUser,
+            'ojsUsers' => $ojsUsers,
+            'ojsError' => $ojsError,
         ]);
     }
 
@@ -664,6 +715,10 @@ class journalController extends Controller
 
     public function articleDestroy($journal_path, $issue_id, $id)
     {
+        if (!auth()->check() || !auth()->user()->hasRole('super-admin')) {
+            abort(403, 'Hanya super-admin yang dapat menghapus submission.');
+        }
+
         $journal = Journal::where('url_path', $journal_path)->first();
         if (!$journal) {
             return abort(404);
