@@ -369,3 +369,79 @@ it('generates a recoverable temporary password for a legacy hashed submission', 
         return $mail->ojsCredentials['password'] === $passwordSentToOjs;
     });
 });
+
+it('allows super-admin to delete manuscript submission', function () {
+    $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
+    $superAdmin = User::create([
+        'name' => 'Super Admin',
+        'email' => 'superadmin@example.com',
+        'phone' => '081234567899',
+        'password' => 'password',
+    ]);
+    $superAdmin->assignRole($superAdminRole);
+
+    $submission = createBackWaitingSubmission($this->journal);
+
+    $response = $this->actingAs($superAdmin)
+        ->delete(route('back.journal.manuscript-submissions.destroy', [
+            $this->journal->url_path,
+            $submission->submission_code,
+        ]));
+
+    $response->assertRedirect(route('back.journal.manuscript-submissions.index', $this->journal->url_path));
+
+    $this->assertDatabaseMissing('waiting_submissions', [
+        'id' => $submission->id,
+    ]);
+});
+
+it('forbids non-super-admin from deleting manuscript submission', function () {
+    $submission = createBackWaitingSubmission($this->journal);
+
+    $response = $this->actingAs($this->editor)
+        ->delete(route('back.journal.manuscript-submissions.destroy', [
+            $this->journal->url_path,
+            $submission->submission_code,
+        ]));
+
+    $response->assertForbidden();
+
+    $this->assertDatabaseHas('waiting_submissions', [
+        'id' => $submission->id,
+    ]);
+});
+
+it('renders delete buttons for super-admin and hides them for editor', function () {
+    $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
+    $superAdmin = User::create([
+        'name' => 'Super Admin',
+        'email' => 'superadmin2@example.com',
+        'phone' => '081234567898',
+        'password' => 'password',
+    ]);
+    $superAdmin->assignRole($superAdminRole);
+
+    $submission = createBackWaitingSubmission($this->journal);
+
+    $this->actingAs($this->editor)
+        ->get(route('back.journal.manuscript-submissions.index', $this->journal->url_path))
+        ->assertOk()
+        ->assertDontSee('btn-delete-submission')
+        ->assertDontSee('modal_delete_submission');
+
+    $this->actingAs($this->editor)
+        ->get(route('back.journal.manuscript-submissions.show', [$this->journal->url_path, $submission->submission_code]))
+        ->assertOk()
+        ->assertDontSee('#modal_delete_submission');
+
+    $this->actingAs($superAdmin)
+        ->get(route('back.journal.manuscript-submissions.index', $this->journal->url_path))
+        ->assertOk()
+        ->assertSee('btn-delete-submission')
+        ->assertSee('modal_delete_submission');
+
+    $this->actingAs($superAdmin)
+        ->get(route('back.journal.manuscript-submissions.show', [$this->journal->url_path, $submission->submission_code]))
+        ->assertOk()
+        ->assertSee('modal_delete_submission');
+});

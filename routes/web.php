@@ -1,38 +1,38 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LocaleController;
-use App\Http\Controllers\Front\HomeController;
-use App\Http\Controllers\Front\AnnouncementController;
-use App\Http\Controllers\Front\MenuProfilController;
-use App\Http\Controllers\Front\EventController;
-use App\Http\Controllers\Front\NewsController;
-use App\Http\Controllers\Front\JournalController;
-use App\Http\Controllers\Front\PaymentController;
-use App\Http\Controllers\Front\ContactController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\GoogleController;
-use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\TwoFactorController;
-use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\AnnouncementController as BackAnnouncementController;
+use App\Http\Controllers\Back\DashboardController as BackDashboardController;
 use App\Http\Controllers\Back\EmailController;
 use App\Http\Controllers\Back\EventController as BackEventController;
-use App\Http\Controllers\Back\NewsController as BackNewsController;
-use App\Http\Controllers\Back\WelcomeSpeechController as BackWelcomeSpeechController;
-use App\Http\Controllers\Back\journalController as BackJournalController;
 use App\Http\Controllers\Back\FinanceController as BackFinanceController;
-use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
-use App\Http\Controllers\Back\MenuProfilController as BackMenuProfilController;
-use App\Http\Controllers\Back\UserController as BackUserController;
-use App\Http\Controllers\Back\MessageController as BackMessageController;
-use App\Http\Controllers\Back\SettingController as BackSettingController;
+use App\Http\Controllers\Back\journalController as BackJournalController;
 use App\Http\Controllers\Back\LogsController as BackLogsController;
 use App\Http\Controllers\Back\ManuscriptSubmissionController as BackManuscriptSubmissionController;
+use App\Http\Controllers\Back\MasterdataController as BackMasterDataController;
+use App\Http\Controllers\Back\MenuProfilController as BackMenuProfilController;
+use App\Http\Controllers\Back\MessageController as BackMessageController;
+use App\Http\Controllers\Back\NewsController as BackNewsController;
+use App\Http\Controllers\Back\SettingController as BackSettingController;
+use App\Http\Controllers\Back\UserController as BackUserController;
+use App\Http\Controllers\Back\WelcomeSpeechController as BackWelcomeSpeechController;
 use App\Http\Controllers\Front\AccountController;
-use App\Http\Controllers\Front\TeamController;
+use App\Http\Controllers\Front\AnnouncementController;
+use App\Http\Controllers\Front\ContactController;
+use App\Http\Controllers\Front\EventController;
+use App\Http\Controllers\Front\HomeController;
+use App\Http\Controllers\Front\JournalController;
 use App\Http\Controllers\Front\ManuscriptSubmissionController;
+use App\Http\Controllers\Front\MenuProfilController;
+use App\Http\Controllers\Front\NewsController;
+use App\Http\Controllers\Front\PaymentController;
+use App\Http\Controllers\Front\TeamController;
+use App\Http\Controllers\LocaleController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('generate-storage', function () {
     \Illuminate\Support\Facades\Artisan::call('storage:link');
@@ -46,7 +46,6 @@ Route::get('/visit', [HomeController::class, 'vistWebsite'])->name('visit.ajax')
 Route::get('/welcome-speech', [HomeController::class, 'welcomeSpeech'])->name('welcome.speech');
 Route::get('/privacy-policy', [HomeController::class, 'privacyPolicy'])->name('privacy.policy');
 Route::get('/terms-of-service', [HomeController::class, 'termsOfService'])->name('terms.service');
-
 
 Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('TrustProxies');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('TrustProxies');
@@ -254,17 +253,16 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
 
     Route::prefix('menu')->name('menu.')->group(function () {
 
+        Route::prefix('profil')->name('profil.')->group(function () {
+            Route::get('/', [BackMenuProfilController::class, 'index'])->name('index');
+            Route::post('/create', [BackMenuProfilController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [BackMenuProfilController::class, 'edit'])->name('edit');
+            Route::put('/edit/{id}', [BackMenuProfilController::class, 'update'])->name('update');
+            Route::delete('/delete/{id}', [BackMenuProfilController::class, 'destroy'])->name('destroy');
 
-            Route::prefix('profil')->name('profil.')->group(function () {
-                Route::get('/', [BackMenuProfilController::class, 'index'])->name('index');
-                Route::post('/create', [BackMenuProfilController::class, 'store'])->name('store');
-                Route::get('/edit/{id}', [BackMenuProfilController::class, 'edit'])->name('edit');
-                Route::put('/edit/{id}', [BackMenuProfilController::class, 'update'])->name('update');
-                Route::delete('/delete/{id}', [BackMenuProfilController::class, 'destroy'])->name('destroy');
-
-                Route::post('/upload', [BackMenuProfilController::class, 'upload'])->name('upload');
-            });
+            Route::post('/upload', [BackMenuProfilController::class, 'upload'])->name('upload');
         });
+    });
 
     Route::prefix('journal')->name('journal.')->group(function () {
         Route::get('/{journal_path}', [BackJournalController::class, 'index'])->name('index');
@@ -279,6 +277,9 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
                 Route::patch('/{submission_code}/status', [BackManuscriptSubmissionController::class, 'updateStatus'])
                     ->whereUuid('submission_code')
                     ->name('status');
+                Route::delete('/{submission_code}', [BackManuscriptSubmissionController::class, 'destroy'])
+                    ->whereUuid('submission_code')
+                    ->name('destroy');
             });
 
         Route::post('/{journal_path}/issue/store', [BackJournalController::class, 'issueStore'])->name('issue.store');
@@ -308,7 +309,6 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/invoice/custom/{invoice_id}/mail-send', [BackJournalController::class, 'invoiceMailSendCustom'])->name('invoice.custom.mail-send');
         Route::delete('/invoice/{invoice_id}/destroy', [BackJournalController::class, 'invoiceDestroy'])->name('invoice.destroy');
 
-
         Route::get('/{journal_path}/issue/{issue_id}/editor', [BackJournalController::class, 'editorIndex'])->name('editor.index');
         Route::get('/{journal_path}/issue/{issue_id}/editor/export', [BackJournalController::class, 'editorExport'])->name('editor.export');
         Route::get('/{journal_path}/issue/{issue_id}/editor/certificate-download/{id?}', [BackJournalController::class, 'editorCertificateDownload'])->name('editor.certificate.download');
@@ -333,7 +333,6 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
 
         Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
     });
-
 
     Route::prefix('finance')->name('finance.')->group(function () {
         Route::get('/verification', [BackFinanceController::class, 'verificationIndex'])->name('verification.index');
@@ -469,6 +468,7 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
 
 Route::get('/sync-issue-author-fees', function () {
     $exitCode = \Illuminate\Support\Facades\Artisan::call('issues:sync-author-fee');
+
     return response()->json([
         'status' => true,
         'exit_code' => $exitCode,
@@ -476,4 +476,3 @@ Route::get('/sync-issue-author-fees', function () {
         'output' => \Illuminate\Support\Facades\Artisan::output(),
     ]);
 })->name('sync-issue-author-fees');
-

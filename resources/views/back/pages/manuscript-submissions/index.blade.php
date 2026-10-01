@@ -115,10 +115,21 @@
                                         <div class="text-muted fs-7">{{ $submission->submitted_at?->format('H:i') }} WIB</div>
                                     </td>
                                     <td class="text-end">
-                                        <a href="{{ route('back.journal.manuscript-submissions.show', [$journal->url_path, $submission->submission_code]) }}"
-                                            class="btn btn-sm btn-light-primary">
-                                            <i class="ki-duotone ki-eye fs-3"></i> Detail
-                                        </a>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{{ route('back.journal.manuscript-submissions.show', [$journal->url_path, $submission->submission_code]) }}"
+                                                class="btn btn-sm btn-light-primary">
+                                                Detail
+                                            </a>
+                                            @hasrole('super-admin')
+                                                <button type="button"
+                                                    class="btn btn-sm btn-light-danger btn-delete-submission"
+                                                    data-url="{{ route('back.journal.manuscript-submissions.destroy', [$journal->url_path, $submission->submission_code]) }}"
+                                                    data-title="{{ $submission->article_title }}"
+                                                    data-code="{{ $submission->submission_code }}">
+                                                    Hapus
+                                                </button>
+                                            @endhasrole
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -141,4 +152,53 @@
             </div>
         </div>
     </div>
+
+    @hasrole('super-admin')
+        <div class="modal fade" tabindex="-1" id="modal_delete_submission" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Hapus Manuscript Submission</h3>
+                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                        </div>
+                    </div>
+                    <form id="form_delete_submission" action="" method="POST">
+                        @method('DELETE')
+                        @csrf
+                        <div class="modal-body">
+                            <p>
+                                Apakah Anda yakin ingin menghapus manuscript submission <strong id="delete_submission_title"></strong> (<span id="delete_submission_code"></span>)?
+                                <br>
+                                <span class="text-danger">
+                                    <strong>Warning!</strong> Data yang sudah dihapus tidak dapat dikembalikan lagi.
+                                </span>
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-danger">Hapus</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endhasrole
+@endsection
+
+@section('scripts')
+    @hasrole('super-admin')
+        <script>
+            $(document).on('click', '.btn-delete-submission', function(e) {
+                e.preventDefault();
+                let url = $(this).data('url');
+                let title = $(this).data('title');
+                let code = $(this).data('code');
+                $('#form_delete_submission').attr('action', url);
+                $('#delete_submission_title').text(title);
+                $('#delete_submission_code').text(code);
+                $('#modal_delete_submission').modal('show');
+            });
+        </script>
+    @endhasrole
 @endsection

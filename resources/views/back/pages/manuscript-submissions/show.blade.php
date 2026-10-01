@@ -32,9 +32,16 @@
                 </div>
                 <div class="text-muted font-monospace">{{ $submission->submission_code }}</div>
             </div>
-            <a href="{{ route('back.journal.manuscript-submissions.index', $journal->url_path) }}" class="btn btn-light">
-                <i class="ki-duotone ki-arrow-left fs-3"></i> Kembali
-            </a>
+            <div class="d-flex align-items-center gap-2">
+                @hasrole('super-admin')
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal_delete_submission">
+                        <i class="ki-duotone ki-trash fs-3"></i> Hapus
+                    </button>
+                @endhasrole
+                <a href="{{ route('back.journal.manuscript-submissions.index', $journal->url_path) }}" class="btn btn-light">
+                    <i class="ki-duotone ki-arrow-left fs-3"></i> Kembali
+                </a>
+            </div>
         </div>
 
         <div class="row g-6">
@@ -240,6 +247,38 @@
             </div>
         </div>
     </div>
+
+    @hasrole('super-admin')
+        <div class="modal fade" tabindex="-1" id="modal_delete_submission" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Hapus Manuscript Submission</h3>
+                        <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+                        </div>
+                    </div>
+                    <form action="{{ route('back.journal.manuscript-submissions.destroy', [$journal->url_path, $submission->submission_code]) }}" method="POST">
+                        @method('DELETE')
+                        @csrf
+                        <div class="modal-body">
+                            <p>
+                                Apakah Anda yakin ingin menghapus manuscript submission <strong>{{ $submission->article_title }}</strong> ({{ $submission->submission_code }})?
+                                <br>
+                                <span class="text-danger">
+                                    <strong>Warning!</strong> Data yang sudah dihapus tidak dapat dikembalikan lagi.
+                                </span>
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-danger">Hapus</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endhasrole
 @endsection
 
 @section('scripts')

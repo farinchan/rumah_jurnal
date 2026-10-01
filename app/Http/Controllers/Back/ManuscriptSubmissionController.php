@@ -246,6 +246,26 @@ class ManuscriptSubmissionController extends Controller
         return back();
     }
 
+    public function destroy(
+        Request $request,
+        string $journalPath,
+        string $submissionCode
+    ): RedirectResponse {
+        $journal = $this->authorizedJournal($request, $journalPath);
+
+        abort_unless($request->user()->hasRole('super-admin'), 403, 'Hanya super-admin yang dapat menghapus manuscript submission.');
+
+        $submission = $journal->waitingSubmissions()
+            ->where('submission_code', $submissionCode)
+            ->firstOrFail();
+
+        $submission->delete();
+
+        Alert::success('Berhasil', 'Manuscript submission berhasil dihapus.');
+
+        return redirect()->route('back.journal.manuscript-submissions.index', $journal->url_path);
+    }
+
     private function authorizedJournal(Request $request, string $journalPath): Journal
     {
         $journal = Journal::query()
