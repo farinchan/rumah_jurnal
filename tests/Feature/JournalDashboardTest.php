@@ -588,5 +588,152 @@ it('provides modal triggers and serves submissions api for belum lunas and belum
         ->assertStatus(403);
 });
 
+it('shows year filter dropdown on journal dashboard page and filters by year via api', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = createTestJournal([
+        'name' => 'Jurnal Sains',
+        'url_path' => 'jsains',
+        'author_fee' => 500000,
+    ]);
+
+    $issue2025 = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '1',
+        'number' => '1',
+        'year' => '2025',
+        'title' => 'Edisi 2025',
+        'author_fee' => 500000,
+    ]);
+
+    $issue2026 = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '2',
+        'number' => '1',
+        'year' => '2026',
+        'title' => 'Edisi 2026',
+        'author_fee' => 500000,
+    ]);
+
+    Submission::create([
+        'issue_id' => $issue2025->id,
+        'submission_id' => 'SUB-2025',
+        'fullTitle' => ['en' => 'Artikel Tahun 2025'],
+        'authorsString' => 'Penulis 2025',
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => false,
+        'payment_status' => 'paid',
+    ]);
+
+    Submission::create([
+        'issue_id' => $issue2026->id,
+        'submission_id' => 'SUB-2026',
+        'fullTitle' => ['en' => 'Artikel Tahun 2026'],
+        'authorsString' => 'Penulis 2026',
+        'status' => '1',
+        'status_label' => 'Queued',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => false,
+        'payment_status' => 'pending',
+    ]);
+
+    // Test page renders year filter dropdown
+    $pageResponse = $this->actingAs($user)
+        ->get(route('back.dashboard.journal', ['journal_id' => $journal->id]));
+
+    $pageResponse->assertStatus(200);
+    $pageResponse->assertSee('FILTER TAHUN');
+    $pageResponse->assertSee('id="year_select"', false);
+    $pageResponse->assertSee('Semua Tahun');
+    $pageResponse->assertSee('2025');
+    $pageResponse->assertSee('2026');
+
+    // Test API stat without year filter returns both
+    $allStatsResponse = $this->actingAs($user)
+        ->getJson(route('back.dashboard.journal.stat', ['journal_id' => $journal->id]));
+
+    $allStatsResponse->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'summary' => [
+                'total_submissions' => 2,
+                'total_published' => 1,
+                'total_unpublished' => 1,
+                'is_year_filtered' => false,
+            ],
+            'years_options' => ['2026', '2025'],
+        ]);
+
+    // Test API stat filtered by 2025
+    $stat2025Response = $this->actingAs($user)
+        ->getJson(route('back.dashboard.journal.stat', [
+            'journal_id' => $journal->id,
+            'year' => '2025',
+        ]));
+
+    $stat2025Response->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'journal' => [
+                'selected_year' => '2025',
+                'filtered_issues_count' => 1,
+            ],
+            'summary' => [
+                'total_submissions' => 1,
+                'total_published' => 1,
+                'total_unpublished' => 0,
+                'is_year_filtered' => true,
+                'selected_year' => '2025',
+            ],
+        ]);
+
+    // Test API stat filtered by 2026
+    $stat2026Response = $this->actingAs($user)
+        ->getJson(route('back.dashboard.journal.stat', [
+            'journal_id' => $journal->id,
+            'year' => '2026',
+        ]));
+
+    $stat2026Response->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'journal' => [
+                'selected_year' => '2026',
+                'filtered_issues_count' => 1,
+            ],
+            'summary' => [
+                'total_submissions' => 1,
+                'total_published' => 0,
+                'total_unpublished' => 1,
+                'is_year_filtered' => true,
+                'selected_year' => '2026',
+            ],
+        ]);
+
+    // Test Submissions modal filtered by year
+    $submissionsModalResponse = $this->actingAs($user)
+        ->getJson(route('back.dashboard.journal.submissions', [
+            'journal_id' => $journal->id,
+            'type' => 'belum_bayar',
+            'year' => '2026',
+        ]));
+
+    $submissionsModalResponse->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'meta' => [
+                'year' => '2026',
+                'total_count' => 1,
+            ],
+        ]);
+
+    $modalList = $submissionsModalResponse->json('submissions');
+    expect($modalList)->toHaveCount(1);
+    expect($modalList[0]['submission_id'])->toBe('SUB-2026');
+});
+
 
 

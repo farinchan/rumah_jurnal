@@ -448,14 +448,28 @@ class DashboardController extends Controller
         }
 
         $selectedIssueId = $request->query('issue_id');
+        $selectedYear = $request->query('year');
 
         $initialIssues = collect();
+        $initialYears = collect();
         if ($selectedJournalId) {
-            $initialIssues = Issue::where('journal_id', $selectedJournalId)
+            $initialYears = Issue::where('journal_id', $selectedJournalId)
+                ->whereNotNull('year')
+                ->where('year', '!=', '')
+                ->distinct()
+                ->orderBy('year', 'desc')
+                ->pluck('year');
+
+            $issuesQuery = Issue::where('journal_id', $selectedJournalId)
                 ->orderBy('year', 'desc')
                 ->orderBy('volume', 'desc')
-                ->orderBy('number', 'desc')
-                ->get();
+                ->orderBy('number', 'desc');
+
+            if ($selectedYear && $selectedYear !== 'all') {
+                $issuesQuery->where('year', $selectedYear);
+            }
+
+            $initialIssues = $issuesQuery->get();
         }
 
         $data = [
@@ -475,6 +489,8 @@ class DashboardController extends Controller
             'selected_journal_id' => $selectedJournalId,
             'initial_issues' => $initialIssues,
             'selected_issue_id' => $selectedIssueId,
+            'initial_years' => $initialYears,
+            'selected_year' => $selectedYear,
             'control_panel' => $controlPanel,
         ];
 
@@ -496,6 +512,7 @@ class DashboardController extends Controller
             $controlPanel = $request->cookie('control_panel', 'journal');
             $journalId = $request->get('journal_id');
             $issueId = $request->get('issue_id');
+            $filterYear = $request->get('year');
 
             if ($journalId) {
                 $journal = Journal::find($journalId);
@@ -521,6 +538,15 @@ class DashboardController extends Controller
                     'message' => 'Anda tidak memiliki akses ke jurnal ini',
                 ], 403);
             }
+
+            // Retrieve all available years of this journal for the year filter options
+            $availableYears = Issue::where('journal_id', $journal->id)
+                ->whereNotNull('year')
+                ->where('year', '!=', '')
+                ->distinct()
+                ->orderBy('year', 'desc')
+                ->pluck('year')
+                ->values();
 
             // Retrieve all issues of this journal for the filter options & total count
             $allIssues = Issue::where('journal_id', $journal->id)
@@ -549,6 +575,8 @@ class DashboardController extends Controller
 
             if ($selectedIssue) {
                 $issuesQuery->where('id', $selectedIssue->id);
+            } elseif (!empty($filterYear) && $filterYear !== 'all') {
+                $issuesQuery->where('year', $filterYear);
             }
 
             $issues = $issuesQuery->get();
@@ -643,15 +671,15 @@ class DashboardController extends Controller
                     }
                 }
 
-                $year = $issue->year ?: ($issue->created_at ? $issue->created_at->format('Y') : 'Unknown');
-                if (!isset($yearData[$year])) {
-                    $yearData[$year] = [
+                $issueYear = $issue->year ?: ($issue->created_at ? $issue->created_at->format('Y') : 'Unknown');
+                if (!isset($yearData[$issueYear])) {
+                    $yearData[$issueYear] = [
                         'published' => 0,
                         'unpublished' => 0,
                     ];
                 }
-                $yearData[$year]['published'] += $issuePublished;
-                $yearData[$year]['unpublished'] += $issueUnpublished;
+                $yearData[$issueYear]['published'] += $issuePublished;
+                $yearData[$issueYear]['unpublished'] += $issueUnpublished;
 
                 $issueLabel = 'Vol. ' . $issue->volume . ' No. ' . $issue->number . ($issue->year ? ' (' . $issue->year . ')' : '');
                 $issueChartCategories[] = $issueLabel;
@@ -723,15 +751,19 @@ class DashboardController extends Controller
                     'journal_author_fee' => (int)($journal->author_fee ?? 0),
                     'total_issues' => $allIssues->count(),
                     'filtered_issues_count' => $issues->count(),
+                    'selected_year' => (!empty($filterYear) && $filterYear !== 'all') ? $filterYear : null,
                     'selected_issue' => $selectedIssue ? [
                         'id' => $selectedIssue->id,
                         'label' => 'Vol. ' . $selectedIssue->volume . ' No. ' . $selectedIssue->number . ($selectedIssue->year ? ' (' . $selectedIssue->year . ')' : ''),
                         'author_fee' => (int)($selectedIssue->author_fee ?? ($journal->author_fee ?? 0)),
                     ] : null,
                 ],
+                'years_options' => $availableYears,
                 'issues_options' => $issuesOptions,
                 'summary' => [
                     'is_issue_filtered' => !empty($selectedIssue),
+                    'is_year_filtered' => (!empty($filterYear) && $filterYear !== 'all'),
+                    'selected_year' => (!empty($filterYear) && $filterYear !== 'all') ? $filterYear : null,
                     'total_submissions' => $totalSubmissions,
                     'total_published' => $publishedCount,
                     'total_unpublished' => $unpublishedCount,
@@ -818,6 +850,7 @@ class DashboardController extends Controller
             $controlPanel = $request->cookie('control_panel', 'journal');
             $journalId = $request->get('journal_id');
             $issueId = $request->get('issue_id');
+            $year = $request->get('year');
             $type = $request->get('type', 'belum_lunas');
 
             if (!in_array($type, ['belum_lunas', 'belum_bayar'])) {
@@ -868,6 +901,8 @@ class DashboardController extends Controller
 
             if ($selectedIssue) {
                 $issuesQuery->where('id', $selectedIssue->id);
+            } elseif (!empty($year) && $year !== 'all') {
+                $issuesQuery->where('year', $year);
             }
 
             $issues = $issuesQuery->get();
@@ -986,6 +1021,7 @@ class DashboardController extends Controller
                         'id' => $selectedIssue->id,
                         'label' => 'Vol. ' . $selectedIssue->volume . ' No. ' . $selectedIssue->number . ($selectedIssue->year ? ' (' . $selectedIssue->year . ')' : ''),
                     ] : null,
+                    'year' => (!empty($year) && $year !== 'all') ? $year : null,
                     'total_count' => count($submissionsList),
                     'total_fee' => $totalFee,
                     'total_paid' => $totalPaid,

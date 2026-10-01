@@ -34,16 +34,17 @@
                             <div class="text-gray-500 fs-7 d-flex flex-wrap align-items-center gap-2">
                                 <span>Pilih jurnal & edisi untuk melihat statistik artikel dan rekap data</span>
                                 <span class="badge badge-light-primary fw-bold" id="journal_fee_badge">Author Fee: Rp 0</span>
+                                <span class="badge badge-light-warning fw-bold d-none" id="filtered_year_badge">Tahun: -</span>
                                 <span class="badge badge-light-info fw-bold d-none" id="filtered_issue_badge">Issue: -</span>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Dropdown Jurnal, Dropdown Issue & Refresh (1 Baris) --}}
+                    {{-- Dropdown Jurnal, Dropdown Tahun, Dropdown Issue & Refresh (1 Baris) --}}
                     <div class="d-flex flex-nowrap align-items-end gap-2 gap-sm-3 flex-shrink-0">
                         <div class="d-flex flex-column">
                             <label class="text-gray-600 fs-8 fw-bold mb-1">PILIH JURNAL</label>
-                            <div class="position-relative w-160px w-sm-200px w-md-250px w-lg-280px">
+                            <div class="position-relative w-150px w-sm-180px w-md-220px w-lg-250px">
                                 <select id="journal_select" class="form-select form-select-solid form-select-sm fw-bold"
                                     data-control="select2" data-placeholder="Pilih Jurnal">
                                     @forelse ($grouped_journals as $typeLabel => $journalGroup)
@@ -62,8 +63,25 @@
                         </div>
 
                         <div class="d-flex flex-column">
+                            <label class="text-gray-600 fs-8 fw-bold mb-1">FILTER TAHUN</label>
+                            <div class="position-relative w-110px w-sm-130px w-md-140px">
+                                <select id="year_select" class="form-select form-select-solid form-select-sm fw-bold"
+                                    data-control="select2" data-placeholder="Semua Tahun">
+                                    <option value="all" @if(empty($selected_year) || $selected_year === 'all') selected @endif>Semua Tahun</option>
+                                    @if(isset($initial_years))
+                                        @foreach ($initial_years as $yr)
+                                            <option value="{{ $yr }}" @if(isset($selected_year) && $selected_year == $yr) selected @endif>
+                                                {{ $yr }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column">
                             <label class="text-gray-600 fs-8 fw-bold mb-1">FILTER ISSUE</label>
-                            <div class="position-relative w-140px w-sm-180px w-md-200px w-lg-220px">
+                            <div class="position-relative w-140px w-sm-170px w-md-190px w-lg-210px">
                                 <select id="issue_select" class="form-select form-select-solid form-select-sm fw-bold"
                                     data-control="select2" data-placeholder="Semua Issue">
                                     <option value="all" @if(empty($selected_issue_id) || $selected_issue_id === 'all') selected @endif>Semua Issue</option>
@@ -598,10 +616,13 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const journalSelect = document.getElementById('journal_select');
+    const yearSelect = document.getElementById('year_select');
     const issueSelect = document.getElementById('issue_select');
     const btnRefresh = document.getElementById('btn_refresh');
     const loadingOverlay = document.getElementById('dashboard_loading_overlay');
     let isUpdatingIssueDropdown = false;
+    let isUpdatingYearDropdown = false;
+    let cachedIssuesOptions = [];
 
     function formatRupiah(amount) {
         return 'Rp ' + parseInt(amount || 0).toLocaleString('id-ID');
@@ -795,13 +816,41 @@ document.addEventListener('DOMContentLoaded', function () {
     const chartArticleStatus = new ApexCharts(document.querySelector("#chart_article_status"), chartArticleStatusOptions);
     chartArticleStatus.render();
 
+    // Helper function to update Issue Select Options
+    function updateIssueSelectOptions(optionsList, selectedVal = 'all') {
+        isUpdatingIssueDropdown = true;
+        if (typeof jQuery !== 'undefined' && $('#issue_select').length) {
+            const $issueSelect = $('#issue_select');
+            $issueSelect.empty();
+            $issueSelect.append(new Option('Semua Issue', 'all', selectedVal === 'all', selectedVal === 'all'));
+            optionsList.forEach(opt => {
+                $issueSelect.append(new Option(opt.label, opt.id, opt.id == selectedVal, opt.id == selectedVal));
+            });
+            $issueSelect.val(selectedVal).trigger('change.select2');
+        } else if (issueSelect) {
+            issueSelect.innerHTML = '<option value="all">Semua Issue</option>';
+            optionsList.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.id;
+                option.textContent = opt.label;
+                if (opt.id == selectedVal) option.selected = true;
+                issueSelect.appendChild(option);
+            });
+            issueSelect.value = selectedVal;
+        }
+        isUpdatingIssueDropdown = false;
+    }
+
     // Main Function to load statistics via API and update DOM
-    function loadJournalStats(journalId, issueId = null, shouldUpdateIssueDropdown = false) {
+    function loadJournalStats(journalId, issueId = null, year = null, shouldUpdateDropdowns = false) {
         if (!journalId) return;
 
         loadingOverlay.classList.remove('d-none');
 
         let url = "{{ route('back.dashboard.journal.stat') }}?journal_id=" + encodeURIComponent(journalId);
+        if (year && year !== 'all') {
+            url += "&year=" + encodeURIComponent(year);
+        }
         if (issueId && issueId !== 'all') {
             url += "&issue_id=" + encodeURIComponent(issueId);
         }
@@ -810,6 +859,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.history && window.history.replaceState) {
             const currentUrl = new URL(window.location.href);
             currentUrl.searchParams.set('journal_id', journalId);
+            if (year && year !== 'all') {
+                currentUrl.searchParams.set('year', year);
+            } else {
+                currentUrl.searchParams.delete('year');
+            }
             if (issueId && issueId !== 'all') {
                 currentUrl.searchParams.set('issue_id', issueId);
             } else {
@@ -844,6 +898,18 @@ document.addEventListener('DOMContentLoaded', function () {
             // Update Header & Journal Info DOM
             document.getElementById('journal_name_display').textContent = journal.name || journal.title;
 
+            const yearBadge = document.getElementById('filtered_year_badge');
+            if (summary.is_year_filtered && summary.selected_year) {
+                if (yearBadge) {
+                    yearBadge.textContent = 'Tahun: ' + summary.selected_year;
+                    yearBadge.classList.remove('d-none');
+                }
+            } else {
+                if (yearBadge) {
+                    yearBadge.classList.add('d-none');
+                }
+            }
+
             const issueBadge = document.getElementById('filtered_issue_badge');
             if (journal.selected_issue) {
                 document.getElementById('journal_fee_badge').textContent = 'Author Fee Edisi: ' + formatRupiah(journal.author_fee);
@@ -858,28 +924,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            // Rebuild Issue Select Options if requested (e.g. on journal switch)
-            if (shouldUpdateIssueDropdown) {
-                isUpdatingIssueDropdown = true;
-                if (typeof jQuery !== 'undefined' && $('#issue_select').length) {
-                    const $issueSelect = $('#issue_select');
-                    $issueSelect.empty();
-                    $issueSelect.append(new Option('Semua Issue', 'all', true, true));
-                    issuesOptions.forEach(opt => {
-                        $issueSelect.append(new Option(opt.label, opt.id, false, false));
+            cachedIssuesOptions = issuesOptions;
+
+            // Rebuild Select Options if requested (e.g. on journal switch)
+            if (shouldUpdateDropdowns) {
+                isUpdatingYearDropdown = true;
+                const yearsOptions = res.years_options || [];
+                if (typeof jQuery !== 'undefined' && $('#year_select').length) {
+                    const $yearSelect = $('#year_select');
+                    $yearSelect.empty();
+                    $yearSelect.append(new Option('Semua Tahun', 'all', true, true));
+                    yearsOptions.forEach(yr => {
+                        $yearSelect.append(new Option(yr, yr, false, false));
                     });
-                    $issueSelect.val('all').trigger('change.select2');
-                } else if (issueSelect) {
-                    issueSelect.innerHTML = '<option value="all" selected>Semua Issue</option>';
-                    issuesOptions.forEach(opt => {
-                        const option = document.createElement('option');
-                        option.value = opt.id;
-                        option.textContent = opt.label;
-                        issueSelect.appendChild(option);
+                    $yearSelect.val('all').trigger('change.select2');
+                } else if (yearSelect) {
+                    yearSelect.innerHTML = '<option value="all" selected>Semua Tahun</option>';
+                    yearsOptions.forEach(yr => {
+                        const opt = document.createElement('option');
+                        opt.value = yr;
+                        opt.textContent = yr;
+                        yearSelect.appendChild(opt);
                     });
-                    issueSelect.value = 'all';
+                    yearSelect.value = 'all';
                 }
-                isUpdatingIssueDropdown = false;
+                isUpdatingYearDropdown = false;
+
+                updateIssueSelectOptions(issuesOptions, 'all');
             }
 
             // Update Summary Card 1 (Total Artikel)
@@ -907,7 +978,13 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('stat_total_paid_received').textContent = formatRupiah(summary.total_paid_received);
             document.getElementById('stat_total_outstanding').textContent = formatRupiah(summary.total_outstanding);
             document.getElementById('stat_total_potential').textContent = formatRupiah(summary.total_potential_revenue);
-            document.getElementById('stat_total_issues').textContent = (journal.filtered_issues_count ?? journal.total_issues ?? 0).toLocaleString('id-ID') + (summary.is_issue_filtered ? ' (Filter)' : '');
+            let issueFilterText = '';
+            if (summary.is_issue_filtered) {
+                issueFilterText = ' (Filter Edisi)';
+            } else if (summary.is_year_filtered) {
+                issueFilterText = ' (Tahun ' + summary.selected_year + ')';
+            }
+            document.getElementById('stat_total_issues').textContent = (journal.filtered_issues_count ?? journal.total_issues ?? 0).toLocaleString('id-ID') + issueFilterText;
 
             if (summary.is_issue_filtered) {
                 document.getElementById('stat_waiting_count').textContent = (summary.waiting_submissions.total || 0) + ' Naskah Baru';
@@ -1049,22 +1126,54 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#journal_select').on('change select2:select', function () {
             const newJournalId = $(this).val();
             if (newJournalId) {
-                loadJournalStats(newJournalId, '', true);
+                loadJournalStats(newJournalId, '', '', true);
             }
+        });
+
+        $('#year_select').on('change select2:select', function () {
+            if (isUpdatingYearDropdown) return;
+            const currentJournalId = $('#journal_select').val();
+            const selectedYear = $(this).val();
+            const filterYear = (selectedYear === 'all' || !selectedYear) ? '' : selectedYear;
+
+            // Filter issue options based on selected year
+            let filteredIssues = cachedIssuesOptions;
+            if (filterYear) {
+                filteredIssues = cachedIssuesOptions.filter(opt => opt.year == filterYear);
+            }
+            updateIssueSelectOptions(filteredIssues, 'all');
+
+            loadJournalStats(currentJournalId, '', filterYear, false);
         });
 
         $('#issue_select').on('change select2:select', function () {
             if (isUpdatingIssueDropdown) return;
             const currentJournalId = $('#journal_select').val();
+            const currentYear = $('#year_select').val();
+            const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
             const selectedIssueId = $(this).val();
             const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
-            loadJournalStats(currentJournalId, filterIssueId, false);
+            loadJournalStats(currentJournalId, filterIssueId, filterYear, false);
         });
     }
 
     if (journalSelect) {
         journalSelect.addEventListener('change', function () {
-            loadJournalStats(this.value, 'all', true);
+            loadJournalStats(this.value, '', '', true);
+        });
+    }
+
+    if (yearSelect) {
+        yearSelect.addEventListener('change', function () {
+            if (isUpdatingYearDropdown) return;
+            const currentJournalId = journalSelect ? journalSelect.value : null;
+            const filterYear = (this.value === 'all' || !this.value) ? '' : this.value;
+            let filteredIssues = cachedIssuesOptions;
+            if (filterYear) {
+                filteredIssues = cachedIssuesOptions.filter(opt => opt.year == filterYear);
+            }
+            updateIssueSelectOptions(filteredIssues, 'all');
+            loadJournalStats(currentJournalId, '', filterYear, false);
         });
     }
 
@@ -1072,8 +1181,10 @@ document.addEventListener('DOMContentLoaded', function () {
         issueSelect.addEventListener('change', function () {
             if (isUpdatingIssueDropdown) return;
             const currentJournalId = journalSelect ? journalSelect.value : null;
+            const currentYear = yearSelect ? yearSelect.value : null;
+            const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
             const filterIssueId = (this.value === 'all' || !this.value) ? '' : this.value;
-            loadJournalStats(currentJournalId, filterIssueId, false);
+            loadJournalStats(currentJournalId, filterIssueId, filterYear, false);
         });
     }
 
@@ -1082,11 +1193,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentJournalId = (typeof jQuery !== 'undefined' && $('#journal_select').val())
                 ? $('#journal_select').val()
                 : (journalSelect ? journalSelect.value : null);
+            const currentYear = (typeof jQuery !== 'undefined' && $('#year_select').val())
+                ? $('#year_select').val()
+                : (yearSelect ? yearSelect.value : null);
+            const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
             const selectedIssueId = (typeof jQuery !== 'undefined' && $('#issue_select').val())
                 ? $('#issue_select').val()
                 : (issueSelect ? issueSelect.value : null);
             const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
-            loadJournalStats(currentJournalId, filterIssueId, false);
+            loadJournalStats(currentJournalId, filterIssueId, filterYear, false);
         });
     }
 
@@ -1256,6 +1371,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let url = '{{ route("back.dashboard.journal.submissions") }}?type=' + encodeURIComponent(type);
         if (journalId) url += '&journal_id=' + encodeURIComponent(journalId);
+        if (filterYear) url += '&year=' + encodeURIComponent(filterYear);
         if (issueId) url += '&issue_id=' + encodeURIComponent(issueId);
 
         fetch(url, {
@@ -1276,8 +1392,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const meta = data.meta || {};
             const journalName = meta.journal ? meta.journal.name : '-';
-            const issueText = meta.issue ? meta.issue.label : 'Semua Issue';
-            document.getElementById('modal_submission_subtitle').textContent = journalName + ' • ' + issueText;
+            let subtitleParts = [journalName];
+            if (meta.year) subtitleParts.push('Tahun ' + meta.year);
+            if (meta.issue) {
+                subtitleParts.push(meta.issue.label);
+            } else if (!meta.year) {
+                subtitleParts.push('Semua Issue');
+            }
+            document.getElementById('modal_submission_subtitle').textContent = subtitleParts.join(' • ');
 
             document.getElementById('modal_summary_count').textContent = (meta.total_count || 0) + ' Naskah';
             document.getElementById('modal_summary_fee').textContent = formatRupiah(meta.total_fee || 0);
@@ -1348,13 +1470,18 @@ document.addEventListener('DOMContentLoaded', function () {
         ? $('#journal_select').val()
         : (journalSelect ? journalSelect.value : null);
 
+    const initialYearVal = (typeof jQuery !== 'undefined' && $('#year_select').val())
+        ? $('#year_select').val()
+        : (yearSelect ? yearSelect.value : null);
+    const initialYear = (initialYearVal === 'all' || !initialYearVal) ? '' : initialYearVal;
+
     const initialIssueVal = (typeof jQuery !== 'undefined' && $('#issue_select').val())
         ? $('#issue_select').val()
         : (issueSelect ? issueSelect.value : null);
     const initialIssueId = (initialIssueVal === 'all' || !initialIssueVal) ? '' : initialIssueVal;
 
     if (initialJournalId) {
-        loadJournalStats(initialJournalId, initialIssueId, false);
+        loadJournalStats(initialJournalId, initialIssueId, initialYear, false);
     }
 });
 </script>
