@@ -984,5 +984,85 @@ it('returns multi-journal submissions list for modal with journal_name and direc
     expect($alphaSub['action_url'])->toContain('/back/journal/alpha/issue/' . $iss1->id . '/article');
 });
 
+it('returns journals_table tree structure with aggregated metrics and child issues in scope mode', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $j1 = createTestJournal([
+        'name' => 'Jurnal Matematika',
+        'url_path' => 'j-mat',
+        'type' => 'journal',
+        'author_fee' => 500000,
+    ]);
+
+    $j2 = createTestJournal([
+        'name' => 'Jurnal Fisika',
+        'url_path' => 'j-fis',
+        'type' => 'journal',
+        'author_fee' => 300000,
+    ]);
+
+    // Jurnal 1: 2 Issues
+    $j1Iss1 = Issue::create(['journal_id' => $j1->id, 'volume' => '1', 'number' => '1', 'year' => '2025', 'title' => 'Vol 1 No 1']);
+    $j1Iss2 = Issue::create(['journal_id' => $j1->id, 'volume' => '1', 'number' => '2', 'year' => '2025', 'title' => 'Vol 1 No 2']);
+
+    // J1 Issue 1 submissions
+    createTestSubmission(['issue_id' => $j1Iss1->id, 'status' => '3', 'payment_status' => 'paid']); // 500k
+    createTestSubmission(['issue_id' => $j1Iss1->id, 'status' => '1', 'payment_status' => 'pending']);
+
+    // J1 Issue 2 submissions
+    createTestSubmission(['issue_id' => $j1Iss2->id, 'status' => '3', 'payment_status' => 'paid']); // 500k
+
+    // Jurnal 2: 1 Issue
+    $j2Iss1 = Issue::create(['journal_id' => $j2->id, 'volume' => '2', 'number' => '1', 'year' => '2025', 'title' => 'Vol 2 No 1']);
+    createTestSubmission(['issue_id' => $j2Iss1->id, 'status' => '1', 'free_charge' => true]);
+
+    // Test Scope Mode (all_journal)
+    $response = $this->actingAs($user)->getJson(route('back.dashboard.journal.stat', ['journal_id' => 'all_journal']));
+    $response->assertStatus(200);
+
+    $journalsTable = $response->json('journals_table');
+    expect($journalsTable)->toBeArray();
+    expect($journalsTable)->toHaveCount(2);
+
+    // Verify Jurnal Fisika & Jurnal Matematika (ordered alphabetically by name)
+    $matData = collect($journalsTable)->firstWhere('journal_id', $j1->id);
+    expect($matData)->not->toBeNull();
+    expect($matData['journal_name'])->toBe('Jurnal Matematika');
+    expect($matData['journal_author_fee'])->toBe(500000);
+    expect($matData['total_issues'])->toBe(2);
+    expect($matData['total_articles'])->toBe(3);
+    expect($matData['published_count'])->toBe(2);
+    expect($matData['unpublished_count'])->toBe(1);
+    expect($matData['lunas_count'])->toBe(2);
+    expect($matData['total_income'])->toBe(1000000);
+    expect($matData['issues'])->toHaveCount(2);
+
+    // Verify child issue data
+    $childIssue = $matData['issues'][0];
+    expect($childIssue)->toHaveKeys([
+        'id', 'journal_id', 'journal_name', 'volume', 'number', 'year',
+        'issue_label', 'author_fee', 'total_articles', 'published_count',
+        'unpublished_count', 'lunas_count', 'total_income', 'action_url'
+    ]);
+    expect($childIssue['action_url'])->toContain('/back/journal/j-mat/issue/');
+
+    $fisData = collect($journalsTable)->firstWhere('journal_id', $j2->id);
+    expect($fisData)->not->toBeNull();
+    expect($fisData['journal_name'])->toBe('Jurnal Fisika');
+    expect($fisData['total_issues'])->toBe(1);
+    expect($fisData['total_articles'])->toBe(1);
+    expect($fisData['free_count'])->toBe(1);
+    expect($fisData['total_income'])->toBe(0);
+    expect($fisData['issues'])->toHaveCount(1);
+
+    // Test Single Journal Mode (should return empty journals_table)
+    $singleResponse = $this->actingAs($user)->getJson(route('back.dashboard.journal.stat', ['journal_id' => $j1->id]));
+    $singleResponse->assertStatus(200);
+    expect($singleResponse->json('journals_table'))->toBeEmpty();
+    expect($singleResponse->json('issues_table'))->toHaveCount(2);
+});
+
+
 
 

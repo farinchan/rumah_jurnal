@@ -896,6 +896,34 @@ class DashboardController extends Controller
                 ];
             }
 
+            $journalsTableData = [];
+            if ($isScope) {
+                $issuesByJournal = collect($issuesTableData)->groupBy('journal_id');
+
+                foreach ($selectedJournals as $j) {
+                    $jIssues = $issuesByJournal->get($j->id, collect())->values()->all();
+
+                    $journalsTableData[] = [
+                        'journal_id' => $j->id,
+                        'journal_name' => $j->name,
+                        'journal_title' => $j->title,
+                        'journal_url_path' => $j->url_path,
+                        'journal_type' => $j->type,
+                        'journal_author_fee' => (int)($j->author_fee ?? 0),
+                        'total_issues' => count($jIssues),
+                        'total_articles' => (int)array_sum(array_column($jIssues, 'total_articles')),
+                        'published_count' => (int)array_sum(array_column($jIssues, 'published_count')),
+                        'unpublished_count' => (int)array_sum(array_column($jIssues, 'unpublished_count')),
+                        'lunas_count' => (int)array_sum(array_column($jIssues, 'lunas_count')),
+                        'belum_lunas_count' => (int)array_sum(array_column($jIssues, 'belum_lunas_count')),
+                        'belum_bayar_count' => (int)array_sum(array_column($jIssues, 'belum_bayar_count')),
+                        'free_count' => (int)array_sum(array_column($jIssues, 'free_count')),
+                        'total_income' => (int)array_sum(array_column($jIssues, 'total_income')),
+                        'issues' => array_reverse($jIssues),
+                    ];
+                }
+            }
+
             if ($isScope) {
                 $issueChartCategories = array_column(array_values($journalChartData), 'name');
                 $issueChartPublished = array_column(array_values($journalChartData), 'published');
@@ -1054,6 +1082,7 @@ class DashboardController extends Controller
                         'colors' => ['#50CD89', '#FFC700', '#7239EA'],
                     ],
                 ],
+                'journals_table' => $journalsTableData,
                 'issues_table' => array_reverse($issuesTableData),
             ]);
         } catch (\Exception $e) {

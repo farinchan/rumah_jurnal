@@ -10,6 +10,29 @@
         transform: translateY(-3px);
         box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08) !important;
     }
+    .journal-master-row {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+    .journal-master-row:hover {
+        background-color: rgba(0, 158, 247, 0.08) !important;
+    }
+    .tree-chevron-icon {
+        display: inline-block;
+        transition: transform 0.2s ease;
+    }
+    .tree-chevron-icon.collapsed {
+        transform: rotate(-90deg);
+    }
+    .journal-child-row {
+        transition: all 0.2s ease;
+    }
+    .journal-child-row:hover {
+        background-color: rgba(0, 0, 0, 0.02) !important;
+    }
+    .journal-child-row td:first-child {
+        border-left: 3px solid #009ef7 !important;
+    }
 </style>
 @endsection
 
@@ -457,8 +480,14 @@
             <div class="card card-flush shadow-sm mb-5 mb-xl-8">
                 <div class="card-header pt-5">
                     <div class="card-title d-flex flex-column">
-                        <h3 class="card-label fw-bold text-gray-900 fs-4">Rekapitulasi Artikel & Pembayaran per Edisi (Issue)</h3>
-                        <span class="text-gray-500 fs-7">Rincian status publikasi, pembayaran, dan realisasi pendapatan per edisi</span>
+                        <h3 class="card-label fw-bold text-gray-900 fs-4" id="table_title">Rekapitulasi Artikel & Pembayaran per Edisi (Issue)</h3>
+                        <span class="text-gray-500 fs-7" id="table_desc">Rincian status publikasi, pembayaran, dan realisasi pendapatan per edisi</span>
+                    </div>
+                    <div class="card-toolbar d-none" id="table_tree_toolbar">
+                        <button type="button" class="btn btn-sm btn-light-primary fw-bold" id="btn_toggle_all_trees">
+                            <i class="ki-duotone ki-element-plus fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>
+                            <span id="btn_toggle_all_text">Buka Semua Edisi</span>
+                        </button>
                     </div>
                 </div>
                 <div class="card-body pt-0">
@@ -467,7 +496,7 @@
                             <thead>
                                 <tr class="fw-bold fs-7 text-gray-500 text-uppercase bg-light">
                                     <th class="min-w-40px text-center">No</th>
-                                    <th class="min-w-175px">Edisi / Issue</th>
+                                    <th class="min-w-175px" id="th_column_edisi">Edisi / Issue</th>
                                     <th class="min-w-80px text-center">Tahun</th>
                                     <th class="min-w-100px text-end">Author Fee</th>
                                     <th class="min-w-90px text-center">Total Artikel</th>
@@ -632,6 +661,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let isUpdatingIssueDropdown = false;
     let isUpdatingYearDropdown = false;
     let cachedIssuesOptions = [];
+    let allTreesExpanded = false;
 
     function formatRupiah(amount) {
         return 'Rp ' + parseInt(amount || 0).toLocaleString('id-ID');
@@ -902,6 +932,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const summary = res.summary;
             const charts = res.charts;
             const issuesTable = res.issues_table;
+            const journalsTable = res.journals_table || [];
             const issuesOptions = res.issues_options || [];
 
             // Update Header & Journal Info DOM
@@ -1105,70 +1136,227 @@ document.addEventListener('DOMContentLoaded', function () {
             const statusSeries = charts.article_status_chart.series || [0, 0, 0];
             chartArticleStatus.updateSeries(statusSeries);
 
-            // Update Issues Table DOM
+            // Update Issues / Journals Table DOM
             const tbody = document.getElementById('table_issues_body');
             tbody.innerHTML = '';
 
-            if (!issuesTable || issuesTable.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="13" class="text-center py-6 text-gray-500">
-                            <i class="ki-duotone ki-information-2 fs-2x text-gray-400 mb-2"></i>
-                            <div class="fw-bold">Belum ada edisi (issue) yang cocok untuk jurnal ini.</div>
-                        </td>
-                    </tr>
-                `;
-            } else {
-                issuesTable.forEach((item, index) => {
-                    const tr = document.createElement('tr');
-                    const journalBadge = (journal.is_scope && item.journal_name)
-                        ? `<span class="badge badge-light-primary fw-bold fs-9 mb-1 align-self-start">${escapeHtml(item.journal_name)}</span>`
-                        : '';
-                    tr.innerHTML = `
-                        <td class="text-center fw-bold text-gray-700">${index + 1}</td>
-                        <td>
-                            <div class="d-flex flex-column">
-                                ${journalBadge}
-                                <span class="text-gray-900 fw-bold fs-6">${escapeHtml(item.issue_label)}</span>
-                                <span class="text-gray-500 fs-8">${escapeHtml(item.title)}</span>
-                            </div>
-                        </td>
-                        <td class="text-center fw-semibold text-gray-700">${escapeHtml(item.year || '-')}</td>
-                        <td class="text-end fw-semibold text-gray-900">${formatRupiah(item.author_fee)}</td>
-                        <td class="text-center">
-                            <span class="badge badge-light-primary fw-bold">${item.total_articles}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge badge-light-success fw-bold">${item.published_count}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge badge-light-warning fw-bold">${item.unpublished_count}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge badge-success fw-bold">${item.lunas_count}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge badge-warning fw-bold">${item.belum_lunas_count}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge badge-danger fw-bold">${item.belum_bayar_count}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge badge-info fw-bold">${item.free_count}</span>
-                        </td>
-                        <td class="text-end fw-bold text-success">${formatRupiah(item.total_income)}</td>
-                        <td class="text-center">
-                            <a href="${item.action_url}" class="btn btn-icon btn-light-primary btn-sm" title="Lihat Artikel Edisi">
-                                <i class="ki-duotone ki-eye fs-4">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                    <span class="path3"></span>
-                                </i>
-                            </a>
-                        </td>
+            const tableTitle = document.getElementById('table_title');
+            const tableDesc = document.getElementById('table_desc');
+            const thColumnEdisi = document.getElementById('th_column_edisi');
+            const tableTreeToolbar = document.getElementById('table_tree_toolbar');
+            const btnToggleAllTrees = document.getElementById('btn_toggle_all_trees');
+
+            if (journal.is_scope) {
+                if (tableTitle) tableTitle.textContent = 'Rekapitulasi Artikel & Pembayaran per Jurnal & Edisi';
+                if (tableDesc) tableDesc.textContent = 'Klik baris jurnal untuk melihat atau menutup rincian per edisi (issue)';
+                if (thColumnEdisi) thColumnEdisi.textContent = 'Jurnal / Edisi';
+                if (tableTreeToolbar) tableTreeToolbar.classList.remove('d-none');
+                if (btnToggleAllTrees) {
+                    btnToggleAllTrees.innerHTML = `
+                        <i class="ki-duotone ki-element-plus fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>
+                        <span id="btn_toggle_all_text">Buka Semua Edisi</span>
                     `;
-                    tbody.appendChild(tr);
-                });
+                }
+                allTreesExpanded = false;
+
+                if (!journalsTable || journalsTable.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="13" class="text-center py-6 text-gray-500">
+                                <i class="ki-duotone ki-information-2 fs-2x text-gray-400 mb-2"></i>
+                                <div class="fw-bold">Belum ada jurnal atau edisi yang cocok untuk cakupan ini.</div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    journalsTable.forEach((item, index) => {
+                        // Master Row (Per Jurnal)
+                        const masterTr = document.createElement('tr');
+                        masterTr.className = 'journal-master-row bg-light-subtle';
+                        masterTr.dataset.journalId = item.journal_id;
+                        masterTr.innerHTML = `
+                            <td class="text-center fw-bold text-gray-800">
+                                <div class="d-flex align-items-center justify-content-center gap-1">
+                                    <button type="button" class="btn btn-sm btn-icon tree-chevron-btn p-0" data-journal-id="${item.journal_id}" style="width: 22px; height: 22px;" title="Buka/Tutup Edisi">
+                                        <i class="ki-duotone ki-down fs-7 tree-chevron-icon collapsed" id="chevron_${item.journal_id}"></i>
+                                    </button>
+                                    <span>${index + 1}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="text-gray-900 fw-bolder fs-6">${escapeHtml(item.journal_name)}</span>
+                                        <span class="badge badge-light-primary fw-bold fs-9">${item.total_issues} Edisi</span>
+                                    </div>
+                                    ${item.journal_title && item.journal_title !== item.journal_name ? `<span class="text-muted fs-8">${escapeHtml(item.journal_title)}</span>` : ''}
+                                </div>
+                            </td>
+                            <td class="text-center text-muted fs-8">-</td>
+                            <td class="text-end fw-semibold text-gray-800">${formatRupiah(item.journal_author_fee)}</td>
+                            <td class="text-center">
+                                <span class="badge badge-light-primary fw-bold">${item.total_articles}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-light-success fw-bold">${item.published_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-light-warning fw-bold">${item.unpublished_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-success fw-bold">${item.lunas_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-warning fw-bold">${item.belum_lunas_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-danger fw-bold">${item.belum_bayar_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-info fw-bold">${item.free_count}</span>
+                            </td>
+                            <td class="text-end fw-bold text-success">${formatRupiah(item.total_income)}</td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-icon btn-light-info btn-sm tree-action-toggle" data-journal-id="${item.journal_id}" title="Buka/Tutup Rincian Edisi">
+                                    <i class="ki-duotone ki-element-plus fs-5">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(masterTr);
+
+                        // Child Rows (Issues of this journal)
+                        if (item.issues && item.issues.length > 0) {
+                            item.issues.forEach((iss, issIdx) => {
+                                const childTr = document.createElement('tr');
+                                childTr.className = `journal-child-row journal-child-${item.journal_id} d-none bg-body`;
+                                childTr.dataset.parentJournal = item.journal_id;
+                                childTr.innerHTML = `
+                                    <td class="text-center text-muted fs-8">${index + 1}.${issIdx + 1}</td>
+                                    <td class="ps-6">
+                                        <div class="d-flex align-items-center">
+                                            <span class="text-gray-400 me-2 fs-6">└─</span>
+                                            <div class="d-flex flex-column">
+                                                <span class="text-gray-800 fw-bold fs-7">${escapeHtml(iss.issue_label)}</span>
+                                                ${iss.title && iss.title !== '-' ? `<span class="text-muted fs-8">${escapeHtml(iss.title)}</span>` : ''}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-gray-700 fs-7">${escapeHtml(iss.year || '-')}</td>
+                                    <td class="text-end text-gray-800 fs-7">${formatRupiah(iss.author_fee)}</td>
+                                    <td class="text-center">
+                                        <span class="badge badge-light-primary fw-semibold fs-8">${iss.total_articles}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-light-success fw-semibold fs-8">${iss.published_count}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-light-warning fw-semibold fs-8">${iss.unpublished_count}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-light-success text-success fw-semibold fs-8">${iss.lunas_count}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-light-warning text-warning fw-semibold fs-8">${iss.belum_lunas_count}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-light-danger text-danger fw-semibold fs-8">${iss.belum_bayar_count}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-light-info text-info fw-semibold fs-8">${iss.free_count}</span>
+                                    </td>
+                                    <td class="text-end fw-semibold text-success fs-7">${formatRupiah(iss.total_income)}</td>
+                                    <td class="text-center">
+                                        <a href="${iss.action_url}" class="btn btn-icon btn-light-primary btn-sm" title="Lihat Artikel Edisi">
+                                            <i class="ki-duotone ki-eye fs-4">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                                <span class="path3"></span>
+                                            </i>
+                                        </a>
+                                    </td>
+                                `;
+                                tbody.appendChild(childTr);
+                            });
+                        } else {
+                            const emptyChildTr = document.createElement('tr');
+                            emptyChildTr.className = `journal-child-row journal-child-${item.journal_id} d-none bg-body`;
+                            emptyChildTr.dataset.parentJournal = item.journal_id;
+                            emptyChildTr.innerHTML = `
+                                <td class="text-center text-muted fs-8">-</td>
+                                <td colspan="12" class="ps-6 py-3 text-muted fs-8 fst-italic">
+                                    <span class="text-gray-400 me-2">└─</span> Belum ada edisi (issue) untuk jurnal ini pada filter yang dipilih.
+                                </td>
+                            `;
+                            tbody.appendChild(emptyChildTr);
+                        }
+                    });
+                }
+            } else {
+                if (tableTitle) tableTitle.textContent = 'Rekapitulasi Artikel & Pembayaran per Edisi (Issue)';
+                if (tableDesc) tableDesc.textContent = 'Rincian status publikasi, pembayaran, dan realisasi pendapatan per edisi';
+                if (thColumnEdisi) thColumnEdisi.textContent = 'Edisi / Issue';
+                if (tableTreeToolbar) tableTreeToolbar.classList.add('d-none');
+
+                if (!issuesTable || issuesTable.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="13" class="text-center py-6 text-gray-500">
+                                <i class="ki-duotone ki-information-2 fs-2x text-gray-400 mb-2"></i>
+                                <div class="fw-bold">Belum ada edisi (issue) yang cocok untuk jurnal ini.</div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    issuesTable.forEach((item, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="text-center fw-bold text-gray-700">${index + 1}</td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="text-gray-900 fw-bold fs-6">${escapeHtml(item.issue_label)}</span>
+                                    <span class="text-gray-500 fs-8">${escapeHtml(item.title)}</span>
+                                </div>
+                            </td>
+                            <td class="text-center fw-semibold text-gray-700">${escapeHtml(item.year || '-')}</td>
+                            <td class="text-end fw-semibold text-gray-900">${formatRupiah(item.author_fee)}</td>
+                            <td class="text-center">
+                                <span class="badge badge-light-primary fw-bold">${item.total_articles}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-light-success fw-bold">${item.published_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-light-warning fw-bold">${item.unpublished_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-success fw-bold">${item.lunas_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-warning fw-bold">${item.belum_lunas_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-danger fw-bold">${item.belum_bayar_count}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-info fw-bold">${item.free_count}</span>
+                            </td>
+                            <td class="text-end fw-bold text-success">${formatRupiah(item.total_income)}</td>
+                            <td class="text-center">
+                                <a href="${item.action_url}" class="btn btn-icon btn-light-primary btn-sm" title="Lihat Artikel Edisi">
+                                    <i class="ki-duotone ki-eye fs-4">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>
+                                </a>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
             }
         })
         .catch(err => {
@@ -1265,6 +1453,86 @@ document.addEventListener('DOMContentLoaded', function () {
                 : (issueSelect ? issueSelect.value : null);
             const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
             loadJournalStats(currentJournalId, filterIssueId, filterYear, false);
+        });
+    }
+
+    // Tree view toggle handlers for multi-journal scope mode
+    function toggleJournalTree(journalId, forceState = null) {
+        const childRows = document.querySelectorAll(`.journal-child-${journalId}`);
+        const chevronIcon = document.getElementById(`chevron_${journalId}`);
+        if (!childRows || childRows.length === 0) return;
+
+        let shouldOpen;
+        if (forceState !== null) {
+            shouldOpen = forceState;
+        } else {
+            shouldOpen = childRows[0].classList.contains('d-none');
+        }
+
+        childRows.forEach(row => {
+            if (shouldOpen) {
+                row.classList.remove('d-none');
+            } else {
+                row.classList.add('d-none');
+            }
+        });
+
+        if (chevronIcon) {
+            if (shouldOpen) {
+                chevronIcon.classList.remove('collapsed');
+            } else {
+                chevronIcon.classList.add('collapsed');
+            }
+        }
+    }
+
+    const issuesTbody = document.getElementById('table_issues_body');
+    if (issuesTbody) {
+        issuesTbody.addEventListener('click', function (e) {
+            // Do not toggle tree if user clicked on an anchor link
+            if (e.target.closest('a')) {
+                return;
+            }
+
+            const masterRow = e.target.closest('.journal-master-row');
+            if (masterRow) {
+                const journalId = masterRow.dataset.journalId;
+                if (journalId) {
+                    toggleJournalTree(journalId);
+                }
+            }
+        });
+    }
+
+    const btnToggleAllTrees = document.getElementById('btn_toggle_all_trees');
+    if (btnToggleAllTrees) {
+        btnToggleAllTrees.addEventListener('click', function () {
+            allTreesExpanded = !allTreesExpanded;
+            const allChildRows = document.querySelectorAll('.journal-child-row');
+            const allChevrons = document.querySelectorAll('.tree-chevron-icon');
+
+            allChildRows.forEach(row => {
+                if (allTreesExpanded) {
+                    row.classList.remove('d-none');
+                } else {
+                    row.classList.add('d-none');
+                }
+            });
+
+            allChevrons.forEach(icon => {
+                if (allTreesExpanded) {
+                    icon.classList.remove('collapsed');
+                } else {
+                    icon.classList.add('collapsed');
+                }
+            });
+
+            btnToggleAllTrees.innerHTML = `
+                <i class="ki-duotone ${allTreesExpanded ? 'ki-element-minus' : 'ki-element-plus'} fs-6 me-1">
+                    <span class="path1"></span><span class="path2"></span>
+                </i>
+                <span id="btn_toggle_all_text">${allTreesExpanded ? 'Tutup Semua Edisi' : 'Buka Semua Edisi'}</span>
+            `;
         });
     }
 
