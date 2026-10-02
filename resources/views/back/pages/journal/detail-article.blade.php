@@ -29,6 +29,12 @@
                             <span class="path2"></span>
                         </i> Export Excel
                     </a>
+                    <button type="button" class="btn btn-sm btn-light-success my-1" id="btn_sync_payments">
+                        <i class="ki-duotone ki-arrows-circle fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i> Sinkron Pembayaran
+                    </button>
                 </div>
             </div>
             <div class="card-body py-4">
@@ -266,6 +272,8 @@
     </div>
     @endhasrole
     <!--end::Modal Delete Article-->
+
+    @include('back.pages.journal.modal-sync-payments')
 @endsection
 @section('scripts')
     <script>
@@ -362,6 +370,24 @@
                     KTMenu.createInstances();
                 }
             });
+
+            // Init Sinkron Pembayaran Modal
+            if (typeof initPaymentSyncModal === 'function') {
+                initPaymentSyncModal({
+                    triggerSelector: '#btn_sync_payments',
+                    getPayload: function() {
+                        return {
+                            issue_id: "{{ $issue->id }}",
+                            journal_path: "{{ $journal->url_path }}"
+                        };
+                    },
+                    onFinished: function(updatedCount) {
+                        if (updatedCount > 0 && typeof articleTable !== 'undefined') {
+                            articleTable.ajax.reload(null, false);
+                        }
+                    }
+                });
+            }
 
             // Modal View Article AJAX Loader
             $(document).on('click', '.btn-view-article', function(e) {

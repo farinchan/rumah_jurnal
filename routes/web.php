@@ -265,6 +265,7 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
     });
 
     Route::prefix('journal')->name('journal.')->group(function () {
+        Route::post('/sync-payments', [BackJournalController::class, 'syncPayments'])->name('sync-payments');
         Route::get('/{journal_path}', [BackJournalController::class, 'index'])->name('index');
 
         Route::prefix('/{journal_path}/manuscript-submissions')

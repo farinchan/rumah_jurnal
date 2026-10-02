@@ -23,13 +23,20 @@
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
                     <div class="btn-group">
 
-                        <a href="#" id="export_excel" class="btn btn-light-primary" id="export_excel">
+                        <a href="#" id="export_excel" class="btn btn-light-primary">
                             <i class="ki-duotone ki-file-down fs-2">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
                             </i>
                             Export Excel
                         </a>
+                        <button type="button" class="btn btn-light-success" id="btn_sync_payments">
+                            <i class="ki-duotone ki-arrows-circle fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                            Sinkron Pembayaran
+                        </button>
                         <a class="btn btn-light-primary" href="">
 
                             <i class="ki-duotone ki-printer fs-2">
@@ -115,6 +122,8 @@
         </div>
 
     </div>
+
+    @include('back.pages.journal.modal-sync-payments')
 @endsection
 @section('scripts')
     <script>
@@ -239,6 +248,23 @@
                 window.location.href = url;
             });
 
+            if (typeof initPaymentSyncModal === 'function') {
+                initPaymentSyncModal({
+                    triggerSelector: '#btn_sync_payments',
+                    getPayload: function() {
+                        return {
+                            journal_id: $('#journal_id').val(),
+                            issue_id: $('#issue_id').val(),
+                            control_panel: "{{ $control_panel }}"
+                        };
+                    },
+                    onFinished: function(updatedCount) {
+                        if (updatedCount > 0 && typeof table !== 'undefined') {
+                            table.ajax.reload(null, false);
+                        }
+                    }
+                });
+            }
         });
     </script>
 @endsection

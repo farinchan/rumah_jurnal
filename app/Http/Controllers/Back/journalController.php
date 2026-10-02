@@ -824,6 +824,194 @@ class journalController extends Controller
         // return response()->json($issue);
     }
 
+    public function syncPayments(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+
+        $allowedRoles = [
+            'super-admin',
+            'keuangan',
+            'admin-ejournal',
+            'admin-proceeding',
+            'admin-student-research-hub',
+            'editor',
+        ];
+
+        if (!$user->hasAnyRole($allowedRoles)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki hak akses untuk sinkronisasi pembayaran.',
+            ], 403);
+        }
+
+        $issueId = $request->input('issue_id');
+        $journalId = $request->input('journal_id');
+        $journalPath = $request->input('journal_path');
+        $controlPanel = $request->input('control_panel') ?: $request->cookie('control_panel', 'journal');
+
+        $query = Submission::with([
+            'paymentInvoices.payments',
+            'issue.journal',
+        ]);
+
+        if ($issueId) {
+            $issue = Issue::with('journal')->find($issueId);
+            if (!$issue) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Issue/Edisi tidak ditemukan.',
+                ], 404);
+            }
+            if (!$user->hasRole(['super-admin', 'keuangan', 'admin-ejournal', 'admin-proceeding', 'admin-student-research-hub'])) {
+                if (!$user->can($issue->journal->url_path)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Anda tidak memiliki akses ke jurnal edisi ini.',
+                    ], 403);
+                }
+            }
+            $query->where('issue_id', $issueId);
+        } elseif ($journalPath) {
+            $journal = Journal::where('url_path', $journalPath)->first();
+            if (!$journal) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Jurnal tidak ditemukan.',
+                ], 404);
+            }
+            if (!$user->hasRole(['super-admin', 'keuangan', 'admin-ejournal', 'admin-proceeding', 'admin-student-research-hub'])) {
+                if (!$user->can($journal->url_path)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Anda tidak memiliki akses ke jurnal ini.',
+                    ], 403);
+                }
+            }
+            $query->whereHas('issue', fn ($q) => $q->where('journal_id', $journal->id));
+        } elseif ($journalId) {
+            $journal = Journal::find($journalId);
+            if (!$journal) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Jurnal tidak ditemukan.',
+                ], 404);
+            }
+            if (!$user->hasRole(['super-admin', 'keuangan', 'admin-ejournal', 'admin-proceeding', 'admin-student-research-hub'])) {
+                if (!$user->can($journal->url_path)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Anda tidak memiliki akses ke jurnal ini.',
+                    ], 403);
+                }
+            }
+            $query->whereHas('issue', fn ($q) => $q->where('journal_id', $journal->id));
+        } else {
+            // Role specific checks if syncing all in control panel
+            if ($user->hasRole('admin-ejournal')) {
+                $query->whereHas('issue.journal', fn ($q) => $q->where('type', 'journal'));
+            } elseif ($user->hasRole('admin-proceeding')) {
+                $query->whereHas('issue.journal', fn ($q) => $q->where('type', 'proceeding'));
+            } elseif ($user->hasRole('admin-student-research-hub')) {
+                $query->whereHas('issue.journal', fn ($q) => $q->where('type', 'student_research_hub'));
+            } elseif ($controlPanel && in_array($controlPanel, ['journal', 'proceeding', 'student_research_hub'])) {
+                $query->whereHas('issue.journal', fn ($q) => $q->where('type', $controlPanel));
+            }
+        }
+
+        $submissions = $query->orderBy('created_at', 'desc')->get();
+
+        $totalChecked = 0;
+        $updatedCount = 0;
+        $alreadyPaidCount = 0;
+        $incompleteCount = 0;
+        $freeChargeCount = 0;
+        $updatedArticles = [];
+
+        foreach ($submissions as $submission) {
+            $totalChecked++;
+
+            if ($submission->free_charge == 1) {
+                $freeChargeCount++;
+                continue;
+            }
+
+            $invoices = $submission->paymentInvoices;
+
+            // Pastikan jika invoice memiliki payment yang accepted, invoice ditandai is_paid = 1
+            foreach ($invoices as $inv) {
+                $hasAccepted = $inv->payments->where('payment_status', 'accepted')->count() > 0;
+                if ($hasAccepted && !$inv->is_paid) {
+                    $inv->update(['is_paid' => 1]);
+                    $inv->is_paid = 1;
+                }
+            }
+
+            $paidInvoices = $invoices->where('is_paid', 1);
+            $paidPercent = (int) $paidInvoices->sum('payment_percent');
+            $paidAmount = (int) $paidInvoices->sum('payment_amount');
+
+            $acceptedPayments = $invoices->flatMap->payments->where('payment_status', 'accepted');
+            $acceptedAmount = (int) $acceptedPayments->sum('payment_amount');
+
+            $totalReceived = max($paidAmount, $acceptedAmount);
+
+            $subFee = (int) ($submission->issue?->author_fee ?? ($submission->issue?->journal?->author_fee ?? 0));
+
+            // Kriteria lunas / 100%:
+            // 1. Akumulasi payment_percent invoice yang lunas >= 100%
+            // 2. ATAU nominal pembayaran yang diterima >= author fee (jika author fee > 0)
+            $isPayment100 = ($paidPercent >= 100)
+                || ($subFee > 0 && $totalReceived >= $subFee);
+
+            if ($isPayment100) {
+                if ($submission->payment_status === 'paid') {
+                    $alreadyPaidCount++;
+                } else {
+                    $oldStatus = $submission->payment_status ?: 'pending';
+                    $submission->update(['payment_status' => 'paid']);
+                    $updatedCount++;
+                    $updatedArticles[] = [
+                        'id' => $submission->id,
+                        'submission_id' => $submission->submission_id,
+                        'title' => $submission->fullTitle ?: ($submission->title ?: '-'),
+                        'author' => $submission->authorsString ?: ($submission->authors[0]['name'] ?? '-'),
+                        'journal' => $submission->issue?->journal?->name ?? ($submission->issue?->journal?->title ?? '-'),
+                        'edition' => 'Vol. ' . ($submission->issue?->volume ?? '-') . ' No. ' . ($submission->issue?->number ?? '-') . ' (' . ($submission->issue?->year ?? '-') . ')',
+                        'old_status' => $oldStatus,
+                        'new_status' => 'paid',
+                        'paid_percent' => $paidPercent >= 100 ? $paidPercent : 100,
+                        'paid_amount' => $totalReceived,
+                    ];
+                }
+            } else {
+                if ($submission->payment_status === 'paid') {
+                    $alreadyPaidCount++;
+                } else {
+                    $incompleteCount++;
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Sinkronisasi selesai. Sebanyak {$updatedCount} artikel berhasil diperbarui menjadi Paid.",
+            'summary' => [
+                'total_checked' => $totalChecked,
+                'updated_count' => $updatedCount,
+                'already_paid_count' => $alreadyPaidCount,
+                'incomplete_count' => $incompleteCount,
+                'free_charge_count' => $freeChargeCount,
+            ],
+            'updated_articles' => $updatedArticles,
+        ]);
+    }
+
     public function loaGenerate($submission)
     {
         $submission = Submission::find($submission);
