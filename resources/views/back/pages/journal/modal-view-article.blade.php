@@ -387,10 +387,14 @@
                             data-dropdown-parent="#modal_view_article">
                             <option></option>
                             @foreach ($allIssues as $targetIssue)
-                                <option value="{{ $targetIssue->id }}">
+                                @php
+                                    $isFull = !is_null($targetIssue->max_articles) && $targetIssue->submissions->count() >= $targetIssue->max_articles;
+                                @endphp
+                                <option value="{{ $targetIssue->id }}" {{ $isFull ? 'disabled' : '' }}>
                                     Vol. {{ $targetIssue->volume }} No. {{ $targetIssue->number }}
                                     ({{ $targetIssue->year }})
                                     - {{ $targetIssue->title }}
+                                    {{ $isFull ? ' (Penuh: ' . $targetIssue->submissions->count() . '/' . $targetIssue->max_articles . ')' : '' }}
                                 </option>
                             @endforeach
                         </select>

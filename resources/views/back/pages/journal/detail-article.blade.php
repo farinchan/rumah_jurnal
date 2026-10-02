@@ -8,10 +8,20 @@
                     <h3 class="me-5 mb-0">Artikel</h3>
                 </div>
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-3">
-                    <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal" id="btn_add_article"
-                        data-bs-target="#modal_select_article">
-                        <i class="ki-duotone ki-plus fs-2"></i> Tambah Artikel
-                    </a>
+                    @if (is_null($issue->max_articles) || $issue->submissions->count() < $issue->max_articles)
+                        <a href="#" class="btn btn-sm btn-primary my-1" data-bs-toggle="modal" id="btn_add_article"
+                            data-bs-target="#modal_select_article">
+                            <i class="ki-duotone ki-plus fs-2"></i> Tambah Artikel
+                        </a>
+                    @else
+                        <span class="badge badge-light-danger my-auto py-2 px-3 fw-semibold">
+                            <i class="ki-duotone ki-information-5 fs-6 text-danger me-1">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                            </i> Maksimal Artikel Tercapai ({{ $issue->submissions->count() }}/{{ $issue->max_articles }})
+                        </span>
+                    @endif
                     <a href="{{ route('back.journal.article.export', [$journal->url_path, $issue->id]) }}"
                         class="btn btn-sm btn-secondary my-1">
                         <i class="ki-duotone ki-file-up fs-2">
@@ -164,6 +174,7 @@
             </div>
         </div>
     </div>
+    @if (is_null($issue->max_articles) || $issue->submissions->count() < $issue->max_articles)
     <div class="modal fade" id="modal_select_article" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -201,6 +212,7 @@
             </div>
         </div>
     </div>
+    @endif
     <!--begin::Modal View Article (Dynamic Content)-->
     <div class="modal fade" tabindex="-1" id="modal_view_article" aria-hidden="true">
         <div class="modal-dialog modal-lg">

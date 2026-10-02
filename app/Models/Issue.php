@@ -24,6 +24,11 @@ class Issue extends Model
                 $journal = $issue->journal ?? ($issue->journal_id ? Journal::find($issue->journal_id) : null);
                 $issue->author_fee = $journal?->author_fee ?? 0;
             }
+            if (!array_key_exists('max_articles', $issue->getAttributes())) {
+                $issue->max_articles = 10;
+            } elseif ($issue->max_articles === '') {
+                $issue->max_articles = null;
+            }
         });
     }
 
@@ -31,6 +36,7 @@ class Issue extends Model
     {
         return [
             'author_fee' => 'integer',
+            'max_articles' => 'integer',
         ];
     }
 

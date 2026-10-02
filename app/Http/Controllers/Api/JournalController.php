@@ -257,6 +257,18 @@ class JournalController extends Controller
             ], 404);
         }
 
+        $existingSubmission = Submission::where('submission_id', $submission_id)
+            ->where('issue_id', $issue->id)
+            ->first();
+
+        if (!$existingSubmission && !is_null($issue->max_articles) && $issue->submissions()->count() >= $issue->max_articles) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan artikel. Jumlah artikel pada issue ini telah mencapai batas maksimal (' . $issue->max_articles . ').',
+                'error' => 'Batas maksimal artikel telah tercapai'
+            ], 422);
+        }
+
         try {
             $response = Http::retry(3, 100)->timeout(120)->withHeaders([
                 'Accept' => 'application/json',

@@ -46,6 +46,12 @@ use ZipArchive;
 
 class journalController extends Controller
 {
+    protected array $allowedMaxArticleRoles = [
+        'super-admin',
+        'admin-ejournal',
+        'admin-proceeding',
+        'admin-student-research-hub',
+    ];
 
     public function index($journal_path)
     {
@@ -89,6 +95,7 @@ class journalController extends Controller
             'title' => 'required',
             'description' => 'nullable',
             'author_fee' => 'nullable|numeric|min:0',
+            'max_articles' => 'nullable|integer|min:1',
         ], [
             'volume.required' => 'Volume harus diisi',
             'number.required' => 'Number harus diisi',
@@ -96,6 +103,8 @@ class journalController extends Controller
             'title.required' => 'Title harus diisi',
             'author_fee.numeric' => 'Author Fee harus berupa angka',
             'author_fee.min' => 'Author Fee tidak boleh kurang dari 0',
+            'max_articles.integer' => 'Maksimal artikel harus berupa angka',
+            'max_articles.min' => 'Maksimal artikel minimal 1',
         ]);
 
         if ($validator->fails()) {
@@ -112,6 +121,20 @@ class journalController extends Controller
         if (!auth()->user()->hasRole('super-admin')) {
             unset($data['author_fee']);
         }
+
+        if (!auth()->user()->hasAnyRole($this->allowedMaxArticleRoles)) {
+            unset($data['max_articles']);
+            $data['max_articles'] = 10;
+        } else {
+            if (!array_key_exists('max_articles', $data)) {
+                $data['max_articles'] = 10;
+            } elseif ($data['max_articles'] === '' || $data['max_articles'] === null) {
+                $data['max_articles'] = null;
+            } else {
+                $data['max_articles'] = (int) $data['max_articles'];
+            }
+        }
+
         $journal->issues()->create($data);
         Alert::success('Success', 'Issue has been created');
         return redirect()->back();
@@ -126,6 +149,7 @@ class journalController extends Controller
             'title' => 'required',
             'description' => 'nullable',
             'author_fee' => 'nullable|numeric|min:0',
+            'max_articles' => 'nullable|integer|min:1',
             'loa_template' => 'nullable|mimes:pptx,docx,doc,pdf|max:10240',
         ], [
             'volume.required' => 'Volume harus diisi',
@@ -134,6 +158,8 @@ class journalController extends Controller
             'title.required' => 'Title harus diisi',
             'author_fee.numeric' => 'Author Fee harus berupa angka',
             'author_fee.min' => 'Author Fee tidak boleh kurang dari 0',
+            'max_articles.integer' => 'Maksimal artikel harus berupa angka',
+            'max_articles.min' => 'Maksimal artikel minimal 1',
             'loa_template.mimes' => 'File harus berupa pptx, docx, doc, pdf',
             'loa_template.max' => 'File tidak boleh lebih dari 10 MB',
         ]);
@@ -156,6 +182,18 @@ class journalController extends Controller
         $data = $request->except('loa_template');
         if (!auth()->user()->hasRole('super-admin')) {
             unset($data['author_fee']);
+        }
+
+        if (!auth()->user()->hasAnyRole($this->allowedMaxArticleRoles)) {
+            unset($data['max_articles']);
+        } else {
+            if (array_key_exists('max_articles', $data)) {
+                if ($data['max_articles'] === '' || $data['max_articles'] === null) {
+                    $data['max_articles'] = null;
+                } else {
+                    $data['max_articles'] = (int) $data['max_articles'];
+                }
+            }
         }
 
         $issue->update($data);
@@ -269,7 +307,7 @@ class journalController extends Controller
             'editors' => Editor::where('issue_id', $issue_id)->get(),
             'reviewers' => Reviewer::where('issue_id', $issue_id)->get(),
             'paymentYearSetting' => $paymentYearSetting,
-            'allIssues' => Issue::where('journal_id', $journal->id)->where('id', '!=', $issue_id)->orderBy('year', 'desc')->orderBy('volume', 'desc')->orderBy('number', 'desc')->get(),
+            'allIssues' => Issue::where('journal_id', $journal->id)->where('id', '!=', $issue_id)->with('submissions')->orderBy('year', 'desc')->orderBy('volume', 'desc')->orderBy('number', 'desc')->get(),
         ];
         // return response()->json($data);
         return view('back.pages.journal.detail-article', $data);
@@ -702,6 +740,12 @@ class journalController extends Controller
         // Pastikan tidak pindah ke issue yang sama
         if ($targetIssue->id == $issue->id) {
             Alert::error('Error', 'Artikel sudah berada di issue ini');
+            return redirect()->back();
+        }
+
+        // Pastikan target issue belum mencapai batas maksimal artikel
+        if (!is_null($targetIssue->max_articles) && $targetIssue->submissions()->count() >= $targetIssue->max_articles) {
+            Alert::error('Error', 'Issue tujuan sudah mencapai batas maksimal artikel (' . $targetIssue->max_articles . ')');
             return redirect()->back();
         }
 

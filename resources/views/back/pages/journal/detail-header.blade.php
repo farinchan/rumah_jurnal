@@ -45,6 +45,7 @@
                                     data-kt-countup-value="{{ $issue->submissions->count() }}">
                                     0
                                 </div>
+                                <span class="text-gray-400 fs-7 ms-1" title="{{ is_null($issue->max_articles) ? 'Tanpa Batas' : 'Maksimal ' . $issue->max_articles . ' Artikel' }}">/ {{ is_null($issue->max_articles) ? '∞' : $issue->max_articles }}</span>
                             </div>
                             <div class="fw-semibold fs-6 text-gray-500">Article</div>
                         </div>

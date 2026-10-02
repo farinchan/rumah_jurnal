@@ -85,6 +85,7 @@
                                     <span class="fw-bold">
                                         {{ $issue->submissions->count() }}
                                     </span>
+                                    <span class="text-muted fs-7" title="{{ is_null($issue->max_articles) ? 'Tanpa Batas' : 'Maksimal ' . $issue->max_articles . ' Artikel' }}">/ {{ is_null($issue->max_articles) ? '∞' : $issue->max_articles }}</span>
                                 </td>
                                 <td class="text-end pe-0">
                                     <span class="fw-bold">
@@ -204,6 +205,18 @@
                                 @enderror
                             </div>
 
+                            @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub')
+                                <div class="col-md-12 mt-5">
+                                    <label class="form-label">Maksimal Artikel</label>
+                                    <input type="number" name="max_articles" class="form-control" placeholder="Maksimal Artikel (Default: 10, kosongkan jika tanpa batas)"
+                                        value="{{ old('max_articles', 10) }}" min="1" />
+                                    <div class="form-text text-muted">Jumlah maksimal artikel untuk issue ini. Default: 10. Kosongkan jika tanpa batas.</div>
+                                    @error('max_articles')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            @endhasanyrole
+
                             @role('super-admin')
                                 <div class="col-md-12 mt-5">
                                     <label class="form-label">Biaya Publikasi (APC)</label>
@@ -288,6 +301,18 @@
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
+                                @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub')
+                                    <div class="col-md-12 mt-5">
+                                        <label class="form-label">Maksimal Artikel</label>
+                                        <input type="number" name="max_articles" class="form-control" placeholder="Kosongkan jika tidak ada batas"
+                                            value="{{ old('max_articles', $issue->max_articles) }}" min="1" />
+                                        <div class="form-text text-muted">Jumlah maksimal artikel untuk issue ini. Kosongkan jika tanpa batas.</div>
+                                        @error('max_articles')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+                                @endhasanyrole
                             </div>
                         </div>
                         <div class="modal-footer">
