@@ -39,6 +39,19 @@ function createTestJournal(array $attributes = []): Journal
     ], $attributes));
 }
 
+function createTestSubmission(array $attributes = []): Submission
+{
+    return Submission::create(array_merge([
+        'submission_id' => 'SUB-' . Str::random(5),
+        'title' => 'Test Article',
+        'status' => '3',
+        'status_label' => 'Published',
+        'lastModified' => now()->toDateTimeString(),
+        'free_charge' => false,
+        'payment_status' => 'pending',
+    ], $attributes));
+}
+
 it('shows journal dashboard page for authenticated user with select2 and optgroups', function () {
     $user = User::factory()->create();
     $user->assignRole('super-admin');
@@ -733,6 +746,242 @@ it('shows year filter dropdown on journal dashboard page and filters by year via
     $modalList = $submissionsModalResponse->json('submissions');
     expect($modalList)->toHaveCount(1);
     expect($modalList[0]['submission_id'])->toBe('SUB-2026');
+});
+
+it('displays all multi-journal scope options for super-admin in view and groups them under RINGKASAN GABUNGAN', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    createTestJournal(['name' => 'Jurnal Utama', 'url_path' => 'jurnal-utama', 'type' => 'journal']);
+    createTestJournal(['name' => 'Proceeding Semnas', 'url_path' => 'proceeding-semnas', 'type' => 'proceeding']);
+    createTestJournal(['name' => 'Student Hub 1', 'url_path' => 'student-hub-1', 'type' => 'student_research_hub']);
+
+    $response = $this->actingAs($user)->get(route('back.dashboard.journal'));
+
+    $response->assertStatus(200);
+    $response->assertSee('<optgroup label="RINGKASAN GABUNGAN">', false);
+    $response->assertSee('value="all"', false);
+    $response->assertSee('Semua Jurnal (Keseluruhan)');
+    $response->assertSee('value="all_journal"', false);
+    $response->assertSee('Semua E-Journal');
+    $response->assertSee('value="all_proceeding"', false);
+    $response->assertSee('Semua Proceeding');
+    $response->assertSee('value="all_student_research_hub"', false);
+    $response->assertSee('Semua Student Research Hub');
+});
+
+it('displays only accessible scope options for role-restricted admins', function () {
+    Role::firstOrCreate(['name' => 'admin-ejournal']);
+    Role::firstOrCreate(['name' => 'admin-proceeding']);
+
+    $adminEjournal = User::factory()->create();
+    $adminEjournal->assignRole('admin-ejournal');
+
+    $adminProceeding = User::factory()->create();
+    $adminProceeding->assignRole('admin-proceeding');
+
+    createTestJournal(['name' => 'Jurnal E', 'url_path' => 'jurnal-e', 'type' => 'journal']);
+    createTestJournal(['name' => 'Proceeding P', 'url_path' => 'proceeding-p', 'type' => 'proceeding']);
+
+    // Admin E-Journal should see all and all_journal, but NOT all_proceeding
+    $resEjournal = $this->actingAs($adminEjournal)->get(route('back.dashboard.journal'));
+    $resEjournal->assertStatus(200);
+    $resEjournal->assertSee('value="all"', false);
+    $resEjournal->assertSee('value="all_journal"', false);
+    $resEjournal->assertDontSee('value="all_proceeding"', false);
+    $resEjournal->assertDontSee('value="all_student_research_hub"', false);
+
+    // Admin Proceeding should see all and all_proceeding, but NOT all_journal
+    $resProceeding = $this->actingAs($adminProceeding)->get(route('back.dashboard.journal'));
+    $resProceeding->assertStatus(200);
+    $resProceeding->assertSee('value="all"', false);
+    $resProceeding->assertSee('value="all_proceeding"', false);
+    $resProceeding->assertDontSee('value="all_journal"', false);
+    $resProceeding->assertDontSee('value="all_student_research_hub"', false);
+});
+
+it('returns aggregated statistics across all journals when scope all is requested', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $j1 = createTestJournal(['name' => 'Jurnal A', 'url_path' => 'jurnal-a', 'type' => 'journal', 'author_fee' => 500000]);
+    $j2 = createTestJournal(['name' => 'Proceeding B', 'url_path' => 'proceeding-b', 'type' => 'proceeding', 'author_fee' => 400000]);
+
+    $iss1 = Issue::create(['journal_id' => $j1->id, 'volume' => '1', 'number' => '1', 'year' => '2025', 'title' => 'Vol 1 No 1']);
+    $iss2 = Issue::create(['journal_id' => $j2->id, 'volume' => '1', 'number' => '1', 'year' => '2025', 'title' => 'Vol 1 No 1']);
+
+    // 1 published submission in J1
+    createTestSubmission([
+        'issue_id' => $iss1->id,
+        'submission_id' => 'SUB-J1',
+        'status' => '3',
+        'free_charge' => false,
+        'payment_status' => 'paid',
+    ]);
+
+    // 1 unpublished submission in J2
+    createTestSubmission([
+        'issue_id' => $iss2->id,
+        'submission_id' => 'SUB-J2',
+        'status' => '1',
+        'free_charge' => false,
+        'payment_status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->getJson(route('back.dashboard.journal.stat', ['journal_id' => 'all']));
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'journal' => [
+                'id' => 'all',
+                'name' => 'Semua Jurnal',
+                'is_scope' => true,
+                'total_journals' => 2,
+            ],
+            'summary' => [
+                'is_scope' => true,
+                'total_submissions' => 2,
+                'total_published' => 1,
+                'total_unpublished' => 1,
+                'lunas' => ['count' => 1, 'amount' => 500000],
+                'belum_bayar' => ['count' => 1, 'amount' => 400000],
+            ],
+            'charts' => [
+                'issue_chart' => [
+                    'mode' => 'by_journal',
+                    'title' => 'Statistik Artikel Publish vs Belum Publish per Jurnal',
+                ],
+            ],
+        ]);
+
+    expect($response->json('charts.issue_chart.categories'))->toContain('Jurnal A', 'Proceeding B');
+    expect($response->json('issues_table'))->toHaveCount(2);
+
+    $firstTableItem = $response->json('issues_table.0');
+    expect($firstTableItem)->toHaveKey('journal_name');
+    expect($firstTableItem)->toHaveKey('action_url');
+});
+
+it('returns aggregated statistics for specific scopes like all_journal, all_proceeding, and all_student_research_hub', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $j = createTestJournal(['name' => 'E-Journal 1', 'url_path' => 'ej-1', 'type' => 'journal', 'author_fee' => 300000]);
+    $p = createTestJournal(['name' => 'Proceeding 1', 'url_path' => 'proc-1', 'type' => 'proceeding', 'author_fee' => 200000]);
+    $s = createTestJournal(['name' => 'Student Hub 1', 'url_path' => 'srh-1', 'type' => 'student_research_hub', 'author_fee' => 100000]);
+
+    $issJ = Issue::create(['journal_id' => $j->id, 'volume' => '1', 'number' => '1', 'year' => '2025', 'title' => 'Vol 1 No 1']);
+    $issP = Issue::create(['journal_id' => $p->id, 'volume' => '1', 'number' => '1', 'year' => '2025', 'title' => 'Vol 1 No 1']);
+    $issS = Issue::create(['journal_id' => $s->id, 'volume' => '1', 'number' => '1', 'year' => '2025', 'title' => 'Vol 1 No 1']);
+
+    createTestSubmission(['issue_id' => $issJ->id, 'submission_id' => 'S-J', 'status' => '3', 'payment_status' => 'paid']);
+    createTestSubmission(['issue_id' => $issP->id, 'submission_id' => 'S-P', 'status' => '1', 'payment_status' => 'pending']);
+    createTestSubmission(['issue_id' => $issS->id, 'submission_id' => 'S-S', 'status' => '3', 'payment_status' => 'paid']);
+
+    // all_journal scope
+    $resJ = $this->actingAs($user)->getJson(route('back.dashboard.journal.stat', ['journal_id' => 'all_journal']));
+    $resJ->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'journal' => ['id' => 'all_journal', 'name' => 'Semua E-Journal', 'is_scope' => true, 'total_journals' => 1],
+            'summary' => ['total_submissions' => 1, 'total_published' => 1],
+        ]);
+
+    // all_proceeding scope
+    $resP = $this->actingAs($user)->getJson(route('back.dashboard.journal.stat', ['journal_id' => 'all_proceeding']));
+    $resP->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'journal' => ['id' => 'all_proceeding', 'name' => 'Semua Proceeding', 'is_scope' => true, 'total_journals' => 1],
+            'summary' => ['total_submissions' => 1, 'total_published' => 0, 'total_unpublished' => 1],
+        ]);
+
+    // all_student_research_hub scope
+    $resS = $this->actingAs($user)->getJson(route('back.dashboard.journal.stat', ['journal_id' => 'all_student_research_hub']));
+    $resS->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'journal' => ['id' => 'all_student_research_hub', 'name' => 'Semua Student Research Hub', 'is_scope' => true, 'total_journals' => 1],
+            'summary' => ['total_submissions' => 1, 'total_published' => 1],
+        ]);
+});
+
+it('restricts role-based admins from querying scopes outside their permissions', function () {
+    Role::firstOrCreate(['name' => 'admin-ejournal']);
+    $adminEjournal = User::factory()->create();
+    $adminEjournal->assignRole('admin-ejournal');
+
+    createTestJournal(['name' => 'Proceeding X', 'url_path' => 'proc-x', 'type' => 'proceeding']);
+
+    // admin-ejournal requesting all_proceeding should get 403 Forbidden
+    $responseProc = $this->actingAs($adminEjournal)
+        ->getJson(route('back.dashboard.journal.stat', ['journal_id' => 'all_proceeding']));
+    $responseProc->assertStatus(403);
+
+    // admin-ejournal requesting all_student_research_hub should get 403 Forbidden
+    $responseSrh = $this->actingAs($adminEjournal)
+        ->getJson(route('back.dashboard.journal.stat', ['journal_id' => 'all_student_research_hub']));
+    $responseSrh->assertStatus(403);
+});
+
+it('returns multi-journal submissions list for modal with journal_name and direct action_url', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $j1 = createTestJournal(['name' => 'Journal Alpha', 'url_path' => 'alpha', 'type' => 'journal', 'author_fee' => 500000]);
+    $j2 = createTestJournal(['name' => 'Proceeding Beta', 'url_path' => 'beta', 'type' => 'proceeding', 'author_fee' => 300000]);
+
+    $iss1 = Issue::create(['journal_id' => $j1->id, 'volume' => '1', 'number' => '1', 'year' => '2025', 'title' => 'Vol 1 No 1']);
+    $iss2 = Issue::create(['journal_id' => $j2->id, 'volume' => '1', 'number' => '1', 'year' => '2025', 'title' => 'Vol 1 No 1']);
+
+    createTestSubmission([
+        'issue_id' => $iss1->id,
+        'submission_id' => 'SUB-ALPHA-1',
+        'title' => 'Alpha Article 1',
+        'status' => '1',
+        'payment_status' => 'pending',
+    ]);
+
+    createTestSubmission([
+        'issue_id' => $iss2->id,
+        'submission_id' => 'SUB-BETA-1',
+        'title' => 'Beta Article 1',
+        'status' => '1',
+        'payment_status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($user)->getJson(route('back.dashboard.journal.submissions', [
+        'journal_id' => 'all',
+        'type' => 'belum_bayar',
+    ]));
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'meta' => [
+                'type' => 'belum_bayar',
+                'journal' => [
+                    'id' => 'all',
+                    'name' => 'Semua Jurnal',
+                    'is_scope' => true,
+                ],
+                'total_count' => 2,
+                'total_fee' => 800000,
+                'total_paid' => 0,
+                'total_remaining' => 800000,
+            ],
+        ]);
+
+    $submissions = $response->json('submissions');
+    expect($submissions)->toHaveCount(2);
+
+    $journalNames = collect($submissions)->pluck('journal_name')->all();
+    expect($journalNames)->toContain('Journal Alpha', 'Proceeding Beta');
+
+    $alphaSub = collect($submissions)->firstWhere('submission_id', 'SUB-ALPHA-1');
+    expect($alphaSub['action_url'])->toContain('/back/journal/alpha/issue/' . $iss1->id . '/article');
 });
 
 

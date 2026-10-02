@@ -47,6 +47,15 @@
                             <div class="position-relative w-150px w-sm-180px w-md-220px w-lg-250px">
                                 <select id="journal_select" class="form-select form-select-solid form-select-sm fw-bold"
                                     data-control="select2" data-placeholder="Pilih Jurnal">
+                                    @if (!empty($accessible_scopes))
+                                        <optgroup label="RINGKASAN GABUNGAN">
+                                            @foreach ($accessible_scopes as $sId => $scope)
+                                                <option value="{{ $sId }}" @if ($selected_journal_id == $sId) selected @endif>
+                                                    {{ $scope['label'] }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
                                     @forelse ($grouped_journals as $typeLabel => $journalGroup)
                                         <optgroup label="{{ $typeLabel }}">
                                             @foreach ($journalGroup as $item)
@@ -331,8 +340,8 @@
                     <div class="card card-flush h-100 shadow-sm">
                         <div class="card-header pt-5">
                             <div class="card-title d-flex flex-column">
-                                <h3 class="card-label fw-bold text-gray-900 fs-4">Statistik Artikel Publish vs Belum Publish per Edisi</h3>
-                                <span class="text-gray-500 fs-7">Perbandingan jumlah artikel terbit dan dalam proses per edisi/issue</span>
+                                <h3 class="card-label fw-bold text-gray-900 fs-4" id="chart_articles_title">Statistik Artikel Publish vs Belum Publish per Edisi</h3>
+                                <span class="text-gray-500 fs-7" id="chart_articles_desc">Perbandingan jumlah artikel terbit dan dalam proses per edisi/issue</span>
                             </div>
                         </div>
                         <div class="card-body pt-0">
@@ -911,7 +920,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const issueBadge = document.getElementById('filtered_issue_badge');
-            if (journal.selected_issue) {
+            if (journal.is_scope) {
+                document.getElementById('journal_fee_badge').textContent = 'Cakupan: ' + (journal.total_journals || 0) + ' Jurnal';
+                if (issueBadge) {
+                    issueBadge.classList.add('d-none');
+                }
+            } else if (journal.selected_issue) {
                 document.getElementById('journal_fee_badge').textContent = 'Author Fee Edisi: ' + formatRupiah(journal.author_fee);
                 if (issueBadge) {
                     issueBadge.textContent = 'Edisi: ' + journal.selected_issue.label;
@@ -950,7 +964,41 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 isUpdatingYearDropdown = false;
 
-                updateIssueSelectOptions(issuesOptions, 'all');
+                if (journal.is_scope) {
+                    isUpdatingIssueDropdown = true;
+                    if (typeof jQuery !== 'undefined' && $('#issue_select').length) {
+                        const $issueSelect = $('#issue_select');
+                        $issueSelect.empty();
+                        $issueSelect.append(new Option('Semua Issue', 'all', true, true));
+                        $issueSelect.val('all').prop('disabled', true).trigger('change.select2');
+                    } else if (issueSelect) {
+                        issueSelect.innerHTML = '<option value="all" selected>Semua Issue</option>';
+                        issueSelect.value = 'all';
+                        issueSelect.disabled = true;
+                    }
+                    isUpdatingIssueDropdown = false;
+                } else {
+                    if (typeof jQuery !== 'undefined' && $('#issue_select').length) {
+                        $('#issue_select').prop('disabled', false).trigger('change.select2');
+                    } else if (issueSelect) {
+                        issueSelect.disabled = false;
+                    }
+                    updateIssueSelectOptions(issuesOptions, 'all');
+                }
+            } else {
+                if (journal.is_scope) {
+                    if (typeof jQuery !== 'undefined' && $('#issue_select').length) {
+                        $('#issue_select').prop('disabled', true).trigger('change.select2');
+                    } else if (issueSelect) {
+                        issueSelect.disabled = true;
+                    }
+                } else {
+                    if (typeof jQuery !== 'undefined' && $('#issue_select').length) {
+                        $('#issue_select').prop('disabled', false).trigger('change.select2');
+                    } else if (issueSelect) {
+                        issueSelect.disabled = false;
+                    }
+                }
             }
 
             // Update Summary Card 1 (Total Artikel)
@@ -1004,7 +1052,18 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('legend_stat_unpublished').textContent = summary.total_unpublished + ' Artikel';
             document.getElementById('legend_stat_waiting').textContent = (summary.is_issue_filtered ? summary.waiting_submissions.total + ' Naskah (Jurnal)' : summary.waiting_submissions.total + ' Naskah');
 
-            // Update Chart 1: Articles Per Issue
+            // Update Chart 1: Articles Per Issue / Per Jurnal
+            const chartTitleEl = document.getElementById('chart_articles_title');
+            const chartDescEl = document.getElementById('chart_articles_desc');
+            if (charts.issue_chart) {
+                if (chartTitleEl && charts.issue_chart.title) {
+                    chartTitleEl.textContent = charts.issue_chart.title;
+                }
+                if (chartDescEl && charts.issue_chart.description) {
+                    chartDescEl.textContent = charts.issue_chart.description;
+                }
+            }
+
             if (charts.issue_chart.categories && charts.issue_chart.categories.length > 0) {
                 document.getElementById('chart_articles_per_issue').classList.remove('d-none');
                 document.getElementById('empty_chart_issue').classList.add('d-none');
@@ -1062,15 +1121,19 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 issuesTable.forEach((item, index) => {
                     const tr = document.createElement('tr');
+                    const journalBadge = (journal.is_scope && item.journal_name)
+                        ? `<span class="badge badge-light-primary fw-bold fs-9 mb-1 align-self-start">${escapeHtml(item.journal_name)}</span>`
+                        : '';
                     tr.innerHTML = `
                         <td class="text-center fw-bold text-gray-700">${index + 1}</td>
                         <td>
                             <div class="d-flex flex-column">
-                                <span class="text-gray-900 fw-bold fs-6">${item.issue_label}</span>
-                                <span class="text-gray-500 fs-8">${item.title}</span>
+                                ${journalBadge}
+                                <span class="text-gray-900 fw-bold fs-6">${escapeHtml(item.issue_label)}</span>
+                                <span class="text-gray-500 fs-8">${escapeHtml(item.title)}</span>
                             </div>
                         </td>
-                        <td class="text-center fw-semibold text-gray-700">${item.year || '-'}</td>
+                        <td class="text-center fw-semibold text-gray-700">${escapeHtml(item.year || '-')}</td>
                         <td class="text-end fw-semibold text-gray-900">${formatRupiah(item.author_fee)}</td>
                         <td class="text-center">
                             <span class="badge badge-light-primary fw-bold">${item.total_articles}</span>
@@ -1288,7 +1351,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </td>
                     <td>
-                        <span class="badge badge-light-primary fw-semibold fs-8">${escapeHtml(sub.issue_label)}</span>
+                        <div class="d-flex flex-column">
+                            ${sub.journal_name ? `<span class="badge badge-light-info fw-bold fs-9 mb-1 align-self-start">${escapeHtml(sub.journal_name)}</span>` : ''}
+                            <span class="badge badge-light-primary fw-semibold fs-8 align-self-start">${escapeHtml(sub.issue_label)}</span>
+                        </div>
                     </td>
                     <td class="text-center">
                         ${statusBadge}
@@ -1322,6 +1388,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const journalId = (typeof jQuery !== 'undefined' && $('#journal_select').val())
             ? $('#journal_select').val()
             : (journalSelect ? journalSelect.value : null);
+
+        const yearVal = (typeof jQuery !== 'undefined' && $('#year_select').length)
+            ? $('#year_select').val()
+            : (yearSelect ? yearSelect.value : null);
+        const filterYear = (yearVal === 'all' || !yearVal) ? '' : yearVal;
 
         const issueVal = (typeof jQuery !== 'undefined' && $('#issue_select').val())
             ? $('#issue_select').val()
