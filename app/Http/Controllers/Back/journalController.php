@@ -639,10 +639,58 @@ class journalController extends Controller
             return abort(404);
         }
 
+        $formType = $request->input('form_type');
+
+        if ($formType === 'author_info') {
+            $validator = Validator::make($request->all(), [
+                'author_nik' => 'nullable|string|max:255',
+                'author_bank_account' => 'nullable|string|max:255',
+                'author_bank_name' => 'nullable|string|max:255',
+                'author_npwp' => 'nullable|string|max:255',
+                'author_golongan' => 'nullable|string|max:255',
+            ], [
+                'author_nik.max' => 'NIK tidak boleh lebih dari 255 karakter',
+                'author_bank_account.max' => 'Nomor rekening tidak boleh lebih dari 255 karakter',
+                'author_bank_name.max' => 'Nama bank tidak boleh lebih dari 255 karakter',
+                'author_npwp.max' => 'NPWP tidak boleh lebih dari 255 karakter',
+                'author_golongan.max' => 'Golongan tidak boleh lebih dari 255 karakter',
+            ]);
+
+            if ($validator->fails()) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $validator->errors()->first(),
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
+                Alert::error('Error', $validator->errors()->all());
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            $submission->update([
+                'author_nik' => $request->author_nik,
+                'author_bank_account' => $request->author_bank_account,
+                'author_bank_name' => $request->author_bank_name,
+                'author_npwp' => $request->author_npwp,
+                'author_golongan' => $request->author_golongan,
+            ]);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Informasi tambahan penulis berhasil diperbarui'
+                ]);
+            }
+
+            Alert::success('Success', 'Informasi tambahan penulis berhasil diperbarui');
+            return redirect()->back();
+        }
+
         $validator = Validator::make($request->all(), [
             'reviewer' => 'nullable|array',
             'editor' => 'nullable|array',
-            'author_nik' => 'nullable|string',
+            'author_nik' => 'nullable|string|max:255',
             'author_bank_account' => 'nullable|string|max:255',
             'author_bank_name' => 'nullable|string|max:255',
             'author_npwp' => 'nullable|string|max:255',
@@ -652,6 +700,7 @@ class journalController extends Controller
             'reviewer.array' => 'Reviewer harus dipilih',
             'editor.required' => 'Editor harus dipilih',
             'editor.array' => 'Editor harus dipilih',
+            'author_nik.max' => 'NIK tidak boleh lebih dari 255 karakter',
             'author_bank_account.max' => 'Nomor rekening tidak boleh lebih dari 255 karakter',
             'author_bank_name.max' => 'Nama bank tidak boleh lebih dari 255 karakter',
             'author_npwp.max' => 'NPWP tidak boleh lebih dari 255 karakter',
@@ -659,19 +708,38 @@ class journalController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->errors()
+                ], 422);
+            }
             Alert::error('Error', $validator->errors()->all());
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $submission->update([
+        $updateData = [
             'free_charge' => $request->free_charge ? 1 : 0,
-            'author_nik' => $request->author_nik,
-            'author_bank_account' => $request->author_bank_account,
-            'author_bank_name' => $request->author_bank_name,
-            'author_npwp' => $request->author_npwp,
-            'author_golongan' => $request->author_golongan,
-        ]);
+        ];
 
+        if ($request->has('author_nik')) {
+            $updateData['author_nik'] = $request->author_nik;
+        }
+        if ($request->has('author_bank_account')) {
+            $updateData['author_bank_account'] = $request->author_bank_account;
+        }
+        if ($request->has('author_bank_name')) {
+            $updateData['author_bank_name'] = $request->author_bank_name;
+        }
+        if ($request->has('author_npwp')) {
+            $updateData['author_npwp'] = $request->author_npwp;
+        }
+        if ($request->has('author_golongan')) {
+            $updateData['author_golongan'] = $request->author_golongan;
+        }
+
+        $submission->update($updateData);
 
         SubmissionReviewer::where('submission_id', $submission->id)->delete();
 
@@ -694,6 +762,13 @@ class journalController extends Controller
                     'editor_id' => $editor,
                 ]);
             }
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Article has been updated'
+            ]);
         }
 
         Alert::success('Success', 'Artcle has been updated');

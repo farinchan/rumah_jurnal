@@ -26,6 +26,10 @@
             <a class="nav-link active" data-bs-toggle="tab"
                 href="#kt_tab_pane_1_submission_{{ $submission->id }}">Informasi</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab"
+                href="#kt_tab_pane_author_info_{{ $submission->id }}">Info Tambahan Penulis</a>
+        </li>
         @if (($issue->author_fee ?? $journal->author_fee) != 0)
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab"
@@ -53,6 +57,7 @@
                 method="POST">
                 @method('PUT')
                 @csrf
+                <input type="hidden" name="form_type" value="general_info">
                 <div class="mh-550px scroll-y me-n7 pe-7">
                     <table
                         class="table table-row-dashed table-row-gray-300 align-top gs-0 gy-4 my-0 fs-6">
@@ -153,6 +158,140 @@
                         <i class="ki-duotone ki-check fs-4 me-1"><span class="path1"></span><span
                                 class="path2"></span></i>
                         Update
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {{-- Tab: Info Tambahan Penulis --}}
+        <div class="tab-pane fade" id="kt_tab_pane_author_info_{{ $submission->id }}"
+            role="tabpanel">
+            <form
+                action="{{ route('back.journal.article.update', [$journal->url_path, $issue->id, $submission->id]) }}"
+                method="POST">
+                @method('PUT')
+                @csrf
+                <input type="hidden" name="form_type" value="author_info">
+                <div class="mh-550px scroll-y me-n7 pe-7">
+                    <div class="notice d-flex bg-light-primary rounded border-primary border border-dashed p-4 mb-6">
+                        <i class="ki-duotone ki-profile-user fs-2x text-primary me-4">
+                            <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
+                        </i>
+                        <div class="d-flex flex-column">
+                            <div class="text-gray-900 fw-bold fs-6">
+                                Penulis: {{ $submission->authorsString ?: 'Penulis Artikel' }}
+                            </div>
+                            <div class="text-muted fs-7">
+                                Lengkapi data informasi tambahan penulis berikut untuk keperluan administrasi, pelaporan, dan pencatatan keuangan.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-5">
+                        <div class="col-md-6">
+                            <label class="form-label fs-6 fw-semibold text-gray-700" for="author_nik_{{ $submission->id }}">
+                                NIK (Nomor Induk Kependudukan)
+                            </label>
+                            <input type="text"
+                                class="form-control form-control-solid"
+                                id="author_nik_{{ $submission->id }}"
+                                name="author_nik"
+                                value="{{ old('author_nik', $submission->author_nik) }}"
+                                placeholder="Masukkan NIK penulis..."
+                                maxlength="255" />
+                            <div class="fs-8 text-muted mt-1">Nomor KTP / NIK penulis korespondensi / utama.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fs-6 fw-semibold text-gray-700" for="author_npwp_{{ $submission->id }}">
+                                NPWP
+                            </label>
+                            <input type="text"
+                                class="form-control form-control-solid"
+                                id="author_npwp_{{ $submission->id }}"
+                                name="author_npwp"
+                                value="{{ old('author_npwp', $submission->author_npwp) }}"
+                                placeholder="Masukkan NPWP penulis..."
+                                maxlength="255" />
+                            <div class="fs-8 text-muted mt-1">Nomor Pokok Wajib Pajak penulis (jika ada).</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fs-6 fw-semibold text-gray-700" for="author_bank_name_{{ $submission->id }}">
+                                Nama Bank
+                            </label>
+                            <input type="text"
+                                list="bank_list_{{ $submission->id }}"
+                                class="form-control form-control-solid"
+                                id="author_bank_name_{{ $submission->id }}"
+                                name="author_bank_name"
+                                value="{{ old('author_bank_name', $submission->author_bank_name) }}"
+                                placeholder="Pilih atau ketik nama bank (contoh: BSI, BRI, BCA)..."
+                                maxlength="255" />
+                            <datalist id="bank_list_{{ $submission->id }}">
+                                <option value="BSI (Bank Syariah Indonesia)">
+                                <option value="BRI (Bank Rakyat Indonesia)">
+                                <option value="BNI (Bank Negara Indonesia)">
+                                <option value="Bank Mandiri">
+                                <option value="BCA (Bank Central Asia)">
+                                <option value="Bank Sumut">
+                                <option value="Bank Aceh Syariah">
+                                <option value="Bank Nagari">
+                                <option value="Bank BTN">
+                            </datalist>
+                            <div class="fs-8 text-muted mt-1">Nama bank tempat rekening penulis dibuka.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fs-6 fw-semibold text-gray-700" for="author_bank_account_{{ $submission->id }}">
+                                Nomor Rekening
+                            </label>
+                            <input type="text"
+                                class="form-control form-control-solid"
+                                id="author_bank_account_{{ $submission->id }}"
+                                name="author_bank_account"
+                                value="{{ old('author_bank_account', $submission->author_bank_account) }}"
+                                placeholder="Masukkan nomor rekening bank..."
+                                maxlength="255" />
+                            <div class="fs-8 text-muted mt-1">Nomor rekening untuk transfer pembayaran / honor.</div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fs-6 fw-semibold text-gray-700" for="author_golongan_{{ $submission->id }}">
+                                Golongan / Jabatan
+                            </label>
+                            <input type="text"
+                                list="golongan_list_{{ $submission->id }}"
+                                class="form-control form-control-solid"
+                                id="author_golongan_{{ $submission->id }}"
+                                name="author_golongan"
+                                value="{{ old('author_golongan', $submission->author_golongan) }}"
+                                placeholder="Pilih atau ketik golongan (contoh: III/c, Non-PNS)..."
+                                maxlength="255" />
+                            <datalist id="golongan_list_{{ $submission->id }}">
+                                <option value="Non-PNS">
+                                <option value="III/a - Penata Muda">
+                                <option value="III/b - Penata Muda Tingkat I">
+                                <option value="III/c - Penata">
+                                <option value="III/d - Penata Tingkat I">
+                                <option value="IV/a - Pembina">
+                                <option value="IV/b - Pembina Tingkat I">
+                                <option value="IV/c - Pembina Utama Muda">
+                                <option value="IV/d - Pembina Utama Madya">
+                                <option value="IV/e - Pembina Utama">
+                            </datalist>
+                            <div class="fs-8 text-muted mt-1">Pangkat/Golongan PNS/ASN atau status kepegawaian penulis.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="separator my-5"></div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="ki-duotone ki-check fs-4 me-1">
+                            <span class="path1"></span><span class="path2"></span>
+                        </i>
+                        Simpan Informasi Penulis
                     </button>
                 </div>
             </form>
