@@ -89,6 +89,97 @@ class journalController extends Controller
         return view('back.pages.journal.index', $data);
     }
 
+    public function searchAuthor(Request $request, $journal_path)
+    {
+        $journal = Journal::where('url_path', $journal_path)->firstOrFail();
+        abort_unless(auth()->user()->can($journal->url_path), 403);
+
+        $keyword = trim((string) $request->input('q', $request->input('search', '')));
+        $searchBy = $request->input('search_by', 'all');
+        $issueId = $request->input('issue_id', $request->input('filter_issue'));
+
+        $filterSubmissionId = trim((string) $request->input('filter_submission_id', $request->input('submission_id', '')));
+        $filterAuthor = trim((string) $request->input('filter_author', $request->input('author', '')));
+        $filterTitle = trim((string) $request->input('filter_title', $request->input('title', '')));
+
+        $submissionsQuery = Submission::whereHas('issue', function ($q) use ($journal, $issueId) {
+            $q->where('journal_id', $journal->id);
+            if (!empty($issueId) && $issueId !== 'all') {
+                $q->where('id', $issueId);
+            }
+        })->with([
+            'issue' => function ($q) {
+                $q->select('id', 'journal_id', 'volume', 'number', 'year', 'title', 'status', 'author_fee');
+            },
+            'paymentInvoices.payments'
+        ]);
+
+        if (!empty($filterSubmissionId)) {
+            $submissionsQuery->where('submission_id', 'like', "%{$filterSubmissionId}%");
+        }
+
+        if (!empty($filterAuthor)) {
+            $submissionsQuery->where('authorsString', 'like', "%{$filterAuthor}%");
+        }
+
+        if (!empty($filterTitle)) {
+            $submissionsQuery->where('fullTitle', 'like', "%{$filterTitle}%");
+        }
+
+        if (!empty($keyword)) {
+            $submissionsQuery->where(function ($query) use ($keyword, $searchBy) {
+                if ($searchBy === 'submission_id') {
+                    $query->where('submission_id', 'like', "%{$keyword}%");
+                } elseif ($searchBy === 'author') {
+                    $query->where('authorsString', 'like', "%{$keyword}%");
+                } else {
+                    $query->where('submission_id', 'like', "%{$keyword}%")
+                        ->orWhere('authorsString', 'like', "%{$keyword}%");
+                }
+            });
+        }
+
+        $submissions = $submissionsQuery->orderBy('id', 'desc')->limit(50)->get();
+
+        $results = $submissions->map(function ($sub) use ($journal) {
+            $issue = $sub->issue;
+            $issueTitle = $issue ? "Vol. {$issue->volume} No. {$issue->number} ({$issue->year}): {$issue->title}" : '-';
+            $issueUrl = $issue ? route('back.journal.article.index', [$journal->url_path, $issue->id]) : '#';
+            $modalViewUrl = $issue ? route('back.journal.article.modal-view', [$journal->url_path, $issue->id, $sub->id]) : '#';
+
+            $fullTitle = is_array($sub->fullTitle) ? implode(', ', $sub->fullTitle) : ($sub->fullTitle ?: 'Tanpa Judul');
+
+            return [
+                'id' => $sub->id,
+                'submission_id' => $sub->submission_id,
+                'title' => (string) $fullTitle,
+                'authors_string' => $sub->authorsString ?: '-',
+                'authors' => $sub->authors ?: [],
+                'author_nik' => $sub->author_nik,
+                'author_bank_name' => $sub->author_bank_name,
+                'author_bank_account' => $sub->author_bank_account,
+                'author_npwp' => $sub->author_npwp,
+                'author_golongan' => $sub->author_golongan,
+                'status' => $sub->status,
+                'status_label' => $sub->status_label ?: ($sub->status == 3 ? 'Published' : ($sub->status == 1 ? 'Queued' : ($sub->status == 4 ? 'Declined' : 'Unknown'))),
+                'payment_status' => $sub->payment_status ?: 'pending',
+                'free_charge' => (bool) $sub->free_charge,
+                'date_published' => $sub->datePublished,
+                'url_published' => $sub->urlPublished,
+                'issue_id' => $sub->issue_id,
+                'issue_title' => $issueTitle,
+                'issue_url' => $issueUrl,
+                'modal_view_url' => $modalViewUrl,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'count' => $results->count(),
+            'data' => $results,
+        ]);
+    }
+
     public function issueStore(Request $request, $journal_path)
     {
         $validator = Validator::make($request->all(), [

@@ -84,15 +84,24 @@
                             <span class="badge badge-light-success fw-bold" id="sync_updated_badge">0 Artikel</span>
                         </div>
                         <div class="table-responsive mh-250px scroll-y border rounded">
+                            <style>
+                                #sync_updated_articles_section table thead th {
+                                    position: sticky;
+                                    top: 0;
+                                    z-index: 5;
+                                    background-color: var(--bs-light, #f9f9f9) !important;
+                                    box-shadow: inset 0 -1px 0 var(--bs-gray-300, #e4e6ef);
+                                }
+                            </style>
                             <table class="table table-row-dashed table-row-gray-200 align-middle gs-3 gy-2 mb-0 fs-8">
                                 <thead class="bg-light text-uppercase text-gray-500 fw-bold fs-9 sticky-top">
                                     <tr>
-                                        <th class="w-40px text-center">No</th>
-                                        <th class="min-w-150px">ID & Judul</th>
-                                        <th class="min-w-120px">Penulis</th>
-                                        <th class="min-w-120px">Jurnal / Edisi</th>
-                                        <th class="min-w-100px text-center">Perubahan Status</th>
-                                        <th class="min-w-90px text-end">Total Bayar</th>
+                                        <th class="w-40px text-center bg-light">No</th>
+                                        <th class="min-w-150px bg-light">ID & Judul</th>
+                                        <th class="min-w-120px bg-light">Penulis</th>
+                                        <th class="min-w-120px bg-light">Jurnal / Edisi</th>
+                                        <th class="min-w-100px text-center bg-light">Perubahan Status</th>
+                                        <th class="min-w-90px text-end bg-light">Total Bayar</th>
                                     </tr>
                                 </thead>
                                 <tbody id="sync_updated_articles_tbody">

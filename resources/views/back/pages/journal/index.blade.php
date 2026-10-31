@@ -1,9 +1,25 @@
 @extends('back.app')
+@section('styles')
+    <style>
+        #table_search_author_results thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        #table_search_author_results thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: var(--bs-light, #f9f9f9) !important;
+            box-shadow: inset 0 -1px 0 var(--bs-gray-300, #e4e6ef);
+        }
+    </style>
+@endsection
 @section('content')
     <div id="kt_content_container" class=" container-xxl ">
         <div class="card card-flush">
             <div class="card-header align-items-center py-5 gap-2 gap-md-5">
-                <div class="card-title">
+                <div class="card-title flex-wrap gap-2">
                     <div class="d-flex align-items-center position-relative my-1">
                         <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
                             <span class="path1"></span>
@@ -12,6 +28,16 @@
                         <input type="text" data-kt-ecommerce-product-filter="search"
                             class="form-control form-control-solid w-250px ps-12" placeholder="Cari Issue" />
                     </div>
+                    <button type="button" class="btn btn-light-primary my-1" data-bs-toggle="modal"
+                        data-bs-target="#modal_search_author" id="btn_search_author">
+                        <i class="ki-duotone ki-profile-user fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                            <span class="path3"></span>
+                            <span class="path4"></span>
+                        </i>
+                        Cari Penulis
+                    </button>
                 </div>
                 <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
                     <a href="{{ route('back.journal.manuscript-submissions.index', $journal->url_path) }}"
@@ -348,7 +374,355 @@
             </div>
         </div>
     @endforeach --}}
+
+    <!--begin::Modal Search Author-->
+    <div class="modal fade" id="modal_search_author" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header pb-0 border-0 justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="symbol symbol-45px me-4">
+                            <span class="symbol-label bg-light-primary">
+                                <i class="ki-duotone ki-profile-user fs-1 text-primary">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="modal-title fw-bold text-gray-900 mb-0">Cari Penulis & Submission</h3>
+                            <span class="text-muted fs-7 fw-semibold">
+                                Cari penulis atau ID submission di semua edisi (issue) jurnal {{ $journal->title }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                        <i class="ki-outline ki-cross fs-1"></i>
+                    </div>
+                </div>
+
+                <div class="modal-body py-4">
+                    <!--begin::Filter Section-->
+                    <div class="mb-4 mt-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="ki-duotone ki-filter fs-3 text-primary">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                            <span class="fw-bold fs-6 text-gray-800">Filter & Pencarian Penulis</span>
+                        </div>
+
+                        <div class="row g-3 align-items-end">
+                            <!-- Kata Kunci Pencarian -->
+                            <div class="col-12 col-md-5">
+                                <label class="form-label fs-8 fw-bold text-gray-700 mb-1">Kata Kunci Pencarian</label>
+                                <div class="position-relative">
+                                    <i class="ki-duotone ki-magnifier fs-4 position-absolute top-50 translate-middle-y ms-3 text-gray-500">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    <input type="text" id="input_search_author_keyword"
+                                        class="form-control form-control-sm form-control-solid ps-10"
+                                        placeholder="Ketik Nama Penulis atau ID Submission..." />
+                                </div>
+                            </div>
+
+                            <!-- Cari Berdasarkan -->
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label class="form-label fs-8 fw-bold text-gray-700 mb-1">Cari Berdasarkan</label>
+                                <select id="select_search_by" class="form-select form-select-sm form-select-solid">
+                                    <option value="all">Semua (ID / Penulis)</option>
+                                    <option value="author">Nama Penulis</option>
+                                    <option value="submission_id">ID Submission</option>
+                                </select>
+                            </div>
+
+                            <!-- Filter Edisi (Issue) -->
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label class="form-label fs-8 fw-bold text-gray-700 mb-1">Filter Edisi (Issue)</label>
+                                <select id="select_search_issue" class="form-select form-select-sm form-select-solid">
+                                    <option value="all">Semua Edisi (Issue)</option>
+                                    @foreach ($journal->issues as $iss)
+                                        <option value="{{ $iss->id }}">
+                                            Vol. {{ $iss->volume }} No. {{ $iss->number }} ({{ $iss->year }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Tombol Reset Filter (Icon Only) -->
+                            <div class="col-12 col-md-1">
+                                <button type="button" class="btn btn-sm btn-icon btn-light-danger w-100" id="btn_reset_search_author" title="Reset Filter" data-bs-toggle="tooltip">
+                                    <i class="ki-duotone ki-arrows-circle fs-3 p-0">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="separator separator-dashed my-4"></div>
+                    <!--end::Filter Section-->
+
+                    <!-- Result Status Header -->
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="fs-7 fw-bold text-gray-700">
+                            Hasil Pencarian: <span id="search_author_count" class="badge badge-light-primary fw-bold ms-1">0 Ditemukan</span>
+                        </div>
+                        <div class="text-muted fs-8">
+                            <i class="ki-duotone ki-information-5 fs-7 text-muted me-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                            Menampilkan artikel dari semua issue pada jurnal ini
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="search_author_loading" class="text-center py-10 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="text-gray-600 fs-7 fw-semibold mt-2">Sedang mencari naskah & penulis...</div>
+                    </div>
+
+                    <!-- Table Content -->
+                    <div id="search_author_table_container" class="table-responsive mh-450px scroll-y">
+                        <table class="table table-hover table-row-dashed table-row-gray-300 align-middle gs-0 gy-3 fs-7" id="table_search_author_results">
+                            <thead class="border-bottom border-gray-300 fs-7 fw-bold text-gray-700 bg-light sticky-top">
+                                <tr>
+                                    <th class="w-90px ps-3 bg-light">ID</th>
+                                    <th class="min-w-200px bg-light">Penulis</th>
+                                    <th class="min-w-250px bg-light">Judul & Naskah</th>
+                                    <th class="min-w-180px bg-light">Edisi (Issue)</th>
+                                    <th class="min-w-100px text-end pe-3 bg-light">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="search_author_tbody">
+                                <!-- Injected via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="search_author_empty" class="text-center py-10 d-none">
+                        <i class="ki-duotone ki-file-deleted fs-3tx text-muted mb-2">
+                            <span class="path1"></span><span class="path2"></span>
+                        </i>
+                        <div class="fs-6 fw-bold text-gray-800" id="search_author_empty_title">Tidak Ada Hasil</div>
+                        <div class="text-muted fs-7" id="search_author_empty_text">Tidak ditemukan artikel atau penulis yang cocok.</div>
+                    </div>
+                </div>
+
+                <div class="modal-footer py-3">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end::Modal Search Author-->
+
+    <!--begin::Modal View Article (Dynamic Content)-->
+    <div class="modal fade" tabindex="-1" id="modal_view_article" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" id="modal_view_article_content">
+                <!-- Loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+    <!--end::Modal View Article-->
 @endsection
 @section('scripts')
     <script src="{{ asset('back/js/custom/apps/ecommerce/catalog/issue.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            let searchTimer = null;
+            let currentAjax = null;
+            let returnToSearchModal = false;
+
+            function fetchAuthors() {
+                const keyword = ($('#input_search_author_keyword').val() || '').trim();
+                const searchBy = $('#select_search_by').val();
+                const issueId = $('#select_search_issue').val();
+
+                if (currentAjax) {
+                    currentAjax.abort();
+                }
+
+                $('#search_author_loading').removeClass('d-none');
+                $('#search_author_table_container').addClass('d-none');
+                $('#search_author_empty').addClass('d-none');
+
+                currentAjax = $.ajax({
+                    url: "{{ route('back.journal.search-author', $journal->url_path) }}",
+                    type: "GET",
+                    data: {
+                        q: keyword,
+                        search_by: searchBy,
+                        issue_id: issueId
+                    },
+                    success: function (res) {
+                        $('#search_author_loading').addClass('d-none');
+                        if (res.success && res.data) {
+                            $('#search_author_count').text(res.count + ' Ditemukan');
+                            renderAuthorRows(res.data, keyword);
+                        }
+                    },
+                    error: function (xhr, status) {
+                        if (status === 'abort') return;
+                        $('#search_author_loading').addClass('d-none');
+                        $('#search_author_empty').removeClass('d-none');
+                        $('#search_author_empty_title').text('Gagal Memuat Data');
+                        $('#search_author_empty_text').text('Terjadi kesalahan koneksi saat mencari data.');
+                    }
+                });
+            }
+
+            function renderAuthorRows(items, keyword) {
+                const tbody = $('#search_author_tbody');
+                tbody.empty();
+
+                if (!items || items.length === 0) {
+                    $('#search_author_table_container').addClass('d-none');
+                    $('#search_author_empty').removeClass('d-none');
+                    if (keyword) {
+                        $('#search_author_empty_title').text('Tidak Ditemukan');
+                        $('#search_author_empty_text').text(`Tidak ada naskah atau penulis yang cocok dengan kata kunci "${keyword}".`);
+                    } else {
+                        $('#search_author_empty_title').text('Belum Ada Naskah');
+                        $('#search_author_empty_text').text('Belum ada artikel pada jurnal atau edisi yang dipilih.');
+                    }
+                    return;
+                }
+
+                $('#search_author_empty').addClass('d-none');
+                $('#search_author_table_container').removeClass('d-none');
+
+                items.forEach(function (item) {
+                    let titleLink = item.url_published
+                        ? `<a href="${item.url_published}" target="_blank" class="text-gray-800 text-hover-primary fw-semibold">${escapeHtml(item.title)}</a>`
+                        : `<span class="text-gray-800 fw-semibold">${escapeHtml(item.title)}</span>`;
+
+                    let rowHtml = `
+                        <tr>
+                            <td class="ps-3 align-middle">
+                                <span class="badge badge-light-dark fw-bold fs-7">#${item.submission_id}</span>
+                            </td>
+                            <td class="align-middle">
+                                <div class="fw-bold text-gray-900 fs-7">${escapeHtml(item.authors_string)}</div>
+                            </td>
+                            <td class="align-middle">
+                                <div>${titleLink}</div>
+                                ${item.date_published ? `<div class="text-muted fs-8 mt-1">Terbit: ${escapeHtml(item.date_published)}</div>` : ''}
+                            </td>
+                            <td class="align-middle">
+                                <a href="${item.issue_url}" class=" text-black text-hover-primary text-wrap text-start fs-8" title="Buka Edisi">
+                                    ${escapeHtml(item.issue_title)}
+                                </a>
+                            </td>
+                            <td class="align-middle text-end pe-3 text-nowrap">
+                                <button type="button" class="btn btn-sm btn-icon btn-light-info me-1 btn-search-view-detail"
+                                    data-url="${item.modal_view_url}" title="Lihat Detail Artikel">
+                                    <i class="ki-duotone ki-eye fs-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                </button>
+                                <a href="${item.issue_url}" class="btn btn-sm btn-icon btn-light-primary" title="Buka Halaman Issue">
+                                    <i class="ki-duotone ki-exit-right-corner fs-4"><span class="path1"></span><span class="path2"></span></i>
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(rowHtml);
+                });
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                return String(text)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // Trigger search when modal is shown
+            $('#modal_search_author').on('shown.bs.modal', function () {
+                $('#input_search_author_keyword').trigger('focus');
+                if ($('#search_author_tbody tr').length === 0) {
+                    fetchAuthors();
+                }
+            });
+
+            // Real-time keyword typing with debounce
+            $('#input_search_author_keyword').on('input keyup', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(fetchAuthors, 300);
+            });
+
+            // Filter changes
+            $('#select_search_by, #select_search_issue').on('change', function () {
+                fetchAuthors();
+            });
+
+            // Reset button
+            $('#btn_reset_search_author').on('click', function () {
+                $('#input_search_author_keyword').val('');
+                $('#select_search_by').val('all');
+                $('#select_search_issue').val('all');
+                fetchAuthors();
+            });
+
+            // View Article Detail inside Search Author Modal
+            $(document).on('click', '.btn-search-view-detail', function (e) {
+                e.preventDefault();
+                const url = $(this).data('url');
+
+                returnToSearchModal = true;
+                $('#modal_search_author').modal('hide');
+
+                $('#modal_view_article_content').html(`
+                    <div class="text-center py-15">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="text-gray-600 fs-6 fw-semibold mt-3">Memuat detail artikel & penulis...</div>
+                    </div>
+                `);
+                $('#modal_view_article').modal('show');
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (html) {
+                        $('#modal_view_article_content').html(html);
+                        $('#modal_view_article [data-control="select2"]').select2({
+                            dropdownParent: $('#modal_view_article')
+                        });
+                        if (typeof KTComponents !== 'undefined' && KTComponents.init) {
+                            KTComponents.init();
+                        }
+                    },
+                    error: function () {
+                        $('#modal_view_article_content').html(`
+                            <div class="modal-body text-center py-10">
+                                <i class="ki-duotone ki-cross-circle fs-3tx text-danger mb-3">
+                                    <span class="path1"></span><span class="path2"></span>
+                                </i>
+                                <div class="text-gray-800 fs-5 fw-bold mb-2">Gagal Memuat Data</div>
+                                <div class="text-muted fs-7 mb-5">Terjadi kesalahan saat memuat detail artikel.</div>
+                                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        `);
+                    }
+                });
+            });
+
+            // When modal_view_article is closed, return to modal_search_author if opened from search
+            $('#modal_view_article').on('hidden.bs.modal', function () {
+                if (returnToSearchModal) {
+                    returnToSearchModal = false;
+                    $('#modal_search_author').modal('show');
+                }
+            });
+        });
+    </script>
 @endsection
