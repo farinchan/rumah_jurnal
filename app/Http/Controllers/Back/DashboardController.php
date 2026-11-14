@@ -313,14 +313,16 @@ class DashboardController extends Controller
                     ->where('date', '<=', $endDate)
                     ->sum('amount');
 
-                // Calculate distribution based on finance year percentage
+                // Split gross income between Rumah Jurnal and BLU before expenses.
                 $distributionPercentage = $financeYear ? $financeYear->distribution_percentage : 80;
                 $totalGrossIncome = $totalIncome + $totalPaymentIncome;
                 $totalBalance = $totalGrossIncome - $totalExpense;
-                // Rumah Jurnal: persentase dari (pemasukan - pengeluaran)
-                $distributionRumahJurnal = ($totalBalance * $distributionPercentage) / 100;
-                // BLU: persentase dari pemasukan
+                // Both shares are calculated from total income. The BLU share is
+                // reserved in full and must not be reduced by operational expenses.
+                $distributionRumahJurnal = ($totalGrossIncome * $distributionPercentage) / 100;
                 $distributionBLU = ($totalGrossIncome * (100 - $distributionPercentage)) / 100;
+                // Rumah Jurnal's usable net balance is its share after expenses.
+                $distributionRumahJurnalBalance = $distributionRumahJurnal - $totalExpense;
 
                 // Transaction counts filtered by control panel
                 $totalTransactionCount = Finance::where('type_control', $controlPanel)
@@ -350,6 +352,7 @@ class DashboardController extends Controller
                         'distribution_percentage' => $distributionPercentage,
                         'distribution_rumah_jurnal' => (int)$distributionRumahJurnal,
                         'distribution_blu' => (int)$distributionBLU,
+                        'distribution_rumah_jurnal_balance' => (int)$distributionRumahJurnalBalance,
                         'total_gross_income' => (int)$totalGrossIncome
                     ]
                 ];

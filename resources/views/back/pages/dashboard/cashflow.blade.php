@@ -86,7 +86,7 @@
 
         <!-- Distribution Cards -->
         <div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
-            <div class="col-xl-6">
+            <div class="col-xl-4">
                 <div class="card card-flush bgi-no-repeat bgi-size-contain bgi-position-x-end h-xl-100"
                     style="background-color: #009EF7;background-image:url('/metronic8/demo1/assets/media/patterns/vector-4.png')">
                     <div class="card-header pt-5">
@@ -109,7 +109,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-6">
+            <div class="col-xl-4">
                 <div class="card card-flush bgi-no-repeat bgi-size-contain bgi-position-x-end h-xl-100"
                     style="background-color: #FF8C00;background-image:url('/metronic8/demo1/assets/media/patterns/vector-5.png')">
                     <div class="card-header pt-5">
@@ -129,6 +129,20 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card card-flush bgi-no-repeat bgi-size-contain bgi-position-x-end h-xl-100"
+                    style="background-color: #7239EA;background-image:url('/metronic8/demo1/assets/media/patterns/vector-2.png')">
+                    <div class="card-header pt-5">
+                        <div class="card-title d-flex flex-column">
+                            <span class="fs-2hx fw-bold text-white me-2 lh-1" id="distribution_rumah_jurnal_balance_card">Rp 0</span>
+                            <span class="text-white opacity-75 pt-1 fw-semibold fs-6">Saldo Bersih Rumah Jurnal</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex align-items-end pt-0">
+                        <span class="text-white opacity-75 fw-semibold fs-7">Bagi hasil Rumah Jurnal dikurangi total pengeluaran</span>
                     </div>
                 </div>
             </div>
@@ -426,6 +440,7 @@
         // Update distribution cards
         $('#distribution_rumah_jurnal_card').text(formatRupiah(summary.distribution_rumah_jurnal));
         $('#distribution_blu_card').text(formatRupiah(summary.distribution_blu));
+        $('#distribution_rumah_jurnal_balance_card').text(formatRupiah(summary.distribution_rumah_jurnal_balance));
         $('#distribution_percentage_card').text((summary.distribution_percentage || 80) + '%');
         $('#distribution_blu_percentage_card').text((100 - (summary.distribution_percentage || 80)) + '%');
 
