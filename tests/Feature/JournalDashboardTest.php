@@ -1063,6 +1063,287 @@ it('returns journals_table tree structure with aggregated metrics and child issu
     expect($singleResponse->json('issues_table'))->toHaveCount(2);
 });
 
+it('shows month filter dropdown on journal dashboard page and displays only Juni and Desember without numbers', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = createTestJournal([
+        'name' => 'Jurnal Bulan Test',
+        'url_path' => 'j-bulan',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('back.dashboard.journal', ['journal_id' => $journal->id]));
+
+    $response->assertStatus(200);
+    $response->assertSee('FILTER BULAN');
+    $response->assertSee('id="month_select"', false);
+    $response->assertSee('<option value="all"', false);
+    $response->assertSee('<option value="6"', false);
+    $response->assertSee('<option value="12"', false);
+    $response->assertSee('Semua Bulan');
+    $response->assertSee('>Juni<', false);
+    $response->assertSee('>Desember<', false);
+    $response->assertDontSee('6 - Juni');
+    $response->assertDontSee('12 - Desember');
+});
+
+it('filters journal statistics by publication month via api', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = createTestJournal([
+        'name' => 'Jurnal Filter Bulan API',
+        'url_path' => 'j-bulan-api',
+        'author_fee' => 500000,
+    ]);
+
+    $issueJune = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '1',
+        'number' => '1',
+        'year' => '2026',
+        'month' => 6,
+        'title' => 'Edisi Juni 2026',
+        'author_fee' => 500000,
+    ]);
+
+    $subJune = createTestSubmission([
+        'issue_id' => $issueJune->id,
+        'status' => '3',
+        'payment_status' => 'paid',
+    ]);
+
+    $issueDec = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '1',
+        'number' => '2',
+        'year' => '2026',
+        'month' => 12,
+        'title' => 'Edisi Desember 2026',
+        'author_fee' => 500000,
+    ]);
+
+    $subDec = createTestSubmission([
+        'issue_id' => $issueDec->id,
+        'status' => '1',
+        'payment_status' => 'pending',
+    ]);
+
+    // Query with month=6
+    $resJune = $this->actingAs($user)->getJson(route('back.dashboard.journal.stat', [
+        'journal_id' => $journal->id,
+        'month' => 6,
+    ]));
+
+    $resJune->assertStatus(200);
+    $resJune->assertJson([
+        'success' => true,
+        'summary' => [
+            'is_month_filtered' => true,
+            'selected_month' => 6,
+            'selected_month_name' => 'Juni',
+            'total_submissions' => 1,
+            'total_published' => 1,
+            'total_unpublished' => 0,
+        ],
+    ]);
+    expect($resJune->json('issues_table'))->toHaveCount(1);
+    expect($resJune->json('issues_table.0.id'))->toBe($issueJune->id);
+    expect($resJune->json('issues_table.0.issue_label'))->toContain('Juni 2026');
+
+    // Query with month=12
+    $resDec = $this->actingAs($user)->getJson(route('back.dashboard.journal.stat', [
+        'journal_id' => $journal->id,
+        'month' => 12,
+    ]));
+
+    $resDec->assertStatus(200);
+    $resDec->assertJson([
+        'success' => true,
+        'summary' => [
+            'is_month_filtered' => true,
+            'selected_month' => 12,
+            'selected_month_name' => 'Desember',
+            'total_submissions' => 1,
+            'total_published' => 0,
+            'total_unpublished' => 1,
+        ],
+    ]);
+    expect($resDec->json('issues_table'))->toHaveCount(1);
+    expect($resDec->json('issues_table.0.id'))->toBe($issueDec->id);
+    expect($resDec->json('issues_table.0.issue_label'))->toContain('Desember 2026');
+
+    // Query with combined year and month
+    $resCombined = $this->actingAs($user)->getJson(route('back.dashboard.journal.stat', [
+        'journal_id' => $journal->id,
+        'year' => '2026',
+        'month' => 6,
+    ]));
+
+    $resCombined->assertStatus(200);
+    expect($resCombined->json('summary.is_year_filtered'))->toBeTrue();
+    expect($resCombined->json('summary.is_month_filtered'))->toBeTrue();
+    expect($resCombined->json('summary.total_submissions'))->toBe(1);
+});
+
+it('filters journal submissions modal by publication month via api', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = createTestJournal([
+        'name' => 'Jurnal Modal Bulan',
+        'url_path' => 'j-modal-bulan',
+        'author_fee' => 500000,
+    ]);
+
+    $issueJune = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '2',
+        'number' => '1',
+        'year' => '2026',
+        'month' => 6,
+        'title' => 'Edisi Juni Modal',
+        'author_fee' => 500000,
+    ]);
+
+    $subJuneBelumBayar = createTestSubmission([
+        'issue_id' => $issueJune->id,
+        'fullTitle' => 'Naskah Juni Belum Bayar',
+        'status' => '1',
+        'payment_status' => 'pending',
+    ]);
+
+    $issueDec = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '2',
+        'number' => '2',
+        'year' => '2026',
+        'month' => 12,
+        'title' => 'Edisi Desember Modal',
+        'author_fee' => 500000,
+    ]);
+
+    $subDecBelumBayar = createTestSubmission([
+        'issue_id' => $issueDec->id,
+        'fullTitle' => 'Naskah Desember Belum Bayar',
+        'status' => '1',
+        'payment_status' => 'pending',
+    ]);
+
+    // Request submissions with month=6
+    $resJuneSub = $this->actingAs($user)->getJson(route('back.dashboard.journal.submissions', [
+        'journal_id' => $journal->id,
+        'month' => 6,
+        'type' => 'belum_bayar',
+    ]));
+
+    $resJuneSub->assertStatus(200);
+    expect($resJuneSub->json('meta.month'))->toBe(6);
+    expect($resJuneSub->json('meta.month_name'))->toBe('Juni');
+    expect($resJuneSub->json('meta.total_count'))->toBe(1);
+    expect($resJuneSub->json('submissions.0.title'))->toBe('Naskah Juni Belum Bayar');
+
+    // Request submissions with month=12
+    $resDecSub = $this->actingAs($user)->getJson(route('back.dashboard.journal.submissions', [
+        'journal_id' => $journal->id,
+        'month' => 12,
+        'type' => 'belum_bayar',
+    ]));
+
+    $resDecSub->assertStatus(200);
+    expect($resDecSub->json('meta.month'))->toBe(12);
+    expect($resDecSub->json('meta.month_name'))->toBe('Desember');
+    expect($resDecSub->json('meta.total_count'))->toBe(1);
+    expect($resDecSub->json('submissions.0.title'))->toBe('Naskah Desember Belum Bayar');
+});
+
+it('exports journal recap excel file successfully for single journal mode', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal = createTestJournal([
+        'name' => 'Jurnal Sains Indonesia',
+        'url_path' => 'jsi',
+        'author_fee' => 750000,
+    ]);
+
+    $issue = Issue::create([
+        'journal_id' => $journal->id,
+        'volume' => '5',
+        'number' => '1',
+        'year' => '2026',
+        'month' => 6,
+        'title' => 'Vol 5 No 1 2026',
+        'author_fee' => 750000,
+    ]);
+
+    createTestSubmission([
+        'issue_id' => $issue->id,
+        'submission_id' => 'SUB-EXP-1',
+        'status' => '3',
+        'status_label' => 'Published',
+        'payment_status' => 'paid',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('back.dashboard.journal.export', [
+            'journal_id' => $journal->id,
+            'year' => '2026',
+            'month' => 6,
+        ]));
+
+    $response->assertStatus(200);
+    $response->assertHeader('content-disposition');
+    expect($response->headers->get('content-disposition'))->toContain('.xlsx');
+    expect($response->headers->get('content-disposition'))->toContain('Rekapitulasi_Dashboard_jurnal_sains_indonesia_2026_Juni');
+});
+
+it('exports journal recap excel file successfully for scope mode', function () {
+    $user = User::factory()->create();
+    $user->assignRole('super-admin');
+
+    $journal1 = createTestJournal(['name' => 'Scope Journal A', 'url_path' => 'sja']);
+    $journal2 = createTestJournal(['name' => 'Scope Journal B', 'url_path' => 'sjb']);
+
+    Issue::create([
+        'journal_id' => $journal1->id,
+        'volume' => '1',
+        'number' => '1',
+        'year' => '2026',
+        'title' => 'Vol 1 No 1',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('back.dashboard.journal.export', [
+            'journal_id' => 'all',
+        ]));
+
+    $response->assertStatus(200);
+    $response->assertHeader('content-disposition');
+    expect($response->headers->get('content-disposition'))->toContain('.xlsx');
+    expect($response->headers->get('content-disposition'))->toContain('Rekapitulasi_Dashboard_semua_jurnal');
+});
+
+it('prevents unauthorized access to export recap excel', function () {
+    // Unauthenticated user
+    $guestResponse = $this->get(route('back.dashboard.journal.export'));
+    $guestResponse->assertRedirect(route('login'));
+
+    // Editor without access to journal
+    $editor = User::factory()->create();
+    $editor->assignRole('editor');
+
+    $journalForbidden = createTestJournal(['name' => 'Restricted Journal', 'url_path' => 'rj']);
+
+    $forbiddenResponse = $this->actingAs($editor)->get(route('back.dashboard.journal.export', [
+        'journal_id' => $journalForbidden->id,
+    ]));
+
+    $forbiddenResponse->assertStatus(403);
+});
+
+
 
 
 

@@ -39,8 +39,8 @@
 @section('content')
     <div id="kt_content_container" class="container-xxl">
 
-        {{-- Header & Dropdown Toolbar --}}
-        <div class="card card-flush mb-5 mb-xl-8">
+        {{-- Header Card (Info & Badges) --}}
+        <div class="card card-flush shadow-sm mb-5">
             <div class="card-body py-5">
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
                     <div class="d-flex align-items-center gap-3">
@@ -54,88 +54,103 @@
                         </div>
                         <div>
                             <h2 class="text-gray-900 fw-bold mb-1" id="journal_name_display">Dashboard Jurnal</h2>
-                            <div class="text-gray-500 fs-7 d-flex flex-wrap align-items-center gap-2">
-                                <span>Pilih jurnal & edisi untuk melihat statistik artikel dan rekap data</span>
-                                <span class="badge badge-light-primary fw-bold" id="journal_fee_badge">Author Fee: Rp 0</span>
-                                <span class="badge badge-light-warning fw-bold d-none" id="filtered_year_badge">Tahun: -</span>
-                                <span class="badge badge-light-info fw-bold d-none" id="filtered_issue_badge">Issue: -</span>
-                            </div>
+                            <span class="text-gray-500 fs-7">Statistik publikasi, naskah, dan rekapitulasi pembayaran artikel</span>
                         </div>
                     </div>
 
-                    {{-- Dropdown Jurnal, Dropdown Tahun, Dropdown Issue & Refresh (1 Baris) --}}
-                    <div class="d-flex flex-nowrap align-items-end gap-2 gap-sm-3 flex-shrink-0">
-                        <div class="d-flex flex-column">
-                            <label class="text-gray-600 fs-8 fw-bold mb-1">PILIH JURNAL</label>
-                            <div class="position-relative w-150px w-sm-180px w-md-220px w-lg-250px">
-                                <select id="journal_select" class="form-select form-select-solid form-select-sm fw-bold"
-                                    data-control="select2" data-placeholder="Pilih Jurnal">
-                                    @if (!empty($accessible_scopes))
-                                        <optgroup label="RINGKASAN GABUNGAN">
-                                            @foreach ($accessible_scopes as $sId => $scope)
-                                                <option value="{{ $sId }}" @if ($selected_journal_id == $sId) selected @endif>
-                                                    {{ $scope['label'] }}
-                                                </option>
-                                            @endforeach
-                                        </optgroup>
-                                    @endif
-                                    @forelse ($grouped_journals as $typeLabel => $journalGroup)
-                                        <optgroup label="{{ $typeLabel }}">
-                                            @foreach ($journalGroup as $item)
-                                                <option value="{{ $item->id }}" @if ($selected_journal_id == $item->id) selected @endif>
-                                                    {{ $item->name }} ({{ $item->url_path }})
-                                                </option>
-                                            @endforeach
-                                        </optgroup>
-                                    @empty
-                                        <option value="">Tidak ada jurnal yang tersedia</option>
-                                    @endforelse
-                                </select>
-                            </div>
-                        </div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="badge badge-light-primary fw-bold fs-7 py-2 px-3" id="journal_fee_badge">Author Fee: Rp 0</span>
+                        <span class="badge badge-light-warning fw-bold fs-7 py-2 px-3 d-none" id="filtered_year_badge">Tahun: -</span>
+                        <span class="badge badge-light-success fw-bold fs-7 py-2 px-3 d-none" id="filtered_month_badge">Bulan: -</span>
+                        <span class="badge badge-light-info fw-bold fs-7 py-2 px-3 d-none" id="filtered_issue_badge">Issue: -</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="d-flex flex-column">
-                            <label class="text-gray-600 fs-8 fw-bold mb-1">FILTER TAHUN</label>
-                            <div class="position-relative w-110px w-sm-130px w-md-140px">
-                                <select id="year_select" class="form-select form-select-solid form-select-sm fw-bold"
-                                    data-control="select2" data-placeholder="Semua Tahun">
-                                    <option value="all" @if(empty($selected_year) || $selected_year === 'all') selected @endif>Semua Tahun</option>
-                                    @if(isset($initial_years))
-                                        @foreach ($initial_years as $yr)
-                                            <option value="{{ $yr }}" @if(isset($selected_year) && $selected_year == $yr) selected @endif>
-                                                {{ $yr }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
+        {{-- Card Filter (1 Row Semua Filter) --}}
+        <div class="card card-flush shadow-sm mb-5 mb-xl-8">
+            <div class="card-body py-4">
+                <div class="row g-3 align-items-end">
+                    {{-- Pilih Jurnal --}}
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="text-gray-700 fs-8 fw-bold mb-1 d-block">PILIH JURNAL</label>
+                        <select id="journal_select" class="form-select form-select-solid form-select-sm fw-bold w-100"
+                            data-control="select2" data-placeholder="Pilih Jurnal">
+                            @if (!empty($accessible_scopes))
+                                <optgroup label="RINGKASAN GABUNGAN">
+                                    @foreach ($accessible_scopes as $sId => $scope)
+                                        <option value="{{ $sId }}" @if ($selected_journal_id == $sId) selected @endif>
+                                            {{ $scope['label'] }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @forelse ($grouped_journals as $typeLabel => $journalGroup)
+                                <optgroup label="{{ $typeLabel }}">
+                                    @foreach ($journalGroup as $item)
+                                        <option value="{{ $item->id }}" @if ($selected_journal_id == $item->id) selected @endif>
+                                            {{ $item->name }} ({{ $item->url_path }})
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @empty
+                                <option value="">Tidak ada jurnal yang tersedia</option>
+                            @endforelse
+                        </select>
+                    </div>
 
-                        <div class="d-flex flex-column">
-                            <label class="text-gray-600 fs-8 fw-bold mb-1">FILTER ISSUE</label>
-                            <div class="position-relative w-140px w-sm-170px w-md-190px w-lg-210px">
-                                <select id="issue_select" class="form-select form-select-solid form-select-sm fw-bold"
-                                    data-control="select2" data-placeholder="Semua Issue">
-                                    <option value="all" @if(empty($selected_issue_id) || $selected_issue_id === 'all') selected @endif>Semua Issue</option>
-                                    @if(isset($initial_issues))
-                                        @foreach ($initial_issues as $iss)
-                                            <option value="{{ $iss->id }}" @if(isset($selected_issue_id) && $selected_issue_id == $iss->id) selected @endif>
-                                                Vol. {{ $iss->volume }} No. {{ $iss->number }} ({{ $iss->year ?? '-' }})@if(!empty($iss->title) && $iss->title !== '-') - {{ Str::limit($iss->title, 25) }}@endif
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
+                    {{-- Filter Tahun --}}
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <label class="text-gray-700 fs-8 fw-bold mb-1 d-block">FILTER TAHUN</label>
+                        <select id="year_select" class="form-select form-select-solid form-select-sm fw-bold w-100"
+                            data-control="select2" data-placeholder="Semua Tahun">
+                            <option value="all" @if(empty($selected_year) || $selected_year === 'all') selected @endif>Semua Tahun</option>
+                            @if(isset($initial_years))
+                                @foreach ($initial_years as $yr)
+                                    <option value="{{ $yr }}" @if(isset($selected_year) && $selected_year == $yr) selected @endif>
+                                        {{ $yr }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
 
-                        <div>
-                            <button type="button" id="btn_refresh" class="btn btn-sm btn-icon btn-light-primary h-38px w-38px flex-shrink-0" title="Muat Ulang Data">
-                                <i class="ki-duotone ki-arrows-circle fs-2">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </button>
-                        </div>
+                    {{-- Filter Bulan --}}
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <label class="text-gray-700 fs-8 fw-bold mb-1 d-block">FILTER BULAN</label>
+                        <select id="month_select" class="form-select form-select-solid form-select-sm fw-bold w-100"
+                            data-control="select2" data-placeholder="Semua Bulan">
+                            <option value="all" @if(empty($selected_month) || $selected_month === 'all') selected @endif>Semua Bulan</option>
+                            <option value="6" @if(isset($selected_month) && $selected_month == 6) selected @endif>Juni</option>
+                            <option value="12" @if(isset($selected_month) && $selected_month == 12) selected @endif>Desember</option>
+                        </select>
+                    </div>
+
+                    {{-- Filter Issue --}}
+                    <div class="col-10 col-md-10 col-lg-4">
+                        <label class="text-gray-700 fs-8 fw-bold mb-1 d-block">FILTER ISSUE</label>
+                        <select id="issue_select" class="form-select form-select-solid form-select-sm fw-bold w-100"
+                            data-control="select2" data-placeholder="Semua Issue">
+                            <option value="all" @if(empty($selected_issue_id) || $selected_issue_id === 'all') selected @endif>Semua Issue</option>
+                            @if(isset($initial_issues))
+                                @foreach ($initial_issues as $iss)
+                                    <option value="{{ $iss->id }}" @if(isset($selected_issue_id) && $selected_issue_id == $iss->id) selected @endif>
+                                        Vol. {{ $iss->volume }} No. {{ $iss->number }} ({{ $iss->month_name ? $iss->month_name . ' ' : '' }}{{ $iss->year ?? '-' }})@if(!empty($iss->title) && $iss->title !== '-') - {{ Str::limit($iss->title, 25) }}@endif
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    {{-- Tombol Refresh --}}
+                    <div class="col-2 col-md-2 col-lg-1">
+                        <button type="button" id="btn_refresh" class="btn btn-sm btn-icon btn-light-primary w-100 h-38px" title="Muat Ulang Data">
+                            <i class="ki-duotone ki-arrows-circle fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -483,10 +498,16 @@
                         <h3 class="card-label fw-bold text-gray-900 fs-4" id="table_title">Rekapitulasi Artikel & Pembayaran per Edisi (Issue)</h3>
                         <span class="text-gray-500 fs-7" id="table_desc">Rincian status publikasi, pembayaran, dan realisasi pendapatan per edisi</span>
                     </div>
-                    <div class="card-toolbar d-none" id="table_tree_toolbar">
-                        <button type="button" class="btn btn-sm btn-light-primary fw-bold" id="btn_toggle_all_trees">
-                            <i class="ki-duotone ki-element-plus fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>
-                            <span id="btn_toggle_all_text">Buka Semua Edisi</span>
+                    <div class="card-toolbar d-flex align-items-center gap-2">
+                        <div class="d-none" id="table_tree_toolbar">
+                            <button type="button" class="btn btn-sm btn-light-primary fw-bold" id="btn_toggle_all_trees">
+                                <i class="ki-duotone ki-element-plus fs-6 me-1"><span class="path1"></span><span class="path2"></span></i>
+                                <span id="btn_toggle_all_text">Buka Semua Edisi</span>
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light-success fw-bold" id="btn_export_excel" title="Export Rekapitulasi ke Excel">
+                            <i class="ki-duotone ki-file-down fs-5 me-1"><span class="path1"></span><span class="path2"></span></i>
+                            Export Excel
                         </button>
                     </div>
                 </div>
@@ -655,11 +676,13 @@
 document.addEventListener('DOMContentLoaded', function () {
     const journalSelect = document.getElementById('journal_select');
     const yearSelect = document.getElementById('year_select');
+    const monthSelect = document.getElementById('month_select');
     const issueSelect = document.getElementById('issue_select');
     const btnRefresh = document.getElementById('btn_refresh');
     const loadingOverlay = document.getElementById('dashboard_loading_overlay');
     let isUpdatingIssueDropdown = false;
     let isUpdatingYearDropdown = false;
+    let isUpdatingMonthDropdown = false;
     let cachedIssuesOptions = [];
     let allTreesExpanded = false;
 
@@ -880,8 +903,30 @@ document.addEventListener('DOMContentLoaded', function () {
         isUpdatingIssueDropdown = false;
     }
 
+    // Helper function to filter Issue Dropdown based on Year and Month
+    function filterCachedIssues() {
+        const currentYear = (typeof jQuery !== 'undefined' && $('#year_select').length)
+            ? $('#year_select').val()
+            : (yearSelect ? yearSelect.value : null);
+        const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
+
+        const currentMonth = (typeof jQuery !== 'undefined' && $('#month_select').length)
+            ? $('#month_select').val()
+            : (monthSelect ? monthSelect.value : null);
+        const filterMonth = (currentMonth === 'all' || !currentMonth) ? '' : currentMonth;
+
+        let filtered = cachedIssuesOptions;
+        if (filterYear) {
+            filtered = filtered.filter(opt => opt.year == filterYear);
+        }
+        if (filterMonth) {
+            filtered = filtered.filter(opt => opt.month == filterMonth);
+        }
+        updateIssueSelectOptions(filtered, 'all');
+    }
+
     // Main Function to load statistics via API and update DOM
-    function loadJournalStats(journalId, issueId = null, year = null, shouldUpdateDropdowns = false) {
+    function loadJournalStats(journalId, issueId = null, year = null, month = null, shouldUpdateDropdowns = false) {
         if (!journalId) return;
 
         loadingOverlay.classList.remove('d-none');
@@ -889,6 +934,9 @@ document.addEventListener('DOMContentLoaded', function () {
         let url = "{{ route('back.dashboard.journal.stat') }}?journal_id=" + encodeURIComponent(journalId);
         if (year && year !== 'all') {
             url += "&year=" + encodeURIComponent(year);
+        }
+        if (month && month !== 'all') {
+            url += "&month=" + encodeURIComponent(month);
         }
         if (issueId && issueId !== 'all') {
             url += "&issue_id=" + encodeURIComponent(issueId);
@@ -902,6 +950,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 currentUrl.searchParams.set('year', year);
             } else {
                 currentUrl.searchParams.delete('year');
+            }
+            if (month && month !== 'all') {
+                currentUrl.searchParams.set('month', month);
+            } else {
+                currentUrl.searchParams.delete('month');
             }
             if (issueId && issueId !== 'all') {
                 currentUrl.searchParams.set('issue_id', issueId);
@@ -950,6 +1003,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
+            const monthBadge = document.getElementById('filtered_month_badge');
+            if (summary.is_month_filtered && summary.selected_month_name) {
+                if (monthBadge) {
+                    monthBadge.textContent = 'Bulan: ' + summary.selected_month_name;
+                    monthBadge.classList.remove('d-none');
+                }
+            } else {
+                if (monthBadge) {
+                    monthBadge.classList.add('d-none');
+                }
+            }
+
             const issueBadge = document.getElementById('filtered_issue_badge');
             if (journal.is_scope) {
                 document.getElementById('journal_fee_badge').textContent = 'Cakupan: ' + (journal.total_journals || 0) + ' Jurnal';
@@ -994,6 +1059,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     yearSelect.value = 'all';
                 }
                 isUpdatingYearDropdown = false;
+
+                isUpdatingMonthDropdown = true;
+                if (typeof jQuery !== 'undefined' && $('#month_select').length) {
+                    $('#month_select').val('all').trigger('change.select2');
+                } else if (monthSelect) {
+                    monthSelect.value = 'all';
+                }
+                isUpdatingMonthDropdown = false;
 
                 if (journal.is_scope) {
                     isUpdatingIssueDropdown = true;
@@ -1377,7 +1450,7 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#journal_select').on('change select2:select', function () {
             const newJournalId = $(this).val();
             if (newJournalId) {
-                loadJournalStats(newJournalId, '', '', true);
+                loadJournalStats(newJournalId, '', '', '', true);
             }
         });
 
@@ -1386,15 +1459,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentJournalId = $('#journal_select').val();
             const selectedYear = $(this).val();
             const filterYear = (selectedYear === 'all' || !selectedYear) ? '' : selectedYear;
+            const currentMonth = $('#month_select').val();
+            const filterMonth = (currentMonth === 'all' || !currentMonth) ? '' : currentMonth;
 
-            // Filter issue options based on selected year
-            let filteredIssues = cachedIssuesOptions;
-            if (filterYear) {
-                filteredIssues = cachedIssuesOptions.filter(opt => opt.year == filterYear);
-            }
-            updateIssueSelectOptions(filteredIssues, 'all');
+            filterCachedIssues();
+            loadJournalStats(currentJournalId, '', filterYear, filterMonth, false);
+        });
 
-            loadJournalStats(currentJournalId, '', filterYear, false);
+        $('#month_select').on('change select2:select', function () {
+            if (isUpdatingMonthDropdown) return;
+            const currentJournalId = $('#journal_select').val();
+            const currentYear = $('#year_select').val();
+            const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
+            const selectedMonth = $(this).val();
+            const filterMonth = (selectedMonth === 'all' || !selectedMonth) ? '' : selectedMonth;
+
+            filterCachedIssues();
+            loadJournalStats(currentJournalId, '', filterYear, filterMonth, false);
         });
 
         $('#issue_select').on('change select2:select', function () {
@@ -1402,15 +1483,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentJournalId = $('#journal_select').val();
             const currentYear = $('#year_select').val();
             const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
+            const currentMonth = $('#month_select').val();
+            const filterMonth = (currentMonth === 'all' || !currentMonth) ? '' : currentMonth;
             const selectedIssueId = $(this).val();
             const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
-            loadJournalStats(currentJournalId, filterIssueId, filterYear, false);
+            loadJournalStats(currentJournalId, filterIssueId, filterYear, filterMonth, false);
         });
     }
 
     if (journalSelect) {
         journalSelect.addEventListener('change', function () {
-            loadJournalStats(this.value, '', '', true);
+            loadJournalStats(this.value, '', '', '', true);
         });
     }
 
@@ -1419,12 +1502,22 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isUpdatingYearDropdown) return;
             const currentJournalId = journalSelect ? journalSelect.value : null;
             const filterYear = (this.value === 'all' || !this.value) ? '' : this.value;
-            let filteredIssues = cachedIssuesOptions;
-            if (filterYear) {
-                filteredIssues = cachedIssuesOptions.filter(opt => opt.year == filterYear);
-            }
-            updateIssueSelectOptions(filteredIssues, 'all');
-            loadJournalStats(currentJournalId, '', filterYear, false);
+            const currentMonth = monthSelect ? monthSelect.value : null;
+            const filterMonth = (currentMonth === 'all' || !currentMonth) ? '' : currentMonth;
+            filterCachedIssues();
+            loadJournalStats(currentJournalId, '', filterYear, filterMonth, false);
+        });
+    }
+
+    if (monthSelect) {
+        monthSelect.addEventListener('change', function () {
+            if (isUpdatingMonthDropdown) return;
+            const currentJournalId = journalSelect ? journalSelect.value : null;
+            const currentYear = yearSelect ? yearSelect.value : null;
+            const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
+            const filterMonth = (this.value === 'all' || !this.value) ? '' : this.value;
+            filterCachedIssues();
+            loadJournalStats(currentJournalId, '', filterYear, filterMonth, false);
         });
     }
 
@@ -1434,8 +1527,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentJournalId = journalSelect ? journalSelect.value : null;
             const currentYear = yearSelect ? yearSelect.value : null;
             const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
+            const currentMonth = monthSelect ? monthSelect.value : null;
+            const filterMonth = (currentMonth === 'all' || !currentMonth) ? '' : currentMonth;
             const filterIssueId = (this.value === 'all' || !this.value) ? '' : this.value;
-            loadJournalStats(currentJournalId, filterIssueId, filterYear, false);
+            loadJournalStats(currentJournalId, filterIssueId, filterYear, filterMonth, false);
         });
     }
 
@@ -1448,11 +1543,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 ? $('#year_select').val()
                 : (yearSelect ? yearSelect.value : null);
             const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
+            const currentMonth = (typeof jQuery !== 'undefined' && $('#month_select').val())
+                ? $('#month_select').val()
+                : (monthSelect ? monthSelect.value : null);
+            const filterMonth = (currentMonth === 'all' || !currentMonth) ? '' : currentMonth;
             const selectedIssueId = (typeof jQuery !== 'undefined' && $('#issue_select').val())
                 ? $('#issue_select').val()
                 : (issueSelect ? issueSelect.value : null);
             const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
-            loadJournalStats(currentJournalId, filterIssueId, filterYear, false);
+            loadJournalStats(currentJournalId, filterIssueId, filterYear, filterMonth, false);
+        });
+    }
+
+    const btnExportExcel = document.getElementById('btn_export_excel');
+    if (btnExportExcel) {
+        btnExportExcel.addEventListener('click', function () {
+            const currentJournalId = (typeof jQuery !== 'undefined' && $('#journal_select').val())
+                ? $('#journal_select').val()
+                : (journalSelect ? journalSelect.value : '');
+            const currentYear = (typeof jQuery !== 'undefined' && $('#year_select').val())
+                ? $('#year_select').val()
+                : (yearSelect ? yearSelect.value : '');
+            const filterYear = (currentYear === 'all' || !currentYear) ? '' : currentYear;
+            const currentMonth = (typeof jQuery !== 'undefined' && $('#month_select').val())
+                ? $('#month_select').val()
+                : (monthSelect ? monthSelect.value : '');
+            const filterMonth = (currentMonth === 'all' || !currentMonth) ? '' : currentMonth;
+            const selectedIssueId = (typeof jQuery !== 'undefined' && $('#issue_select').val())
+                ? $('#issue_select').val()
+                : (issueSelect ? issueSelect.value : '');
+            const filterIssueId = (selectedIssueId === 'all' || !selectedIssueId) ? '' : selectedIssueId;
+
+            const params = new URLSearchParams();
+            if (currentJournalId) params.append('journal_id', currentJournalId);
+            if (filterIssueId) params.append('issue_id', filterIssueId);
+            if (filterYear) params.append('year', filterYear);
+            if (filterMonth) params.append('month', filterMonth);
+
+            const exportUrl = '{{ route("back.dashboard.journal.export") }}' + '?' + params.toString();
+            window.location.href = exportUrl;
         });
     }
 
@@ -1711,6 +1840,13 @@ document.addEventListener('DOMContentLoaded', function () {
         let url = '{{ route("back.dashboard.journal.submissions") }}?type=' + encodeURIComponent(type);
         if (journalId) url += '&journal_id=' + encodeURIComponent(journalId);
         if (filterYear) url += '&year=' + encodeURIComponent(filterYear);
+
+        const monthVal = (typeof jQuery !== 'undefined' && $('#month_select').length)
+            ? $('#month_select').val()
+            : (monthSelect ? monthSelect.value : null);
+        const filterMonth = (monthVal === 'all' || !monthVal) ? '' : monthVal;
+        if (filterMonth) url += '&month=' + encodeURIComponent(filterMonth);
+
         if (issueId) url += '&issue_id=' + encodeURIComponent(issueId);
 
         fetch(url, {
@@ -1733,9 +1869,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const journalName = meta.journal ? meta.journal.name : '-';
             let subtitleParts = [journalName];
             if (meta.year) subtitleParts.push('Tahun ' + meta.year);
+            if (meta.month_name) subtitleParts.push('Bulan ' + meta.month_name);
             if (meta.issue) {
                 subtitleParts.push(meta.issue.label);
-            } else if (!meta.year) {
+            } else if (!meta.year && !meta.month_name) {
                 subtitleParts.push('Semua Issue');
             }
             document.getElementById('modal_submission_subtitle').textContent = subtitleParts.join(' • ');
@@ -1814,13 +1951,18 @@ document.addEventListener('DOMContentLoaded', function () {
         : (yearSelect ? yearSelect.value : null);
     const initialYear = (initialYearVal === 'all' || !initialYearVal) ? '' : initialYearVal;
 
+    const initialMonthVal = (typeof jQuery !== 'undefined' && $('#month_select').val())
+        ? $('#month_select').val()
+        : (monthSelect ? monthSelect.value : null);
+    const initialMonth = (initialMonthVal === 'all' || !initialMonthVal) ? '' : initialMonthVal;
+
     const initialIssueVal = (typeof jQuery !== 'undefined' && $('#issue_select').val())
         ? $('#issue_select').val()
         : (issueSelect ? issueSelect.value : null);
     const initialIssueId = (initialIssueVal === 'all' || !initialIssueVal) ? '' : initialIssueVal;
 
     if (initialJournalId) {
-        loadJournalStats(initialJournalId, initialIssueId, initialYear, false);
+        loadJournalStats(initialJournalId, initialIssueId, initialYear, initialMonth, false);
     }
 });
 </script>
