@@ -11,7 +11,7 @@
                 @method('PUT')
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label required">Volume</label>
                             <input type="text" name="volume" class="form-control" value="{{ $issue->volume }}"
                                 required />
@@ -19,7 +19,7 @@
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label required">Number</label>
                             <input type="text" name="number" class="form-control" value="{{ $issue->number }}"
                                 required />
@@ -27,11 +27,31 @@
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label required">Year</label>
                             <input type="text" name="year" class="form-control" placeholder="{{ date('Y') }}"
                                 value="{{ $issue->year }}" required />
                             @error('year')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Bulan Terbit</label>
+                            <select name="month" class="form-select">
+                                <option value="">Pilih Bulan (Opsional)</option>
+                                @php
+                                    $monthList = [
+                                        6 => 'Juni',
+                                        12 => 'Desember',
+                                    ];
+                                @endphp
+                                @foreach ($monthList as $monthNum => $monthLabel)
+                                    <option value="{{ $monthNum }}" {{ old('month', $issue->month) == $monthNum ? 'selected' : '' }}>
+                                        {{ $monthLabel }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('month')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>

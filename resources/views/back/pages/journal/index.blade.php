@@ -101,7 +101,7 @@
                                         <div class="ms-5">
                                             <a href="#" class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1"
                                                 data-kt-ecommerce-category-filter="category_name">Vol. {{ $issue->volume }}
-                                                No. {{ $issue->number }} ({{ $issue->year }}): {{ $issue->title }}</a>
+                                                No. {{ $issue->number }} ({{ $issue->month_name ? $issue->month_name . ' ' : '' }}{{ $issue->year }}): {{ $issue->title }}</a>
                                             <div class="text-muted fs-7 fw-bold">
                                                 {{ Str::limit(strip_tags($issue->description), 300) }}...</div>
                                         </div>
@@ -189,7 +189,7 @@
                     @csrf
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label required">Volume</label>
                                 <input type="text" name="volume" class="form-control" value="{{ old('volume') }}"
                                     required />
@@ -197,7 +197,7 @@
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label required">Number</label>
                                 <input type="text" name="number" class="form-control" value="{{ old('number') }}"
                                     required />
@@ -205,11 +205,31 @@
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label required">Year</label>
                                 <input type="text" name="year" class="form-control"
                                     placeholder="{{ date('Y') }}" value="{{ old('year') }}" required />
                                 @error('year')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Bulan Terbit</label>
+                                <select name="month" class="form-select">
+                                    <option value="">Pilih Bulan (Opsional)</option>
+                                    @php
+                                        $monthList = [
+                                            6 => 'Juni',
+                                            12 => 'Desember',
+                                        ];
+                                    @endphp
+                                    @foreach ($monthList as $monthNum => $monthLabel)
+                                        <option value="{{ $monthNum }}" {{ old('month') == $monthNum ? 'selected' : '' }}>
+                                            {{ $monthLabel }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('month')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
@@ -290,24 +310,38 @@
                         @method('put')
                         <div class="modal-body">
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label required">Volume</label>
                                     <input type="text" name="volume" class="form-control" value="{{ $issue->volume }}" required />
                                     @error('volume')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label required">Number</label>
                                     <input type="text" name="number" class="form-control" value="{{ $issue->number }}" required />
                                     @error('number')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label required">Year</label>
                                     <input type="text" name="year" class="form-control" value="{{ $issue->year }}" required />
                                     @error('year')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Bulan Terbit</label>
+                                    <select name="month" class="form-select">
+                                        <option value="">Pilih Bulan (Opsional)</option>
+                                        @foreach ([6 => 'Juni', 12 => 'Desember'] as $mNum => $mName)
+                                            <option value="{{ $mNum }}" {{ old('month', $issue->month) == $mNum ? 'selected' : '' }}>
+                                                {{ $mName }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('month')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>

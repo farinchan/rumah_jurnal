@@ -17,7 +17,7 @@ it('logs in user with remember me enabled', function () {
         'remember' => '1',
     ]);
 
-    $response->assertRedirect('/');
+    $response->assertRedirect('/back/profile');
     $this->assertAuthenticatedAs($user);
 
     // Verify remember token is set on user

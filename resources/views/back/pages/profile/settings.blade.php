@@ -273,24 +273,7 @@
                 </div>
             </div>
             <div class="card-body border-top p-9">
-                <div class="d-flex flex-wrap align-items-center">
-                    <div class="flex-row-fluid">
-                        <div class="notice d-flex bg-light-success rounded border-success border border-dashed p-6">
-                            <i class="ki-duotone ki-shield-tick fs-2tx text-success me-4">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                            <div class="d-flex flex-stack flex-grow-1 flex-wrap flex-md-nowrap">
-                                <div class="mb-3 mb-md-0 fw-semibold">
-                                    <h4 class="text-gray-900 fw-bold">2FA Aktif</h4>
-                                    <div class="fs-6 text-gray-700 pe-7">Two-Factor Authentication (2FA) selalu aktif untuk keamanan akun Anda. Setiap kali login, kode verifikasi akan dikirim ke email Anda.</div>
-                                </div>
-                                <span class="badge badge-success fs-7 fw-bold py-3 px-4">Wajib Aktif</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="separator separator-dashed my-6"></div>
+
                 <div class="d-flex flex-wrap align-items-center mb-4">
                     <div class="d-flex flex-column flex-grow-1">
                         <div class="d-flex align-items-center mb-2">

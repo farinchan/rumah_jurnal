@@ -29,6 +29,19 @@ class Issue extends Model
             } elseif ($issue->max_articles === '') {
                 $issue->max_articles = null;
             }
+            if ($issue->month === '' || $issue->month === null) {
+                $issue->month = null;
+            } else {
+                $issue->month = (int) $issue->month;
+            }
+        });
+
+        static::updating(function (Issue $issue) {
+            if ($issue->month === '' || $issue->month === null) {
+                $issue->month = null;
+            } else {
+                $issue->month = (int) $issue->month;
+            }
         });
     }
 
@@ -37,7 +50,42 @@ class Issue extends Model
         return [
             'author_fee' => 'integer',
             'max_articles' => 'integer',
+            'month' => 'integer',
         ];
+    }
+
+    public function getPublicationMonthAttribute(): ?int
+    {
+        return $this->month ? (int) $this->month : null;
+    }
+
+    public function setPublicationMonthAttribute($value): void
+    {
+        $this->attributes['month'] = ($value === '' || $value === null) ? null : (int) $value;
+    }
+
+    public function getMonthNameAttribute(): ?string
+    {
+        if (!$this->month) {
+            return null;
+        }
+
+        $months = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        return $months[(int) $this->month] ?? null;
     }
 
     protected $guarded = ['id', 'created_at', 'updated_at'];

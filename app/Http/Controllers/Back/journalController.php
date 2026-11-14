@@ -186,6 +186,7 @@ class journalController extends Controller
             'volume' => 'required',
             'number' => 'required',
             'year' => 'required',
+            'month' => 'nullable|integer|between:1,12',
             'title' => 'required',
             'description' => 'nullable',
             'author_fee' => 'nullable|numeric|min:0',
@@ -194,6 +195,8 @@ class journalController extends Controller
             'volume.required' => 'Volume harus diisi',
             'number.required' => 'Number harus diisi',
             'year.required' => 'Year harus diisi',
+            'month.integer' => 'Bulan terbit harus berupa angka',
+            'month.between' => 'Bulan terbit harus antara 1 sampai 12',
             'title.required' => 'Title harus diisi',
             'author_fee.numeric' => 'Author Fee harus berupa angka',
             'author_fee.min' => 'Author Fee tidak boleh kurang dari 0',
@@ -229,6 +232,12 @@ class journalController extends Controller
             }
         }
 
+        if (array_key_exists('month', $data)) {
+            $data['month'] = ($data['month'] === '' || $data['month'] === null) ? null : (int) $data['month'];
+        } elseif (array_key_exists('publication_month', $data)) {
+            $data['month'] = ($data['publication_month'] === '' || $data['publication_month'] === null) ? null : (int) $data['publication_month'];
+        }
+
         $journal->issues()->create($data);
         Alert::success('Success', 'Issue has been created');
         return redirect()->back();
@@ -240,6 +249,7 @@ class journalController extends Controller
             'volume' => 'required',
             'number' => 'required',
             'year' => 'required',
+            'month' => 'nullable|integer|between:1,12',
             'title' => 'required',
             'description' => 'nullable',
             'author_fee' => 'nullable|numeric|min:0',
@@ -249,6 +259,8 @@ class journalController extends Controller
             'volume.required' => 'Volume harus diisi',
             'number.required' => 'Number harus diisi',
             'year.required' => 'Year harus diisi',
+            'month.integer' => 'Bulan terbit harus berupa angka',
+            'month.between' => 'Bulan terbit harus antara 1 sampai 12',
             'title.required' => 'Title harus diisi',
             'author_fee.numeric' => 'Author Fee harus berupa angka',
             'author_fee.min' => 'Author Fee tidak boleh kurang dari 0',
@@ -288,6 +300,12 @@ class journalController extends Controller
                     $data['max_articles'] = (int) $data['max_articles'];
                 }
             }
+        }
+
+        if (array_key_exists('month', $data)) {
+            $data['month'] = ($data['month'] === '' || $data['month'] === null) ? null : (int) $data['month'];
+        } elseif (array_key_exists('publication_month', $data)) {
+            $data['month'] = ($data['publication_month'] === '' || $data['publication_month'] === null) ? null : (int) $data['publication_month'];
         }
 
         $issue->update($data);

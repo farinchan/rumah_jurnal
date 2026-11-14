@@ -71,7 +71,7 @@ class LoginController extends Controller
             }
 
             // For regular users, or when 2FA is disabled, login directly
-            return redirect()->intended('/');
+            return redirect()->intended('/back/profile');
 
         }
 

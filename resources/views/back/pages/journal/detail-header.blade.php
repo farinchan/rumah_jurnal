@@ -7,7 +7,7 @@
                     <div class="d-flex flex-column">
                         <div class="d-flex align-items-center mb-1">
                             <a href="#" class="text-gray-800 text-hover-primary fs-2 fw-bold me-3">
-                                Vol. {{ $issue->volume }} No. {{ $issue->number }} ({{ $issue->year }}):
+                                Vol. {{ $issue->volume }} No. {{ $issue->number }} ({{ $issue->month_name ? $issue->month_name . ' ' : '' }}{{ $issue->year }}):
                                 {{ $issue->title }}
                             </a>
                             @if ($issue->status == 'published')
