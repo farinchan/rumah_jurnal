@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
          $middleware->alias([
             'TrustProxies' => \App\Http\Middleware\TrustProxies::class,
             '2fa' => \App\Http\Middleware\TwoFactorAuthentication::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             '/login',

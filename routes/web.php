@@ -337,12 +337,12 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
     });
 
-    Route::prefix('finance')->name('finance.')->group(function () {
+    Route::prefix('finance')->name('finance.')->middleware(['role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub'])->group(function () {
         Route::get('/verification', [BackFinanceController::class, 'verificationIndex'])->name('verification.index');
         Route::get('/verification/datatable', [BackFinanceController::class, 'verificationDatatable'])->name('verification.datatable');
         Route::get('/verification/{id}/detail', [BackFinanceController::class, 'verificationDetail'])->name('verification.detail');
         Route::put('/verification/{id}/update', [BackFinanceController::class, 'verificationUpdate'])->name('verification.update');
-        Route::get('/verification/{id}/delete', [BackFinanceController::class, 'verificationDelete'])->name('verification.delete');
+        Route::delete('/verification/{id}/delete', [BackFinanceController::class, 'verificationDelete'])->name('verification.delete')->middleware(['role:super-admin']);
         Route::get('/confirm-payment/{id}/generate', [BackFinanceController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
         Route::get('/confirm-payment/{id}/mail-send', [BackFinanceController::class, 'confirmPaymentMailSend'])->name('confirm-payment.mail-send');
 
@@ -369,7 +369,7 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
             Route::delete('/delete/{id}', [BackMasterDataController::class, 'journalDestroy'])->name('destroy');
         });
 
-        Route::prefix('user')->name('user.')->group(function () {
+        Route::prefix('user')->name('user.')->middleware(['role:super-admin'])->group(function () {
             Route::get('/', [BackUserController::class, 'index'])->name('index');
             Route::get('/create', [BackUserController::class, 'create'])->name('create');
             Route::post('/create', [BackUserController::class, 'store'])->name('store');
@@ -404,7 +404,7 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::delete('/{id}', [BackMessageController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('setting')->name('setting.')->group(function () {
+    Route::prefix('setting')->name('setting.')->middleware(['role:super-admin'])->group(function () {
         Route::get('/website', [BackSettingController::class, 'website'])->name('website');
         Route::put('/website', [BackSettingController::class, 'websiteUpdate'])->name('website.update');
         Route::put('/website/info', [BackSettingController::class, 'informationUpdate'])->name('website.info');

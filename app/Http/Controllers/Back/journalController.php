@@ -56,6 +56,24 @@ class journalController extends Controller
         'admin-student-research-hub',
     ];
 
+    public function authorizeJournalAccess(string|Journal $journalOrPath): Journal
+    {
+        $journal = $journalOrPath instanceof Journal
+            ? $journalOrPath
+            : Journal::where('url_path', $journalOrPath)->first();
+
+        if (!$journal) {
+            abort(404, 'Jurnal tidak ditemukan.');
+        }
+
+        $user = auth()->user();
+        if ($user && ($user->hasRole('super-admin') || $user->hasRole('admin') || $user->can($journal->url_path))) {
+            return $journal;
+        }
+
+        abort(403, 'Anda tidak memiliki hak akses untuk jurnal ini.');
+    }
+
     public function index($journal_path)
     {
         $journal = Journal::where('url_path', $journal_path)
@@ -68,7 +86,7 @@ class journalController extends Controller
         if (!$journal) {
             return abort(404);
         }
-        abort_unless(auth()->user()->can($journal->url_path), 403);
+        $this->authorizeJournalAccess($journal);
 
         $data = [
             'title' => $journal->title,
@@ -91,8 +109,7 @@ class journalController extends Controller
 
     public function searchAuthor(Request $request, $journal_path)
     {
-        $journal = Journal::where('url_path', $journal_path)->firstOrFail();
-        abort_unless(auth()->user()->can($journal->url_path), 403);
+        $journal = $this->authorizeJournalAccess($journal_path);
 
         $keyword = trim((string) $request->input('q', $request->input('search', '')));
         $searchBy = $request->input('search_by', 'all');
@@ -209,10 +226,7 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
         $data = $request->all();
         if (!auth()->user()->hasRole('super-admin')) {
@@ -275,10 +289,7 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
         $issue = $journal->issues()->find($issue_id);
         if (!$issue) {
@@ -321,10 +332,7 @@ class journalController extends Controller
 
     public function issueDestroy($journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
         $issue = $journal->issues()->find($issue_id);
         if (!$issue) {
@@ -338,12 +346,9 @@ class journalController extends Controller
 
     public function dashboardIndex($journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::with('submissions')->where('journal_id', $journal->id)->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -381,12 +386,9 @@ class journalController extends Controller
             return $this->articleDatatable($request, $journal_path, $issue_id);
         }
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -427,12 +429,9 @@ class journalController extends Controller
 
     public function articleDatatable(Request $request, $journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -646,8 +645,8 @@ class journalController extends Controller
 
     public function articleModalView($journal_path, $issue_id, $id)
     {
-        $journal = Journal::where('url_path', $journal_path)->firstOrFail();
-        $issue = Issue::findOrFail($issue_id);
+        $journal = $this->authorizeJournalAccess($journal_path);
+        $issue = Issue::where('journal_id', $journal->id)->findOrFail($issue_id);
         $submission = Submission::where('issue_id', $issue->id)
             ->with(['paymentInvoices.payments', 'editors', 'reviewers'])
             ->findOrFail($id);
@@ -720,8 +719,8 @@ class journalController extends Controller
 
     public function articleModalAction($journal_path, $issue_id, $id)
     {
-        $journal = Journal::where('url_path', $journal_path)->firstOrFail();
-        $issue = Issue::findOrFail($issue_id);
+        $journal = $this->authorizeJournalAccess($journal_path);
+        $issue = Issue::where('journal_id', $journal->id)->findOrFail($issue_id);
         $submission = Submission::where('issue_id', $issue->id)
             ->with(['paymentInvoices.payments'])
             ->findOrFail($id);
@@ -736,12 +735,9 @@ class journalController extends Controller
 
     public function articleUpdate(Request $request, $journal_path, $issue_id, $id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -887,14 +883,11 @@ class journalController extends Controller
         return redirect()->back();
     }
 
-        public function articleMoveIssue(Request $request, $journal_path, $issue_id, $id)
+    public function articleMoveIssue(Request $request, $journal_path, $issue_id, $id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -950,12 +943,9 @@ class journalController extends Controller
             abort(403, 'Hanya super-admin yang dapat menghapus submission.');
         }
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -972,12 +962,9 @@ class journalController extends Controller
 
     public function articleExport($journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -1201,17 +1188,13 @@ class journalController extends Controller
 
     public function loaGenerate($submission)
     {
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $validationUrl = route('loa.validate', [
             'submission_id' => $submission->submission_id ?? $submission->id,
@@ -1249,17 +1232,13 @@ class journalController extends Controller
 
     public function loaMailSend($submission)
     {
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $validationUrl = route('loa.validate', [
             'submission_id' => $submission->submission_id ?? $submission->id,
@@ -1412,17 +1391,13 @@ class journalController extends Controller
 
     public function invoiceGenerate1($submission)
     {
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $invoice = $submission->paymentInvoices()->where('payment_percent', '60')->first();
         if (!$invoice) {
@@ -1480,18 +1455,13 @@ class journalController extends Controller
 
     public function invoiceMailSend1($submission)
     {
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        // Load PPTX template
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $invoice = $submission->paymentInvoices()->where('payment_percent', '60')->first();
         if (!$invoice) {
@@ -1593,17 +1563,13 @@ class journalController extends Controller
 
     public function invoiceGenerate2($submission)
     {
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $invoice = $submission->paymentInvoices()->where('payment_percent', '40')->first();
         if (!$invoice) {
@@ -1661,18 +1627,13 @@ class journalController extends Controller
 
     public function invoiceMailSend2($submission)
     {
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        // Load PPTX template
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $invoice = $submission->paymentInvoices()->where('payment_percent', '40')->first();
         if (!$invoice) {
@@ -1774,17 +1735,13 @@ class journalController extends Controller
 
     public function invoiceGenerate3($submission)
     {
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $invoice = $submission->paymentInvoices()->where('payment_percent', '100')->first();
         if (!$invoice) {
@@ -1842,18 +1799,13 @@ class journalController extends Controller
 
     public function invoiceMailSend3($submission)
     {
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        // Load PPTX template
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $invoice = $submission->paymentInvoices()->where('payment_percent', '100')->first();
         if (!$invoice) {
@@ -1968,17 +1920,13 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $submission = Submission::find($submission);
-        if (!$submission) {
+        $submission = Submission::with('issue.journal')->find($submission);
+        if (!$submission || !$submission->issue || !$submission->issue->journal) {
             Alert::error('Error', 'Submission not found');
             return redirect()->back()->with('error', 'Submission not found');
         }
-
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($submission->issue->journal);
+        $issue = $submission->issue;
 
         $invoice = $submission->paymentInvoices()
             ->where('is_custom', true)
@@ -2024,11 +1972,12 @@ class journalController extends Controller
 
     public function invoiceDestroy($invoiceId)
     {
-        $invoice = PaymentInvoice::find($invoiceId);
-        if (!$invoice) {
+        $invoice = PaymentInvoice::with('submission.issue.journal')->find($invoiceId);
+        if (!$invoice || !$invoice->submission || !$invoice->submission->issue || !$invoice->submission->issue->journal) {
             Alert::error('Error', 'Invoice tidak ditemukan');
             return redirect()->back();
         }
+        $this->authorizeJournalAccess($invoice->submission->issue->journal);
 
         if ($invoice->is_paid) {
             Alert::error('Error', 'Invoice yang sudah lunas tidak dapat dibatalkan');
@@ -2045,23 +1994,14 @@ class journalController extends Controller
 
     public function invoiceGenerateCustom($invoiceId)
     {
-        $invoice = PaymentInvoice::find($invoiceId);
-        if (!$invoice || !$invoice->is_custom) {
+        $invoice = PaymentInvoice::with('submission.issue.journal')->find($invoiceId);
+        if (!$invoice || !$invoice->is_custom || !$invoice->submission || !$invoice->submission->issue || !$invoice->submission->issue->journal) {
             Alert::error('Error', 'Custom invoice not found');
             return redirect()->back()->with('error', 'Custom invoice not found');
         }
-
-        $submission = Submission::find($invoice->submission_id);
-        if (!$submission) {
-            Alert::error('Error', 'Submission not found');
-            return redirect()->back()->with('error', 'Submission not found');
-        }
-
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($invoice->submission->issue->journal);
+        $submission = $invoice->submission;
+        $issue = $submission->issue;
 
         $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
         $data = [
@@ -2099,23 +2039,14 @@ class journalController extends Controller
 
     public function invoiceMailSendCustom($invoiceId)
     {
-        $invoice = PaymentInvoice::find($invoiceId);
-        if (!$invoice || !$invoice->is_custom) {
+        $invoice = PaymentInvoice::with('submission.issue.journal')->find($invoiceId);
+        if (!$invoice || !$invoice->is_custom || !$invoice->submission || !$invoice->submission->issue || !$invoice->submission->issue->journal) {
             Alert::error('Error', 'Custom invoice not found');
             return redirect()->back()->with('error', 'Custom invoice not found');
         }
-
-        $submission = Submission::find($invoice->submission_id);
-        if (!$submission) {
-            Alert::error('Error', 'Submission not found');
-            return redirect()->back()->with('error', 'Submission not found');
-        }
-
-        $issue = Issue::find($submission->issue_id);
-        if (!$issue) {
-            Alert::error('Error', 'Issue not found');
-            return redirect()->back()->with('error', 'Issue not found');
-        }
+        $this->authorizeJournalAccess($invoice->submission->issue->journal);
+        $submission = $invoice->submission;
+        $issue = $submission->issue;
 
         $yearFolder = $invoice->created_at ? $invoice->created_at->format('Y') : Carbon::now()->format('Y');
         $filename = 'invoice-' . $submission->submission_id . '-custom-' . $invoice->id . '.pdf';
@@ -2202,12 +2133,9 @@ class journalController extends Controller
 
     public function editorIndex($journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with(['submissions', 'editors', 'reviewers'])->find($issue_id);
+        $issue = Issue::with(['submissions', 'editors', 'reviewers'])->where('journal_id', $journal->id)->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2243,12 +2171,9 @@ class journalController extends Controller
 
     public function EditorExport($journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2264,12 +2189,9 @@ class journalController extends Controller
 
     public function editorCertificateDownload(Request $request, $journal_path, $issue_id, ?int $id = null)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2422,12 +2344,9 @@ class journalController extends Controller
 
     public function editorCertificateSendmail(Request $request, $journal_path, $issue_id, ?int $id = null)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2594,12 +2513,9 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2618,12 +2534,9 @@ class journalController extends Controller
     public function editorFileSkSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
     {
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2688,12 +2601,9 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2712,12 +2622,9 @@ class journalController extends Controller
     public function editorFileFeeSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
     {
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2793,6 +2700,13 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        $journal = $this->authorizeJournalAccess($journal_path);
+        $issue = Issue::where('journal_id', $journal->id)->find($issue_id);
+        if (!$issue) {
+            Alert::error('Error', 'Issue not found');
+            return redirect()->back();
+        }
+
         $editor = Editor::where('issue_id', $issue_id)->find($id);
         if (!$editor) {
             Alert::error('Error', 'Editor not found');
@@ -2816,13 +2730,9 @@ class journalController extends Controller
 
     public function editorDestroy($journal_path, $issue_id, $id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            Alert::error('Error', 'Journal not found');
-            return back()->with('error', 'Journal not found');
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             Alert::error('Error', 'Issue not found');
             return back()->with('error', 'Issue not found');
@@ -2843,12 +2753,9 @@ class journalController extends Controller
 
     public function reviewerIndex($journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2885,12 +2792,9 @@ class journalController extends Controller
 
     public function reviewerExport($journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -2906,12 +2810,9 @@ class journalController extends Controller
 
     public function reviewerCertificateDownload(Request $request, $journal_path, $issue_id, ?int $id = null)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -3065,12 +2966,9 @@ class journalController extends Controller
 
     public function reviewerCertificateSendmail(Request $request, $journal_path, $issue_id, ?int $id = null)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -3237,12 +3135,9 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -3261,12 +3156,9 @@ class journalController extends Controller
     public function reviewerFileSkSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
     {
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -3331,12 +3223,9 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -3355,12 +3244,9 @@ class journalController extends Controller
     public function reviewerFileFeeSendMail(Request $request, $journal_path, $issue_id, ?string $email = null)
     {
 
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
@@ -3434,6 +3320,12 @@ class journalController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        $journal = $this->authorizeJournalAccess($journal_path);
+        $issue = Issue::where('journal_id', $journal->id)->find($issue_id);
+        if (!$issue) {
+            return abort(404);
+        }
+
         $reviewer = Reviewer::where('issue_id', $issue_id)->find($id);
         if (!$reviewer) {
             Alert::error('Error', 'Reviewer not found');
@@ -3457,17 +3349,14 @@ class journalController extends Controller
 
     public function reviewerDestroy($journal_path, $issue_id, $id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }
 
-        $reviewer = Reviewer::find($id);
+        $reviewer = Reviewer::where('issue_id', $issue_id)->find($id);
         if (!$reviewer) {
             return abort(404);
         }
@@ -3479,12 +3368,9 @@ class journalController extends Controller
 
     public function settingIndex($journal_path, $issue_id)
     {
-        $journal = Journal::where('url_path', $journal_path)->first();
-        if (!$journal) {
-            return abort(404);
-        }
+        $journal = $this->authorizeJournalAccess($journal_path);
 
-        $issue = Issue::with('submissions')->find($issue_id);
+        $issue = Issue::where('journal_id', $journal->id)->with('submissions')->find($issue_id);
         if (!$issue) {
             return abort(404);
         }

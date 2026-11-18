@@ -18,6 +18,8 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Mail;
@@ -29,18 +31,21 @@ use Yajra\DataTables\Facades\DataTables;
 use illuminate\Support\Str;
 
 
-class FinanceController extends Controller
+class FinanceController extends Controller implements HasMiddleware
 {
 
     protected $cookie_control_panel;
 
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub'),
+        ];
+    }
+
     public function __construct()
     {
-        $this->cookie_control_panel = Cookie::get('control_panel');
-
-        if (!$this->cookie_control_panel) {
-            redirect()->route('back.dashboard')->with('permission_denied', 'Anda tidak memiliki akses modul ini')->send();
-        }
+        $this->cookie_control_panel = Cookie::get('control_panel', 'journal');
     }
 
     public function verificationIndex()
@@ -213,15 +218,15 @@ class FinanceController extends Controller
             })
             ->addColumn('action', function ($payment) {
                 $deleteButton = '';
-                if (Auth()->user()->hasRole('super-admin')) {
+                if (auth()->check() && auth()->user()->hasRole('super-admin')) {
                     $deleteButton = '
-                        <a href="' . route("back.finance.verification.delete", $payment->id) . '" class="btn btn-sm btn-light-danger my-1">
+                        <button type="button" class="btn btn-sm btn-light-danger my-1 btn-delete-payment" data-url="' . route("back.finance.verification.delete", $payment->id) . '" data-id="' . $payment->id . '" title="Hapus Pembayaran">
                             <i class="ki-duotone ki-trash fs-2">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
                             </i>
                             Hapus
-                        </a>
+                        </button>
                     ';
                 }
                 if ($payment->payment_status == 'accepted') {
@@ -382,6 +387,10 @@ class FinanceController extends Controller
 
     public function verificationDelete(Request $request, $id)
     {
+        if (!auth()->check() || !auth()->user()->hasRole('super-admin')) {
+            abort(403, 'Hanya super-admin yang dapat menghapus data pembayaran.');
+        }
+
         $payment = Payment::findOrFail($id);
         if (!$payment) {
             Alert::error('Error', 'Payment not found');

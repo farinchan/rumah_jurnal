@@ -157,6 +157,10 @@
                 </table>
             </div>
         </div>
+        <form id="form_delete_verification" method="POST" style="display: none;">
+            @csrf
+            @method('DELETE')
+        </form>
     </div>
 @endsection
 @section('scripts')
@@ -225,5 +229,26 @@
             function() {
                 $('#datatable_ajax').DataTable().ajax.reload();
             });
+
+        $(document).on('click', '.btn-delete-payment', function(e) {
+            e.preventDefault();
+            var url = $(this).data('url');
+            Swal.fire({
+                title: 'Hapus Pembayaran?',
+                text: 'Data pembayaran yang dihapus tidak dapat dikembalikan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var form = $('#form_delete_verification');
+                    form.attr('action', url);
+                    form.submit();
+                }
+            });
+        });
     </script>
 @endsection

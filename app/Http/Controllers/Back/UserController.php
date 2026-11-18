@@ -4,14 +4,23 @@ namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 
-class UserController extends Controller
+class UserController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:super-admin'),
+        ];
+    }
+
     public function index()
     {
         $data = [
@@ -292,6 +301,11 @@ class UserController extends Controller
 
     public function destroy($id)
     {
+        if ($id == auth()->id()) {
+            Alert::error('Gagal', 'Anda tidak dapat menghapus akun Anda sendiri.');
+            return redirect()->back();
+        }
+
         $user = User::find($id);
         if ($user?->photo) {
             Storage::disk('public')->delete($user->photo);
