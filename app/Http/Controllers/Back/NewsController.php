@@ -7,13 +7,21 @@ use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\NewsComment;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
 
-class NewsController extends Controller
+class NewsController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:super-admin|humas'),
+        ];
+    }
     public function category()
     {
         $data = [

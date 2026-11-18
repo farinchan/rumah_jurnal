@@ -39,15 +39,17 @@
                         </a>
                     </div>
                 @endhasanyrole
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.dashboard.news')) active @endif"
-                        href="{{ route('back.dashboard.news') }}">
-                        <span class="menu-bullet">
-                            <span class="bullet bullet-dot"></span>
-                        </span>
-                        <span class="menu-title">Berita</span>
-                    </a>
-                </div>
+                @role('super-admin|humas')
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.dashboard.news')) active @endif"
+                            href="{{ route('back.dashboard.news') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Berita</span>
+                        </a>
+                    </div>
+                @endrole
                 @role('super-admin|keuangan')
                     <div class="menu-item">
                         <a class="menu-link @if (request()->routeIs('back.dashboard.cashflow')) active @endif"

@@ -410,3 +410,56 @@ it('allows super-admin to delete payment via HTTP DELETE', function () {
     $res->assertStatus(302);
     expect(Payment::find($payment->id))->toBeNull();
 });
+
+/*
+|--------------------------------------------------------------------------
+| Post Menu Access Control: Restricted to Super-Admin and Humas
+|--------------------------------------------------------------------------
+*/
+
+it('forbids unauthorized roles from accessing Post menu routes', function () {
+    $editor = User::factory()->create();
+    $editor->assignRole('editor');
+
+    // Pengumuman
+    $this->actingAs($editor)->get(route('back.announcement.index'))->assertStatus(403);
+    $this->actingAs($editor)->get(route('back.announcement.create'))->assertStatus(403);
+
+    // Event
+    $this->actingAs($editor)->get(route('back.event.index'))->assertStatus(403);
+    $this->actingAs($editor)->get(route('back.event.create'))->assertStatus(403);
+
+    // Berita (News)
+    $this->actingAs($editor)->get(route('back.news.index'))->assertStatus(403);
+    $this->actingAs($editor)->get(route('back.news.create'))->assertStatus(403);
+    $this->actingAs($editor)->get(route('back.news.category'))->assertStatus(403);
+    $this->actingAs($editor)->get(route('back.news.comment'))->assertStatus(403);
+
+    // Kata Sambutan (Welcome Speech / Tentang Kami)
+    $this->actingAs($editor)->get(route('back.welcomeSpeech.index'))->assertStatus(403);
+
+    // Menu Profil
+    $this->actingAs($editor)->get(route('back.menu.profil.index'))->assertStatus(403);
+
+    // Dashboard Berita
+    $this->actingAs($editor)->get(route('back.dashboard.news'))->assertStatus(403);
+});
+
+it('allows humas and super-admin to access Post menu routes', function () {
+    $humas = User::factory()->create();
+    $humas->assignRole('humas');
+
+    $superAdmin = User::factory()->create();
+    $superAdmin->assignRole('super-admin');
+
+    foreach ([$humas, $superAdmin] as $user) {
+        $this->actingAs($user)->get(route('back.announcement.index'))->assertStatus(200);
+        $this->actingAs($user)->get(route('back.event.index'))->assertStatus(200);
+        $this->actingAs($user)->get(route('back.news.index'))->assertStatus(200);
+        $this->actingAs($user)->get(route('back.news.category'))->assertStatus(200);
+        $this->actingAs($user)->get(route('back.news.comment'))->assertStatus(200);
+        $this->actingAs($user)->get(route('back.welcomeSpeech.index'))->assertStatus(200);
+        $this->actingAs($user)->get(route('back.menu.profil.index'))->assertStatus(200);
+        $this->actingAs($user)->get(route('back.dashboard.news'))->assertStatus(200);
+    }
+});

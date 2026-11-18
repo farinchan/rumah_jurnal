@@ -157,8 +157,8 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/stats', [BackDashboardController::class, 'stats'])->name('stats');
         Route::get('/visitor-stat', [BackDashboardController::class, 'visistorStat'])->name('visitor.stat');
 
-        Route::get('/news', [BackDashboardController::class, 'news'])->name('news');
-        Route::get('/news-stat', [BackDashboardController::class, 'stat'])->name('news.stat');
+        Route::get('/news', [BackDashboardController::class, 'news'])->name('news')->middleware(['role:super-admin|humas']);
+        Route::get('/news-stat', [BackDashboardController::class, 'stat'])->name('news.stat')->middleware(['role:super-admin|humas']);
 
         Route::get('/cashflow', [BackDashboardController::class, 'cashflow'])->name('cashflow');
         Route::get('/cashflow-stat', [BackDashboardController::class, 'cashflowStat'])->name('cashflow.stat');
@@ -177,91 +177,93 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::put('/password-update', [App\Http\Controllers\Back\ProfileController::class, 'passwordUpdate'])->name('password.update');
     });
 
-    Route::prefix('announcement')->name('announcement.')->group(function () {
-        Route::get('/', [BackAnnouncementController::class, 'index'])->name('index');
-        Route::get('/create', [BackAnnouncementController::class, 'create'])->name('create');
-        Route::post('/create', [BackAnnouncementController::class, 'store'])->name('store');
-        Route::get('/edit/{id}', [BackAnnouncementController::class, 'edit'])->name('edit');
-        Route::put('/edit/{id}', [BackAnnouncementController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [BackAnnouncementController::class, 'destroy'])->name('destroy');
-    });
-
-    Route::prefix('event')->name('event.')->group(function () {
-        Route::get('/', [BackEventController::class, 'index'])->name('index');
-        Route::get('/create', [BackEventController::class, 'create'])->name('create');
-        Route::post('/create', [BackEventController::class, 'store'])->name('store');
-        Route::get('/edit/{id}', [BackEventController::class, 'edit'])->name('edit');
-        Route::put('/edit/{id}', [BackEventController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [BackEventController::class, 'destroy'])->name('destroy');
-
-        Route::prefix('detail')->name('detail.')->group(function () {
-            Route::get('/{id}/overview', [BackEventController::class, 'overview'])->name('overview');
-
-            Route::get('/{id}/participant', [BackEventController::class, 'participant'])->name('participant');
-            Route::post('/{id}/participant/store', [BackEventController::class, 'participantStore'])->name('participant.store');
-            Route::delete('/{id}/participant/{event_user_id}/delete', [BackEventController::class, 'participantDestroy'])->name('participant.destroy');
-            Route::get('/{id}/participant/export', [BackEventController::class, 'participantExport'])->name('participant.export');
-            Route::get('/{id}/participant/import-reviewer', [BackEventController::class, 'participantImportReviewerModal'])->name('participant.import-reviewer.modal');
-            Route::post('/{id}/participant/import-reviewer', [BackEventController::class, 'participantImportReviewer'])->name('participant.import-reviewer');
-            Route::get('/{id}/participant/import-editor', [BackEventController::class, 'participantImportEditorModal'])->name('participant.import-editor.modal');
-            Route::post('/{id}/participant/import-editor', [BackEventController::class, 'participantImportEditor'])->name('participant.import-editor');
-
-            Route::get('/{id}/attendance', [BackEventController::class, 'attendance'])->name('attendance');
-            Route::post('/{id}/attendance/store', [BackEventController::class, 'attendanceStore'])->name('attendance.store');
-            Route::put('/{id}/attendance/{event_attendance_id}/update', [BackEventController::class, 'attendanceUpdate'])->name('attendance.update');
-            Route::get('/{id}/attendance/{event_attendance_id}', [BackEventController::class, 'attendanceDetail'])->name('attendance.detail');
-            Route::get('/{id}/attendance/{event_attendance_id}/datatable', [BackEventController::class, 'attendanceDetailDatatable'])->name('attendance.detail.datatable');
-            Route::post('/{id}/attendance/{event_attendance_id}/checkin/{event_user_id}', [BackEventController::class, 'attendanceDetailUserCheckin'])->name('attendance.detail.checkin');
-            Route::get('/{id}/attendance/{event_attendance_id}/export', [BackEventController::class, 'attendanceExport'])->name('attendance.export');
-
-            Route::get('/{id}/notification', [BackEventController::class, 'notification'])->name('notification');
-            Route::post('/{id}/notification/whatsapp', [BackEventController::class, 'notificationWhatsapp'])->name('notification.whatsapp');
-
-            // Certificate routes (1 event = 1 template)
-            Route::get('/{id}/certificate', [App\Http\Controllers\Back\CertificateController::class, 'index'])->name('certificate.index');
-            Route::get('/{id}/certificate/create', [App\Http\Controllers\Back\CertificateController::class, 'create'])->name('certificate.create');
-            Route::post('/{id}/certificate/store', [App\Http\Controllers\Back\CertificateController::class, 'store'])->name('certificate.store');
-            Route::get('/{id}/certificate/{template_id}/edit', [App\Http\Controllers\Back\CertificateController::class, 'edit'])->name('certificate.edit');
-            Route::put('/{id}/certificate/{template_id}/update', [App\Http\Controllers\Back\CertificateController::class, 'update'])->name('certificate.update');
-            Route::post('/{id}/certificate/{template_id}/save-positions', [App\Http\Controllers\Back\CertificateController::class, 'savePositions'])->name('certificate.save-positions');
-            Route::get('/{id}/certificate/{template_id}/preview', [App\Http\Controllers\Back\CertificateController::class, 'preview'])->name('certificate.preview');
-            Route::delete('/{id}/certificate/{template_id}/delete', [App\Http\Controllers\Back\CertificateController::class, 'destroy'])->name('certificate.destroy');
-            Route::get('/{id}/certificate/generate/{event_user_id}', [App\Http\Controllers\Back\CertificateController::class, 'generateForParticipant'])->name('certificate.generate');
+    Route::middleware(['role:super-admin|humas'])->group(function () {
+        Route::prefix('announcement')->name('announcement.')->group(function () {
+            Route::get('/', [BackAnnouncementController::class, 'index'])->name('index');
+            Route::get('/create', [BackAnnouncementController::class, 'create'])->name('create');
+            Route::post('/create', [BackAnnouncementController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [BackAnnouncementController::class, 'edit'])->name('edit');
+            Route::put('/edit/{id}', [BackAnnouncementController::class, 'update'])->name('update');
+            Route::delete('/delete/{id}', [BackAnnouncementController::class, 'destroy'])->name('destroy');
         });
-    });
 
-    Route::prefix('news')->name('news.')->group(function () {
-        Route::get('/category', [BackNewsController::class, 'category'])->name('category');
-        Route::post('/category', [BackNewsController::class, 'categoryStore'])->name('category.store');
-        Route::put('/category/edit/{id}', [BackNewsController::class, 'categoryUpdate'])->name('category.update');
-        Route::delete('/category/delete/{id}', [BackNewsController::class, 'categoryDestroy'])->name('category.destroy');
+        Route::prefix('event')->name('event.')->group(function () {
+            Route::get('/', [BackEventController::class, 'index'])->name('index');
+            Route::get('/create', [BackEventController::class, 'create'])->name('create');
+            Route::post('/create', [BackEventController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [BackEventController::class, 'edit'])->name('edit');
+            Route::put('/edit/{id}', [BackEventController::class, 'update'])->name('update');
+            Route::delete('/delete/{id}', [BackEventController::class, 'destroy'])->name('destroy');
 
-        Route::get('/', [BackNewsController::class, 'index'])->name('index');
-        Route::get('/create', [BackNewsController::class, 'create'])->name('create');
-        Route::post('/create', [BackNewsController::class, 'store'])->name('store');
-        Route::get('/edit/{id}', [BackNewsController::class, 'edit'])->name('edit');
-        Route::put('/edit/{id}', [BackNewsController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [BackNewsController::class, 'destroy'])->name('destroy');
+            Route::prefix('detail')->name('detail.')->group(function () {
+                Route::get('/{id}/overview', [BackEventController::class, 'overview'])->name('overview');
 
-        Route::get('/comment', [BackNewsController::class, 'comment'])->name('comment');
-        Route::post('/comment/spam/{id}', [BackNewsController::class, 'commentSpam'])->name('comment.spam');
-    });
+                Route::get('/{id}/participant', [BackEventController::class, 'participant'])->name('participant');
+                Route::post('/{id}/participant/store', [BackEventController::class, 'participantStore'])->name('participant.store');
+                Route::delete('/{id}/participant/{event_user_id}/delete', [BackEventController::class, 'participantDestroy'])->name('participant.destroy');
+                Route::get('/{id}/participant/export', [BackEventController::class, 'participantExport'])->name('participant.export');
+                Route::get('/{id}/participant/import-reviewer', [BackEventController::class, 'participantImportReviewerModal'])->name('participant.import-reviewer.modal');
+                Route::post('/{id}/participant/import-reviewer', [BackEventController::class, 'participantImportReviewer'])->name('participant.import-reviewer');
+                Route::get('/{id}/participant/import-editor', [BackEventController::class, 'participantImportEditorModal'])->name('participant.import-editor.modal');
+                Route::post('/{id}/participant/import-editor', [BackEventController::class, 'participantImportEditor'])->name('participant.import-editor');
 
-    Route::prefix('welcomeSpeech')->name('welcomeSpeech.')->group(function () {
-        Route::get('/', [BackWelcomeSpeechController::class, 'index'])->name('index');
-        Route::put('/edit', [BackWelcomeSpeechController::class, 'update'])->name('update');
-    });
+                Route::get('/{id}/attendance', [BackEventController::class, 'attendance'])->name('attendance');
+                Route::post('/{id}/attendance/store', [BackEventController::class, 'attendanceStore'])->name('attendance.store');
+                Route::put('/{id}/attendance/{event_attendance_id}/update', [BackEventController::class, 'attendanceUpdate'])->name('attendance.update');
+                Route::get('/{id}/attendance/{event_attendance_id}', [BackEventController::class, 'attendanceDetail'])->name('attendance.detail');
+                Route::get('/{id}/attendance/{event_attendance_id}/datatable', [BackEventController::class, 'attendanceDetailDatatable'])->name('attendance.detail.datatable');
+                Route::post('/{id}/attendance/{event_attendance_id}/checkin/{event_user_id}', [BackEventController::class, 'attendanceDetailUserCheckin'])->name('attendance.detail.checkin');
+                Route::get('/{id}/attendance/{event_attendance_id}/export', [BackEventController::class, 'attendanceExport'])->name('attendance.export');
 
-    Route::prefix('menu')->name('menu.')->group(function () {
+                Route::get('/{id}/notification', [BackEventController::class, 'notification'])->name('notification');
+                Route::post('/{id}/notification/whatsapp', [BackEventController::class, 'notificationWhatsapp'])->name('notification.whatsapp');
 
-        Route::prefix('profil')->name('profil.')->group(function () {
-            Route::get('/', [BackMenuProfilController::class, 'index'])->name('index');
-            Route::post('/create', [BackMenuProfilController::class, 'store'])->name('store');
-            Route::get('/edit/{id}', [BackMenuProfilController::class, 'edit'])->name('edit');
-            Route::put('/edit/{id}', [BackMenuProfilController::class, 'update'])->name('update');
-            Route::delete('/delete/{id}', [BackMenuProfilController::class, 'destroy'])->name('destroy');
+                // Certificate routes (1 event = 1 template)
+                Route::get('/{id}/certificate', [App\Http\Controllers\Back\CertificateController::class, 'index'])->name('certificate.index');
+                Route::get('/{id}/certificate/create', [App\Http\Controllers\Back\CertificateController::class, 'create'])->name('certificate.create');
+                Route::post('/{id}/certificate/store', [App\Http\Controllers\Back\CertificateController::class, 'store'])->name('certificate.store');
+                Route::get('/{id}/certificate/{template_id}/edit', [App\Http\Controllers\Back\CertificateController::class, 'edit'])->name('certificate.edit');
+                Route::put('/{id}/certificate/{template_id}/update', [App\Http\Controllers\Back\CertificateController::class, 'update'])->name('certificate.update');
+                Route::post('/{id}/certificate/{template_id}/save-positions', [App\Http\Controllers\Back\CertificateController::class, 'savePositions'])->name('certificate.save-positions');
+                Route::get('/{id}/certificate/{template_id}/preview', [App\Http\Controllers\Back\CertificateController::class, 'preview'])->name('certificate.preview');
+                Route::delete('/{id}/certificate/{template_id}/delete', [App\Http\Controllers\Back\CertificateController::class, 'destroy'])->name('certificate.destroy');
+                Route::get('/{id}/certificate/generate/{event_user_id}', [App\Http\Controllers\Back\CertificateController::class, 'generateForParticipant'])->name('certificate.generate');
+            });
+        });
 
-            Route::post('/upload', [BackMenuProfilController::class, 'upload'])->name('upload');
+        Route::prefix('news')->name('news.')->group(function () {
+            Route::get('/category', [BackNewsController::class, 'category'])->name('category');
+            Route::post('/category', [BackNewsController::class, 'categoryStore'])->name('category.store');
+            Route::put('/category/edit/{id}', [BackNewsController::class, 'categoryUpdate'])->name('category.update');
+            Route::delete('/category/delete/{id}', [BackNewsController::class, 'categoryDestroy'])->name('category.destroy');
+
+            Route::get('/', [BackNewsController::class, 'index'])->name('index');
+            Route::get('/create', [BackNewsController::class, 'create'])->name('create');
+            Route::post('/create', [BackNewsController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [BackNewsController::class, 'edit'])->name('edit');
+            Route::put('/edit/{id}', [BackNewsController::class, 'update'])->name('update');
+            Route::delete('/delete/{id}', [BackNewsController::class, 'destroy'])->name('destroy');
+
+            Route::get('/comment', [BackNewsController::class, 'comment'])->name('comment');
+            Route::post('/comment/spam/{id}', [BackNewsController::class, 'commentSpam'])->name('comment.spam');
+        });
+
+        Route::prefix('welcomeSpeech')->name('welcomeSpeech.')->group(function () {
+            Route::get('/', [BackWelcomeSpeechController::class, 'index'])->name('index');
+            Route::put('/edit', [BackWelcomeSpeechController::class, 'update'])->name('update');
+        });
+
+        Route::prefix('menu')->name('menu.')->group(function () {
+
+            Route::prefix('profil')->name('profil.')->group(function () {
+                Route::get('/', [BackMenuProfilController::class, 'index'])->name('index');
+                Route::post('/create', [BackMenuProfilController::class, 'store'])->name('store');
+                Route::get('/edit/{id}', [BackMenuProfilController::class, 'edit'])->name('edit');
+                Route::put('/edit/{id}', [BackMenuProfilController::class, 'update'])->name('update');
+                Route::delete('/delete/{id}', [BackMenuProfilController::class, 'destroy'])->name('destroy');
+
+                Route::post('/upload', [BackMenuProfilController::class, 'upload'])->name('upload');
+            });
         });
     });
 
