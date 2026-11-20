@@ -10,7 +10,9 @@ class FinanceYear extends Model
         'name',
         'start_date',
         'end_date',
+        'distribution_percentage',
         'is_active',
+        'created_by',
         'type_control',
     ];
 }

@@ -22,18 +22,23 @@ class CashflowExport implements FromCollection, WithHeadings, WithStyles, WithEv
     protected $date_start;
     protected $date_end;
     protected $type;
+    protected $type_control;
 
-    public function __construct($date_start, $date_end, $type = 'all')
+    public function __construct($date_start, $date_end, $type = 'all', $type_control = null)
     {
         $this->date_start = $date_start;
         $this->date_end = $date_end;
         $this->type = $type;
+        $this->type_control = $type_control;
     }
     public function collection()
     {
         $counter = 1;
         $finance = Finance::where('date', '>=', $this->date_start)
             ->where('date', '<=', $this->date_end)
+            ->when($this->type_control, function ($query) {
+                return $query->where('type_control', $this->type_control);
+            })
             ->get()
             ->map(function ($item) {
                 return (object)[
@@ -55,9 +60,15 @@ class CashflowExport implements FromCollection, WithHeadings, WithStyles, WithEv
                 ];
             })->collect();
 
-        $billing = Payment::with(['paymentInvoice'])
-            ->whereBetween('created_at', [$this->date_start, $this->date_end])
+        $billing = Payment::with(['paymentInvoice.submission.issue.journal'])
+            ->where('created_at', '>=', Carbon::parse($this->date_start)->startOfDay())
+            ->where('created_at', '<=', Carbon::parse($this->date_end)->endOfDay())
             ->where('payment_status', 'accepted')
+            ->when($this->type_control, function ($query) {
+                return $query->whereHas('paymentInvoice.submission.issue.journal', function ($q) {
+                    $q->where('type', $this->type_control);
+                });
+            })
             ->get()
             ->map(function ($item) {
                 return (object)[

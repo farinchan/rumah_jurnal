@@ -12,7 +12,7 @@
                                     <a href="#" class="text-gray-800 text-hover-primary fs-2 fw-bold me-3">
                                         {{ $finance_year ? $finance_year->name : 'Tidak ada buku aktif' }}
                                     </a>
-                                    @if ($finance_year->is_active)
+                                    @if ($finance_year && $finance_year->is_active)
                                         <span class="badge badge-light-success me-auto">Aktif</span>
                                     @else
                                         <span class="badge badge-light-danger me-auto">Tutup</span>
@@ -22,7 +22,7 @@
                                     with Web Apps any Kind & size</div> --}}
                             </div>
                             <div class="d-flex mb-4">
-                                @if ($finance_year->is_active)
+                                @if ($finance_year && $finance_year->is_active)
                                     <div id="btn_status">
 
                                         <a href="#" class="btn btn-sm btn-danger me-3" data-bs-toggle="modal"
@@ -143,6 +143,7 @@
                                                         method="post">
                                                         @csrf
                                                         @method('PUT')
+                                                        <input type="hidden" name="id" value="{{ $finance_year?->id }}">
                                                         <div class="modal-body">
                                                             <div class="mb-5">
                                                                 <label class="form-label required">Nama Tahun
@@ -282,7 +283,7 @@
                                             <span class="path1"></span>
                                             <span class="path2"></span>
                                         </i>
-                                        <div class="fs-4 fw-bold" id="total_income_all">
+                                        <div class="fs-4 fw-bold" id="total_income_year">
                                             {{ $finance_year ? 'Rp ' . number_format($total_income_now, 0, ',', '.') : 'Rp 0' }}
                                         </div>
                                     </div>
@@ -294,7 +295,7 @@
                                             <span class="path1"></span>
                                             <span class="path2"></span>
                                         </i>
-                                        <div class="fs-4 fw-bold" id="total_income_all">
+                                        <div class="fs-4 fw-bold" id="total_outcome_year">
                                             {{ $finance_year ? 'Rp ' . number_format($total_outcome_now, 0, ',', '.') : 'Rp 0' }}
                                         </div>
                                     </div>
@@ -306,7 +307,7 @@
                                             <span class="path1"></span>
                                             <span class="path2"></span>
                                         </i>
-                                        <div class="fs-4 fw-bold">
+                                        <div class="fs-4 fw-bold" id="total_balance_year">
                                             {{ $finance_year ? 'Rp ' . number_format($total_balance_now, 0, ',', '.') : 'Rp 0' }}
                                         </div>
                                     </div>
@@ -314,29 +315,37 @@
                                 </div>
                                 <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                                     <div class="d-flex align-items-center">
-                                        <div class="fs-4 fw-bold">
+                                        <div class="fs-4 fw-bold text-primary">
                                             {{ $finance_year ? 'Rp ' . number_format($total_distribution, 0, ',', '.') : 'Rp 0' }}
                                         </div>
                                         @if($finance_year)
                                             <span class="ms-2 fs-6 text-muted">
-                                                ({{ $finance_year->distribution_percentage ?? 0 }}%)
+                                                ({{ $finance_year->distribution_percentage ?? 80 }}%)
                                             </span>
                                         @endif
                                     </div>
-                                    <div class="fw-semibold fs-6 text-gray-500">Total Distribusi ke Rumah Jurnal</div>
+                                    <div class="fw-semibold fs-6 text-gray-500">Bagi Hasil Rumah Jurnal</div>
                                 </div>
                                 <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                                     <div class="d-flex align-items-center">
-                                        <div class="fs-4 fw-bold">
+                                        <div class="fs-4 fw-bold text-warning">
                                             {{ $finance_year ? 'Rp ' . number_format($total_distributtion_other, 0, ',', '.') : 'Rp 0' }}
                                         </div>
                                         @if($finance_year)
                                             <span class="ms-2 fs-6 text-muted">
-                                                ({{ 100 - ($finance_year->distribution_percentage ?? 0) }}%)
+                                                ({{ 100 - ($finance_year->distribution_percentage ?? 80) }}%)
                                             </span>
                                         @endif
                                     </div>
-                                    <div class="fw-semibold fs-6 text-gray-500">Total Distribusi ke BLU UIN Bukittinggi</div>
+                                    <div class="fw-semibold fs-6 text-gray-500">Bagi Hasil BLU UIN Bukittinggi</div>
+                                </div>
+                                <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fs-4 fw-bold text-success">
+                                            {{ $finance_year ? 'Rp ' . number_format($distribution_rumah_jurnal_balance, 0, ',', '.') : 'Rp 0' }}
+                                        </div>
+                                    </div>
+                                    <div class="fw-semibold fs-6 text-gray-500">Saldo Bersih Rumah Jurnal</div>
                                 </div>
                             </div>
                         </div>
@@ -358,7 +367,7 @@
                             </i>
                             Export Excel
                         </a>
-                        @if ($finance_year->is_active)
+                        @if ($finance_year && $finance_year->is_active)
                             <a href="#" class="btn btn-light-info" data-bs-toggle="modal"
                                 data-bs-target="#add_finance">
                                 <i class="ki-duotone ki-plus fs-2"></i>
@@ -384,7 +393,7 @@
                         <input type="date" name="date_start" class="form-control form-control-solid"
                             placeholder="Date Start" id="date_start"
                             min="{{ $finance_year ? \Carbon\Carbon::parse($finance_year->start_date)->format('Y-m-d') : \Carbon\Carbon::now()->format('Y-m-d') }}"
-                            max="{{ \Carbon\Carbon::now()->subDay()->format('Y-m-d') }}"
+                            max="{{ $finance_year && $finance_year->end_date ? \Carbon\Carbon::parse($finance_year->end_date)->format('Y-m-d') : \Carbon\Carbon::now()->addDay()->format('Y-m-d') }}"
                             value="{{ $finance_year ? \Carbon\Carbon::parse($finance_year->start_date)->format('Y-m-d') : \Carbon\Carbon::now()->format('Y-m-d') }}"
                             oninput="
                                 if (this.value < this.min) this.value = this.min;
@@ -621,14 +630,14 @@
                 summary.total_expense = json.total_expense;
                 summary.total_balance = json.total_balance;
                 console.log(summary);
-                $('#total_income').text('Rp ' + summary.total_income.toLocaleString());
-                $('#total_expense').text('Rp ' + summary.total_expense.toLocaleString());
+                $('#total_income').text('Rp ' + (summary.total_income || 0).toLocaleString('id-ID'));
+                $('#total_expense').text('Rp ' + (summary.total_expense || 0).toLocaleString('id-ID'));
                 if (summary.total_balance >= 0) {
                     $('#balance').removeClass('text-danger').addClass('text-success');
                 } else {
                     $('#balance').removeClass('text-success').addClass('text-danger');
                 }
-                $('#balance').text('Rp ' + summary.total_balance.toLocaleString());
+                $('#balance').text('Rp ' + (summary.total_balance || 0).toLocaleString('id-ID'));
                 $('#export_excel').attr('href',
                     "{{ route('back.finance.cashflow.export') }}?type=" +
                     $('#type').val() + "&date_start=" + $('#date_start').val() + "&date_end=" +

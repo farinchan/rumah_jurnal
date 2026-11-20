@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert;
 use Yajra\DataTables\Facades\DataTables;
@@ -645,10 +646,16 @@ class FinanceController extends Controller implements HasMiddleware
 
     public function cashflowYearStore(Request $request)
     {
+        $type = $this->cookie_control_panel;
         $validator = Validator::make(
             $request->all(),
             [
-                'name' => 'required|string|max:255|unique:finance_years,name',
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('finance_years', 'name')->where('type_control', $type),
+                ],
                 'start_date' => 'required|date',
                 'distribution_percentage' => 'required|integer|min:0|max:100',
             ],
@@ -669,15 +676,20 @@ class FinanceController extends Controller implements HasMiddleware
             Alert::error('Gagal', $validator->errors()->all());
             return redirect()->back()->withErrors($validator)->withInput();
         }
-        FinanceYear::latest()->first()?->update([
+
+        FinanceYear::where('type_control', $type)->latest()->first()?->update([
             'end_date' => Carbon::parse($request->start_date)->subDay()->toDateString(),
             'is_active' => 0,
         ]);
+
         FinanceYear::create([
             'name' => $request->name,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
-            'created_by' => Auth::user()->name,
+            'distribution_percentage' => $request->distribution_percentage,
+            'is_active' => 1,
+            'type_control' => $type,
+            'created_by' => Auth::user()->name ?? 'System',
         ]);
 
         Alert::success('Berhasil', 'Tahun Keuangan berhasil ditambahkan');
@@ -686,15 +698,25 @@ class FinanceController extends Controller implements HasMiddleware
 
     public function cashflowYearEdit(Request $request)
     {
-        $finance_year = FinanceYear::latest()->first();
+        $type = $this->cookie_control_panel;
+        $finance_year = $request->id
+            ? FinanceYear::where('type_control', $type)->find($request->id)
+            : FinanceYear::where('type_control', $type)->latest()->first();
+
         if (!$finance_year) {
             Alert::error('Gagal', 'Tahun Keuangan tidak ditemukan');
             return redirect()->back()->with('error', 'Tahun Keuangan tidak ditemukan');
         }
+
         $validator = Validator::make(
             $request->all(),
             [
-                'name' => 'required|string|max:255|unique:finance_years,name,' . $finance_year->id,
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('finance_years', 'name')->ignore($finance_year->id)->where('type_control', $type),
+                ],
                 'start_date' => 'required|date',
                 'distribution_percentage' => 'required|integer|min:0|max:100',
             ],
@@ -738,11 +760,11 @@ class FinanceController extends Controller implements HasMiddleware
         if ($id) {
             $finance_year_now = FinanceYear::where('type_control', $type)->findOrFail($id);
             $start_date = $finance_year_now->start_date;
-            $end_date = $finance_year_now->end_date ?? now()->addDay()->toDateString();
+            $end_date = $finance_year_now->end_date ?? now()->toDateString();
         } else {
             $finance_year_now = FinanceYear::latest()->where('type_control', $type)->first();
             $start_date = $finance_year_now ? $finance_year_now->start_date : now()->startOfYear()->toDateString();
-            $end_date = $finance_year_now && $finance_year_now->end_date ? $finance_year_now->end_date : now()->addDay()->toDateString();
+            $end_date = $finance_year_now && $finance_year_now->end_date ? $finance_year_now->end_date : now()->toDateString();
         }
 
         $finance_now = Finance::where('date', '>=', $start_date)
@@ -752,13 +774,12 @@ class FinanceController extends Controller implements HasMiddleware
         $income_temp = (clone $finance_now)->where('type', 'income')->sum('amount');
 
         $payment = Payment::with(['paymentInvoice'])
-            ->where('created_at', '>=', $start_date)
-            ->where('created_at', '<=', $end_date)
+            ->where('created_at', '>=', Carbon::parse($start_date)->startOfDay())
+            ->where('created_at', '<=', Carbon::parse($end_date)->endOfDay())
             ->where('payment_status', 'accepted')
             ->whereHas('paymentInvoice.submission.issue.journal', function ($query) use ($type) {
                 $query->where('type', $type);
             })
-            // ->where('type_control', $type)
             ->get()
             ->map(function ($item) {
                 return $item->paymentInvoice->payment_amount ?? 0;
@@ -766,6 +787,15 @@ class FinanceController extends Controller implements HasMiddleware
 
         $income = $income_temp + $payment;
         $balance = $income - $outcome;
+
+        $distributionPercentage = $finance_year_now ? $finance_year_now->distribution_percentage : 80;
+        // Porsi bruto Rumah Jurnal (80%)
+        $distributionRumahJurnal = ($income * $distributionPercentage) / 100;
+        // Porsi BLU (20%) dihitung murni dari pemasukan kotor tanpa terpotong pengeluaran
+        $distributionBLU = ($income * (100 - $distributionPercentage)) / 100;
+        // Saldo bersih Rumah Jurnal setelah menanggung seluruh pengeluaran operasional
+        $distributionRumahJurnalBalance = $distributionRumahJurnal - $outcome;
+
         $data = [
             'title' => 'Laporan Keuangan',
             'breadcrumbs' => [
@@ -783,11 +813,12 @@ class FinanceController extends Controller implements HasMiddleware
             'total_outcome_now' => $outcome,
             'total_income_now' => $income,
             'total_balance_now' => $balance,
-            'total_distribution' => ($finance_year_now ? ($income * ($finance_year_now->distribution_percentage / 100)) : 0) - $outcome,
-            'total_distributtion_other' => $finance_year_now ? ($income * ((100 - $finance_year_now->distribution_percentage) / 100)) : 0,
-
+            'distribution_percentage' => $distributionPercentage,
+            'total_distribution' => $distributionRumahJurnal,
+            'total_distributtion_other' => $distributionBLU,
+            'distribution_rumah_jurnal_balance' => $distributionRumahJurnalBalance,
         ];
-        // return response()->json($data);
+
         return view('back.pages.finance.cashflow', $data);
     }
 
@@ -827,7 +858,8 @@ class FinanceController extends Controller implements HasMiddleware
             ->whereHas('paymentInvoice.submission.issue.journal', function ($query) use ($type_control) {
                 $query->where('type', $type_control);
             })
-            ->whereBetween('created_at', [$date_start, $date_end])
+            ->where('created_at', '>=', Carbon::parse($date_start)->startOfDay())
+            ->where('created_at', '<=', Carbon::parse($date_end)->endOfDay())
             ->where('payment_status', 'accepted')
             ->get()
             ->map(function ($item) {
@@ -850,14 +882,14 @@ class FinanceController extends Controller implements HasMiddleware
                 ];
             })->collect();
 
+        $all_data = $finance->merge($billing);
+        $total_income = $all_data->where('type', 'income')->sum('amount');
+        $total_expense = $all_data->where('type', 'expense')->sum('amount');
+        $total_balance = $total_income - $total_expense;
 
-        $data = $finance->merge($billing)->when($type != 'all', function ($query) use ($type) {
+        $data = $all_data->when($type != 'all', function ($query) use ($type) {
             return $query->where('type', $type);
         })->sortByDesc('date')->values();
-
-        $total_income = $data->where('type', 'income')->sum('amount');
-        $total_expense = $data->where('type', 'expense')->sum('amount');
-        $total_balance = $total_income - $total_expense;
 
         return datatables()->of($data)
             ->addColumn('transaction', function ($row) {
@@ -1063,8 +1095,9 @@ class FinanceController extends Controller implements HasMiddleware
         $type = $request->type;
         $date_end = $request->date_end ?? now()->toDateString();
         $date_start = $request->date_start ?? now()->subMonth()->toDateString();
+        $type_control = $this->cookie_control_panel;
 
-        return Excel::download(new CashflowExport($date_start, $date_end, $type), 'cashflow_' . now()->format('Y_m_d') . '.xlsx');
+        return Excel::download(new CashflowExport($date_start, $date_end, $type, $type_control), 'cashflow_' . now()->format('Y_m_d') . '.xlsx');
     }
 
     public function CashflowStore(Request $request)
@@ -1112,7 +1145,7 @@ class FinanceController extends Controller implements HasMiddleware
 
     public function cashflowDestroy(Request $request)
     {
-        $finance = Finance::find($request->id);
+        $finance = Finance::where('type_control', $this->cookie_control_panel)->find($request->id);
         if (!$finance) {
             Alert::error('Error', 'Finance record not found.');
             return redirect()->back();
@@ -1147,7 +1180,7 @@ class FinanceController extends Controller implements HasMiddleware
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $finance = Finance::findOrFail($request->id);
+        $finance = Finance::where('type_control', $this->cookie_control_panel)->findOrFail($request->id);
         if (!$finance) {
             Alert::error('Error', 'Finance record not found.');
             return redirect()->back();
