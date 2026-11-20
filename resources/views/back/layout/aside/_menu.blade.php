@@ -28,7 +28,7 @@
                         <span class="menu-title">Default</span>
                     </a>
                 </div>
-                @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|editor|editor-proceeding|editor-student-research-hub')
+                @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|editor|editor-proceeding|editor-student-research-hub|spi')
                     <div class="menu-item">
                         <a class="menu-link @if (request()->routeIs('back.dashboard.journal')) active @endif"
                             href="{{ route('back.dashboard.journal') }}">
@@ -50,7 +50,7 @@
                         </a>
                     </div>
                 @endrole
-                @role('super-admin|keuangan')
+                @hasanyrole('super-admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|p2b')
                     <div class="menu-item">
                         <a class="menu-link @if (request()->routeIs('back.dashboard.cashflow')) active @endif"
                             href="{{ route('back.dashboard.cashflow') }}">
@@ -60,7 +60,7 @@
                             <span class="menu-title">Cashflow</span>
                         </a>
                     </div>
-                @endrole
+                @endhasanyrole
             </div>
         </div>
 
@@ -320,70 +320,78 @@
         @endif
 
         @if ($control_panel)
-            @role('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub')
+            @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub|p2b|spi')
                 <div class="menu-item pt-5">
                     <div class="menu-content"><span class="menu-heading fw-bold text-uppercase fs-7">Keuangan</span>
                     </div>
                 </div>
 
-                <div class= "menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.finance.verification.index')) active @endif"
-                        href="{{ route('back.finance.verification.index') }}">
-                        <span class="menu-icon">
-                            <i class="ki-duotone ki-two-credit-cart fs-2">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                                <span class="path3"></span>
-                                <span class="path4"></span>
-                                <span class="path5"></span>
-                            </i>
-                        </span>
-                        <span class="menu-title">Verifikasi</span>
-                        @php
-                            $payment_count = App\Models\Payment::where('payment_status', 'pending')
-                                ->WhereHas('paymentInvoice.submission.issue.journal', function ($q) use (
-                                    $control_panel,
-                                ) {
-                                    $q->where('type', $control_panel);
-                                })
-                                ->count();
-                        @endphp
-                        @if ($payment_count > 0)
-                            <span class="menu-badge">
-                                <span class="badge badge-warning"> {{ $payment_count }} </span>
+                @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub|spi')
+                    <div class= "menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.finance.verification.index')) active @endif"
+                            href="{{ route('back.finance.verification.index') }}">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-two-credit-cart fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                    <span class="path5"></span>
+                                </i>
                             </span>
-                        @endif
-                    </a>
-                </div>
-                <div class= "menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.finance.report.index')) active @endif"
-                        href="{{ route('back.finance.report.index') }}">
-                        <span class="menu-icon">
-                            <i class="ki-duotone ki-financial-schedule fs-2">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                                <span class="path3"></span>
-                                <span class="path4"></span>
-                            </i>
-                        </span>
-                        <span class="menu-title">Laporan</span>
-                    </a>
-                </div>
-                <div class="menu-item">
-                    <a class="menu-link @if (request()->routeIs('back.finance.cashflow.index')) active @endif"
-                        href="{{ route('back.finance.cashflow.index') }}">
-                        <span class="menu-icon">
-                            <i class="ki-duotone ki-wallet fs-2">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                                <span class="path3"></span>
-                                <span class="path4"></span>
-                            </i>
-                        </span>
-                        <span class="menu-title">CashFlow</span>
-                    </a>
-                </div>
-            @endrole
+                            <span class="menu-title">Verifikasi</span>
+                            @php
+                                $payment_count = App\Models\Payment::where('payment_status', 'pending')
+                                    ->WhereHas('paymentInvoice.submission.issue.journal', function ($q) use (
+                                        $control_panel,
+                                    ) {
+                                        $q->where('type', $control_panel);
+                                    })
+                                    ->count();
+                            @endphp
+                            @if ($payment_count > 0)
+                                <span class="menu-badge">
+                                    <span class="badge badge-warning"> {{ $payment_count }} </span>
+                                </span>
+                            @endif
+                        </a>
+                    </div>
+                @endhasanyrole
+
+                @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub')
+                    <div class= "menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.finance.report.index')) active @endif"
+                            href="{{ route('back.finance.report.index') }}">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-financial-schedule fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">Laporan</span>
+                        </a>
+                    </div>
+                @endhasanyrole
+
+                @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub|p2b')
+                    <div class="menu-item">
+                        <a class="menu-link @if (request()->routeIs('back.finance.cashflow.index')) active @endif"
+                            href="{{ route('back.finance.cashflow.index') }}">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-wallet fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">CashFlow</span>
+                        </a>
+                    </div>
+                @endhasanyrole
+            @endhasanyrole
         @endif
 
         @php

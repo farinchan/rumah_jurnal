@@ -160,13 +160,13 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/news', [BackDashboardController::class, 'news'])->name('news')->middleware(['role:super-admin|humas']);
         Route::get('/news-stat', [BackDashboardController::class, 'stat'])->name('news.stat')->middleware(['role:super-admin|humas']);
 
-        Route::get('/cashflow', [BackDashboardController::class, 'cashflow'])->name('cashflow');
-        Route::get('/cashflow-stat', [BackDashboardController::class, 'cashflowStat'])->name('cashflow.stat');
+        Route::get('/cashflow', [BackDashboardController::class, 'cashflow'])->name('cashflow')->middleware(['role:super-admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|p2b']);
+        Route::get('/cashflow-stat', [BackDashboardController::class, 'cashflowStat'])->name('cashflow.stat')->middleware(['role:super-admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|p2b']);
 
-        Route::get('/journal', [BackDashboardController::class, 'journal'])->name('journal');
-        Route::get('/journal-stat', [BackDashboardController::class, 'journalStat'])->name('journal.stat');
-        Route::get('/journal-submissions', [BackDashboardController::class, 'journalSubmissions'])->name('journal.submissions');
-        Route::get('/journal-export', [BackDashboardController::class, 'journalExport'])->name('journal.export');
+        Route::get('/journal', [BackDashboardController::class, 'journal'])->name('journal')->middleware(['role:super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|editor|editor-proceeding|editor-student-research-hub|spi']);
+        Route::get('/journal-stat', [BackDashboardController::class, 'journalStat'])->name('journal.stat')->middleware(['role:super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|editor|editor-proceeding|editor-student-research-hub|spi']);
+        Route::get('/journal-submissions', [BackDashboardController::class, 'journalSubmissions'])->name('journal.submissions')->middleware(['role:super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|editor|editor-proceeding|editor-student-research-hub|spi']);
+        Route::get('/journal-export', [BackDashboardController::class, 'journalExport'])->name('journal.export')->middleware(['role:super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|editor|editor-proceeding|editor-student-research-hub|spi']);
     });
 
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -339,28 +339,35 @@ Route::prefix('back')->name('back.')->middleware(['auth', '2fa'])->group(functio
         Route::get('/{journal_path}/issue/{issue_id}/setting', [BackJournalController::class, 'settingIndex'])->name('setting.index');
     });
 
-    Route::prefix('finance')->name('finance.')->middleware(['role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub'])->group(function () {
-        Route::get('/verification', [BackFinanceController::class, 'verificationIndex'])->name('verification.index');
-        Route::get('/verification/datatable', [BackFinanceController::class, 'verificationDatatable'])->name('verification.datatable');
-        Route::get('/verification/{id}/detail', [BackFinanceController::class, 'verificationDetail'])->name('verification.detail');
-        Route::put('/verification/{id}/update', [BackFinanceController::class, 'verificationUpdate'])->name('verification.update');
-        Route::delete('/verification/{id}/delete', [BackFinanceController::class, 'verificationDelete'])->name('verification.delete')->middleware(['role:super-admin']);
-        Route::get('/confirm-payment/{id}/generate', [BackFinanceController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
-        Route::get('/confirm-payment/{id}/mail-send', [BackFinanceController::class, 'confirmPaymentMailSend'])->name('confirm-payment.mail-send');
+    Route::prefix('finance')->name('finance.')->middleware(['role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|p2b|spi'])->group(function () {
+        Route::middleware(['role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|spi'])->group(function () {
+            Route::get('/verification', [BackFinanceController::class, 'verificationIndex'])->name('verification.index');
+            Route::get('/verification/datatable', [BackFinanceController::class, 'verificationDatatable'])->name('verification.datatable');
+            Route::get('/verification/{id}/detail', [BackFinanceController::class, 'verificationDetail'])->name('verification.detail');
+            Route::get('/confirm-payment/{id}/generate', [BackFinanceController::class, 'confirmPaymentGenerate'])->name('confirm-payment.generate');
+        });
 
-        Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');
-        Route::get('/report/datatable', [BackFinanceController::class, 'reportDatatable'])->name('report.datatable');
-        Route::get('/report/export', [BackFinanceController::class, 'reportExport'])->name('report.export');
+        Route::middleware(['role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub'])->group(function () {
+            Route::put('/verification/{id}/update', [BackFinanceController::class, 'verificationUpdate'])->name('verification.update');
+            Route::delete('/verification/{id}/delete', [BackFinanceController::class, 'verificationDelete'])->name('verification.delete')->middleware(['role:super-admin']);
+            Route::get('/confirm-payment/{id}/mail-send', [BackFinanceController::class, 'confirmPaymentMailSend'])->name('confirm-payment.mail-send');
 
-        Route::post('cashflow-year/store', [BackFinanceController::class, 'cashflowYearStore'])->name('cashflow-year.store');
-        Route::put('cashflow-year/edit', [BackFinanceController::class, 'cashflowYearEdit'])->name('cashflow-year.edit');
+            Route::get('/report', [BackFinanceController::class, 'reportIndex'])->name('report.index');
+            Route::get('/report/datatable', [BackFinanceController::class, 'reportDatatable'])->name('report.datatable');
+            Route::get('/report/export', [BackFinanceController::class, 'reportExport'])->name('report.export');
+        });
 
-        Route::get('/cashflow', [BackFinanceController::class, 'cashflowIndex'])->name('cashflow.index');
-        Route::get('/cashflow/datatable', [BackFinanceController::class, 'cashflowDatatables'])->name('cashflow.datatable');
-        Route::get('/cashflow/export', [BackFinanceController::class, 'cashflowExport'])->name('cashflow.export');
-        Route::post('/cashflow/store', [BackFinanceController::class, 'cashflowStore'])->name('cashflow.store');
-        Route::put('/cashflow/{id}/update', [BackFinanceController::class, 'cashflowUpdate'])->name('cashflow.update');
-        Route::delete('/cashflow/{id}/delete', [BackFinanceController::class, 'cashflowDestroy'])->name('cashflow.destroy');
+        Route::middleware(['role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|p2b'])->group(function () {
+            Route::post('cashflow-year/store', [BackFinanceController::class, 'cashflowYearStore'])->name('cashflow-year.store');
+            Route::put('cashflow-year/edit', [BackFinanceController::class, 'cashflowYearEdit'])->name('cashflow-year.edit');
+
+            Route::get('/cashflow', [BackFinanceController::class, 'cashflowIndex'])->name('cashflow.index');
+            Route::get('/cashflow/datatable', [BackFinanceController::class, 'cashflowDatatables'])->name('cashflow.datatable');
+            Route::get('/cashflow/export', [BackFinanceController::class, 'cashflowExport'])->name('cashflow.export');
+            Route::post('/cashflow/store', [BackFinanceController::class, 'cashflowStore'])->name('cashflow.store');
+            Route::put('/cashflow/{id}/update', [BackFinanceController::class, 'cashflowUpdate'])->name('cashflow.update');
+            Route::delete('/cashflow/{id}/delete', [BackFinanceController::class, 'cashflowDestroy'])->name('cashflow.destroy');
+        });
     });
 
     Route::prefix('master')->name('master.')->group(function () {

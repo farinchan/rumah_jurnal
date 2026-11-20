@@ -40,7 +40,30 @@ class FinanceController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub'),
+            new Middleware('role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|p2b|spi'),
+            new Middleware('role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|p2b', only: [
+                'cashflowIndex',
+                'cashflowDatatables',
+                'cashFlowExport',
+                'cashflowStore',
+                'cashflowUpdate',
+                'cashflowDestroy',
+                'cashflowYearStore',
+                'cashflowYearEdit',
+            ]),
+            new Middleware('role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub|spi', only: [
+                'verificationIndex',
+                'verificationDatatable',
+                'verificationDetail',
+                'confirmPaymentGenerate',
+            ]),
+            new Middleware('role:super-admin|admin|keuangan|keuangan-proceeding|keuangan-student-research-hub|admin-ejournal|admin-proceeding|admin-student-research-hub', only: [
+                'verificationUpdate',
+                'confirmPaymentMailSend',
+                'reportIndex',
+                'reportDatatable',
+                'reportExport',
+            ]),
         ];
     }
 

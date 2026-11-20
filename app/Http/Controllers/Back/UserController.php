@@ -150,6 +150,12 @@ class UserController extends Controller implements HasMiddleware
         if ($request->role_humas) {
             $user->assignRole('humas');
         }
+        if ($request->role_p2b) {
+            $user->assignRole('p2b');
+        }
+        if ($request->role_spi) {
+            $user->assignRole('spi');
+        }
 
         if ($request->permissions) {
             foreach ($request->permissions as $permission) {
@@ -286,6 +292,18 @@ class UserController extends Controller implements HasMiddleware
             $user->assignRole('humas');
         } else {
             $user->removeRole('humas');
+        }
+
+        if ($request->role_p2b) {
+            $user->assignRole('p2b');
+        } else {
+            $user->removeRole('p2b');
+        }
+
+        if ($request->role_spi) {
+            $user->assignRole('spi');
+        } else {
+            $user->removeRole('spi');
         }
 
         $user->permissions()->detach();

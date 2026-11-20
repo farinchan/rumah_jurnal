@@ -34,6 +34,8 @@ class DatabaseSeeder extends Seeder
         Role::create(['name' => 'keuangan-student-research-hub']);
 
         Role::create(['name' => 'humas']);
+        Role::create(['name' => 'p2b']);
+        Role::create(['name' => 'spi']);
 
         User::create([
             'name' => 'Fajri - Developer',

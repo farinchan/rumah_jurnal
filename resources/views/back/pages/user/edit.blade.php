@@ -146,6 +146,22 @@
                                 </label>
                             </div>
 
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_p2b" value="1"
+                                    @if ($user->hasRole('p2b')) checked @endif id="flexCheckP2B" />
+                                <label class="form-check-label" for="flexCheckP2B">
+                                    P2B (Pusat Pengembangan Bisnis)
+                                </label>
+                            </div>
+
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="role_spi" value="1"
+                                    @if ($user->hasRole('spi')) checked @endif id="flexCheckSPI" />
+                                <label class="form-check-label" for="flexCheckSPI">
+                                    SPI (Satuan Pengawas Internal)
+                                </label>
+                            </div>
+
 
                         </div>
                     </div>

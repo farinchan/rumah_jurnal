@@ -262,6 +262,7 @@
                     </div>
                     <div class="card-body pt-0">
                         <div class="row g-5">
+                            @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub|spi')
                             <div class="col-xxl-3 col-md-6">
                                 <a href="{{ route('back.finance.verification.index') }}" class="card bg-light-warning hoverable card-xl-stretch mb-xl-8">
                                     <div class="card-body">
@@ -274,6 +275,8 @@
                                     </div>
                                 </a>
                             </div>
+                            @endhasanyrole
+                            @hasanyrole('super-admin|admin-ejournal|admin-proceeding|admin-student-research-hub|keuangan|keuangan-proceeding|keuangan-student-research-hub')
                             <div class="col-xxl-3 col-md-6">
                                 <a href="{{ route('back.finance.report.index') }}" class="card bg-light-info hoverable card-xl-stretch mb-xl-8">
                                     <div class="card-body">
@@ -286,6 +289,7 @@
                                     </div>
                                 </a>
                             </div>
+                            @endhasanyrole
                              <div class="col-xxl-3 col-md-6">
                                 <a href="{{ route('back.finance.cashflow.index') }}" class="card bg-light-primary hoverable card-xl-stretch mb-xl-8">
                                     <div class="card-body">

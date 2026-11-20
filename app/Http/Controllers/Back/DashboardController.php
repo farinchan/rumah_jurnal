@@ -130,8 +130,24 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
+    protected array $allowedDashboardCashflowRoles = [
+        'super-admin',
+        'keuangan',
+        'keuangan-proceeding',
+        'keuangan-student-research-hub',
+        'admin-ejournal',
+        'admin-proceeding',
+        'admin-student-research-hub',
+        'p2b',
+    ];
+
     public function cashFlow()
     {
+        $user = Auth::user();
+        if (!$user || !$user->hasAnyRole($this->allowedDashboardCashflowRoles)) {
+            abort(403, 'Anda tidak memiliki akses ke Dashboard Cashflow');
+        }
+
         $data = [
             'title' => 'Dashboard Cashflow',
             'breadcrumbs' => [
@@ -150,6 +166,11 @@ class DashboardController extends Controller
 
     public function cashflowStat(Request $request)
     {
+        $user = Auth::user();
+        if (!$user || !$user->hasAnyRole($this->allowedDashboardCashflowRoles)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         try {
             // Get control panel type from cookie
             $controlPanel = $request->cookie('control_panel', 'journal');
@@ -377,6 +398,7 @@ class DashboardController extends Controller
         'editor',
         'editor-proceeding',
         'editor-student-research-hub',
+        'spi',
     ];
 
     protected array $dashboardScopes = [
@@ -412,7 +434,7 @@ class DashboardController extends Controller
             return false;
         }
 
-        if ($user->hasRole('super-admin')) {
+        if ($user->hasRole('super-admin') || $user->hasRole('spi')) {
             return true;
         }
 
@@ -431,7 +453,7 @@ class DashboardController extends Controller
     private function getAccessibleScopes($user, $accessibleJournals): array
     {
         $scopes = [];
-        $isSuperAdmin = $user->hasRole('super-admin');
+        $isSuperAdmin = $user->hasRole('super-admin') || $user->hasRole('spi');
 
         foreach ($this->dashboardScopes as $key => $scopeDef) {
             $type = $scopeDef['type'];
@@ -457,7 +479,7 @@ class DashboardController extends Controller
             $scopeDef = $this->dashboardScopes[$journalId];
             $type = $scopeDef['type'];
 
-            if ($type !== null && !$user->hasRole('super-admin') && !$this->canUserAccessScopeType($user, $type) && $accessibleJournals->where('type', $type)->isEmpty()) {
+            if ($type !== null && !$user->hasRole('super-admin') && !$user->hasRole('spi') && !$this->canUserAccessScopeType($user, $type) && $accessibleJournals->where('type', $type)->isEmpty()) {
                 return [
                     'authorized' => false,
                     'error_code' => 403,
@@ -469,7 +491,7 @@ class DashboardController extends Controller
                 ? $accessibleJournals
                 : $accessibleJournals->where('type', $type)->values();
 
-            if ($selectedJournals->isEmpty() && !$user->hasRole('super-admin')) {
+            if ($selectedJournals->isEmpty() && !$user->hasRole('super-admin') && !$user->hasRole('spi')) {
                 return [
                     'authorized' => false,
                     'error_code' => 403,
@@ -525,8 +547,8 @@ class DashboardController extends Controller
             return false;
         }
 
-        // super-admin can open everything across all types
-        if ($user->hasRole('super-admin')) {
+        // super-admin and spi can open everything across all types
+        if ($user->hasRole('super-admin') || $user->hasRole('spi')) {
             return true;
         }
 
